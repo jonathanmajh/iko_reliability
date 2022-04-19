@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   auto_route: ^3.2.4
   http: ^0.13.4
+  pluto_grid: ^2.9.3
 
 dev_dependencies:
   flutter_test:

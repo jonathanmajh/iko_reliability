@@ -101,9 +101,14 @@ class _GHFlutterState extends State<GHFlutter> {
                 Navigator.pop(context); // close the drawer
               },
             ),
-            const ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                context.router.pushNamed("/grid");
+                // change app state...
+                Navigator.pop(context); // close the drawer
+              },
             ),
           ],
         ),
