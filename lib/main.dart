@@ -110,6 +110,29 @@ class _GHFlutterState extends State<GHFlutter> {
                 Navigator.pop(context); // close the drawer
               },
             ),
+            ExpansionTile(
+              title: const Text("Maximo Admin"),
+              children: <Widget>[
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Assets'),
+                  onTap: () {
+                    context.router.pushNamed("/asset");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Contractors'),
+                  onTap: () {
+                    context.router.pushNamed("/contractor");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
+              ],
+            )
           ],
         ),
       ),
