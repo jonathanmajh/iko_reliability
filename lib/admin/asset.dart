@@ -9,10 +9,26 @@ class AssetPage extends StatefulWidget {
 
 class _AssetPageState extends State<AssetPage> {
   List<String> _sites = [];
+  bool showHierarchy = false;
+
   @override
   void initState() {
     super.initState();
     _sites = ['GH: Hawkesbury', 'CA: Kankakee', 'GV: Hillsboro'];
+  }
+
+  void toggleHierarchy(bool value) {
+    if (showHierarchy) {
+      setState(() {
+        showHierarchy = false;
+        // reset table
+      });
+    } else {
+      setState(() {
+        showHierarchy = true;
+        // get table data
+      });
+    }
   }
 
   @override
@@ -28,17 +44,21 @@ class _AssetPageState extends State<AssetPage> {
               SizedBox(
                   width: 440,
                   child: DropdownSearch<String>(
-                    popupProps: PopupProps.menu(
-                      showSelectedItems: true,
-                      disabledItemFn: (String s) => s.startsWith('I'),
-                    ),
+                    popupProps: const PopupProps.menu(
+                        showSearchBox: true,
+                        showSelectedItems: true,
+                        searchFieldProps: TextFieldProps(
+                          autofocus: true,
+                          autocorrect: true,
+                        )),
                     items: _sites,
                     dropdownSearchDecoration: const InputDecoration(
                       labelText: "Site",
                       hintText: "Select Site for Adding Asset",
                     ),
                     onChanged: print,
-                  ))
+                  )),
+              Switch(value: showHierarchy, onChanged: toggleHierarchy)
             ])));
   }
 }
