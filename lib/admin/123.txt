@@ -1,4 +1,4 @@
-[
+{ "assets": [
  {
    "assetnum": "A0001",
    "siteid": "GV",
@@ -600,3 +600,4 @@
    "parent": "A0037"
  }
 ]
+}
