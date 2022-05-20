@@ -5,6 +5,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 class AssetPage extends StatefulWidget {
   const AssetPage({Key? key}) : super(key: key);
@@ -17,6 +18,7 @@ class _AssetPageState extends State<AssetPage> {
   bool showHierarchy = false;
   dynamic _assets;
   String _stateMessage = 'There is nothing here';
+  dynamic gridData;
 
   Future<void> selectedSite(String? siteid) async {
     if (showHierarchy == false) {
@@ -32,11 +34,11 @@ class _AssetPageState extends State<AssetPage> {
       return;
     }
     if (siteid == 'GV: Hillsboro') {
-      final String data = await rootBundle.loadString(
-          '/home/jonathan/Documents/flutter_application_1/lib/admin/123.txt');
+      final String data =
+          await rootBundle.loadString('lib\\admin\\GVAssets.json');
       _assets = await compute(jsonDecode, data);
       setState(() {
-        _assets = _assets['assets'];
+        _assets = _assets;
       });
     }
   }
@@ -56,6 +58,7 @@ class _AssetPageState extends State<AssetPage> {
     } else {
       setState(() {
         showHierarchy = true;
+        gridData = Griddata();
         // get table data
       });
     }
@@ -69,7 +72,7 @@ class _AssetPageState extends State<AssetPage> {
       ),
       body: GridView.count(
         crossAxisCount: 2,
-        children: [
+        children: <Widget>[
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             SizedBox(
                 width: MediaQuery.of(context).size.width / 3,
@@ -90,6 +93,7 @@ class _AssetPageState extends State<AssetPage> {
                 )),
             Switch(value: showHierarchy, onChanged: toggleHierarchy)
           ]),
+          Text('_stateMessage'),
           Container(
               child: _assets != null
                   ? ListView.builder(
@@ -98,14 +102,77 @@ class _AssetPageState extends State<AssetPage> {
                         return ListTile(
                           leading: Text(_assets[index]['assetnum']),
                           title: Text(_assets[index]['description']),
-                          subtitle: Text(_assets[index]['parent']),
+                          subtitle: Text(_assets[index]['parent'] ?? ""),
                         );
                       }),
                     )
                   : Text(_stateMessage) // this is the else statement
-              )
+              ),
+          gridData != null
+              ? PlutoGrid(
+                  columns: gridData.columns,
+                  rows: gridData.rows,
+                )
+              : Text('no table'),
         ],
       ),
     );
+  }
+}
+
+class Griddata {
+  late List<PlutoColumn> columns;
+  late List<PlutoRow> rows;
+
+  Griddata() {
+    columns = [
+      PlutoColumn(
+        title: 'Site ID',
+        field: 'site_id',
+        type: PlutoColumnType.select(['GH', 'GV', 'GK']),
+      ),
+      PlutoColumn(
+        title: 'Asset Number',
+        field: 'asset_number',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        title: 'Asset Description',
+        field: 'asset_description',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        title: 'Parent Asset',
+        field: 'parent_number',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        title: 'Standard Job Plan Description',
+        field: 'sjp_description',
+        type: PlutoColumnType.text(),
+      ),
+    ];
+
+    rows = [
+      PlutoRow(
+        cells: {
+          'site_id': PlutoCell(
+            value: 'GV',
+          ),
+          'parent_number': PlutoCell(
+            value: 'column a value',
+          ),
+          'asset_number': PlutoCell(
+            value: 'column a value',
+          ),
+          'asset_description': PlutoCell(
+            value: 'column a value',
+          ),
+          'sjp_description': PlutoCell(
+            value: 'column a value',
+          ),
+        },
+      ),
+    ];
   }
 }

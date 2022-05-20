@@ -19,3 +19,5 @@ samples, guidance on mobile development, and a full API reference.
 dart pub upgrade --major-versions
 dart pub outdated
 flutter packages pub run build_runner watch / build
+flutter pub get
+select assetnum, location, parent, description, siteid, status, changedate from asset where siteid = 'gv'
