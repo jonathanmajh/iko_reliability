@@ -41,7 +41,7 @@ dependencies:
     html: ^0.15.0
     dropdown_search: ^5.0.1
     pluto_grid: ^3.1.1
-    file_picker: ^3.0.4
+    file_picker: ^4.6.0
 
 dev_dependencies:
     flutter_test:
@@ -68,7 +68,7 @@ flutter:
 
     # To add assets to your application, add an assets section, like this:
     assets:
-        - lib\admin\GVAssets.json
+        - lib/admin/GVAssets.json
 
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware.

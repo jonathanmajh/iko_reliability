@@ -15,7 +15,7 @@ import 'package:flutter/material.dart' as _i7;
 
 import '../admin/asset.dart' as _i3;
 import '../admin/contractor.dart' as _i4;
-import '../admin/pm-check.dart' as _i5;
+import '../admin/pm_check.dart' as _i5;
 import '../main.dart' as _i1;
 import '../test/test.dart' as _i2;
 

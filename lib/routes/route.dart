@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 
 import '../admin/asset.dart';
 import '../admin/contractor.dart';
-import '../admin/pm-check.dart';
+import '../admin/pm_check.dart';
 import '../main.dart';
 import '../test/test.dart';
 

@@ -109,7 +109,7 @@ class _AssetPageState extends State<AssetPage> {
                   columns: gridData.columns,
                   rows: gridData.rows,
                 )
-              : Text('no table'),
+              : const Text('no table'),
         ],
       ),
     );
