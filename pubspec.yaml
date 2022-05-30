@@ -39,8 +39,9 @@ dependencies:
     video_player_web: ^2.0.7
     wakelock_web: ^0.4.0
     html: ^0.15.0
-    dropdown_search: ^4.0.1
-    pluto_grid: ^2.10.3
+    dropdown_search: ^5.0.1
+    pluto_grid: ^3.1.1
+    file_picker: ^3.0.4
 
 dev_dependencies:
     flutter_test:

@@ -101,17 +101,8 @@ class _GHFlutterState extends State<GHFlutter> {
                 Navigator.pop(context); // close the drawer
               },
             ),
-            // ListTile(
-            //   leading: const Icon(Icons.settings),
-            //   title: const Text('Book'),
-            //   onTap: () {
-            //     context.router.pushNamed("/readbook");
-            //     // change app state...
-            //     Navigator.pop(context); // close the drawer
-            //   },
-            // ),
             ExpansionTile(
-              title: const Text("Maximo Admin"),
+              title: const Text("Request PMs"),
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.settings),
@@ -122,9 +113,32 @@ class _GHFlutterState extends State<GHFlutter> {
                     Navigator.pop(context); // close the drawer
                   },
                 ),
+              ],
+            ),
+            ExpansionTile(
+              title: const Text("Maximo Admin"),
+              children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.settings),
-                  title: const Text('Contractors'),
+                  title: const Text('Validate PMs'),
+                  onTap: () {
+                    context.router.pushNamed("/pm/check");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Create Assets'),
+                  onTap: () {
+                    context.router.pushNamed("/asset");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Create Contractors'),
                   onTap: () {
                     context.router.pushNamed("/contractor");
                     // change app state...

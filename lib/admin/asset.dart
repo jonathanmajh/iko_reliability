@@ -85,15 +85,11 @@ class _AssetPageState extends State<AssetPage> {
                         autocorrect: true,
                       )),
                   items: _sites,
-                  dropdownSearchDecoration: const InputDecoration(
-                    labelText: "Site",
-                    hintText: "Select Site for Adding Asset",
-                  ),
                   onChanged: selectedSite,
                 )),
             Switch(value: showHierarchy, onChanged: toggleHierarchy)
           ]),
-          Text('_stateMessage'),
+          const Text('_stateMessage'),
           Container(
               child: _assets != null
                   ? ListView.builder(
