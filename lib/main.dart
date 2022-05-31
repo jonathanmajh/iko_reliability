@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/route.gr.dart';
-import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
@@ -46,116 +43,98 @@ class _GHFlutterState extends State<GHFlutter> {
   @override
   void initState() {
     super.initState();
-    _loadData();
-  }
-
-  var _members = <dynamic>[];
-  final _biggerFont = const TextStyle(fontSize: 18.0);
-
-  Future<void> _loadData() async {
-    const dataUrl = 'https://api.github.com/orgs/raywenderlich/members';
-    final response = await http.get(Uri.parse(dataUrl));
-    setState(() {
-      _members = json.decode(response.body) as List;
-    });
-  }
-
-  Widget _buildRow(int i) {
-    return ListTile(
-      title: Text('${_members[i]['login']}', style: _biggerFont),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("app title"),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Text(
-                'Drawer Header',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            const ListTile(
-              leading: Icon(Icons.message),
-              title: Text('Home'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.account_circle),
-              title: const Text('Test'),
-              onTap: () {
-                context.router.pushNamed("/test");
-                // change app state...
-                Navigator.pop(context); // close the drawer
-              },
-            ),
-            ExpansionTile(
-              title: const Text("Request PMs"),
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Assets'),
-                  onTap: () {
-                    context.router.pushNamed("/asset");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-              ],
-            ),
-            ExpansionTile(
-              title: const Text("Maximo Admin"),
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Validate PMs'),
-                  onTap: () {
-                    context.router.pushNamed("/pm/check");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Create Assets'),
-                  onTap: () {
-                    context.router.pushNamed("/asset");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Create Contractors'),
-                  onTap: () {
-                    context.router.pushNamed("/contractor");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-              ],
-            )
-          ],
+        appBar: AppBar(
+          title: const Text("app title"),
         ),
-      ),
-      body: ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: _members.length,
-          itemBuilder: (BuildContext context, int position) {
-            return _buildRow(position);
-          }),
-    );
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Text(
+                  'Drawer Header',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+              const ListTile(
+                leading: Icon(Icons.message),
+                title: Text('Home'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.account_circle),
+                title: const Text('Test'),
+                onTap: () {
+                  context.router.pushNamed("/test");
+                  // change app state...
+                  Navigator.pop(context); // close the drawer
+                },
+              ),
+              ExpansionTile(
+                title: const Text("Request PMs"),
+                children: <Widget>[
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Assets'),
+                    onTap: () {
+                      context.router.pushNamed("/asset");
+                      // change app state...
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                ],
+              ),
+              ExpansionTile(
+                title: const Text("Maximo Admin"),
+                children: <Widget>[
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Validate PMs'),
+                    onTap: () {
+                      context.router.pushNamed("/pm/check");
+                      // change app state...
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Create Assets'),
+                    onTap: () {
+                      context.router.pushNamed("/asset");
+                      // change app state...
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Create Contractors'),
+                    onTap: () {
+                      context.router.pushNamed("/contractor");
+                      // change app state...
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+        body: ListView(children: const <Widget>[
+          ListTile(
+            // a spacer
+            title: Text(
+                'Open the menu on the right, then select a module to get started'),
+          )
+        ]));
   }
 }

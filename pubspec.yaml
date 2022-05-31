@@ -42,6 +42,7 @@ dependencies:
     dropdown_search: ^5.0.1
     pluto_grid: ^3.1.1
     file_picker: ^4.6.0
+    spreadsheet_decoder: ^2.0.2
 
 dev_dependencies:
     flutter_test:

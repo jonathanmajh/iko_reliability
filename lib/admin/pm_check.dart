@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/admin/pmCheck/parse_template.dart';
 
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
@@ -27,8 +26,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
   }
 
   void pickTemplates() async {
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(allowMultiple: true);
+    FilePickerResult? result = await FilePicker.platform
+        .pickFiles(allowMultiple: true, withData: true);
     List<PlatformFile> files = [];
     String msg = '';
     if (result != null) {
@@ -41,6 +40,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
       templates = files;
       _show(msg);
     });
+    if (files.isNotEmpty) {
+      for (var file in files) {
+        PreventiveMaintenance.fromExcel(file.bytes!);
+      }
+      // TODO
+    }
   }
 
   @override
@@ -70,12 +75,40 @@ class _PmCheckPageState extends State<PmCheckPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("PM Verify and Upload"),
+        leading: (ModalRoute.of(context)?.canPop ?? false)
+            ? const BackButton()
+            : null,
       ),
-      body: ElevatedButton(
-        onPressed: () {
-          pickTemplates();
-        },
-        child: const Text('Pick Files'),
+      body: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              const Text(
+                  'Click "Pick Files" and select PM templates to get started.\nClick "Restart" to remove all PMs\nDetected PMs will appear in below list'),
+              ElevatedButton(
+                onPressed: () {
+                  pickTemplates();
+                },
+                child: const Text('Pick Files'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  pickTemplates(); //TODO
+                },
+                child: const Text('Restart'),
+              ),
+            ],
+          ),
+          Expanded(
+              child: ListView(children: const <Widget>[
+            ListTile(
+              // a spacer
+              title: Text(
+                  'Open the menu on the right, then select a module to get started'),
+            )
+          ]))
+        ],
       ),
       endDrawer: Drawer(
         child: ListView(
@@ -93,7 +126,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
               trailing: Switch(value: optionOne, onChanged: toggleOptionOne),
             ),
             const ListTile(
-            // a spacer
+              // a spacer
               title: Text(''),
             ),
             Center(
