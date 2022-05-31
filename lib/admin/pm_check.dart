@@ -17,6 +17,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   Map<String, Map<String, dynamic>> observationList = {};
   Map<String, String> workOrderType = {};
   List<PlatformFile> templates = [];
+  bool optionOne = false;
 
   void _show(toastMsg) {
     final msg = toastMsg;
@@ -47,17 +48,61 @@ class _PmCheckPageState extends State<PmCheckPage> {
     super.initState();
   }
 
+  void toggleOptionOne(bool value) {
+    if (optionOne) {
+      setState(() {
+        optionOne = false;
+        // reset table
+      });
+    } else {
+      setState(() {
+        optionOne = true;
+      });
+    }
+  }
+
+  void _closeEndDrawer() {
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Maximo Asset Creator"),
+        title: const Text("PM Verify and Upload"),
       ),
       body: ElevatedButton(
         onPressed: () {
           pickTemplates();
         },
         child: const Text('Pick Files'),
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            const DrawerHeader(
+                child: Text(
+              'PM Settings',
+              style: TextStyle(fontSize: 24),
+            )),
+            ListTile(
+              leading: const Icon(Icons.message),
+              title: const Text('Option 1'),
+              subtitle: const Text(
+                  'Option 1 help text, this will be a very long and detailed explaination about what toggling this option entails. reload / re validate should occur after the drawer has been closed'),
+              trailing: Switch(value: optionOne, onChanged: toggleOptionOne),
+            ),
+            const ListTile(
+            // a spacer
+              title: Text(''),
+            ),
+            Center(
+                child: ElevatedButton(
+              onPressed: _closeEndDrawer,
+              child: const Text('Close Drawer'),
+            )),
+          ],
+        ),
       ),
     );
   }
