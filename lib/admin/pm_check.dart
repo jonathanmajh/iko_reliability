@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/admin/pmCheck/parse_template.dart';
+import 'package:flutter_application_1/admin/parse_template.dart';
 
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
@@ -17,6 +20,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   Map<String, String> workOrderType = {};
   List<PlatformFile> templates = [];
   bool optionOne = false;
+  Map<String, dynamic> parsedTemplates = {};
 
   void _show(toastMsg) {
     final msg = toastMsg;
@@ -26,6 +30,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   }
 
   void pickTemplates() async {
+    print('Picking Files');
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
     List<PlatformFile> files = [];
@@ -41,11 +46,27 @@ class _PmCheckPageState extends State<PmCheckPage> {
       _show(msg);
     });
     if (files.isNotEmpty) {
-      for (var file in files) {
-        PreventiveMaintenance.fromExcel(file.bytes!);
-      }
-      // TODO
+      setState(() {
+        print('Loading files...');
+      });
+      final stopwatch = Stopwatch()..start();
+      var temp = await parseSpreadsheets(files);
+      setState(() {
+        print('Parsed files in ${stopwatch.elapsedMilliseconds} milliseconds');
+        for (var thing in temp) {
+          parsedTemplates[thing.keys.first] = thing[thing.keys.first];
+        }
+      });
     }
+  }
+
+  Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
+    List<Future> futures = [];
+    for (var file in files) {
+      futures.add(
+          compute(PreventiveMaintenance().fromExcel, [file.bytes!, file.name]));
+    }
+    return await Future.wait(futures);
   }
 
   @override
@@ -101,13 +122,11 @@ class _PmCheckPageState extends State<PmCheckPage> {
             ],
           ),
           Expanded(
-              child: ListView(children: const <Widget>[
-            ListTile(
-              // a spacer
-              title: Text(
-                  'Open the menu on the right, then select a module to get started'),
-            )
-          ]))
+              child: parsedTemplates.isNotEmpty
+                  ? ListView(
+                      children: buildPMList(parsedTemplates),
+                    )
+                  : const Text("Waiting for Data"))
         ],
       ),
       endDrawer: Drawer(
@@ -139,4 +158,18 @@ class _PmCheckPageState extends State<PmCheckPage> {
       ),
     );
   }
+}
+
+List<ListTile> buildPMList(parsedTemplates) {
+  List<ListTile> list = [];
+  for (String ws in parsedTemplates.keys) {
+    for (int pmOrder in parsedTemplates[ws].keys) {
+      list.add(ListTile(
+        leading: Text(pmOrder.toString()),
+        title: Text(parsedTemplates[ws][pmOrder].workOrderType),
+        subtitle: Text(ws),
+      ));
+    }
+  }
+  return list;
 }
