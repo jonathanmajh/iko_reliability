@@ -16,8 +16,9 @@ For help getting started with Flutter, view our
 samples, guidance on mobile development, and a full API reference.
 
 ## Notes on common commands
-dart pub upgrade --major-versions
-dart pub outdated
+flutter pub upgrade --major-versions
+flutter pub outdated
 flutter packages pub run build_runner watch / build
 flutter pub get
+flutter upgrade
 select assetnum, location, parent, description, siteid, status, changedate from asset where siteid = 'gv'

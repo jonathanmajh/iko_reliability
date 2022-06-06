@@ -76,6 +76,16 @@ class JobTask {
   });
 }
 
+class ProcessedTemplate {
+  String? pmNumber;
+  String? pmName;
+
+  ProcessedTemplate({
+    this.pmName,
+    this.pmNumber,
+  });
+}
+
 class PreventiveMaintenance {
   List<String> assets;
   String? siteId;
@@ -92,6 +102,7 @@ class PreventiveMaintenance {
   String? pmName;
   String? pmPackageNumber;
   String? routeNumber;
+  ProcessedTemplate? uploads;
 
   PreventiveMaintenance({
     List<String>? assets,
@@ -107,6 +118,7 @@ class PreventiveMaintenance {
     this.pmName,
     this.pmPackageNumber,
     this.routeNumber,
+    this.uploads,
     List<JobService>? services,
     List<JobTask>? tasks,
   })  : assets = assets ?? [],
