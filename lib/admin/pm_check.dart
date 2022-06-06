@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/admin/parse_template.dart';
 import 'package:flutter_application_1/admin/pm_name_generator.dart';
 
+import 'asset_storage.dart';
+
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
 
@@ -141,7 +143,11 @@ class _PmCheckPageState extends State<PmCheckPage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  pickTemplates(); //TODO
+                  print(findParent(Asset(
+                      assetNumber: 'C8192',
+                      name: 'name',
+                      parent: 'C8181',
+                      siteid: 'AA')));
                 },
                 child: const Text('Restart'),
               ),
@@ -170,6 +176,14 @@ class _PmCheckPageState extends State<PmCheckPage> {
                   'Option 1 help text, this will be a very long and detailed explaination about what toggling this option entails. reload / re validate should occur after the drawer has been closed'),
               trailing: Switch(value: optionOne, onChanged: toggleOptionOne),
             ),
+            const ListTile(
+                leading: Icon(Icons.message),
+                title: Text('Load Asset'),
+                subtitle: Text('Clear and Load Assets from Spreadsheet'),
+                trailing: ElevatedButton(
+                  onPressed: loadHierarchy,
+                  child: Text('Load Asset'),
+                )),
             const ListTile(
               // a spacer
               title: Text(''),
