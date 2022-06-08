@@ -1,8 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/route.gr.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+import 'admin/asset_storage.dart';
+
+void main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(AssetAdapter());
+  await Hive.openBox('assets');
   runApp(MyApp());
 }
 
