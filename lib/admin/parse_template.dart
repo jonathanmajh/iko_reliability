@@ -163,7 +163,10 @@ class PreventiveMaintenance {
                   frequencyUnits.contains(nextRow[4]) ? nextRow[4] : null,
               frequency: nextRow[5],
               workOrderType: nextRow[6],
-              processCondition: nextRow[7]);
+              processCondition: nextRow[7],
+              pmName: nextRow[8] ?? 'Generating Name...',
+              pmNumber: decoder.tables[sheet]!.rows[i + 2][8] ??
+                  'Generating Number...');
         }
         if (row[7] != null && readTasks) {
           pmTemplates[filename][pmNumber].tasks.add(JobTask(

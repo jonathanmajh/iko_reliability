@@ -192,8 +192,11 @@ List<Widget> buildPMList(parsedTemplates) {
     for (int pmOrder in parsedTemplates[ws].keys) {
       list.add(TemplateListItem(
         templateNumber: pmOrder,
-        pmName: parsedTemplates[ws][pmOrder].workOrderType,
+        pmName: parsedTemplates[ws][pmOrder].uploads?.pmName ??
+            parsedTemplates[ws][pmOrder].pmName,
         filename: ws,
+        pmNumber: parsedTemplates[ws][pmOrder].uploads?.pmNumber ??
+            parsedTemplates[ws][pmOrder].pmNumber,
         status: parsedTemplates[ws][pmOrder].uploads == null
             ? 'processing'
             : 'done',
@@ -208,6 +211,7 @@ class TemplateListItem extends StatelessWidget {
     Key? key,
     required this.filename,
     required this.pmName,
+    required this.pmNumber,
     required this.status,
     required this.templateNumber,
   }) : super(key: key);
@@ -215,6 +219,7 @@ class TemplateListItem extends StatelessWidget {
   final String filename;
   final int templateNumber;
   final String pmName;
+  final String pmNumber;
   final String status;
 
   @override
@@ -231,6 +236,7 @@ class TemplateListItem extends StatelessWidget {
                 filename: filename,
                 templateNumber: templateNumber,
                 pmName: pmName,
+                pmNumber: pmNumber,
                 status: status,
               ),
             ),
@@ -246,6 +252,7 @@ class _TemplateDescription extends StatelessWidget {
     Key? key,
     required this.filename,
     required this.pmName,
+    required this.pmNumber,
     required this.status,
     required this.templateNumber,
   }) : super(key: key);
@@ -253,6 +260,7 @@ class _TemplateDescription extends StatelessWidget {
   final String filename;
   final int templateNumber;
   final String pmName;
+  final String pmNumber;
   final String status;
 
   @override
@@ -264,6 +272,14 @@ class _TemplateDescription extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Text(
+                pmNumber,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               Text(
                 pmName,
                 maxLines: 2,
