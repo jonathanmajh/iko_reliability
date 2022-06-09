@@ -7,6 +7,7 @@ import 'package:flutter_application_1/admin/parse_template.dart';
 import 'package:flutter_application_1/admin/pm_name_generator.dart';
 
 import 'asset_storage.dart';
+import 'maximo_jp_pm.dart';
 
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
@@ -23,6 +24,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
   Map<String, String> workOrderType = {};
   List<PlatformFile> templates = [];
   bool optionOne = false;
+  String maximoServerSelected = 'TEST';
+
   Map<String, dynamic> parsedTemplates = {};
 
   void _show(toastMsg) {
@@ -88,8 +91,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
   void parseTemplate(List<dynamic> parameters) async {
     String ws = parameters[0];
     int templateNumber = parameters[1];
-    var result =
-        await PMName().generateName(parsedTemplates[ws][templateNumber]);
+    var result = await PMName().generateName(
+        parsedTemplates[ws][templateNumber], maximoServerSelected);
     setState(() {
       var processed =
           ProcessedTemplate(pmName: result.pmName, pmNumber: result.pmNumber);
@@ -113,6 +116,16 @@ class _PmCheckPageState extends State<PmCheckPage> {
         optionOne = true;
       });
     }
+  }
+
+  void changeMaximoEnvironment(String? value) {
+    if (value == null) {
+      return;
+    }
+    setState(() {
+      maximoServerSelected = value;
+      // TODO reset table generated information
+    });
   }
 
   void _closeEndDrawer() {
@@ -176,6 +189,24 @@ class _PmCheckPageState extends State<PmCheckPage> {
                   'Option 1 help text, this will be a very long and detailed explaination about what toggling this option entails. reload / re validate should occur after the drawer has been closed'),
               trailing: Switch(value: optionOne, onChanged: toggleOptionOne),
             ),
+            ListTile(
+                leading: const Icon(Icons.message),
+                title: const Text('Maximo Environment'),
+                subtitle:
+                    const Text('Toggle which environment to apply changes to'),
+                trailing: DropdownButton(
+                  value: maximoServerSelected,
+                  onChanged: (String? newValue) {
+                    changeMaximoEnvironment(newValue);
+                  },
+                  items: maximoServerDomains.keys
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                )),
             const ListTile(
                 leading: Icon(Icons.message),
                 title: Text('Load Asset'),

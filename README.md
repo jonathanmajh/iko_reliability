@@ -18,6 +18,7 @@ samples, guidance on mobile development, and a full API reference.
 ## Notes on common commands
 flutter pub upgrade --major-versions
 flutter pub outdated
+flutter packages pub run build_runner build --delete-conflicting-outputs
 flutter packages pub run build_runner watch / build
 flutter pub get
 flutter upgrade

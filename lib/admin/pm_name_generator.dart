@@ -1,3 +1,6 @@
+import 'package:flutter_application_1/admin/maximo_jp_pm.dart';
+import 'package:flutter_application_1/admin/pm_jp_storage.dart';
+
 import 'parse_template.dart';
 
 const frequencyUnits = {'D': "Day", 'W': "Week", 'M': "Month", 'Y': "Year"};
@@ -30,7 +33,8 @@ class PMName {
     this.pmName,
   });
 
-  Future<PMName> generateName(PreventiveMaintenance pmdetails) async {
+  Future<PMName> generateName(
+      PreventiveMaintenance pmdetails, String maximoServerSelected) async {
     bool available = false;
     String number = '';
     String name = '';
@@ -66,29 +70,33 @@ class PMName {
     if (wotype != 'LC1') {
       name = '$name - ${crafts[craft]}';
     }
-    available = await checkPMNumber(number);
+    available =
+        await checkPMNumber(number, pmdetails.siteId!, maximoServerSelected);
     int counter = 0;
     String tempNumber = number;
     while (!available) {
       counter++;
       if (wotype != 'LC1') {
-        tempNumber = '$number$tempNumber';
+        tempNumber = '$number$counter';
       } else {
         tempNumber =
             '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
       }
-      available = await checkPMNumber(tempNumber);
+      available = await checkPMNumber(
+          tempNumber, pmdetails.siteId!, maximoServerSelected);
     }
     if (counter > 0) {
       if (wotype != 'LC1') {
-        tempNumber = '$number$tempNumber';
+        tempNumber = '$number$counter';
       } else {
         tempNumber =
             '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
         name = '$name${numberToLetter(counter)}';
       }
+    } else {
+      // TODO for LC1 name gets left as LC-
     }
-    return PMName(pmNumber: number, pmName: name);
+    return PMName(pmNumber: tempNumber, pmName: name);
   }
 }
 
@@ -96,8 +104,13 @@ String getParent() {
   return "A0001";
 }
 
-Future<bool> checkPMNumber(String number) async {
-  // check db async
+Future<bool> checkPMNumber(String number, String siteid, String env) async {
+  // check to see if PM number is available, true if available
+  var result = existPmNumberCache(number, siteid);
+  if (result) {
+    return false;
+  }
+  result = await existPmNumberMaximo(number, siteid, env);
   // check maximo async
   await Future.delayed(const Duration(seconds: 5));
   return true;

@@ -9,6 +9,7 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(AssetAdapter());
   await Hive.openBox('assets');
+  await Hive.openBox('pmNumber');
   runApp(MyApp());
 }
 

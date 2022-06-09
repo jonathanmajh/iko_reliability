@@ -159,8 +159,9 @@ class PreventiveMaintenance {
           pmTemplates[filename][pmNumber] = PreventiveMaintenance(
               nextDueDate: nextRow[2],
               siteId: nextRow[3],
-              frequencyUnit:
-                  frequencyUnits.contains(nextRow[4]) ? nextRow[4] : null,
+              frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))
+                  ? nextRow[4].substring(0, 1)
+                  : null,
               frequency: nextRow[5],
               workOrderType: nextRow[6],
               processCondition: nextRow[7],
