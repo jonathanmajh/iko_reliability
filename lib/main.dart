@@ -10,6 +10,7 @@ void main() async {
   Hive.registerAdapter(AssetAdapter());
   await Hive.openBox('assets');
   await Hive.openBox('pmNumber');
+  await Hive.openBox('jpNumber');
   runApp(MyApp());
 }
 

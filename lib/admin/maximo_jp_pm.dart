@@ -27,3 +27,20 @@ Future<bool> existPmNumberMaximo(
   }
   return false;
 }
+
+Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
+  final url =
+      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/mxl_jobplan?oslc.select=jpnum&oslc.pageSize=10&oslc.where=jpnum="$jpNumber"&_lid=corcoop3&_lpwd=maximo';
+  // TODO login management
+  // save login in settings box
+  var response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    var parsed = jsonDecode(response.body);
+    if (parsed['rdf:member'] == null) {
+      return true;
+    }
+  } else {
+    print('Failed to check Maximo');
+  }
+  return false;
+}

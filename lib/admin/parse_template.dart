@@ -79,14 +79,18 @@ class JobTask {
 class ProcessedTemplate {
   String? pmNumber;
   String? pmName;
+  String? jpNumber;
+  List<String>? replaceable;
 
   ProcessedTemplate({
     this.pmName,
     this.pmNumber,
+    this.jpNumber,
+    this.replaceable,
   });
 }
 
-class PreventiveMaintenance {
+class PreventiveMaintenanceTemplate {
   List<String> assets;
   String? siteId;
   String? frequencyUnit;
@@ -104,7 +108,7 @@ class PreventiveMaintenance {
   String? routeNumber;
   ProcessedTemplate? uploads;
 
-  PreventiveMaintenance({
+  PreventiveMaintenanceTemplate({
     List<String>? assets,
     this.siteId,
     this.frequencyUnit,
@@ -156,7 +160,7 @@ class PreventiveMaintenance {
           readRouteAsset = false;
           var nextRow = decoder.tables[sheet]!.rows[i + 1];
           pmNumber++;
-          pmTemplates[filename][pmNumber] = PreventiveMaintenance(
+          pmTemplates[filename][pmNumber] = PreventiveMaintenanceTemplate(
               nextDueDate: nextRow[2],
               siteId: nextRow[3],
               frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))

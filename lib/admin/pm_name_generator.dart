@@ -27,15 +27,15 @@ const crafts = {
 class PMName {
   String? pmNumber;
   String? pmName;
+  String? jpNumber;
+  List<String>? replaceable;
 
-  PMName({
-    this.pmNumber,
-    this.pmName,
-  });
+  PMName({this.pmNumber, this.pmName, this.jpNumber, this.replaceable});
 
-  Future<PMName> generateName(
-      PreventiveMaintenance pmdetails, String maximoServerSelected) async {
-    bool available = false;
+  Future<PMName> generateName(PreventiveMaintenanceTemplate pmdetails,
+      String maximoServerSelected) async {
+    bool availablePM = false;
+    bool availableJP = false;
     String number = '';
     String name = '';
     if (pmdetails.routeNumber != null) {
@@ -45,6 +45,7 @@ class PMName {
       number = getParent();
       name = "Site Operations"; // TODO look up asset description
     }
+    final replaceable = [number, name];
     String wotype = pmdetails.workOrderType!.substring(0, 3);
 
 // add frequency details if pm
@@ -70,11 +71,13 @@ class PMName {
     if (wotype != 'LC1') {
       name = '$name - ${crafts[craft]}';
     }
-    available =
+    availablePM =
         await checkPMNumber(number, pmdetails.siteId!, maximoServerSelected);
+    availableJP = await checkJPNumber(
+        '${pmdetails.siteId!}$number', maximoServerSelected);
     int counter = 0;
     String tempNumber = number;
-    while (!available) {
+    while (!availablePM && !availableJP) {
       counter++;
       if (wotype != 'LC1') {
         tempNumber = '$number$counter';
@@ -82,8 +85,10 @@ class PMName {
         tempNumber =
             '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
       }
-      available = await checkPMNumber(
+      availablePM = await checkPMNumber(
           tempNumber, pmdetails.siteId!, maximoServerSelected);
+      availableJP = await checkJPNumber(
+          '${pmdetails.siteId!}$tempNumber', maximoServerSelected);
     }
     if (counter > 0) {
       if (wotype != 'LC1') {
@@ -93,10 +98,12 @@ class PMName {
             '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
         name = '$name${numberToLetter(counter)}';
       }
-    } else {
-      // TODO for LC1 name gets left as LC-
-    }
-    return PMName(pmNumber: tempNumber, pmName: name);
+    } else {}
+    return PMName(
+        pmNumber: tempNumber,
+        pmName: name,
+        jpNumber: '${pmdetails.siteId!}$tempNumber',
+        replaceable: replaceable);
   }
 }
 
@@ -111,6 +118,18 @@ Future<bool> checkPMNumber(String number, String siteid, String env) async {
     return false;
   }
   result = await existPmNumberMaximo(number, siteid, env);
+  // check maximo async
+  await Future.delayed(const Duration(seconds: 5));
+  return true;
+}
+
+Future<bool> checkJPNumber(String number, String env) async {
+  // check to see if PM number is available, true if available
+  var result = existJpNumberCache(number);
+  if (result) {
+    return false;
+  }
+  result = await existJpNumberMaximo(number, env);
   // check maximo async
   await Future.delayed(const Duration(seconds: 5));
   return true;
