@@ -94,7 +94,6 @@ class JobPlanMaximo {
 
 Future<Map<String, dynamic>> generatePM(
     ParsedTemplate pmDetails, String maximoServerSelected) async {
-  // var mainJobPlan = JobPlanMaximo(description: description, ikoConditions: ikoConditions, ikoPmpackage: ikoPmpackage, ikoWorktype: ikoWorktype, jpduration: jpduration, jpnum: jpnum, persongroup: persongroup, priority: priority, templatetype: templatetype, joblabor: joblabor, jobmaterial: jobmaterial, jobservice: jobservice, jobtask: jobtask)
   List<JobTaskMaximo> mainJobTasks = [];
   List<JobPlanMaximo> childJobPlans = [];
   int routeTasks = 0;
@@ -162,6 +161,27 @@ Future<Map<String, dynamic>> generatePM(
       ));
     }
   }
+  double jobhrs = 0.0;
+  for (final joblabor in pmDetails.crafts) {
+    jobhrs = jobhrs + joblabor.hours;
+  }
+  var mainJobPlan = JobPlanMaximo(
+    description: pmDetails.uploads!.pmName!,
+    ikoConditions: pmDetails.processCondition!,
+    ikoPmpackage: pmDetails.pmPackageNumber,
+    ikoWorktype: pmDetails.workOrderType!,
+    jpduration: jobhrs,
+    jpnum: pmDetails.uploads!.jpNumber!,
+    persongroup: personGroups[pmDetails.crafts[0].laborType
+        .substring(pmDetails.crafts[0].laborType.length - 1)]!,
+    priority: 2,
+    templatetype: 'PM',
+    // TODO need to create below 3 objects
+    joblabor: joblabor,
+    jobmaterial: jobmaterial,
+    jobservice: jobservice,
+    jobtask: mainJobTasks,
+  );
   print('complete job plan generation');
   return {'thing': 'thing'};
 }

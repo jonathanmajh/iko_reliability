@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 import 'package:iko_reliability/admin/pm_name_generator.dart';
@@ -26,7 +27,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   List<PlatformFile> templates = [];
   bool optionOne = false;
   String maximoServerSelected = 'TEST';
-
+  List<String> _selected = [];
   Map<String, dynamic> parsedTemplates = {};
 
   void _show(toastMsg) {
@@ -34,6 +35,40 @@ class _PmCheckPageState extends State<PmCheckPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),
     ));
+  }
+
+  void updateState() {
+    setState(() {
+      if (_selected.isEmpty) {
+        _selected = ['123'];
+      } else {
+        _selected = [];
+      }
+
+      print('set the state');
+    });
+  }
+
+  Widget detailedView(List<String> state) {
+    if (state.isNotEmpty) {
+      return Expanded(
+          child: ListView(
+        children: [
+          ListTile(title: const Text('data')),
+          ListTile(title: const Text('data')),
+          ListTile(title: const Text('data')),
+          ListTile(title: const Text('data')),
+        ],
+      ));
+    } else {
+      return VerticalDivider(
+        width: 20,
+        thickness: 1,
+        indent: 20,
+        endIndent: 0,
+        color: Colors.grey,
+      );
+    }
   }
 
   void pickTemplates() async {
@@ -174,8 +209,25 @@ class _PmCheckPageState extends State<PmCheckPage> {
           ),
           Expanded(
               child: parsedTemplates.isNotEmpty
-                  ? ListView(
-                      children: buildPMList(parsedTemplates),
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Expanded(
+                            child: ListView(
+                          children: buildPMList(parsedTemplates),
+                        )),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: (_selected.isNotEmpty
+                                  ? 'Select a PM to view details'
+                                  : 'Click to close detailed view')
+                              .split('')
+                              .map((c) => Text(c))
+                              .toList(),
+                        ),
+                        detailedView(_selected)
+                      ],
                     )
                   : const Text("Waiting for Data"))
         ],
@@ -191,8 +243,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
             ListTile(
               leading: const Icon(Icons.message),
               title: const Text('Option 1'),
-              subtitle: const Text(
-                  'Option 1 help text, this will be a very long and detailed explaination about what toggling this option entails. reload / re validate should occur after the drawer has been closed'),
+              subtitle: const Text('Option 1 help text'),
               trailing: Switch(value: optionOne, onChanged: toggleOptionOne),
             ),
             ListTile(
@@ -235,142 +286,122 @@ class _PmCheckPageState extends State<PmCheckPage> {
       ),
     );
   }
-}
 
-List<Widget> buildPMList(parsedTemplates) {
-  List<Widget> list = [];
-  for (String ws in parsedTemplates.keys) {
-    for (int pmOrder in parsedTemplates[ws].keys) {
-      list.add(TemplateListItem(
-        templateNumber: pmOrder,
-        pmName: parsedTemplates[ws][pmOrder].uploads?.pmName ??
-            parsedTemplates[ws][pmOrder].pmName,
-        filename: ws,
-        pmNumber: parsedTemplates[ws][pmOrder].uploads?.pmNumber ??
-            parsedTemplates[ws][pmOrder].pmNumber,
-        status: parsedTemplates[ws][pmOrder].uploads == null
-            ? 'processing'
-            : 'done',
-      ));
+  List<Widget> buildPMList(parsedTemplates) {
+    List<Widget> list = [];
+    for (String ws in parsedTemplates.keys) {
+      for (int pmOrder in parsedTemplates[ws].keys) {
+        list.add(templateListItem(
+          ws,
+          pmOrder,
+          parsedTemplates[ws][pmOrder].uploads?.pmName ??
+              parsedTemplates[ws][pmOrder].pmName,
+          parsedTemplates[ws][pmOrder].uploads?.pmNumber ??
+              parsedTemplates[ws][pmOrder].pmNumber,
+          parsedTemplates[ws][pmOrder].uploads == null ? 'processing' : 'done',
+        ));
+      }
     }
+    return list;
   }
-  return list;
+
+  Widget templateListItem(
+    String filename,
+    int templateNumber,
+    String pmName,
+    String pmNumber,
+    String status,
+  ) {
+    return SizedBox(
+        height: 100,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            print('tapped');
+            updateState();
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
+                  child: templateDescription(
+                    filename,
+                    templateNumber,
+                    pmName,
+                    pmNumber,
+                    status,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
 }
 
-class TemplateListItem extends StatelessWidget {
-  const TemplateListItem({
-    Key? key,
-    required this.filename,
-    required this.pmName,
-    required this.pmNumber,
-    required this.status,
-    required this.templateNumber,
-  }) : super(key: key);
-
-  final String filename;
-  final int templateNumber;
-  final String pmName;
-  final String pmNumber;
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 100,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
-              child: _TemplateDescription(
-                filename: filename,
-                templateNumber: templateNumber,
-                pmName: pmName,
-                pmNumber: pmNumber,
-                status: status,
+Widget templateDescription(
+  String filename,
+  int templateNumber,
+  String pmName,
+  String pmNumber,
+  String status,
+) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              pmNumber,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-        ],
+            Text(
+              pmName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Padding(padding: EdgeInsets.only(bottom: 2.0)),
+            Text(
+              filename,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12.0,
+                color: Colors.black54,
+              ),
+            ),
+            Text(
+              'Template #$templateNumber',
+              style: const TextStyle(
+                fontSize: 12.0,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
       ),
-    );
-  }
-}
-
-class _TemplateDescription extends StatelessWidget {
-  const _TemplateDescription({
-    Key? key,
-    required this.filename,
-    required this.pmName,
-    required this.pmNumber,
-    required this.status,
-    required this.templateNumber,
-  }) : super(key: key);
-
-  final String filename;
-  final int templateNumber;
-  final String pmName;
-  final String pmNumber;
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                pmNumber,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                pmName,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Padding(padding: EdgeInsets.only(bottom: 2.0)),
-              Text(
-                filename,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black54,
-                ),
-              ),
-              Text(
-                'Template #$templateNumber',
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            statusIndicator(status),
+          ],
         ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              statusIndicator(status),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }
 
 Widget statusIndicator(status) {
