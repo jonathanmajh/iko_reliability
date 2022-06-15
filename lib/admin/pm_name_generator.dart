@@ -1,5 +1,5 @@
-import 'package:flutter_application_1/admin/maximo_jp_pm.dart';
-import 'package:flutter_application_1/admin/pm_jp_storage.dart';
+import 'package:iko_reliability/admin/maximo_jp_pm.dart';
+import 'package:iko_reliability/admin/pm_jp_storage.dart';
 
 import 'asset_storage.dart';
 import 'parse_template.dart';

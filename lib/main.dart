@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/routes/route.gr.dart';
+import 'package:iko_reliability/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'admin/asset_storage.dart';
@@ -11,9 +11,12 @@ void main() async {
   await Hive.openBox('assets');
   await Hive.openBox('pmNumber');
   await Hive.openBox('jpNumber');
+  await Hive.openBox('routeNumber');
   var box = Hive.box('jpNumber');
   box.clear();
   box = Hive.box('pmNumber');
+  box.clear();
+  box = Hive.box('routeNumber');
   box.clear();
   runApp(MyApp());
 }

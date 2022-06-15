@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/admin/parse_template.dart';
-import 'package:flutter_application_1/admin/pm_name_generator.dart';
+import 'package:iko_reliability/admin/parse_template.dart';
+import 'package:iko_reliability/admin/pm_name_generator.dart';
 
 import 'asset_storage.dart';
 import 'generate_job_plans.dart';
