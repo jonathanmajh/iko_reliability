@@ -45,13 +45,18 @@ class PMName {
       number = getParent();
       name = "Site Operations"; // TODO look up asset description
     }
-    final replaceable = [number, name];
+    var replaceable = ['XXXXX', 'XXXXX'];
+    // number, name | XXXXX asset number, !!! duplicate counter
     String wotype = pmdetails.workOrderType!.substring(0, 3);
 
 // add frequency details if pm
     if (pmdetails.frequency != null) {
       number = '$number${pmdetails.frequencyUnit}${pmdetails.frequency}';
+      replaceable[0] =
+          '${replaceable[0]}${pmdetails.frequencyUnit}${pmdetails.frequency}';
       if (wotype != 'LC1') {
+        replaceable[1] =
+            '${replaceable[1]} - ${pmdetails.frequency} ${frequencyUnits[pmdetails.frequencyUnit]}';
         name =
             '$name - ${pmdetails.frequency} ${frequencyUnits[pmdetails.frequencyUnit]}';
       }
@@ -60,16 +65,22 @@ class PMName {
     number = '$number$wotype';
     if (wotype != 'LC1') {
       name = '$name ${workType[wotype]}';
+      replaceable[0] = '${replaceable[0]}$wotype';
+      replaceable[1] = '${replaceable[1]} ${workType[wotype]}';
     } else {
       name = '$name - LC-';
+      replaceable[0] = '${replaceable[0]}LC!!!';
+      replaceable[1] = '${replaceable[1]} - LC-!!!';
       // properly assign letter after number has been determined
     }
     // add craft
     var craft = pmdetails.crafts[0].laborType;
     craft = craft.substring(craft.length - 1);
     number = '$number$craft';
+    replaceable[0] = '${replaceable[0]}$craft';
     if (wotype != 'LC1') {
       name = '$name - ${crafts[craft]}';
+      replaceable[1] = '${replaceable[1]} - ${crafts[craft]}';
     }
     availablePM =
         await checkPMNumber(number, pmdetails.siteId!, maximoServerSelected);
@@ -98,7 +109,7 @@ class PMName {
             '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
         name = '$name${numberToLetter(counter)}';
       }
-    } else {}
+    }
     return PMName(
         pmNumber: tempNumber,
         pmName: name,

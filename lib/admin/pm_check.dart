@@ -7,6 +7,7 @@ import 'package:flutter_application_1/admin/parse_template.dart';
 import 'package:flutter_application_1/admin/pm_name_generator.dart';
 
 import 'asset_storage.dart';
+import 'generate_job_plans.dart';
 import 'maximo_jp_pm.dart';
 
 class PmCheckPage extends StatefulWidget {
@@ -91,6 +92,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   void parseTemplate(List<dynamic> parameters) async {
     String ws = parameters[0];
     int templateNumber = parameters[1];
+    generatePM(parsedTemplates[ws][templateNumber]);
     var result = await PMName().generateName(
         parsedTemplates[ws][templateNumber], maximoServerSelected);
     setState(() {
@@ -102,6 +104,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
       );
       parsedTemplates[ws][templateNumber].uploads = processed;
     });
+    generatePM(parsedTemplates[ws][templateNumber]);
   }
 
   @override

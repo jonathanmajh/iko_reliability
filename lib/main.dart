@@ -142,6 +142,11 @@ class _GHFlutterState extends State<GHFlutter> {
             // a spacer
             title: Text(
                 'Open the menu on the right, then select a module to get started'),
+          ),
+          ListTile(
+            // a spacer
+            title: Text(
+                'For Asset Criticality Generator, save the processed breakdown data into sharepoint'),
           )
         ]));
   }

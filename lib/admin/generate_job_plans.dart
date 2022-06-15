@@ -51,21 +51,21 @@ class JobTaskMaximo {
 }
 
 class JobPlanMaximo {
-  final String jpnum;
-  final String description;
-  final String persongroup;
-  final String ikoConditions;
-  final int priority;
-  final String ikoWorktype;
-  final String templatetype;
-  final int jpduration;
-  final String ikoPmpackage;
-  final List<JobTaskMaximo> jobtask;
-  final List<JobLaborMaximo> joblabor;
-  final List<JobMaterialMaximo> jobmaterial;
-  final List<JobServiceMaximo> jobservice;
+  String jpnum;
+  String description;
+  String persongroup;
+  String ikoConditions;
+  int priority;
+  String ikoWorktype;
+  String templatetype;
+  int jpduration;
+  String ikoPmpackage;
+  List<JobTaskMaximo> jobtask;
+  List<JobLaborMaximo> joblabor;
+  List<JobMaterialMaximo> jobmaterial;
+  List<JobServiceMaximo> jobservice;
 
-  const JobPlanMaximo({
+  JobPlanMaximo({
     required this.description,
     required this.ikoConditions,
     required this.ikoPmpackage,
@@ -76,12 +76,50 @@ class JobPlanMaximo {
     required this.priority,
     required this.templatetype,
     required this.joblabor,
-    required this.jobmaterial,
-    required this.jobservice,
+    List<JobMaterialMaximo>? jobmaterial,
+    List<JobServiceMaximo>? jobservice,
     required this.jobtask,
-  });
+  })  : jobmaterial = jobmaterial ?? [],
+        jobservice = jobservice ?? [];
 }
 
 Map<String, dynamic> generatePM(PreventiveMaintenanceTemplate pmDetails) {
-  // TODO
+  // var mainJobPlan = JobPlanMaximo(description: description, ikoConditions: ikoConditions, ikoPmpackage: ikoPmpackage, ikoWorktype: ikoWorktype, jpduration: jpduration, jpnum: jpnum, persongroup: persongroup, priority: priority, templatetype: templatetype, joblabor: joblabor, jobmaterial: jobmaterial, jobservice: jobservice, jobtask: jobtask)
+  List<JobTaskMaximo> mainJobTasks = [];
+  List<JobPlanMaximo> childJobPlans = [];
+  int routeTasks = 0;
+  for (final task in pmDetails.tasks) {
+    //count number of route task for calculating labor hours required
+    if (task.metername == null || task.metername == '') {
+      continue;
+    } else {
+      routeTasks++;
+    }
+  }
+  for (final task in pmDetails.tasks) {
+    if (task.metername == null || task.metername == '') {
+      mainJobTasks.add(JobTaskMaximo(
+        jptask: task.jptask,
+        description: task.description,
+        longdescription: task.longdescription,
+      ));
+    } else {
+      var childTask = JobTaskMaximo(
+        jptask: task.jptask,
+        description: task.description,
+        longdescription: task.longdescription,
+        metername: task.metername,
+      );
+      var childLabor = JobLaborMaximo(
+        laborType: pmDetails.crafts[0].laborType,
+        quantity: pmDetails.crafts[0].quantity,
+        hours: pmDetails.crafts[0].hours / routeTasks.toDouble(),
+      );
+      //TODO actually generate the numbers / descriptions
+      // populate child job plan
+      childJobPlans.add(JobPlanMaximo(description: description, ikoConditions: ikoConditions, ikoPmpackage: ikoPmpackage, ikoWorktype: ikoWorktype, jpduration: jpduration, jpnum: jpnum, persongroup: persongroup, priority: priority, templatetype: templatetype, joblabor: joblabor, jobtask: jobtask))
+    }
+  }
+
+  return {'thing': 'thing'};
 }
