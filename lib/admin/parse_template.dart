@@ -90,7 +90,7 @@ class ProcessedTemplate {
   });
 }
 
-class PreventiveMaintenanceTemplate {
+class ParsedTemplate {
   List<String> assets;
   String? siteId;
   String? frequencyUnit;
@@ -107,8 +107,9 @@ class PreventiveMaintenanceTemplate {
   String? pmPackageNumber;
   String? routeNumber;
   ProcessedTemplate? uploads;
+  String? pmAsset;
 
-  PreventiveMaintenanceTemplate({
+  ParsedTemplate({
     List<String>? assets,
     this.siteId,
     this.frequencyUnit,
@@ -123,6 +124,7 @@ class PreventiveMaintenanceTemplate {
     this.pmPackageNumber,
     this.routeNumber,
     this.uploads,
+    this.pmAsset,
     List<JobService>? services,
     List<JobTask>? tasks,
   })  : assets = assets ?? [],
@@ -160,7 +162,7 @@ class PreventiveMaintenanceTemplate {
           readRouteAsset = false;
           var nextRow = decoder.tables[sheet]!.rows[i + 1];
           pmNumber++;
-          pmTemplates[filename][pmNumber] = PreventiveMaintenanceTemplate(
+          pmTemplates[filename][pmNumber] = ParsedTemplate(
               nextDueDate: nextRow[2],
               siteId: nextRow[3],
               frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))
@@ -169,6 +171,7 @@ class PreventiveMaintenanceTemplate {
               frequency: nextRow[5],
               workOrderType: nextRow[6],
               processCondition: nextRow[7],
+              pmAsset: nextRow[0],
               pmName: nextRow[8] ?? 'Generating Name...',
               pmNumber: decoder.tables[sheet]!.rows[i + 2][8] ??
                   'Generating Number...');
@@ -180,6 +183,9 @@ class PreventiveMaintenanceTemplate {
               assetNumber: row[4],
               metername: row[10],
               longdescription: row[8]));
+          if (row[4] != null) {
+            pmTemplates[filename][pmNumber].assets.add(row[4]);
+          }
         }
         if (row[3] != null && readRouteAsset) {
           pmTemplates[filename][pmNumber].assets.add(row[3]);

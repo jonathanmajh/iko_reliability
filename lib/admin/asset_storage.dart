@@ -82,7 +82,7 @@ Asset getParent(Asset asset) {
 }
 
 Asset getAsset(String siteid, String assetNum) {
-  // TODO get from Maximo after DB
+  // TODO get from Maximo after DB instead of default value
   final box = Hive.box('assets');
   final asset = box.get('$siteid|$assetNum',
       defaultValue: Asset(
@@ -95,4 +95,24 @@ Asset getAsset(String siteid, String assetNum) {
   }
   assetCache[siteid]![assetNum] = asset;
   return asset;
+}
+
+Asset getCommonParent(List<String> assets, String siteID) {
+  if (assets.length == 1) {
+    return getAsset(siteID, assets[0]);
+  }
+  String commonHierarchy = getAsset(siteID, assets[0]).hierarchy!;
+  for (String asset in assets) {
+    final hierarchy = getAsset(siteID, asset).hierarchy!;
+    int iterations = ','.allMatches(hierarchy).length;
+    for (iterations; iterations >= 0; iterations--) {
+      if (commonHierarchy
+          .contains(hierarchy.substring(0, iterations * 6 + 5))) {
+        commonHierarchy = hierarchy;
+        break;
+      }
+    }
+  }
+  return getAsset(
+      siteID, commonHierarchy.substring(commonHierarchy.length - 5));
 }

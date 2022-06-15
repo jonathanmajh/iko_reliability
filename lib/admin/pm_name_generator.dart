@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/admin/maximo_jp_pm.dart';
 import 'package:flutter_application_1/admin/pm_jp_storage.dart';
 
+import 'asset_storage.dart';
 import 'parse_template.dart';
 
 const frequencyUnits = {'D': "Day", 'W': "Week", 'M': "Month", 'Y': "Year"};
@@ -32,18 +33,23 @@ class PMName {
 
   PMName({this.pmNumber, this.pmName, this.jpNumber, this.replaceable});
 
-  Future<PMName> generateName(PreventiveMaintenanceTemplate pmdetails,
-      String maximoServerSelected) async {
-    bool availablePM = false;
-    bool availableJP = false;
+  Future<PMName> generateName(
+      ParsedTemplate pmdetails, String maximoServerSelected) async {
     String number = '';
     String name = '';
+    Asset asset;
     if (pmdetails.routeNumber != null) {
       number = pmdetails.routeNumber!;
       name = '[RouteName]';
+      // TODO proper handling of route naming
     } else {
-      number = getParent();
-      name = "Site Operations"; // TODO look up asset description
+      if (pmdetails.assets.isEmpty) {
+        asset = getAsset(pmdetails.siteId!, pmdetails.pmAsset!);
+      } else {
+        asset = getCommonParent(pmdetails.assets, pmdetails.siteId!);
+      }
+      number = asset.assetNumber;
+      name = asset.name;
     }
     var replaceable = ['XXXXX', 'XXXXX'];
     // number, name | XXXXX asset number, !!! duplicate counter
@@ -82,40 +88,60 @@ class PMName {
       name = '$name - ${crafts[craft]}';
       replaceable[1] = '${replaceable[1]} - ${crafts[craft]}';
     }
-    availablePM =
-        await checkPMNumber(number, pmdetails.siteId!, maximoServerSelected);
-    availableJP = await checkJPNumber(
-        '${pmdetails.siteId!}$number', maximoServerSelected);
-    int counter = 0;
-    String tempNumber = number;
-    while (!availablePM && !availableJP) {
-      counter++;
-      if (wotype != 'LC1') {
-        tempNumber = '$number$counter';
-      } else {
-        tempNumber =
-            '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
-      }
-      availablePM = await checkPMNumber(
-          tempNumber, pmdetails.siteId!, maximoServerSelected);
-      availableJP = await checkJPNumber(
-          '${pmdetails.siteId!}$tempNumber', maximoServerSelected);
-    }
+    final counter = await findAvailablePMNumber(
+        number, pmdetails.siteId!, maximoServerSelected, wotype, 2);
     if (counter > 0) {
       if (wotype != 'LC1') {
-        tempNumber = '$number$counter';
+        number = '$number$counter';
       } else {
-        tempNumber =
+        number =
             '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
         name = '$name${numberToLetter(counter)}';
       }
     }
     return PMName(
-        pmNumber: tempNumber,
+        pmNumber: number,
         pmName: name,
-        jpNumber: '${pmdetails.siteId!}$tempNumber',
+        jpNumber: '${pmdetails.siteId!}$number',
         replaceable: replaceable);
   }
+}
+
+Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,
+    String woType, int checkType) async {
+  // checkType 1 = PM + JP
+  // checkType 2 = JP
+  // checkType 3 = PM + JP + Route
+  // assume type 2 by default
+  bool availablePM = true;
+  bool availableJP = false;
+  bool availableRoute = true;
+  availableJP = await checkJPNumber('$siteID$pmNumber', server);
+  if (checkType == 1) {
+    availablePM = await checkPMNumber(pmNumber, siteID, server);
+  }
+  if (checkType == 3) {
+    availableRoute = await checkRouteNumber(pmNumber, siteID, server);
+  }
+  int counter = 0;
+  String tempNumber = pmNumber;
+  while (!availablePM && !availableJP && !availableRoute) {
+    counter++;
+    if (woType != 'LC1') {
+      tempNumber = '$pmNumber$counter';
+    } else {
+      tempNumber =
+          '${pmNumber.substring(0, pmNumber.length - 2)}${counter + 1}${pmNumber.substring(pmNumber.length - 1)}';
+    }
+    availablePM = await checkPMNumber(tempNumber, siteID, server);
+    if (checkType == 1) {
+      availablePM = await checkPMNumber(pmNumber, siteID, server);
+    }
+    if (checkType == 3) {
+      availableRoute = await checkRouteNumber(pmNumber, siteID, server);
+    }
+  }
+  return counter;
 }
 
 String getParent() {
@@ -130,7 +156,19 @@ Future<bool> checkPMNumber(String number, String siteid, String env) async {
   }
   result = await existPmNumberMaximo(number, siteid, env);
   // check maximo async
-  await Future.delayed(const Duration(seconds: 5));
+  await Future.delayed(const Duration(seconds: 1));
+  return true;
+}
+
+Future<bool> checkRouteNumber(String number, String siteid, String env) async {
+  // check to see if PM number is available, true if available
+  var result = existRouteNumberCache(number, siteid);
+  if (result) {
+    return false;
+  }
+  result = await existPmNumberMaximo(number, siteid, env);
+  // check maximo async
+  await Future.delayed(const Duration(seconds: 1));
   return true;
 }
 
@@ -142,7 +180,7 @@ Future<bool> checkJPNumber(String number, String env) async {
   }
   result = await existJpNumberMaximo(number, env);
   // check maximo async
-  await Future.delayed(const Duration(seconds: 5));
+  await Future.delayed(const Duration(seconds: 1));
   return true;
 }
 

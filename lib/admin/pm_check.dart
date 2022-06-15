@@ -74,8 +74,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
   Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
     List<Future> futures = [];
     for (var file in files) {
-      futures.add(compute(
-          PreventiveMaintenanceTemplate().fromExcel, [file.bytes!, file.name]));
+      futures
+          .add(compute(ParsedTemplate().fromExcel, [file.bytes!, file.name]));
     }
     return await Future.wait(futures);
   }
@@ -92,7 +92,6 @@ class _PmCheckPageState extends State<PmCheckPage> {
   void parseTemplate(List<dynamic> parameters) async {
     String ws = parameters[0];
     int templateNumber = parameters[1];
-    generatePM(parsedTemplates[ws][templateNumber]);
     var result = await PMName().generateName(
         parsedTemplates[ws][templateNumber], maximoServerSelected);
     setState(() {
@@ -104,7 +103,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
       );
       parsedTemplates[ws][templateNumber].uploads = processed;
     });
-    generatePM(parsedTemplates[ws][templateNumber]);
+    generatePM(parsedTemplates[ws][templateNumber], maximoServerSelected);
   }
 
   @override

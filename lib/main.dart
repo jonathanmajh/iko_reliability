@@ -11,6 +11,10 @@ void main() async {
   await Hive.openBox('assets');
   await Hive.openBox('pmNumber');
   await Hive.openBox('jpNumber');
+  var box = Hive.box('jpNumber');
+  box.clear();
+  box = Hive.box('pmNumber');
+  box.clear();
   runApp(MyApp());
 }
 

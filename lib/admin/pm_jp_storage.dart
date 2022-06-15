@@ -8,8 +8,6 @@ bool existPmNumberCache(String pmNumber, String siteid) {
     return false;
   }
   return true;
-  // TODO need to clear XXnumber box everytime we load files / program start?
-  // not sure which frequency is better
 }
 
 bool existJpNumberCache(String jpNumber) {
@@ -20,6 +18,14 @@ bool existJpNumberCache(String jpNumber) {
     return false;
   }
   return true;
-  // TODO need to clear XXnumber box everytime we load files / program start?
-  // not sure which frequency is better
+}
+
+bool existRouteNumberCache(String routeNumber, String siteid) {
+  final box = Hive.box('routeNumber');
+  var result = box.get('$siteid|$routeNumber');
+  if (result == null) {
+    box.put('$siteid|$routeNumber', '$siteid|$routeNumber');
+    return false;
+  }
+  return true;
 }

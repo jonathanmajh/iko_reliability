@@ -44,3 +44,21 @@ Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
   }
   return false;
 }
+
+Future<bool> existRouteNumberMaximo(
+    String routeNumber, String siteid, String env) async {
+  final url =
+      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/mxl_routes?oslc.select=route,siteid&oslc.pageSize=10&oslc.where=route="$routeNumber"%20and%20siteid="$siteid"&_lid=corcoop3&_lpwd=maximo';
+  // TODO login management
+  // save login in settings box
+  var response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    var parsed = jsonDecode(response.body);
+    if (parsed['rdf:member'] == null) {
+      return true;
+    }
+  } else {
+    print('Failed to check Maximo');
+  }
+  return false;
+}
