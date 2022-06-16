@@ -162,8 +162,28 @@ Future<Map<String, dynamic>> generatePM(
     }
   }
   double jobhrs = 0.0;
+  List<JobLaborMaximo> joblabs = [];
   for (final joblabor in pmDetails.crafts) {
     jobhrs = jobhrs + joblabor.hours;
+    joblabs.add(JobLaborMaximo(
+      laborType: joblabor.laborType,
+      quantity: joblabor.quantity,
+      hours: joblabor.hours,
+    ));
+  }
+  List<JobMaterialMaximo> jobmats = [];
+  for (final jobmaterial in pmDetails.materials) {
+    jobmats.add(JobMaterialMaximo(
+      itemNumber: jobmaterial.itemNumber,
+      quantity: jobmaterial.quantity,
+    ));
+  }
+  List<JobServiceMaximo> jobservs = [];
+  for (final jobservice in pmDetails.services) {
+    jobservs.add(JobServiceMaximo(
+      itemNumber: jobservice.itemNumber,
+      vendorId: jobservice.vendorId,
+    ));
   }
   var mainJobPlan = JobPlanMaximo(
     description: pmDetails.uploads!.pmName!,
@@ -176,10 +196,9 @@ Future<Map<String, dynamic>> generatePM(
         .substring(pmDetails.crafts[0].laborType.length - 1)]!,
     priority: 2,
     templatetype: 'PM',
-    // TODO need to create below 3 objects
-    joblabor: joblabor,
-    jobmaterial: jobmaterial,
-    jobservice: jobservice,
+    joblabor: joblabs,
+    jobmaterial: jobmats,
+    jobservice: jobservs,
     jobtask: mainJobTasks,
   );
   print('complete job plan generation');
