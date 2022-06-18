@@ -12,6 +12,13 @@ final personGroups = {
   'E': 'ELECTSUP',
 };
 
+final freqUnitToDays = {
+  'D': 1,
+  'W': 7,
+  'M': 30,
+  'Y': 365,
+};
+
 class JobAssetMaximo {
   final String assetNumber;
 
@@ -142,7 +149,7 @@ class PMMaximo {
   final woStatus = 'WSCH';
   int frequency;
   String personGroup;
-  Char freqUnit;
+  String freqUnit;
   bool pmAssetWOGen;
   String assetNumber;
   int leadTime;
@@ -150,7 +157,7 @@ class PMMaximo {
   String? nextDate;
   String orgID;
   String targetStartTime;
-  String ikoPMHistoryNotes;
+  String? ikoPMHistoryNotes;
   bool fmecaPM;
 
   PMMaximo({
@@ -162,18 +169,18 @@ class PMMaximo {
     required this.frequency,
     required this.personGroup,
     required this.freqUnit,
-    required this.pmAssetWOGen,
+    this.pmAssetWOGen = false,
     required this.assetNumber,
     required this.leadTime,
     this.nextDate,
     required this.orgID,
     required this.targetStartTime,
-    required this.ikoPMHistoryNotes,
-    required this.fmecaPM,
+    this.ikoPMHistoryNotes,
+    this.fmecaPM = false,
   });
 }
 
-Future<Map<String, dynamic>> generatePM(
+Future<PMMaximo> generatePM(
     ParsedTemplate pmDetails, String maximoServerSelected) async {
   List<JobTaskMaximo> mainJobTasks = [];
   List<JobPlanMaximo> childJobPlans = [];
@@ -256,6 +263,7 @@ Future<Map<String, dynamic>> generatePM(
         jpnum: jpnumber,
         persongroup: personGroups[pmDetails.crafts[0].laborType
             .substring(pmDetails.crafts[0].laborType.length - 1)]!,
+        // TODO replace with validate character
         priority: 2,
         templatetype: 'PM',
         joblabor: [childLabor],
@@ -311,5 +319,30 @@ Future<Map<String, dynamic>> generatePM(
     routeStops: routeStops,
   );
   print('complete job plan generation');
-  return {'thing': 'thing'};
+  return PMMaximo(
+      siteID: pmDetails.siteId!,
+      pmNumber: pmDetails.uploads!.pmNumber,
+      description: pmDetails.uploads!.pmName,
+      jobplan: mainJobPlan,
+      frequency: pmDetails.frequency!,
+      personGroup: personGroups[pmDetails.crafts[0].laborType
+          .substring(pmDetails.crafts[0].laborType.length - 1)]!,
+      freqUnit: pmDetails.frequencyUnit!,
+      assetNumber: pmDetails.uploads!.commonParent,
+      leadTime: calcLeadTime(pmDetails.frequency!, pmDetails.frequencyUnit!),
+      orgID: 'IKO-CAD', // TODO
+      targetStartTime: '08:00:00',
+      // TODO ikoPMHistoryNotes: ikoPMHistoryNotes,
+      fmecaPM: null != pmDetails.pmPackageNumber);
+}
+
+int calcLeadTime(int frequency, String freqUnit) {
+  final days = frequency * freqUnitToDays[freqUnit]!;
+  if (days <= 14) {
+    return 7;
+  }
+  if (days <= 42) {
+    return 14;
+  }
+  return 30;
 }
