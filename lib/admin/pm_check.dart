@@ -1,8 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 import 'package:iko_reliability/admin/pm_name_generator.dart';
@@ -27,7 +24,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   List<PlatformFile> templates = [];
   bool optionOne = false;
   String maximoServerSelected = 'TEST';
-  List<String> _selected = [];
+  List<dynamic> _selected = [];
   Map<String, dynamic> parsedTemplates = {};
 
   void _show(toastMsg) {
@@ -37,37 +34,53 @@ class _PmCheckPageState extends State<PmCheckPage> {
     ));
   }
 
-  void updateState() {
-    setState(() {
-      if (_selected.isEmpty) {
-        _selected = ['123'];
-      } else {
-        _selected = [];
-      }
-
-      print('set the state');
-    });
-  }
-
-  Widget detailedView(List<String> state) {
+  List<Widget> detailedView(List<dynamic> state) {
     if (state.isNotEmpty) {
-      return Expanded(
-          child: ListView(
-        children: [
-          ListTile(title: const Text('data')),
-          ListTile(title: const Text('data')),
-          ListTile(title: const Text('data')),
-          ListTile(title: const Text('data')),
-        ],
-      ));
+      return [
+        GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              setState(() {
+                _selected = [];
+              });
+            },
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Icon(Icons.keyboard_double_arrow_right),
+                  Icon(Icons.keyboard_double_arrow_right),
+                  Icon(Icons.keyboard_double_arrow_right),
+                ])),
+        Expanded(
+            child: ListView(
+          children: [
+            ListTile(
+                title:
+                    Text(parsedTemplates[state[0]][state[1]].maximo.pmNumber)),
+            ListTile(
+                title: Text(
+                    parsedTemplates[state[0]][state[1]].maximo.description)),
+            ListTile(
+                title: Text(
+                    parsedTemplates[state[0]][state[1]].maximo.assetNumber)),
+            ListTile(
+                title: Text(parsedTemplates[state[0]][state[1]]
+                    .maximo
+                    .leadTime
+                    .toString())),
+          ],
+        ))
+      ];
     } else {
-      return VerticalDivider(
-        width: 20,
-        thickness: 1,
-        indent: 20,
-        endIndent: 0,
-        color: Colors.grey,
-      );
+      return const [
+        VerticalDivider(
+          width: 20,
+          thickness: 1,
+          indent: 20,
+          endIndent: 0,
+          color: Colors.grey,
+        )
+      ];
     }
   }
 
@@ -132,7 +145,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
     setState(() {
       parsedTemplates[ws][templateNumber].uploads = result;
     });
-    generatePM(parsedTemplates[ws][templateNumber], maximoServerSelected);
+    generatePM(parsedTemplates[ws][templateNumber], maximoServerSelected)
+        .then((value) {
+      setState(() {
+        parsedTemplates[ws][templateNumber].maximo = value;
+      });
+    });
   }
 
   @override
@@ -182,7 +200,10 @@ class _PmCheckPageState extends State<PmCheckPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               const Text(
-                  'Click "Pick Files" and select PM templates to get started.\nClick "Restart" to remove all PMs\nDetected PMs will appear in below list'),
+                  'Click "Pick Files" and select PM templates to get started.'
+                  '\nClick "Restart" to remove all PMs'
+                  '\nDetected PMs will appear in below list'
+                  '\nClick on detected PMs to view details'),
               ElevatedButton(
                 onPressed: () {
                   pickTemplates();
@@ -205,24 +226,13 @@ class _PmCheckPageState extends State<PmCheckPage> {
               child: parsedTemplates.isNotEmpty
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                            child: ListView(
-                          children: buildPMList(parsedTemplates),
-                        )),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: (_selected.isNotEmpty
-                                  ? 'Select a PM to view details'
-                                  : 'Click to close detailed view')
-                              .split('')
-                              .map((c) => Text(c))
-                              .toList(),
-                        ),
-                        detailedView(_selected)
-                      ],
-                    )
+                      children: <Widget>[
+                            Expanded(
+                                child: ListView(
+                              children: buildPMList(parsedTemplates),
+                            ))
+                          ] +
+                          detailedView(_selected))
                   : const Text("Waiting for Data"))
         ],
       ),
@@ -311,8 +321,13 @@ class _PmCheckPageState extends State<PmCheckPage> {
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
-            print('tapped');
-            updateState();
+            if (parsedTemplates[filename][templateNumber].maximo != null) {
+              setState(() {
+                _selected = [filename, templateNumber];
+              });
+            } else {
+              _show('Template is still being parsed...');
+            }
           },
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

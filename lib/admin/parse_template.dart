@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:iko_reliability/admin/generate_job_plans.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 import 'pm_name_generator.dart';
@@ -110,6 +111,7 @@ class ParsedTemplate {
   String? routeNumber;
   PMName? uploads;
   String? pmAsset;
+  PMMaximo? maximo;
 
   ParsedTemplate({
     List<String>? assets,
@@ -127,6 +129,7 @@ class ParsedTemplate {
     this.routeNumber,
     this.uploads,
     this.pmAsset,
+    this.maximo,
     List<JobService>? services,
     List<JobTask>? tasks,
   })  : assets = assets ?? [],

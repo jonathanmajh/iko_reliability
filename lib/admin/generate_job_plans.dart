@@ -1,6 +1,3 @@
-import 'dart:ffi';
-
-import 'package:flutter/cupertino.dart';
 import 'package:iko_reliability/admin/asset_storage.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 
@@ -159,6 +156,7 @@ class PMMaximo {
   String targetStartTime;
   String? ikoPMHistoryNotes;
   bool fmecaPM;
+  List<String>? logs;
 
   PMMaximo({
     required this.siteID,
@@ -177,6 +175,7 @@ class PMMaximo {
     required this.targetStartTime,
     this.ikoPMHistoryNotes,
     this.fmecaPM = false,
+    this.logs,
   });
 }
 
@@ -331,6 +330,7 @@ Future<PMMaximo> generatePM(
       assetNumber: pmDetails.uploads!.commonParent,
       leadTime: calcLeadTime(pmDetails.frequency!, pmDetails.frequencyUnit!),
       orgID: 'IKO-CAD', // TODO
+      route: routeType != 'NONE' ? route : null,
       targetStartTime: '08:00:00',
       // TODO ikoPMHistoryNotes: ikoPMHistoryNotes,
       fmecaPM: null != pmDetails.pmPackageNumber);

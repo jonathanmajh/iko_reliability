@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:iko_reliability/admin/maximo_jp_pm.dart';
 import 'package:iko_reliability/admin/pm_jp_storage.dart';
 
@@ -43,6 +45,7 @@ class PMName {
 
 Future<PMName> generateName(
     ParsedTemplate pmdetails, String maximoServerSelected) async {
+  await Future.delayed(const Duration(seconds: 5));
   String number = '';
   String name = '';
   Asset asset;
