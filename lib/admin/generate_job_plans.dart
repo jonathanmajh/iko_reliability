@@ -1,3 +1,6 @@
+import 'dart:ffi';
+
+import 'package:flutter/cupertino.dart';
 import 'package:iko_reliability/admin/asset_storage.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 
@@ -8,6 +11,14 @@ final personGroups = {
   'M': 'MECHSUP',
   'E': 'ELECTSUP',
 };
+
+class JobAssetMaximo {
+  final String assetNumber;
+
+  const JobAssetMaximo({
+    required this.assetNumber,
+  });
+}
 
 class JobLaborMaximo {
   final String laborType;
@@ -73,6 +84,7 @@ class JobPlanMaximo {
   List<JobLaborMaximo> joblabor;
   List<JobMaterialMaximo> jobmaterial;
   List<JobServiceMaximo> jobservice;
+  List<JobAssetMaximo> jobasset;
 
   JobPlanMaximo({
     required this.description,
@@ -88,21 +100,106 @@ class JobPlanMaximo {
     List<JobMaterialMaximo>? jobmaterial,
     List<JobServiceMaximo>? jobservice,
     required this.jobtask,
+    required this.jobasset,
   })  : jobmaterial = jobmaterial ?? [],
         jobservice = jobservice ?? [];
+}
+
+class RouteStopMaximo {
+  int routeStopID;
+  String? jpnum;
+  int stopSequence;
+  String assetNumber;
+
+  RouteStopMaximo({
+    required this.routeStopID,
+    required this.assetNumber,
+    required this.stopSequence,
+    this.jpnum,
+  });
+}
+
+class RouteMaximo {
+  String routeNumber;
+  String routeStopsBecome;
+  String description;
+  List<RouteStopMaximo> routeStops;
+
+  RouteMaximo({
+    required this.routeNumber,
+    required this.description,
+    required this.routeStopsBecome,
+    List<RouteStopMaximo>? routeStops,
+  }) : routeStops = routeStops ?? [];
+}
+
+class PMMaximo {
+  String siteID;
+  String pmNumber;
+  String description;
+  JobPlanMaximo jobplan;
+  RouteMaximo? route;
+  final woStatus = 'WSCH';
+  int frequency;
+  String personGroup;
+  Char freqUnit;
+  bool pmAssetWOGen;
+  String assetNumber;
+  int leadTime;
+  final priority = 2;
+  String? nextDate;
+  String orgID;
+  String targetStartTime;
+  String ikoPMHistoryNotes;
+  bool fmecaPM;
+
+  PMMaximo({
+    required this.siteID,
+    required this.pmNumber,
+    required this.description,
+    required this.jobplan,
+    this.route,
+    required this.frequency,
+    required this.personGroup,
+    required this.freqUnit,
+    required this.pmAssetWOGen,
+    required this.assetNumber,
+    required this.leadTime,
+    this.nextDate,
+    required this.orgID,
+    required this.targetStartTime,
+    required this.ikoPMHistoryNotes,
+    required this.fmecaPM,
+  });
 }
 
 Future<Map<String, dynamic>> generatePM(
     ParsedTemplate pmDetails, String maximoServerSelected) async {
   List<JobTaskMaximo> mainJobTasks = [];
   List<JobPlanMaximo> childJobPlans = [];
+  List<RouteStopMaximo> routeStops = [];
+  var sequence = 1;
   int routeTasks = 0;
+  String routeType = 'NONE';
   for (final task in pmDetails.tasks) {
     //count number of route task for calculating labor hours required
+    //check if PM is child route, will set as TASK if there are child job tasks
     if (task.metername == null || task.metername == '') {
       continue;
     } else {
       routeTasks++;
+      routeType = 'CHILD';
+    }
+  }
+  if (pmDetails.assets.length > 1 && routeType != 'CHILD') {
+    routeType = 'TASK';
+    for (final asset in pmDetails.assets) {
+      routeStops.add(RouteStopMaximo(
+        routeStopID: sequence,
+        assetNumber: asset,
+        stopSequence: sequence,
+      ));
+      sequence++;
     }
   }
   for (final task in pmDetails.tasks) {
@@ -144,7 +241,12 @@ Future<Map<String, dynamic>> generatePM(
               jpdescription.replaceFirst('!!!', numberToLetter(counter));
         }
       }
-
+      routeStops.add(RouteStopMaximo(
+        routeStopID: sequence,
+        assetNumber: asset.assetNumber,
+        stopSequence: sequence,
+      ));
+      sequence++;
       childJobPlans.add(JobPlanMaximo(
         description: jpdescription,
         ikoConditions: pmDetails.processCondition!,
@@ -158,6 +260,7 @@ Future<Map<String, dynamic>> generatePM(
         templatetype: 'PM',
         joblabor: [childLabor],
         jobtask: [childTask],
+        jobasset: [JobAssetMaximo(assetNumber: asset.assetNumber)],
       ));
     }
   }
@@ -186,20 +289,26 @@ Future<Map<String, dynamic>> generatePM(
     ));
   }
   var mainJobPlan = JobPlanMaximo(
-    description: pmDetails.uploads!.pmName!,
-    ikoConditions: pmDetails.processCondition!,
-    ikoPmpackage: pmDetails.pmPackageNumber,
-    ikoWorktype: pmDetails.workOrderType!,
-    jpduration: jobhrs,
-    jpnum: pmDetails.uploads!.jpNumber!,
-    persongroup: personGroups[pmDetails.crafts[0].laborType
-        .substring(pmDetails.crafts[0].laborType.length - 1)]!,
-    priority: 2,
-    templatetype: 'PM',
-    joblabor: joblabs,
-    jobmaterial: jobmats,
-    jobservice: jobservs,
-    jobtask: mainJobTasks,
+      description: pmDetails.uploads!.pmName,
+      ikoConditions: pmDetails.processCondition!,
+      ikoPmpackage: pmDetails.pmPackageNumber,
+      ikoWorktype: pmDetails.workOrderType!,
+      jpduration: jobhrs,
+      jpnum: pmDetails.uploads!.jpNumber,
+      persongroup: personGroups[pmDetails.crafts[0].laborType
+          .substring(pmDetails.crafts[0].laborType.length - 1)]!,
+      priority: 2,
+      templatetype: 'PM',
+      joblabor: joblabs,
+      jobmaterial: jobmats,
+      jobservice: jobservs,
+      jobtask: mainJobTasks,
+      jobasset: [JobAssetMaximo(assetNumber: pmDetails.uploads!.commonParent)]);
+  var route = RouteMaximo(
+    routeNumber: pmDetails.uploads!.pmNumber,
+    description: pmDetails.uploads!.pmName,
+    routeStopsBecome: routeType,
+    routeStops: routeStops,
   );
   print('complete job plan generation');
   return {'thing': 'thing'};

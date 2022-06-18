@@ -26,85 +26,96 @@ const crafts = {
 };
 
 class PMName {
-  String? pmNumber;
-  String? pmName;
-  String? jpNumber;
+  String pmNumber;
+  String pmName;
+  String jpNumber;
+  String commonParent;
   List<String>? replaceable;
 
-  PMName({this.pmNumber, this.pmName, this.jpNumber, this.replaceable});
+  PMName({
+    required this.pmNumber,
+    required this.pmName,
+    required this.jpNumber,
+    required this.commonParent,
+    this.replaceable,
+  });
+}
 
-  Future<PMName> generateName(
-      ParsedTemplate pmdetails, String maximoServerSelected) async {
-    String number = '';
-    String name = '';
-    Asset asset;
-    if (pmdetails.routeNumber != null) {
-      number = pmdetails.routeNumber!;
-      name = '[RouteName]';
-      // TODO proper handling of route naming
-    } else {
-      if (pmdetails.assets.isEmpty) {
-        asset = getAsset(pmdetails.siteId!, pmdetails.pmAsset!);
-      } else {
-        asset = getCommonParent(pmdetails.assets, pmdetails.siteId!);
-      }
-      number = asset.assetNumber;
-      name = asset.name;
-    }
-    var replaceable = ['XXXXX', 'XXXXX'];
-    // number, name | XXXXX asset number, !!! duplicate counter
-    String wotype = pmdetails.workOrderType!.substring(0, 3);
+Future<PMName> generateName(
+    ParsedTemplate pmdetails, String maximoServerSelected) async {
+  String number = '';
+  String name = '';
+  Asset asset;
+  String commonParent;
+  if (pmdetails.assets.isEmpty) {
+    asset = getAsset(pmdetails.siteId!, pmdetails.pmAsset!);
+  } else {
+    asset = getCommonParent(pmdetails.assets, pmdetails.siteId!);
+  }
+  commonParent = asset.assetNumber;
+  if (pmdetails.routeNumber != null) {
+    number = pmdetails.routeNumber!;
+    name = '[RouteName]';
+    // TODO proper handling of route naming
+  } else {
+    number = asset.assetNumber;
+    name = asset.name;
+  }
+  var replaceable = ['XXXXX', 'XXXXX'];
+  // number, name | XXXXX asset number, !!! duplicate counter
+  String wotype = pmdetails.workOrderType!.substring(0, 3);
 
 // add frequency details if pm
-    if (pmdetails.frequency != null) {
-      number = '$number${pmdetails.frequencyUnit}${pmdetails.frequency}';
-      replaceable[0] =
-          '${replaceable[0]}${pmdetails.frequencyUnit}${pmdetails.frequency}';
-      if (wotype != 'LC1') {
-        replaceable[1] =
-            '${replaceable[1]} - ${pmdetails.frequency} ${frequencyUnits[pmdetails.frequencyUnit]}';
-        name =
-            '$name - ${pmdetails.frequency} ${frequencyUnits[pmdetails.frequencyUnit]}';
-      }
-    }
-// add work order type
-    number = '$number$wotype';
+  if (pmdetails.frequency != null) {
+    number = '$number${pmdetails.frequencyUnit}${pmdetails.frequency}';
+    replaceable[0] =
+        '${replaceable[0]}${pmdetails.frequencyUnit}${pmdetails.frequency}';
     if (wotype != 'LC1') {
-      name = '$name ${workType[wotype]}';
-      replaceable[0] = '${replaceable[0]}$wotype';
-      replaceable[1] = '${replaceable[1]} ${workType[wotype]}';
-    } else {
-      name = '$name - LC-';
-      replaceable[0] = '${replaceable[0]}LC!!!';
-      replaceable[1] = '${replaceable[1]} - LC-!!!';
-      // properly assign letter after number has been determined
+      replaceable[1] =
+          '${replaceable[1]} - ${pmdetails.frequency} ${frequencyUnits[pmdetails.frequencyUnit]}';
+      name =
+          '$name - ${pmdetails.frequency} ${frequencyUnits[pmdetails.frequencyUnit]}';
     }
-    // add craft
-    var craft = pmdetails.crafts[0].laborType;
-    craft = craft.substring(craft.length - 1);
-    number = '$number$craft';
-    replaceable[0] = '${replaceable[0]}$craft';
-    if (wotype != 'LC1') {
-      name = '$name - ${crafts[craft]}';
-      replaceable[1] = '${replaceable[1]} - ${crafts[craft]}';
-    }
-    final counter = await findAvailablePMNumber(
-        number, pmdetails.siteId!, maximoServerSelected, wotype, 2);
-    if (counter > 0) {
-      if (wotype != 'LC1') {
-        number = '$number$counter';
-      } else {
-        number =
-            '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
-        name = '$name${numberToLetter(counter)}';
-      }
-    }
-    return PMName(
-        pmNumber: number,
-        pmName: name,
-        jpNumber: '${pmdetails.siteId!}$number',
-        replaceable: replaceable);
   }
+// add work order type
+  number = '$number$wotype';
+  if (wotype != 'LC1') {
+    name = '$name ${workType[wotype]}';
+    replaceable[0] = '${replaceable[0]}$wotype';
+    replaceable[1] = '${replaceable[1]} ${workType[wotype]}';
+  } else {
+    name = '$name - LC-';
+    replaceable[0] = '${replaceable[0]}LC!!!';
+    replaceable[1] = '${replaceable[1]} - LC-!!!';
+    // properly assign letter after number has been determined
+  }
+  // add craft
+  var craft = pmdetails.crafts[0].laborType;
+  craft = craft.substring(craft.length - 1);
+  number = '$number$craft';
+  replaceable[0] = '${replaceable[0]}$craft';
+  if (wotype != 'LC1') {
+    name = '$name - ${crafts[craft]}';
+    replaceable[1] = '${replaceable[1]} - ${crafts[craft]}';
+  }
+  final counter = await findAvailablePMNumber(
+      number, pmdetails.siteId!, maximoServerSelected, wotype, 2);
+  if (counter > 0) {
+    if (wotype != 'LC1') {
+      number = '$number$counter';
+    } else {
+      number =
+          '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
+      name = '$name${numberToLetter(counter)}';
+    }
+  }
+  return PMName(
+    pmNumber: number,
+    pmName: name,
+    jpNumber: '${pmdetails.siteId!}$number',
+    replaceable: replaceable,
+    commonParent: commonParent,
+  );
 }
 
 Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,

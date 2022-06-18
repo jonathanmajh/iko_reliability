@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
+import 'pm_name_generator.dart';
+
 const siteIds = [];
 
 const frequencyUnits = ['D', 'W', 'M', 'Y'];
@@ -106,7 +108,7 @@ class ParsedTemplate {
   String? pmName;
   String? pmPackageNumber;
   String? routeNumber;
-  ProcessedTemplate? uploads;
+  PMName? uploads;
   String? pmAsset;
 
   ParsedTemplate({

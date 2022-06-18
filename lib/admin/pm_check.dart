@@ -127,16 +127,10 @@ class _PmCheckPageState extends State<PmCheckPage> {
   void parseTemplate(List<dynamic> parameters) async {
     String ws = parameters[0];
     int templateNumber = parameters[1];
-    var result = await PMName().generateName(
+    var result = await generateName(
         parsedTemplates[ws][templateNumber], maximoServerSelected);
     setState(() {
-      var processed = ProcessedTemplate(
-        pmName: result.pmName,
-        pmNumber: result.pmNumber,
-        jpNumber: result.jpNumber,
-        replaceable: result.replaceable,
-      );
-      parsedTemplates[ws][templateNumber].uploads = processed;
+      parsedTemplates[ws][templateNumber].uploads = result;
     });
     generatePM(parsedTemplates[ws][templateNumber], maximoServerSelected);
   }
