@@ -7,6 +7,7 @@ import 'package:iko_reliability/admin/pm_name_generator.dart';
 import 'asset_storage.dart';
 import 'generate_job_plans.dart';
 import 'maximo_jp_pm.dart';
+import 'observation_list_storage.dart';
 
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
@@ -212,13 +213,15 @@ class _PmCheckPageState extends State<PmCheckPage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  print(findParent(Asset(
-                      assetNumber: 'C8192',
-                      name: 'name',
-                      parent: 'C8181',
-                      siteid: 'AA')));
+                  loadHierarchy();
                 },
-                child: const Text('Restart'),
+                child: const Text('LoadAssets'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  loadObservationList();
+                },
+                child: const Text('LoadObservation'),
               ),
             ],
           ),

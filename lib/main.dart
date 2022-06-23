@@ -4,14 +4,18 @@ import 'package:iko_reliability/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'admin/asset_storage.dart';
+import 'admin/observation_list_storage.dart';
 
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(AssetAdapter());
+  Hive.registerAdapter(ObservationsAdapter());
+  Hive.registerAdapter(ObservationListAdapter());
   await Hive.openBox('assets');
   await Hive.openBox('pmNumber');
   await Hive.openBox('jpNumber');
   await Hive.openBox('routeNumber');
+  await Hive.openBox('observationList');
   var box = Hive.box('jpNumber');
   box.clear();
   box = Hive.box('pmNumber');

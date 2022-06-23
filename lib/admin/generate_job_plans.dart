@@ -184,9 +184,12 @@ Future<PMMaximo> generatePM(
   List<JobTaskMaximo> mainJobTasks = [];
   List<JobPlanMaximo> childJobPlans = [];
   List<RouteStopMaximo> routeStops = [];
+  Map<String, List<String>> meters = {};
   var sequence = 1;
   int routeTasks = 0;
   String routeType = 'NONE';
+  String meter = '';
+  int meterCount = 1;
   for (final task in pmDetails.tasks) {
     //count number of route task for calculating labor hours required
     //check if PM is child route, will set as TASK if there are child job tasks
@@ -219,6 +222,18 @@ Future<PMMaximo> generatePM(
       if (task.assetNumber == null || task.assetNumber == '') {
         print('asset number is empty, failed to generate child route job plan');
       }
+      if (meters.keys.contains(task.assetNumber)) {
+        meter =
+            '${task.metername}${meterCount < 10 ? "0$meterCount" : meterCount}';
+        while (meters[task.assetNumber]!.contains(meter)) {
+          meterCount++;
+          meter =
+              '${task.metername}${meterCount < 10 ? "0$meterCount" : meterCount}';
+        }
+      } else {
+        meter = '${task.metername}01';
+      }
+      meters[task.assetNumber!] = [meter];
       var childTask = JobTaskMaximo(
         jptask: task.jptask,
         description: task.description,
