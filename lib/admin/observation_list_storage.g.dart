@@ -63,6 +63,7 @@ class ObservationListAdapter extends TypeAdapter<ObservationList> {
       frequency: fields[3] as int,
       inspect: fields[1] as String,
       meterGroup: fields[0] as String,
+      craft: fields[7] as String,
       observations: (fields[6] as List).cast<Observations>(),
     );
   }
@@ -70,7 +71,7 @@ class ObservationListAdapter extends TypeAdapter<ObservationList> {
   @override
   void write(BinaryWriter writer, ObservationList obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.meterGroup)
       ..writeByte(1)
@@ -84,7 +85,9 @@ class ObservationListAdapter extends TypeAdapter<ObservationList> {
       ..writeByte(5)
       ..write(obj.condition)
       ..writeByte(6)
-      ..write(obj.observations);
+      ..write(obj.observations)
+      ..writeByte(7)
+      ..write(obj.craft);
   }
 
   @override

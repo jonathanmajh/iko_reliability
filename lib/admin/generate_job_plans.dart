@@ -128,13 +128,15 @@ class RouteMaximo {
   String routeStopsBecome;
   String description;
   List<RouteStopMaximo> routeStops;
+  List<JobPlanMaximo> childJobPlans;
 
   RouteMaximo({
     required this.routeNumber,
     required this.description,
     required this.routeStopsBecome,
-    List<RouteStopMaximo>? routeStops,
-  }) : routeStops = routeStops ?? [];
+    required this.routeStops,
+    List<JobPlanMaximo>? childJobPlans,
+  }) : childJobPlans = childJobPlans ?? [];
 }
 
 class PMMaximo {
@@ -331,6 +333,7 @@ Future<PMMaximo> generatePM(
     description: pmDetails.uploads!.pmName,
     routeStopsBecome: routeType,
     routeStops: routeStops,
+    childJobPlans: childJobPlans,
   );
   print('complete job plan generation');
   return PMMaximo(

@@ -43,6 +43,9 @@ class ObservationList {
   @HiveField(6)
   List<Observations> observations;
 
+  @HiveField(7)
+  String craft;
+
   ObservationList(
       {required this.condition,
       required this.extendedDescription,
@@ -50,6 +53,7 @@ class ObservationList {
       required this.frequency,
       required this.inspect,
       required this.meterGroup,
+      required this.craft,
       required this.observations});
 }
 
@@ -65,9 +69,9 @@ void loadObservationList() async {
     final box = Hive.box('observationList');
     await box.clear();
     var observation;
+    List<Observations> observations = [];
     for (var i = 1; i < sheet.maxRows; i++) {
       var row = sheet.rows[i];
-      List<Observations> observations = [];
       try {
         if (row[0] != null) {
           observation = ObservationList(
@@ -77,16 +81,18 @@ void loadObservationList() async {
             frequency: int.parse(row[10].substring(0, row[10].length - 1)),
             inspect: row[2],
             meterGroup: row[0],
+            craft: row[11].substring(0, 1),
             observations: [],
           );
         }
-        if (row[6] != null) {
+        if (row[5] != null) {
           observations.add(
-              Observations(code: row[5], description: row[6], action: row[9]));
+              Observations(code: row[5], description: row[6], action: row[7]));
         }
-        if (row[6] == null) {
+        if (row[5] == null) {
           observation.observations = observations;
           box.put(observation.meterGroup, observation);
+          observations = [];
         }
       } catch (err) {
         print('Row ${i + 1} is problematic\n$err');
@@ -94,4 +100,9 @@ void loadObservationList() async {
     }
   }
   print('Finished Loading');
+}
+
+ObservationList getObservation(String meterCode) {
+  final box = Hive.box('observationList');
+  return box.get(meterCode);
 }

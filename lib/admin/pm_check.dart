@@ -6,6 +6,7 @@ import 'package:iko_reliability/admin/pm_name_generator.dart';
 
 import 'asset_storage.dart';
 import 'generate_job_plans.dart';
+import 'generate_uploads.dart';
 import 'maximo_jp_pm.dart';
 import 'observation_list_storage.dart';
 
@@ -69,6 +70,14 @@ class _PmCheckPageState extends State<PmCheckPage> {
                     .maximo
                     .leadTime
                     .toString())),
+            ElevatedButton(
+              onPressed: () {
+                final thing =
+                    generateUploads(parsedTemplates[state[0]][state[1]].maximo);
+                print(thing);
+              },
+              child: const Text('LoadAssets'),
+            ),
           ],
         ))
       ];
@@ -223,6 +232,14 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 },
                 child: const Text('LoadObservation'),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  final thing = getObservation('AACT');
+                  print(thing);
+                  print(thing.observations[0]);
+                },
+                child: const Text('GetObservation'),
+              ),
             ],
           ),
           Expanded(
@@ -361,7 +378,7 @@ Widget templateDescription(
   String status,
 ) {
   return Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: <Widget>[
       Expanded(
         child: Column(
