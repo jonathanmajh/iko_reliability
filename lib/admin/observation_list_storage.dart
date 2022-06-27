@@ -104,5 +104,5 @@ void loadObservationList() async {
 
 ObservationList getObservation(String meterCode) {
   final box = Hive.box('observationList');
-  return box.get(meterCode);
+  return box.get(meterCode.substring(0, meterCode.length - 2));
 }

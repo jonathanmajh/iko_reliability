@@ -28,6 +28,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   String maximoServerSelected = 'TEST';
   List<dynamic> _selected = [];
   Map<String, dynamic> parsedTemplates = {};
+  String temp = '';
 
   void _show(toastMsg) {
     final msg = toastMsg;
@@ -55,6 +56,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 ])),
         Expanded(
             child: ListView(
+          primary: false,
           children: [
             ListTile(
                 title:
@@ -74,10 +76,13 @@ class _PmCheckPageState extends State<PmCheckPage> {
               onPressed: () {
                 final thing =
                     generateUploads(parsedTemplates[state[0]][state[1]].maximo);
-                print(thing);
+                setState(() {
+                  temp = writeToCSV(thing);
+                });
               },
-              child: const Text('LoadAssets'),
+              child: const Text('ConvertToTemplate'),
             ),
+            Text(temp)
           ],
         ))
       ];
@@ -233,10 +238,10 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 child: const Text('LoadObservation'),
               ),
               ElevatedButton(
-                onPressed: () {
-                  final thing = getObservation('AACT');
+                onPressed: () async {
+                  final thing = await findAvailablePMNumber(
+                      'S4790W1INRM', 'GJ', maximoServerSelected, 'INR', 1);
                   print(thing);
-                  print(thing.observations[0]);
                 },
                 child: const Text('GetObservation'),
               ),

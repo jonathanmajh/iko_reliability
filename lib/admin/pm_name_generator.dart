@@ -2,28 +2,8 @@ import 'package:iko_reliability/admin/maximo_jp_pm.dart';
 import 'package:iko_reliability/admin/pm_jp_storage.dart';
 
 import 'asset_storage.dart';
+import 'consts.dart';
 import 'parse_template.dart';
-
-const frequencyUnits = {'D': "Day", 'W': "Week", 'M': "Month", 'Y': "Year"};
-const workType = {
-  'PPM': 'Preventive Maintenance',
-  'CAL': 'Calibration',
-  'ENV': 'Environmental',
-  'HKG': 'Housekeeping',
-  'INR': 'Routine Inspection',
-  // 'LC1': 'Life Cycle',
-  'LUB': 'Lubrication',
-  'PDM': 'Predictive Maintenance',
-  'PEM': 'Pre-emptive Maintenance',
-  'PRO': 'Process Maintenance',
-  'SAF': 'Safety',
-};
-
-const crafts = {
-  'E': 'Electrical',
-  'M': 'Mechanical',
-  'O': 'Production',
-};
 
 class PMName {
   String pmNumber;
@@ -73,9 +53,9 @@ Future<PMName> generateName(
         '${replaceable[0]}${pmdetails.frequencyUnit}${pmdetails.frequency}';
     if (wotype != 'LC1') {
       replaceable[1] =
-          '${replaceable[1]} - ${pmdetails.frequency} ${frequencyUnits[pmdetails.frequencyUnit]}';
+          '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
       name =
-          '$name - ${pmdetails.frequency} ${frequencyUnits[pmdetails.frequencyUnit]}';
+          '$name - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]} - ';
     }
   }
 // add work order type
@@ -126,18 +106,19 @@ Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,
   // checkType 3 = PM + JP + Route
   // assume type 2 by default
   bool availablePM = true;
-  bool availableJP = false;
+  bool availableJP = true;
   bool availableRoute = true;
-  availableJP = await checkJPNumber('$siteID$pmNumber', server);
   if (checkType == 1) {
     availablePM = await checkPMNumber(pmNumber, siteID, server);
   }
+  availableJP = await checkJPNumber('$siteID$pmNumber', server);
   if (checkType == 3) {
     availableRoute = await checkRouteNumber(pmNumber, siteID, server);
+    availablePM = await checkPMNumber(pmNumber, siteID, server);
   }
   int counter = 0;
   String tempNumber = pmNumber;
-  while (!availablePM && !availableJP && !availableRoute) {
+  while (!availablePM || !availableJP || !availableRoute) {
     counter++;
     if (woType != 'LC1') {
       tempNumber = '$pmNumber$counter';
@@ -145,12 +126,13 @@ Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,
       tempNumber =
           '${pmNumber.substring(0, pmNumber.length - 2)}${counter + 1}${pmNumber.substring(pmNumber.length - 1)}';
     }
-    availablePM = await checkPMNumber(tempNumber, siteID, server);
+    availableJP = await checkJPNumber('$siteID$tempNumber', server);
     if (checkType == 1) {
-      availablePM = await checkPMNumber(pmNumber, siteID, server);
+      availablePM = await checkPMNumber(tempNumber, siteID, server);
     }
     if (checkType == 3) {
-      availableRoute = await checkRouteNumber(pmNumber, siteID, server);
+      availableRoute = await checkRouteNumber(tempNumber, siteID, server);
+      availablePM = await checkPMNumber(tempNumber, siteID, server);
     }
   }
   return counter;
@@ -168,8 +150,7 @@ Future<bool> checkPMNumber(String number, String siteid, String env) async {
   }
   result = await existPmNumberMaximo(number, siteid, env);
   // check maximo async
-  await Future.delayed(const Duration(seconds: 1));
-  return true;
+  return result;
 }
 
 Future<bool> checkRouteNumber(String number, String siteid, String env) async {
@@ -178,10 +159,9 @@ Future<bool> checkRouteNumber(String number, String siteid, String env) async {
   if (result) {
     return false;
   }
-  result = await existPmNumberMaximo(number, siteid, env);
+  result = await existRouteNumberMaximo(number, siteid, env);
   // check maximo async
-  await Future.delayed(const Duration(seconds: 1));
-  return true;
+  return result;
 }
 
 Future<bool> checkJPNumber(String number, String env) async {
@@ -192,8 +172,7 @@ Future<bool> checkJPNumber(String number, String env) async {
   }
   result = await existJpNumberMaximo(number, env);
   // check maximo async
-  await Future.delayed(const Duration(seconds: 1));
-  return true;
+  return result;
 }
 
 String numberToLetter(int counter) {

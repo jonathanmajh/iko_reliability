@@ -5,11 +5,7 @@ import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 import 'pm_name_generator.dart';
 
-const siteIds = [];
-
 const frequencyUnits = ['D', 'W', 'M', 'Y'];
-
-// TODO way more consts for value checking
 
 double parseTime(dynamic text) {
   var hour = 0.0;
@@ -104,7 +100,7 @@ class ParsedTemplate {
   List<JobMaterial> materials;
   List<JobService> services;
   List<JobTask> tasks;
-  String? nextDueDate; // TODO should be datetime
+  String? nextDueDate;
   String? pmNumber;
   String? pmName;
   String? pmPackageNumber;
@@ -168,14 +164,14 @@ class ParsedTemplate {
           var nextRow = decoder.tables[sheet]!.rows[i + 1];
           pmNumber++;
           pmTemplates[filename][pmNumber] = ParsedTemplate(
-              nextDueDate: nextRow[2],
+              nextDueDate: nextRow[2].substring(0, 10),
               siteId: nextRow[3],
               frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))
                   ? nextRow[4].substring(0, 1)
                   : null,
               frequency: nextRow[5],
-              workOrderType: nextRow[6],
-              processCondition: nextRow[7],
+              workOrderType: nextRow[6].substring(0, 3),
+              processCondition: nextRow[7].substring(0, 4),
               pmAsset: nextRow[0],
               pmName: nextRow[8] ?? 'Generating Name...',
               pmNumber: decoder.tables[sheet]!.rows[i + 2][8] ??
@@ -207,7 +203,9 @@ class ParsedTemplate {
         }
         if (row[1] != null && readCraft) {
           pmTemplates[filename][pmNumber].crafts.add(JobCraft(
-              laborType: row[0], quantity: row[1], hours: parseTime(row[2])));
+              laborType: row[0].substring(row[0].length - 1),
+              quantity: row[1],
+              hours: parseTime(row[2])));
         }
 
         if (row[0] != null && readMaterials) {

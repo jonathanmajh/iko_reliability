@@ -1,3 +1,5 @@
+import 'package:csv/csv.dart';
+import 'package:iko_reliability/admin/consts.dart';
 import 'package:iko_reliability/admin/generate_job_plans.dart';
 import 'package:iko_reliability/admin/observation_list_storage.dart';
 
@@ -15,12 +17,13 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
       pmpkg.woStatus,
       pmpkg.personGroup,
       pmpkg.frequency.toString(),
-      pmpkg.freqUnit,
+      freqUnitToString[pmpkg.freqUnit]!.toUpperCase(),
       pmpkg.pmAssetWOGen ? 'Y' : 'N',
       pmpkg.assetNumber,
       pmpkg.route?.routeNumber ?? '',
       pmpkg.leadTime.toString(),
-      pmpkg.nextDate ?? '',
+      pmpkg.priority.toString(),
+      '${pmpkg.nextDate}T00:00:00',
       pmpkg.orgID,
       pmpkg.targetStartTime,
       pmpkg.ikoPMHistoryNotes ?? '',
@@ -57,7 +60,7 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
     generated['JobMaterial'] = [];
     generated['JobService'] = [];
     generated['JobLabor'] = [];
-    generated['JobAsset'] = [];
+    generated['JPASSETLINK'] = [];
     generated['JobTask'] = [];
     generated = generateJobplan(
       pmpkg.jobplan,
@@ -85,21 +88,24 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
     }
     // Asset Meter + Meausure Point + AssetMeter + CBM Job Plans
     for (final jobplan in pmpkg.route!.childJobPlans) {
-      final jobtask = jobplan.jobtask[0];
+      final jobtask =
+          jobplan.jobtask[0]; // child job plans should only have 1 job task
       if (jobtask.metername != null) {
         for (final routeStops in pmpkg.route!.routeStops) {
-          if (routeStops.jpnum == pmpkg.jobplan.jpnum) {
+          if (routeStops.jpnum == jobplan.jpnum) {
             generated['AssetMeter']!.add([
               pmpkg.siteID,
               routeStops.assetNumber,
               jobtask.metername ?? '',
             ]);
+            final asset = getAsset(pmpkg.siteID, routeStops.assetNumber);
+            final meter = getObservation(jobtask.metername!);
             generated['MeasurePoint']!.add([
               pmpkg.siteID,
               routeStops.assetNumber,
               jobtask.metername ?? '',
               '${routeStops.assetNumber}${jobtask.metername}',
-              '${routeStops.assetNumber}${jobtask.metername}', // TODO get meter & asset
+              '${asset.name} - ${meter.inspect} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
             ]);
             generated['Meter']!.add([
               jobtask.metername ?? '',
@@ -118,9 +124,9 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
               ...generated['JobLabor']!,
               ...newGen['JobLabor']!
             ];
-            generated['JobAsset'] = [
-              ...generated['JobAsset']!,
-              ...newGen['JobAsset']!
+            generated['JPASSETLINK'] = [
+              ...generated['JPASSETLINK']!,
+              ...newGen['JPASSETLINK']!
             ];
             generated['JobTask'] = [
               ...generated['JobTask']!,
@@ -161,6 +167,7 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
     jobplan.jpnum,
     '0', // PLUSCREVNUM
     jobplan.description,
+    '', // details
     'ACTIVE', // STATUS
     jobplan.persongroup,
     jobplan.ikoConditions,
@@ -213,13 +220,13 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
       siteID,
       jobplan.jpnum,
       '0', //PLUSCREVNUM
-      joblabor.laborType,
+      craftCode[joblabor.laborType]!,
       joblabor.hours.toString(),
       joblabor.quantity.toString(),
     ]);
   }
   for (final jobasset in jobplan.jobasset) {
-    generated['JobAsset']!.add([
+    generated['JPASSETLINK']!.add([
       orgID,
       siteID,
       jobplan.jpnum,
@@ -238,7 +245,7 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
       '0', //PLUSCJPREVNUM
       jobtask.metername ?? '',
       jobtask.description,
-      jobtask.longdescription ?? '',
+      jobTaskFormat(jobtask.longdescription ?? ''),
     ]);
   }
   return generated;
@@ -248,21 +255,22 @@ Map<String, List<List<String>>> generateMeterJobplan(
     Asset asset, String meterCode) {
   Map<String, List<List<String>>> generated = {};
   final meter = getObservation(meterCode);
+  final meterNumber = int.parse(meterCode.substring(meterCode.length - 2));
   generated['JobPlan'] = [];
   generated['JobLabor'] = [];
-  generated['JobAsset'] = [];
+  generated['JPASSETLINK'] = [];
   generated['JobTask'] = [];
   generated['MeasurePoint2'] = [];
   for (final observation in meter.observations) {
-    if (!['C01', 'C99'].contains(observation.code)) {
+    if (!['C01', 'C98'].contains(observation.code)) {
       final jpnum =
           '${asset.assetNumber}${meterCode}CBM${meter.craft}${observation.code.substring(1, 3)}';
       generated['JobPlan']!.add([
         jpnum,
-        '${asset.name} ${meter.inspect} - CBM - ${meter.craft}',
-        '${meter.inspect} - ${observation.description} - ${observation.action} ${meter.inspect}',
+        '${asset.name} ${meter.inspect} $meterNumber - CBM - ${crafts[meter.craft]}',
+        '${meter.inspect} $meterNumber - ${observation.description} - ${observation.action} ${meter.inspect} $meterNumber',
         'ACTIVE',
-        meter.craft,
+        personGroups[meter.craft]!,
         meter.condition,
         '0',
         '3',
@@ -276,7 +284,6 @@ Map<String, List<List<String>>> generateMeterJobplan(
         '10',
         '0',
         '',
-        '',
         'General',
         "<div>1. Strictly follow all IKO, plant and common sense safety procedures when executing each and all tasks.</div>\n<div>2. Clean off all debris from asset being worked on and related work area.</div>\n<div>3. Record all work done and all parts used, and all observations as each task is executed.</div>\n<div>4. Ensure all applicable IKO SOP's are followed when performing each task.</div>\n<div>5. If any suspect conditions or components are found that may cause operating problems before the next PM cycle, immediately report these to the maintenance supervisor or designate.</div>",
       ]);
@@ -285,7 +292,6 @@ Map<String, List<List<String>>> generateMeterJobplan(
         '0',
         '20',
         '0',
-        '',
         meterCode,
         '${observation.action} ${meter.inspect}',
         "<div></div>",
@@ -296,22 +302,21 @@ Map<String, List<List<String>>> generateMeterJobplan(
         '30',
         '0',
         '',
-        '',
-        'General',
+        'Completion',
         "<div>1. Remove any garbage from area and dispose.</div>\n<div>2. Ensure that all tools are removed from the area and returned to their proper storage location.</div>\n<div>3. Clean all lubricate surfaces and areas.</div>\n<div>4. Remove all lock outs.</div>\n<div>5. Review the work orders assuring that all reported requirements have been fully satisfied, all parts that consumed are documented, and all adjustments made are recorded. If any concern still exists about the condition of this piece of equipment notify the supervisor immediately.</div>\n<div>6. Record the time taken to execute the whole work order.</div>\n<div>7. Hand in all replaced components with work order to Supervisor for analysis.</div>",
       ]);
       generated['JobLabor']!.add([
         jpnum,
         '0', //PLUSCREVNUM
-        asset.siteid,
-        meter.craft,
+        siteIDAndOrgID[asset.siteid]!,
+        craftCode[meter.craft]!,
         '1',
         '1',
       ]);
-      generated['JobAsset']!.add([
+      generated['JPASSETLINK']!.add([
         jpnum,
         '0', //PLUSCREVNUM
-        asset.siteid,
+        siteIDAndOrgID[asset.siteid]!,
         asset.siteid,
         asset.assetNumber,
         '0' //ISDEFAULTASSETSP
@@ -325,4 +330,17 @@ Map<String, List<List<String>>> generateMeterJobplan(
     }
   }
   return generated;
+}
+
+String writeToCSV(Map<String, List<List<String>>> generated) {
+  String allData = '';
+  for (final tables in generated.keys) {
+    allData =
+        '$allData\n$tables\n${const ListToCsvConverter().convert(generated[tables])}';
+  }
+  return allData;
+}
+
+String jobTaskFormat(String desc) {
+  return '<div>${desc.replaceAll('\n', '<div>\n</div>')}</div>';
 }

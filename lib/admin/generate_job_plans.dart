@@ -1,20 +1,8 @@
 import 'package:iko_reliability/admin/asset_storage.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 
+import 'consts.dart';
 import 'pm_name_generator.dart';
-
-final personGroups = {
-  'O': 'PRODSUP',
-  'M': 'MECHSUP',
-  'E': 'ELECTSUP',
-};
-
-final freqUnitToDays = {
-  'D': 1,
-  'W': 7,
-  'M': 30,
-  'Y': 365,
-};
 
 class JobAssetMaximo {
   final String assetNumber;
@@ -240,7 +228,7 @@ Future<PMMaximo> generatePM(
         jptask: task.jptask,
         description: task.description,
         longdescription: task.longdescription,
-        metername: task.metername,
+        metername: meter,
       );
       var childLabor = JobLaborMaximo(
         laborType: pmDetails.crafts[0].laborType,
@@ -254,7 +242,7 @@ Future<PMMaximo> generatePM(
       jpdescription = jpdescription.replaceFirst('XXXXX', asset.name);
       final woType = pmDetails.workOrderType!;
       final counter = await findAvailablePMNumber(
-          jpnumber, pmDetails.siteId!, maximoServerSelected, woType, 1);
+          jpnumber, pmDetails.siteId!, maximoServerSelected, woType, 2);
       if (counter > 0) {
         if (woType != 'LC1') {
           jpnumber = '$jpnumber$counter';
@@ -265,10 +253,10 @@ Future<PMMaximo> generatePM(
         }
       }
       routeStops.add(RouteStopMaximo(
-        routeStopID: sequence,
-        assetNumber: asset.assetNumber,
-        stopSequence: sequence,
-      ));
+          routeStopID: sequence,
+          assetNumber: asset.assetNumber,
+          stopSequence: sequence,
+          jpnum: jpnumber));
       sequence++;
       childJobPlans.add(JobPlanMaximo(
         description: jpdescription,
@@ -279,7 +267,6 @@ Future<PMMaximo> generatePM(
         jpnum: jpnumber,
         persongroup: personGroups[pmDetails.crafts[0].laborType
             .substring(pmDetails.crafts[0].laborType.length - 1)]!,
-        // TODO replace with validate character
         priority: 2,
         templatetype: 'PM',
         joblabor: [childLabor],
@@ -319,8 +306,7 @@ Future<PMMaximo> generatePM(
       ikoWorktype: pmDetails.workOrderType!,
       jpduration: jobhrs,
       jpnum: pmDetails.uploads!.jpNumber,
-      persongroup: personGroups[pmDetails.crafts[0].laborType
-          .substring(pmDetails.crafts[0].laborType.length - 1)]!,
+      persongroup: personGroups[pmDetails.crafts[0].laborType]!,
       priority: 2,
       templatetype: 'PM',
       joblabor: joblabs,
@@ -337,21 +323,23 @@ Future<PMMaximo> generatePM(
   );
   print('complete job plan generation');
   return PMMaximo(
-      siteID: pmDetails.siteId!,
-      pmNumber: pmDetails.uploads!.pmNumber,
-      description: pmDetails.uploads!.pmName,
-      jobplan: mainJobPlan,
-      frequency: pmDetails.frequency!,
-      personGroup: personGroups[pmDetails.crafts[0].laborType
-          .substring(pmDetails.crafts[0].laborType.length - 1)]!,
-      freqUnit: pmDetails.frequencyUnit!,
-      assetNumber: pmDetails.uploads!.commonParent,
-      leadTime: calcLeadTime(pmDetails.frequency!, pmDetails.frequencyUnit!),
-      orgID: 'IKO-CAD', // TODO
-      route: routeType != 'NONE' ? route : null,
-      targetStartTime: '08:00:00',
-      // TODO ikoPMHistoryNotes: ikoPMHistoryNotes,
-      fmecaPM: null != pmDetails.pmPackageNumber);
+    siteID: pmDetails.siteId!,
+    pmNumber: pmDetails.uploads!.pmNumber,
+    description: pmDetails.uploads!.pmName,
+    jobplan: mainJobPlan,
+    frequency: pmDetails.frequency!,
+    personGroup: personGroups[
+        pmDetails.crafts[0].laborType]!, // take first craft as primary craft
+    freqUnit: pmDetails.frequencyUnit!,
+    assetNumber: pmDetails.uploads!.commonParent,
+    leadTime: calcLeadTime(pmDetails.frequency!, pmDetails.frequencyUnit!),
+    orgID: siteIDAndOrgID[pmDetails.siteId!]!,
+    route: routeType != 'NONE' ? route : null,
+    targetStartTime: '08:00:00',
+    // TODO ikoPMHistoryNotes: ikoPMHistoryNotes,
+    fmecaPM: null != pmDetails.pmPackageNumber,
+    nextDate: pmDetails.nextDueDate,
+  );
 }
 
 int calcLeadTime(int frequency, String freqUnit) {

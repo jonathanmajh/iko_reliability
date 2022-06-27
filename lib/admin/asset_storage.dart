@@ -103,11 +103,11 @@ Asset getCommonParent(List<String> assets, String siteID) {
   }
   String commonHierarchy = getAsset(siteID, assets[0]).hierarchy!;
   for (String asset in assets) {
-    final hierarchy = getAsset(siteID, asset).hierarchy!;
+    var hierarchy = getAsset(siteID, asset).hierarchy!;
     int iterations = ','.allMatches(hierarchy).length;
     for (iterations; iterations >= 0; iterations--) {
-      if (commonHierarchy
-          .contains(hierarchy.substring(0, iterations * 6 + 5))) {
+      hierarchy = hierarchy.substring(0, iterations * 6 + 5);
+      if (commonHierarchy.contains(hierarchy)) {
         commonHierarchy = hierarchy;
         break;
       }
