@@ -23,7 +23,6 @@ class PMName {
 
 Future<PMName> generateName(
     ParsedTemplate pmdetails, String maximoServerSelected) async {
-  await Future.delayed(const Duration(seconds: 5));
   String number = '';
   String name = '';
   Asset asset;

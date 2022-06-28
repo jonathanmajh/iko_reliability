@@ -8,8 +8,6 @@ Map<String, String> maximoServerDomains = {
   'DEV': 'nscandacmaxdev1',
 };
 
-// http://nsmaxim1app1.na.iko/maxrest/oslc/os/mxl_pm?oslc.select=pmnum,siteid&oslc.pageSize=10&oslc.where=pmnum="A0001D1INRE"%20and%20siteid="AA"&_lid=corcoop3&_lpwd=maximo
-
 Future<bool> existPmNumberMaximo(
     String pmNumber, String siteid, String env) async {
   final url =
