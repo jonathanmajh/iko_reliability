@@ -9,6 +9,7 @@ import 'generate_job_plans.dart';
 import 'generate_uploads.dart';
 import 'maximo_jp_pm.dart';
 import 'observation_list_storage.dart';
+import 'upload_maximo.dart';
 
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
@@ -81,6 +82,16 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 });
               },
               child: const Text('ConvertToTemplate'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final thing = uploadToMaximo(
+                    generateUploads(parsedTemplates[state[0]][state[1]].maximo),
+                    maximoServerSelected);
+                print('done');
+                // print(thing);
+              },
+              child: const Text('Just DO IT'),
             ),
             Text(temp)
           ],

@@ -3,7 +3,19 @@ import 'dart:convert';
 import 'maximo_jp_pm.dart';
 import 'package:http/http.dart' as http;
 
-void uploadToMaximo(Map<String, List<List<String>>> uploadData) {
+void uploadToMaximo(
+    Map<String, List<List<String>>> uploadData, String env) async {
+  // +: uploaded; ~: already exist; !: error
+  if (uploadData.containsKey('Meter')) {
+    for (int i = 0; i < uploadData['Meter']!.length; i++) {
+      if (await isNewMeter(uploadData['Meter']![i][0], env)) {
+        uploadData['Meter']![i].add('+');
+        await uploadMeter(uploadData['Meter']![i], env);
+      } else {
+        uploadData['Meter']![i].add('~');
+      }
+    }
+  }
   // consider returning data of what was uploaded, prefix data with +/!
   // Meters
   // Asset Meter (dont think checks are necessary)
@@ -39,7 +51,8 @@ Future<bool> isNewMeter(String meterName, String maximoEnvironment) async {
   }
 }
 
-Future<bool> uploadMeter(String meterName, String maximoEnvironment) async {
+Future<bool> uploadMeter(
+    List<String> meterName, String maximoEnvironment) async {
   const url = '/maxrest/oslc/os/iko_meter';
   final result = await maximoRequest(url, 'post', maximoEnvironment);
   // TODO post data and header
@@ -52,20 +65,20 @@ Future<bool> uploadMeter(String meterName, String maximoEnvironment) async {
 
 Future<Map<String, String>> maximoRequest(String url, String type, String env,
     [Map<String, String>? header, String? body]) async {
-  url = 'http://${maximoServerDomains[env]}.na.iko';
+  url = 'http://${maximoServerDomains[env]}.na.iko$url';
   http.Response response;
   try {
     if (type == 'get') {
       response = await http.get(Uri.parse('$url&_lid=corcoop3&_lpwd=maximo'));
+      var parsed = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        var parsed = jsonDecode(response.body);
         if (parsed['rdf:member'] == null) {
           return {'status': 'empty'};
         } else {
           return parsed['rdf:member'] + {'status': 'results'};
         }
       } else {
-        return {'status': 'Invalid Response Code from Maximo'};
+        return parsed + {'status': 'Invalid Response Code from Maximo'};
       }
     } else if (type == 'post') {
       response = await http.post(
