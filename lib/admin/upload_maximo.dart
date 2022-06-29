@@ -1,16 +1,25 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:csv/csv.dart';
+import 'consts.dart';
 import 'maximo_jp_pm.dart';
 import 'package:http/http.dart' as http;
 
-void uploadToMaximo(
+Future<Map<String, List<List<String>>>> uploadToMaximo(
     Map<String, List<List<String>>> uploadData, String env) async {
   // +: uploaded; ~: already exist; !: error
-  var result;
+  bool result;
   if (uploadData.containsKey('Meter')) {
+    print('uploading meters');
     for (int i = 0; i < uploadData['Meter']!.length; i++) {
       if (await isNewMeter(uploadData['Meter']![i][0], env)) {
-        result = await uploadMeter(uploadData['Meter']![i], env);
+        debugger();
+        result = await uploadGeneric(
+          uploadData['Meter']![i],
+          env,
+          'Meter',
+          '/maxrest/oslc/os/iko_meter',
+        );
         if (result) {
           uploadData['Meter']![i].add('+');
         } else {
@@ -22,9 +31,15 @@ void uploadToMaximo(
     }
   }
   if (uploadData.containsKey('AssetMeter')) {
-    // no checks
+    print('uploading assetmeters');
+    // no checks, maximo will auto error out, can consider adding check for less errors
     for (int i = 0; i < uploadData['AssetMeter']!.length; i++) {
-      result = await uploadAssetMeter(uploadData['AssetMeter']![i], env);
+      result = await uploadGeneric(
+        uploadData['AssetMeter']![i],
+        env,
+        'AssetMeter',
+        '/maxrest/oslc/os/iko_assetmeter',
+      );
       if (result) {
         uploadData['AssetMeter']![i].add('+');
       } else {
@@ -33,6 +48,7 @@ void uploadToMaximo(
     }
   }
   if (uploadData.containsKey('JobPlan')) {
+    print('uploading jobplan');
     for (int i = 0; i < uploadData['JobPlan']!.length; i++) {
       if (uploadData['JobPlan']![i][9] == 'CBM') {
         if (!(await isNewJobPlan(uploadData['JobPlan']![i][0], env))) {
@@ -40,7 +56,12 @@ void uploadToMaximo(
           continue;
         }
       }
-      result = await uploadAssetMeter(uploadData['JobPlan']![i], env);
+      result = await uploadGeneric(
+        uploadData['JobPlan']![i],
+        env,
+        'JobPlan',
+        '/maxrest/oslc/os/iko_jobplan',
+      );
       if (result) {
         uploadData['JobPlan']![i].add('+');
       } else {
@@ -49,9 +70,15 @@ void uploadToMaximo(
     }
   } // should cache job plans that are brand new to save on later check
   if (uploadData.containsKey('MeasurePoint')) {
+    print('uploading measurepoint');
     for (int i = 0; i < uploadData['MeasurePoint']!.length; i++) {
       if (await isNewMeasurePoint(uploadData['MeasurePoint']![i][3], env)) {
-        result = await uploadMeasurePoint(uploadData['MeasurePoint']![i], env);
+        result = await uploadGeneric(
+          uploadData['MeasurePoint']![i],
+          env,
+          'MeasurePoint',
+          '/maxrest/oslc/os/iko_measurepoint',
+        );
         if (result) {
           uploadData['MeasurePoint']![i].add('+');
         } else {
@@ -63,11 +90,15 @@ void uploadToMaximo(
     }
   } // should cache
   if (uploadData.containsKey('MeasurePoint2')) {
+    print('uploading measurepoint2');
     for (int i = 0; i < uploadData['MeasurePoint2']!.length; i++) {
-      if (await isNewMeasurePoint2(uploadData['MeasurePoint2']![i][2],
-          uploadData['MeasurePoint2']![i][2], env)) {
-        result =
-            await uploadMeasurePoint2(uploadData['MeasurePoint2']![i], env);
+      if (await isNewMeasurePoint2(uploadData['MeasurePoint2']![i][3], env)) {
+        result = await uploadGeneric(
+          uploadData['MeasurePoint2']![i],
+          env,
+          'MeasurePoint2',
+          '/maxrest/oslc/os/iko_measurepoint',
+        );
         if (result) {
           uploadData['MeasurePoint2']![i].add('+');
         } else {
@@ -79,9 +110,15 @@ void uploadToMaximo(
     }
   }
   if (uploadData.containsKey('Route')) {
+    print('uploading route');
     // no checks
     for (int i = 0; i < uploadData['Route']!.length; i++) {
-      result = await uploadRoute(uploadData['Route']![i], env);
+      result = await uploadGeneric(
+        uploadData['Route']![i],
+        env,
+        'Route',
+        '/maxrest/oslc/os/iko_route',
+      );
       if (result) {
         uploadData['Route']![i].add('+');
       } else {
@@ -89,21 +126,33 @@ void uploadToMaximo(
       }
     }
   }
-  if (uploadData.containsKey('RouteStop')) {
+  if (uploadData.containsKey('Route_Stop')) {
+    print('uploading routestop');
     // no checks
-    for (int i = 0; i < uploadData['RouteStop']!.length; i++) {
-      result = await uploadRouteStop(uploadData['RouteStop']![i], env);
+    for (int i = 0; i < uploadData['Route_Stop']!.length; i++) {
+      result = await uploadGeneric(
+        uploadData['Route_Stop']![i],
+        env,
+        'Route_Stop',
+        '/maxrest/oslc/os/iko_route_stop',
+      );
       if (result) {
-        uploadData['RouteStop']![i].add('+');
+        uploadData['Route_Stop']![i].add('+');
       } else {
-        uploadData['RouteStop']![i].add('!');
+        uploadData['Route_Stop']![i].add('!');
       }
     }
   }
   if (uploadData.containsKey('PM')) {
+    print('uploading pm');
     // no checks
     for (int i = 0; i < uploadData['PM']!.length; i++) {
-      result = await uploadPM(uploadData['PM']![i], env);
+      result = await uploadGeneric(
+        uploadData['PM']![i],
+        env,
+        'PM',
+        '/maxrest/oslc/os/iko_pm',
+      );
       if (result) {
         uploadData['PM']![i].add('+');
       } else {
@@ -112,6 +161,7 @@ void uploadToMaximo(
     }
   }
   if (uploadData.containsKey('JobLabor')) {
+    print('uploading joblabor');
     for (int i = 0; i < uploadData['JobLabor']!.length; i++) {
       if (uploadData['JobLabor']![i][0].contains('CBM')) {
         if (!(await isNewJobLabor(uploadData['JobLabor']![i][0],
@@ -120,7 +170,12 @@ void uploadToMaximo(
           continue;
         }
       }
-      result = await uploadJobLabor(uploadData['JobLabor']![i], env);
+      result = await uploadGeneric(
+        uploadData['JobLabor']![i],
+        env,
+        'JobLabor',
+        '/maxrest/oslc/os/iko_joblabor',
+      );
       if (result) {
         uploadData['JobLabor']![i].add('+');
       } else {
@@ -129,15 +184,25 @@ void uploadToMaximo(
     }
   }
   if (uploadData.containsKey('JPASSETLINK')) {
+    print('uploading jobasset');
     for (int i = 0; i < uploadData['JPASSETLINK']!.length; i++) {
       if (uploadData['JPASSETLINK']![i][0].contains('CBM')) {
-        if (!(await isNewJobAsset(uploadData['JPASSETLINK']![i][0],
-            uploadData['JPASSETLINK']![i][2], env))) {
+        if (!(await isNewJobAsset(
+          uploadData['JPASSETLINK']![i][0],
+          uploadData['JPASSETLINK']![i][2],
+          uploadData['JPASSETLINK']![i][4],
+          env,
+        ))) {
           uploadData['JPASSETLINK']![i].add('~');
           continue;
         }
       }
-      result = await uploadJobAsset(uploadData['JPASSETLINK']![i], env);
+      result = await uploadGeneric(
+        uploadData['JPASSETLINK']![i],
+        env,
+        'JPASSETLINK',
+        '/maxrest/oslc/os/iko_jpassetlink',
+      );
       if (result) {
         uploadData['JPASSETLINK']![i].add('+');
       } else {
@@ -147,13 +212,20 @@ void uploadToMaximo(
   }
 
   if (uploadData.containsKey('JobTask')) {
+    print('uploading jobtask');
     // no checks
     for (int i = 0; i < uploadData['JobTask']!.length; i++) {
+      // do not upload if CBM job plan already exists
       if (uploadData['JobTask']![i][0].contains('CBM')) {
-        uploadData['JPASSETLINK']![i].add('~');
+        uploadData['JobTask']![i].add('~');
         continue;
       }
-      result = await uploadJobTask(uploadData['JobTask']![i], env);
+      result = await uploadGeneric(
+        uploadData['JobTask']![i],
+        env,
+        'JobTask',
+        '/maxrest/oslc/os/iko_jobtask',
+      );
       if (result) {
         uploadData['JobTask']![i].add('+');
       } else {
@@ -162,9 +234,15 @@ void uploadToMaximo(
     }
   }
   if (uploadData.containsKey('JobMaterial')) {
+    print('uploading jobmaterial');
     // no checks
     for (int i = 0; i < uploadData['JobMaterial']!.length; i++) {
-      result = await uploadJobMaterial(uploadData['JobMaterial']![i], env);
+      result = await uploadGeneric(
+        uploadData['JobMaterial']![i],
+        env,
+        'JobMaterial',
+        '/maxrest/oslc/os/iko_jobmaterial',
+      );
       if (result) {
         uploadData['JobMaterial']![i].add('+');
       } else {
@@ -173,9 +251,15 @@ void uploadToMaximo(
     }
   }
   if (uploadData.containsKey('JobService')) {
+    print('uploading jobservice');
     // no checks
     for (int i = 0; i < uploadData['JobService']!.length; i++) {
-      result = await uploadJobService(uploadData['JobService']![i], env);
+      result = await uploadGeneric(
+        uploadData['JobService']![i],
+        env,
+        'JobService',
+        '/maxrest/oslc/os/iko_jobservice',
+      );
       if (result) {
         uploadData['JobService']![i].add('+');
       } else {
@@ -183,102 +267,14 @@ void uploadToMaximo(
       }
     }
   }
-}
-
-Future<bool> uploadPM(List<String> route, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_pm';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([route]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadRoute(List<String> route, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_route';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([route]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadRouteStop(
-    List<String> routestop, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_routestop';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([routestop]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadMeasurePoint(
-    List<String> measurepoint, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_measurepoint';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([measurepoint]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadMeasurePoint2(
-    List<String> measurepoints, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_measurepoint';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([measurepoints]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadAssetMeter(
-    List<String> assetMeter, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_assetmeter';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([assetMeter]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadJobLabor(
-    List<String> assetMeter, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_joblabor';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([assetMeter]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
+  return uploadData;
 }
 
 Future<bool> isNewJobLabor(
     String jpNumber, String orgid, String maximoEnvironment) async {
   // is only needed for CBMs
   final url =
-      '/maxrest/oslc/os/iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber"';
+      '/maxrest/oslc/os/iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber" and joblabor.orgid="$orgid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -287,66 +283,14 @@ Future<bool> isNewJobLabor(
   }
 }
 
-Future<bool> uploadJobAsset(
-    List<String> jobAsset, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_jpassetlink';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([jobAsset]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadJobMaterial(
-    List<String> jobMaterial, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_jobmaterial';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([jobMaterial]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadJobService(
-    List<String> jobService, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_jobservice';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([jobService]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<bool> isNewJobAsset(
-    String jpNumber, String siteid, String maximoEnvironment) async {
+Future<bool> isNewJobAsset(String jpNumber, String siteid, String assetnum,
+    String maximoEnvironment) async {
   // is only needed for CBMs
   final url =
-      '/maxrest/oslc/os/iko_jpassetlink?oslc.select=jpnum&oslc.where=jpnum="$jpNumber"';
+      '/maxrest/oslc/os/iko_jpassetlink?oslc.select=*&oslc.where=jpnum="$jpNumber" and JPASSETSPLINK.siteid="$siteid" and JPASSETSPLINK.assetnum="$assetnum"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
-  } else {
-    return false;
-  }
-}
-
-Future<bool> uploadJobTask(
-    List<String> jobTask, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_jobtask';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([jobTask]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
   } else {
     return false;
   }
@@ -367,7 +311,7 @@ Future<bool> isNewJobPlan(String jpNumber, String maximoEnvironment) async {
 Future<bool> isNewMeasurePoint(
     String measurePoint, String maximoEnvironment) async {
   final url =
-      '/maxrest/oslc/os/iko_measurepoint?oslc.select=measurepoint&oslc.where=measurepoint="$measurePoint"';
+      '/maxrest/oslc/os/iko_measurepoint?oslc.select=pointnum&oslc.where=pointnum="$measurePoint"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -376,10 +320,9 @@ Future<bool> isNewMeasurePoint(
   }
 }
 
-Future<bool> isNewMeasurePoint2(String measurePoint, String observationCode,
-    String maximoEnvironment) async {
+Future<bool> isNewMeasurePoint2(String jpnum, String maximoEnvironment) async {
   final url =
-      '/maxrest/oslc/os/iko_measurepoint?oslc.select=measurepoint&oslc.where=measurepoint="$measurePoint"';
+      '/maxrest/oslc/os/iko_measurepoint?oslc.select=charpointaction&oslc.where=charpointaction.jpnum="$jpnum"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -389,9 +332,8 @@ Future<bool> isNewMeasurePoint2(String measurePoint, String observationCode,
 }
 
 Future<bool> isNewMeter(String meterName, String maximoEnvironment) async {
-  // TODO check string
   final url =
-      '/maxrest/oslc/os/iko_meter?oslc.select=meter&oslc.where=meter="$meterName"';
+      '/maxrest/oslc/os/iko_meter?oslc.select=metername&oslc.where=metername="$meterName"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -400,59 +342,99 @@ Future<bool> isNewMeter(String meterName, String maximoEnvironment) async {
   }
 }
 
-Future<bool> uploadJobPlan(
-    List<String> jobplan, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_jobplan';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([jobplan]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
+Future<bool> uploadGeneric(List<String> data, String maximoEnvironment,
+    String table, String url) async {
+  // first preview the upload
+  final result = await maximoRequest(url, 'post', maximoEnvironment,
+      const ListToCsvConverter().convert([tableHeaders[table], data]));
+  if (result['status'] == 'uploaded') {
+    print('uploaded');
+    return true;
   } else {
+    print(result.toString());
     return false;
   }
 }
 
-Future<bool> uploadMeter(List<String> meter, String maximoEnvironment) async {
-  const url = '/maxrest/oslc/os/iko_meter';
-  final result = await maximoRequest(url, 'post', maximoEnvironment, {},
-      const ListToCsvConverter().convert([meter]));
-  // TODO post data and header
-  if (result['status']! == 'empty') {
-    return true; // TODO read status
-  } else {
-    return false;
-  }
-}
-
-Future<Map<String, String>> maximoRequest(String url, String type, String env,
-    [Map<String, String>? header, String? body]) async {
+Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
+    [String? body, Map<String, String>? header]) async {
   url = 'http://${maximoServerDomains[env]}.na.iko$url';
   http.Response response;
-  try {
-    if (type == 'get') {
-      response = await http.get(Uri.parse('$url&_lid=corcoop3&_lpwd=maximo'));
-      var parsed = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        if (parsed['rdf:member'] == null) {
-          return {'status': 'empty'};
-        } else {
-          return parsed['rdf:member'] + {'status': 'results'};
+
+  if (type == 'get') {
+    try {
+      response = await http.get(Uri.parse('$url&_lid=majona&_lpwd=maximo'));
+    } catch (err) {
+      return {'status': 'Failed to Connect'};
+    }
+    print('get response');
+    print(response.body);
+    var parsed = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      if (parsed['rdfs:member'] != null) {
+        if (parsed['rdfs:member'].length == 0) {
+          parsed['status'] = 'empty';
+          return parsed;
         }
-      } else {
-        return parsed + {'status': 'Invalid Response Code from Maximo'};
       }
-    } else if (type == 'post') {
+      parsed['status'] = 'results';
+      return parsed;
+    } else {
+      return parsed + {'status': 'Invalid Response Code from Maximo'};
+    }
+  } else if (type == 'post') {
+    header ??= {'preview': '1', 'Content-Type': 'text/plain'};
+    try {
       response = await http.post(
-        Uri.parse('$url?action=importfile&lean=1&_lid=corcoop3&_lpwd=maximo'),
-        headers: header, // TODO preview first then real upload
+        Uri.parse('$url?action=importfile&lean=1&_lid=majona&_lpwd=maximo'),
+        headers: header,
         body: body,
       );
-      return {'status': 'TODO'};
-    } else {
-      return {'status': 'TODO'};
+    } catch (err) {
+      return {'status': 'Failed to Connect'};
     }
-  } catch (err) {
-    return {'status': 'Failed to Connect'};
+    // debugger();
+    print('post response');
+    print(response.body);
+    var parsed = jsonDecode(response.body);
+    if (parsed['Error'] != null) {
+      return {'status': response.body};
+    }
+    if (parsed['invaliddoc'] != null) {
+      if (parsed['invaliddoc'] > 0) {
+        return {'status': 'failed'};
+      }
+    }
+    if (parsed['totaldoc'] != null && parsed['validdoc'] != null) {
+      if (parsed['totaldoc'] == parsed['validdoc']) {
+        // preview passed
+        header.remove('preview');
+        try {
+          response = await http.post(
+            Uri.parse('$url?action=importfile&lean=1&_lid=majona&_lpwd=maximo'),
+            headers: header,
+            body: body,
+          );
+        } catch (err) {
+          return {'status': 'Failed to Connect'};
+        }
+        // debugger();
+        print('post response');
+        print(response.body);
+        parsed = jsonDecode(response.body);
+        if (parsed['Error'] != null) {
+          return {'status': response.body};
+        }
+        if (parsed['validdoc'] != null) {
+          if (parsed['validdoc'] > 0) {
+            return {'status': 'uploaded'};
+          }
+        }
+      }
+    }
+    return {'status': 'Unknown'};
+  } else {
+    // not post or get
+    return {'status': 'TODO'};
   }
 }

@@ -223,6 +223,7 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
       craftCode[joblabor.laborType]!,
       joblabor.hours.toString(),
       joblabor.quantity.toString(),
+      orgID,
     ]);
   }
   for (final jobasset in jobplan.jobasset) {
@@ -232,7 +233,9 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
       jobplan.jpnum,
       '0', //PLUSCREVNUM
       jobasset.assetNumber,
-      '0' //ISDEFAULTASSETSP
+      '0', //ISDEFAULTASSETSP
+      orgID,
+      siteID,
     ]);
   }
   for (final jobtask in jobplan.jobtask) {
@@ -266,19 +269,26 @@ Map<String, List<List<String>>> generateMeterJobplan(
       final jpnum =
           '${asset.assetNumber}${meterCode}CBM${meter.craft}${observation.code.substring(1, 3)}';
       generated['JobPlan']!.add([
+        '', //orgid
+        '', //siteid
         jpnum,
+        '0', //pluscrevnum
         '${asset.name} ${meter.inspect} $meterNumber - CBM - ${crafts[meter.craft]}',
         '${meter.inspect} $meterNumber - ${observation.description} - ${observation.action} ${meter.inspect} $meterNumber',
         'ACTIVE',
         personGroups[meter.craft]!,
         meter.condition,
-        '0',
         '3',
         'CBM',
         'PM',
-        '1'
+        '1',
+        'N',
+        'N',
+        ''
       ]);
       generated['JobTask']!.add([
+        '',
+        '',
         jpnum,
         '0',
         '10',
@@ -288,6 +298,8 @@ Map<String, List<List<String>>> generateMeterJobplan(
         "<div>1. Strictly follow all IKO, plant and common sense safety procedures when executing each and all tasks.</div>\n<div>2. Clean off all debris from asset being worked on and related work area.</div>\n<div>3. Record all work done and all parts used, and all observations as each task is executed.</div>\n<div>4. Ensure all applicable IKO SOP's are followed when performing each task.</div>\n<div>5. If any suspect conditions or components are found that may cause operating problems before the next PM cycle, immediately report these to the maintenance supervisor or designate.</div>",
       ]);
       generated['JobTask']!.add([
+        '',
+        '',
         jpnum,
         '0',
         '20',
@@ -297,6 +309,8 @@ Map<String, List<List<String>>> generateMeterJobplan(
         "<div></div>",
       ]);
       generated['JobTask']!.add([
+        '',
+        '',
         jpnum,
         '0',
         '30',
@@ -306,20 +320,24 @@ Map<String, List<List<String>>> generateMeterJobplan(
         "<div>1. Remove any garbage from area and dispose.</div>\n<div>2. Ensure that all tools are removed from the area and returned to their proper storage location.</div>\n<div>3. Clean all lubricate surfaces and areas.</div>\n<div>4. Remove all lock outs.</div>\n<div>5. Review the work orders assuring that all reported requirements have been fully satisfied, all parts that consumed are documented, and all adjustments made are recorded. If any concern still exists about the condition of this piece of equipment notify the supervisor immediately.</div>\n<div>6. Record the time taken to execute the whole work order.</div>\n<div>7. Hand in all replaced components with work order to Supervisor for analysis.</div>",
       ]);
       generated['JobLabor']!.add([
+        '',
+        '',
         jpnum,
         '0', //PLUSCREVNUM
-        siteIDAndOrgID[asset.siteid]!,
         craftCode[meter.craft]!,
         '1',
         '1',
+        siteIDAndOrgID[asset.siteid]!,
       ]);
       generated['JPASSETLINK']!.add([
+        '',
+        '',
         jpnum,
         '0', //PLUSCREVNUM
+        asset.assetNumber,
+        '0', //ISDEFAULTASSETSP
         siteIDAndOrgID[asset.siteid]!,
         asset.siteid,
-        asset.assetNumber,
-        '0' //ISDEFAULTASSETSP
       ]);
       generated['MeasurePoint2']!.add([
         asset.siteid,

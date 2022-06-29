@@ -84,16 +84,19 @@ class _PmCheckPageState extends State<PmCheckPage> {
               child: const Text('ConvertToTemplate'),
             ),
             ElevatedButton(
-              onPressed: () {
-                final thing = uploadToMaximo(
+              onPressed: () async {
+                final thing = await uploadToMaximo(
                     generateUploads(parsedTemplates[state[0]][state[1]].maximo),
                     maximoServerSelected);
                 print('done');
+                setState(() {
+                  temp = writeToCSV(thing);
+                });
                 // print(thing);
               },
               child: const Text('Just DO IT'),
             ),
-            Text(temp)
+            SelectableText(temp)
           ],
         ))
       ];
@@ -250,8 +253,25 @@ class _PmCheckPageState extends State<PmCheckPage> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final thing = await findAvailablePMNumber(
-                      'S4790W1INRM', 'GJ', maximoServerSelected, 'INR', 1);
+                  final thing = await uploadGeneric([
+                    'IKO-CAD',
+                    'AA',
+                    'AAS3200W1INRM',
+                    '0',
+                    'Cooling Section Spray Bars - 1 Weeks - Routine Inspection - Mechanical',
+                    '',
+                    'ACTIVE',
+                    'MECHSUP',
+                    'CR01',
+                    '2',
+                    'INR',
+                    'PM',
+                    '1',
+                    'N',
+                    'N',
+                    ''
+                  ], maximoServerSelected, 'JobPlan',
+                      '/maxrest/oslc/os/iko_jobplan');
                   print(thing);
                 },
                 child: const Text('GetObservation'),

@@ -79,7 +79,7 @@ Future<PMName> generateName(
     replaceable[1] = '${replaceable[1]} - ${crafts[craft]}';
   }
   final counter = await findAvailablePMNumber(
-      number, pmdetails.siteId!, maximoServerSelected, wotype, 2);
+      number, pmdetails.siteId!, maximoServerSelected, wotype, 3);
   if (counter > 0) {
     if (wotype != 'LC1') {
       number = '$number$counter';
@@ -135,10 +135,6 @@ Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,
     }
   }
   return counter;
-}
-
-String getParent() {
-  return "A0001";
 }
 
 Future<bool> checkPMNumber(String number, String siteid, String env) async {

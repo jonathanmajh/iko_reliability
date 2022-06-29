@@ -11,14 +11,14 @@ Map<String, String> maximoServerDomains = {
 Future<bool> existPmNumberMaximo(
     String pmNumber, String siteid, String env) async {
   final url =
-      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/mxl_pm?oslc.select=pmnum,siteid&oslc.pageSize=10&oslc.where=pmnum="$pmNumber"%20and%20siteid="$siteid"&_lid=corcoop3&_lpwd=maximo';
+      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_pm?oslc.select=pmnum,siteid&oslc.pageSize=10&oslc.where=pmnum="$pmNumber"%20and%20siteid="$siteid"&_lid=corcoop3&_lpwd=maximo';
   // TODO login management
   // save login in settings box
   try {
     var response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       var parsed = jsonDecode(response.body);
-      if (parsed['rdf:member'] == null) {
+      if (parsed['rdfs:member'].length == 0) {
         return true;
       }
     } else {
@@ -34,14 +34,14 @@ Future<bool> existPmNumberMaximo(
 
 Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
   final url =
-      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/mxl_jobplan?oslc.select=jpnum&oslc.pageSize=10&oslc.where=jpnum="$jpNumber"&_lid=corcoop3&_lpwd=maximo';
+      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_jobplan?oslc.select=jpnum&oslc.pageSize=10&oslc.where=jpnum="$jpNumber"&_lid=corcoop3&_lpwd=maximo';
   // TODO login management
   // save login in settings box
   try {
     var response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       var parsed = jsonDecode(response.body);
-      if (parsed['rdf:member'] == null) {
+      if (parsed['rdfs:member'].length == 0) {
         return true;
       }
     } else {
@@ -58,14 +58,14 @@ Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
 Future<bool> existRouteNumberMaximo(
     String routeNumber, String siteid, String env) async {
   final url =
-      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/mxl_routes?oslc.select=route,siteid&oslc.pageSize=10&oslc.where=route="$routeNumber"%20and%20siteid="$siteid"&_lid=corcoop3&_lpwd=maximo';
+      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_route?oslc.select=route,siteid&oslc.pageSize=10&oslc.where=route="$routeNumber"%20and%20siteid="$siteid"&_lid=corcoop3&_lpwd=maximo';
   // TODO login management
   // save login in settings box
   try {
     var response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       var parsed = jsonDecode(response.body);
-      if (parsed['rdf:member'] == null) {
+      if (parsed['rdfs:member'].length == 0) {
         return true;
       }
     } else {
