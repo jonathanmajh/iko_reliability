@@ -170,8 +170,8 @@ const tableHeaders = {
     'JP_JPNUM',
     'PLUSCREVNUM',
     'ASSETNUM',
-    'ISDEFAULTASSETSP'
-        'ORGID',
+    'ISDEFAULTASSETSP',
+    'ORGID',
     'SITEID',
   ],
   'JobTask': [

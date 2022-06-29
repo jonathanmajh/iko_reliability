@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:iko_reliability/admin/asset_storage.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 
@@ -243,6 +245,7 @@ Future<PMMaximo> generatePM(
       final woType = pmDetails.workOrderType!;
       final counter = await findAvailablePMNumber(
           jpnumber, pmDetails.siteId!, maximoServerSelected, woType, 2);
+      jpnumber = '${pmDetails.siteId}$jpnumber';
       if (counter > 0) {
         if (woType != 'LC1') {
           jpnumber = '$jpnumber$counter';
