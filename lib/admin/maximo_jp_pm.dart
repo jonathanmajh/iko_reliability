@@ -11,7 +11,7 @@ Map<String, String> maximoServerDomains = {
 Future<bool> existPmNumberMaximo(
     String pmNumber, String siteid, String env) async {
   final url =
-      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_pm?oslc.select=pmnum,siteid&oslc.pageSize=10&oslc.where=pmnum="$pmNumber"%20and%20siteid="$siteid"&_lid=corcoop3&_lpwd=maximo';
+      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_pm?oslc.select=pmnum,siteid&oslc.pageSize=10&oslc.where=pmnum="$pmNumber"%20and%20siteid="$siteid"&_lid=majona&_lpwd=happy818';
   // TODO login management
   // save login in settings box
   try {
@@ -34,7 +34,7 @@ Future<bool> existPmNumberMaximo(
 
 Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
   final url =
-      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_jobplan?oslc.select=jpnum&oslc.pageSize=10&oslc.where=jpnum="$jpNumber"&_lid=corcoop3&_lpwd=maximo';
+      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_jobplan?oslc.select=jpnum&oslc.pageSize=10&oslc.where=jpnum="$jpNumber"&_lid=majona&_lpwd=happy818';
   // TODO login management
   // save login in settings box
   try {
@@ -58,7 +58,7 @@ Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
 Future<bool> existRouteNumberMaximo(
     String routeNumber, String siteid, String env) async {
   final url =
-      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_route?oslc.select=route,siteid&oslc.pageSize=10&oslc.where=route="$routeNumber"%20and%20siteid="$siteid"&_lid=corcoop3&_lpwd=maximo';
+      'http://${maximoServerDomains[env]}.na.iko/maxrest/oslc/os/iko_route?oslc.select=route,siteid&oslc.pageSize=10&oslc.where=route="$routeNumber"%20and%20siteid="$siteid"&_lid=majona&_lpwd=happy818';
   // TODO login management
   // save login in settings box
   try {

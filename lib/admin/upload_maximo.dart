@@ -71,7 +71,8 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   if (uploadData.containsKey('MeasurePoint')) {
     print('uploading measurepoint');
     for (int i = 0; i < uploadData['MeasurePoint']!.length; i++) {
-      if (await isNewMeasurePoint(uploadData['MeasurePoint']![i][3], env)) {
+      if (await isNewMeasurePoint(uploadData['MeasurePoint']![i][3],
+          uploadData['MeasurePoint']![i][0], env)) {
         result = await uploadGeneric(
           uploadData['MeasurePoint']![i],
           env,
@@ -91,7 +92,8 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   if (uploadData.containsKey('MeasurePoint2')) {
     print('uploading measurepoint2');
     for (int i = 0; i < uploadData['MeasurePoint2']!.length; i++) {
-      if (await isNewMeasurePoint2(uploadData['MeasurePoint2']![i][3], env)) {
+      if (await isNewMeasurePoint2(uploadData['MeasurePoint2']![i][3],
+          uploadData['MeasurePoint2']![i][0], env)) {
         result = await uploadGeneric(
           uploadData['MeasurePoint2']![i],
           env,
@@ -323,9 +325,9 @@ Future<bool> isNewJobPlan(String jpNumber, String maximoEnvironment) async {
 }
 
 Future<bool> isNewMeasurePoint(
-    String measurePoint, String maximoEnvironment) async {
+    String measurePoint, String siteid, String maximoEnvironment) async {
   final url =
-      '/maxrest/oslc/os/iko_measurepoint?oslc.select=pointnum&oslc.where=pointnum="$measurePoint"';
+      '/maxrest/oslc/os/iko_measurepoint?oslc.select=pointnum&oslc.where=pointnum="$measurePoint" and siteid="$siteid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -334,9 +336,10 @@ Future<bool> isNewMeasurePoint(
   }
 }
 
-Future<bool> isNewMeasurePoint2(String jpnum, String maximoEnvironment) async {
+Future<bool> isNewMeasurePoint2(
+    String jpnum, String siteid, String maximoEnvironment) async {
   final url =
-      '/maxrest/oslc/os/iko_measurepoint?oslc.select=charpointaction&oslc.where=charpointaction.jpnum="$jpnum"';
+      '/maxrest/oslc/os/iko_measurepoint?oslc.select=charpointaction&oslc.where=charpointaction.jpnum="$jpnum" and siteid="$siteid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -376,7 +379,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
   http.Response response;
   if (type == 'get') {
     try {
-      response = await http.get(Uri.parse('$url&_lid=majona&_lpwd=maximo'));
+      response = await http.get(Uri.parse('$url&_lid=majona&_lpwd=happy818'));
     } catch (err) {
       return {'status': 'Failed to Connect'};
     }
@@ -399,7 +402,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     header ??= {'preview': '1', 'Content-Type': 'text/plain'};
     try {
       response = await http.post(
-        Uri.parse('$url?action=importfile&lean=1&_lid=majona&_lpwd=maximo'),
+        Uri.parse('$url?action=importfile&lean=1&_lid=majona&_lpwd=happy818'),
         headers: header,
         body: body,
       );
@@ -423,7 +426,8 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
         header.remove('preview');
         try {
           response = await http.post(
-            Uri.parse('$url?action=importfile&lean=1&_lid=majona&_lpwd=maximo'),
+            Uri.parse(
+                '$url?action=importfile&lean=1&_lid=majona&_lpwd=happy818'),
             headers: header,
             body: body,
           );
