@@ -13,7 +13,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
     print('uploading meters');
     for (int i = 0; i < uploadData['Meter']!.length; i++) {
       if (await isNewMeter(uploadData['Meter']![i][0], env)) {
-        debugger();
         result = await uploadGeneric(
           uploadData['Meter']![i],
           env,
@@ -50,8 +49,8 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   if (uploadData.containsKey('JobPlan')) {
     print('uploading jobplan');
     for (int i = 0; i < uploadData['JobPlan']!.length; i++) {
-      if (uploadData['JobPlan']![i][9] == 'CBM') {
-        if (!(await isNewJobPlan(uploadData['JobPlan']![i][0], env))) {
+      if (uploadData['JobPlan']![i][10] == 'CBM') {
+        if (!(await isNewJobPlan(uploadData['JobPlan']![i][2], env))) {
           uploadData['JobPlan']![i].add('~');
           continue;
         }
@@ -163,9 +162,9 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   if (uploadData.containsKey('JobLabor')) {
     print('uploading joblabor');
     for (int i = 0; i < uploadData['JobLabor']!.length; i++) {
-      if (uploadData['JobLabor']![i][0].contains('CBM')) {
-        if (!(await isNewJobLabor(uploadData['JobLabor']![i][0],
-            uploadData['JobLabor']![i][2], env))) {
+      if (uploadData['JobLabor']![i][2].contains('CBM')) {
+        if (!(await isNewJobLabor(uploadData['JobLabor']![i][2],
+            uploadData['JobLabor']![i][7], env))) {
           uploadData['JobLabor']![i].add('~');
           continue;
         }
@@ -186,10 +185,10 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   if (uploadData.containsKey('JPASSETLINK')) {
     print('uploading jobasset');
     for (int i = 0; i < uploadData['JPASSETLINK']!.length; i++) {
-      if (uploadData['JPASSETLINK']![i][0].contains('CBM')) {
+      if (uploadData['JPASSETLINK']![i][2].contains('CBM')) {
         if (!(await isNewJobAsset(
-          uploadData['JPASSETLINK']![i][0],
           uploadData['JPASSETLINK']![i][2],
+          uploadData['JPASSETLINK']![i][7],
           uploadData['JPASSETLINK']![i][4],
           env,
         ))) {
@@ -215,10 +214,12 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
     print('uploading jobtask');
     // no checks
     for (int i = 0; i < uploadData['JobTask']!.length; i++) {
-      // do not upload if CBM job plan already exists
-      if (uploadData['JobTask']![i][0].contains('CBM')) {
-        uploadData['JobTask']![i].add('~');
-        continue;
+      if (uploadData['JobTask']![i][2].contains('CBM')) {
+        if (!(await isNewJobTask(
+            uploadData['JobTask']![i][2], uploadData['JobTask']![i][4], env))) {
+          uploadData['JobTask']![i].add('~');
+          continue;
+        }
       }
       result = await uploadGeneric(
         uploadData['JobTask']![i],
@@ -275,6 +276,19 @@ Future<bool> isNewJobLabor(
   // is only needed for CBMs
   final url =
       '/maxrest/oslc/os/iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber" and joblabor.orgid="$orgid"';
+  final result = await maximoRequest(url, 'get', maximoEnvironment);
+  if (result['status']! == 'empty') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+Future<bool> isNewJobTask(
+    String jpNumber, String jptask, String maximoEnvironment) async {
+  // is only needed for CBMs
+  final url =
+      '/maxrest/oslc/os/iko_jobtask?oslc.select=*&oslc.where=jpnum="$jpNumber" and jobtask.jptask="$jptask"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -360,7 +374,6 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     [String? body, Map<String, String>? header]) async {
   url = 'http://${maximoServerDomains[env]}.na.iko$url';
   http.Response response;
-
   if (type == 'get') {
     try {
       response = await http.get(Uri.parse('$url&_lid=majona&_lpwd=maximo'));
@@ -393,7 +406,6 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     } catch (err) {
       return {'status': 'Failed to Connect'};
     }
-    // debugger();
     print('post response');
     print(response.body);
     var parsed = jsonDecode(response.body);
@@ -418,7 +430,6 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
         } catch (err) {
           return {'status': 'Failed to Connect'};
         }
-        // debugger();
         print('post response');
         print(response.body);
         parsed = jsonDecode(response.body);
