@@ -23,13 +23,26 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
       pmpkg.route?.routeNumber ?? '',
       pmpkg.leadTime.toString(),
       pmpkg.priority.toString(),
-      '${pmpkg.nextDate}T00:00:00',
+      pmpkg.nextDate == null ? '' : '${pmpkg.nextDate}T00:00:00',
       pmpkg.orgID,
       pmpkg.targetStartTime,
       pmpkg.ikoPMHistoryNotes ?? '',
       pmpkg.fmecaPM ? 'Y' : 'N'
     ]
   ];
+  // job plan
+  generated['JobPlan'] = [];
+  generated['JobMaterial'] = [];
+  generated['JobService'] = [];
+  generated['JobLabor'] = [];
+  generated['JPASSETLINK'] = [];
+  generated['JobTask'] = [];
+  generated = generateJobplan(
+    pmpkg.jobplan,
+    pmpkg.siteID,
+    pmpkg.orgID,
+    generated,
+  );
   // route
   if (pmpkg.route != null) {
     generated['Route'] = [
@@ -55,19 +68,6 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
         pmpkg.siteID,
       ]);
     }
-    // job plan
-    generated['JobPlan'] = [];
-    generated['JobMaterial'] = [];
-    generated['JobService'] = [];
-    generated['JobLabor'] = [];
-    generated['JPASSETLINK'] = [];
-    generated['JobTask'] = [];
-    generated = generateJobplan(
-      pmpkg.jobplan,
-      pmpkg.siteID,
-      pmpkg.orgID,
-      generated,
-    );
 
     // Asset update for fmeca
     generated['Asset'] = [];

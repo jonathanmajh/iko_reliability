@@ -164,7 +164,7 @@ class ParsedTemplate {
           var nextRow = decoder.tables[sheet]!.rows[i + 1];
           pmNumber++;
           pmTemplates[filename][pmNumber] = ParsedTemplate(
-              nextDueDate: nextRow[2].substring(0, 10),
+              nextDueDate: nextRow[2]?.substring(0, 10),
               siteId: nextRow[3],
               frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))
                   ? nextRow[4].substring(0, 1)

@@ -100,26 +100,40 @@ Future<PMName> generateName(
   );
 }
 
+// consider making recursive would probably be cleaner
 Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,
     String woType, int checkType) async {
   // checkType 1 = PM + JP
   // checkType 2 = JP
   // checkType 3 = PM + JP + Route
   // assume type 2 by default
-  bool availablePM = true;
-  bool availableJP = true;
-  bool availableRoute = true;
-  if (checkType == 1) {
-    availablePM = await checkPMNumber(pmNumber, siteID, server);
-  }
-  availableJP = await checkJPNumber('$siteID$pmNumber', server);
-  if (checkType == 3) {
-    availableRoute = await checkRouteNumber(pmNumber, siteID, server);
-    availablePM = await checkPMNumber(pmNumber, siteID, server);
-  }
+  bool existPM = false;
+  bool existJP = false;
+  bool existRoute = false;
   int counter = 0;
+  if (checkType == 1) {
+    existPM = existPmNumberCache(pmNumber, siteID);
+  }
+  existJP = existJpNumberCache('$siteID$pmNumber');
+  if (checkType == 3) {
+    existRoute = existRouteNumberCache(pmNumber, siteID);
+    existPM = existPmNumberCache(pmNumber, siteID);
+  }
+  if (existRoute == false && existJP == false && existPM == false) {
+    if (checkType == 1) {
+      existPM = await existPmNumberMaximo(pmNumber, siteID, server);
+    }
+    existJP = await existJpNumberMaximo('$siteID$pmNumber', server);
+    if (checkType == 3) {
+      existRoute = await existRouteNumberMaximo(pmNumber, siteID, server);
+      existPM = await existPmNumberMaximo(pmNumber, siteID, server);
+    }
+    if (existRoute == false && existJP == false && existPM == false) {
+      return counter;
+    }
+  }
   String tempNumber = pmNumber;
-  while (!availablePM || !availableJP || !availableRoute) {
+  while (existPM || existJP || existRoute) {
     counter++;
     if (woType != 'LC1') {
       tempNumber = '$pmNumber$counter';
@@ -127,13 +141,23 @@ Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,
       tempNumber =
           '${pmNumber.substring(0, pmNumber.length - 2)}${counter + 1}${pmNumber.substring(pmNumber.length - 1)}';
     }
-    availableJP = await checkJPNumber('$siteID$tempNumber', server);
+    existJP = existJpNumberCache('$siteID$tempNumber');
     if (checkType == 1) {
-      availablePM = await checkPMNumber(tempNumber, siteID, server);
+      existPM = existPmNumberCache(tempNumber, siteID);
     }
     if (checkType == 3) {
-      availableRoute = await checkRouteNumber(tempNumber, siteID, server);
-      availablePM = await checkPMNumber(tempNumber, siteID, server);
+      existRoute = existRouteNumberCache(tempNumber, siteID);
+      existPM = existPmNumberCache(tempNumber, siteID);
+    }
+    if (existRoute == false && existJP == false && existPM == false) {
+      existJP = await existJpNumberMaximo('$siteID$tempNumber', server);
+      if (checkType == 1) {
+        existPM = await existPmNumberMaximo(tempNumber, siteID, server);
+      }
+      if (checkType == 3) {
+        existRoute = await existRouteNumberMaximo(tempNumber, siteID, server);
+        existPM = await existPmNumberMaximo(tempNumber, siteID, server);
+      }
     }
   }
   return counter;

@@ -19,7 +19,7 @@ Future<bool> existPmNumberMaximo(
     if (response.statusCode == 200) {
       var parsed = jsonDecode(response.body);
       if (parsed['rdfs:member'].length == 0) {
-        return true;
+        return false;
       }
     } else {
       print('Invalid Response from Maximo');
@@ -27,9 +27,9 @@ Future<bool> existPmNumberMaximo(
     }
   } catch (err) {
     print('Failed to Connect');
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
 
 Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
@@ -42,7 +42,7 @@ Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
     if (response.statusCode == 200) {
       var parsed = jsonDecode(response.body);
       if (parsed['rdfs:member'].length == 0) {
-        return true;
+        return false;
       }
     } else {
       print('Invalid Response from Maximo');
@@ -50,9 +50,9 @@ Future<bool> existJpNumberMaximo(String jpNumber, String env) async {
     }
   } catch (err) {
     print('Failed to Connect');
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
 
 Future<bool> existRouteNumberMaximo(
@@ -66,7 +66,7 @@ Future<bool> existRouteNumberMaximo(
     if (response.statusCode == 200) {
       var parsed = jsonDecode(response.body);
       if (parsed['rdfs:member'].length == 0) {
-        return true;
+        return false;
       }
     } else {
       print('Invalid Response from Maximo');
@@ -74,7 +74,7 @@ Future<bool> existRouteNumberMaximo(
     }
   } catch (err) {
     print('Failed to Connect');
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
