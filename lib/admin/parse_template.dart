@@ -163,6 +163,10 @@ class ParsedTemplate {
           readRouteAsset = false;
           var nextRow = decoder.tables[sheet]!.rows[i + 1];
           pmNumber++;
+          String workOrderType = nextRow[6].substring(0, 3);
+          if (workOrderType == 'LC1') {
+            workOrderType = 'LIF';
+          }
           pmTemplates[filename][pmNumber] = ParsedTemplate(
               nextDueDate: nextRow[2]?.substring(0, 10),
               siteId: nextRow[3],
@@ -170,7 +174,7 @@ class ParsedTemplate {
                   ? nextRow[4].substring(0, 1)
                   : null,
               frequency: nextRow[5],
-              workOrderType: nextRow[6].substring(0, 3),
+              workOrderType: workOrderType,
               processCondition: nextRow[7].substring(0, 4),
               pmAsset: nextRow[0],
               pmName: nextRow[8] ?? 'Generating Name...',

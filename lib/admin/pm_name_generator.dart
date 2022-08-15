@@ -52,7 +52,7 @@ Future<PMName> generateName(
     number = '$number${pmdetails.frequencyUnit}${pmdetails.frequency}';
     replaceable[0] =
         '${replaceable[0]}${pmdetails.frequencyUnit}${pmdetails.frequency}';
-    if (wotype != 'LC1') {
+    if (wotype != 'LIF') {
       replaceable[1] =
           '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
       name =
@@ -60,36 +60,40 @@ Future<PMName> generateName(
     }
   }
 // add work order type
-  number = '$number$wotype';
-  if (wotype != 'LC1') {
+  if (wotype != 'LIF') {
+    number = '$number$wotype';
     name = '$name ${workType[wotype]}';
     replaceable[0] = '${replaceable[0]}$wotype';
     replaceable[1] = '${replaceable[1]} ${workType[wotype]}';
   } else {
+    number = '${number}LC1';
     name = '$name - LC-';
     replaceable[0] = '${replaceable[0]}LC!!!';
     replaceable[1] = '${replaceable[1]} - LC-!!!';
     // properly assign letter after number has been determined
+    // TODO add the replaced component to the end of the name
   }
   // add craft
   var craft = pmdetails.crafts[0].laborType;
   craft = craft.substring(craft.length - 1);
   number = '$number$craft';
   replaceable[0] = '${replaceable[0]}$craft';
-  if (wotype != 'LC1') {
+  if (wotype != 'LIF') {
     name = '$name - ${crafts[craft]}';
     replaceable[1] = '${replaceable[1]} - ${crafts[craft]}';
   }
   final counter = await findAvailablePMNumber(
       number, pmdetails.siteId!, maximoServerSelected, wotype, 3);
   if (counter > 0) {
-    if (wotype != 'LC1') {
+    if (wotype != 'LIF') {
       number = '$number$counter';
     } else {
       number =
           '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
       name = '$name${numberToLetter(counter)}';
     }
+  } else {
+    name = '${name}A';
   }
   return PMName(
     pmNumber: number,
@@ -135,7 +139,7 @@ Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,
   String tempNumber = pmNumber;
   while (existPM || existJP || existRoute) {
     counter++;
-    if (woType != 'LC1') {
+    if (woType != 'LIF') {
       tempNumber = '$pmNumber$counter';
     } else {
       tempNumber =

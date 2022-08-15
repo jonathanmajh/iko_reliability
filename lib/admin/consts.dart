@@ -17,7 +17,7 @@ const workType = {
   'ENV': 'Environmental',
   'HKG': 'Housekeeping',
   'INR': 'Routine Inspection',
-  // 'LC1': 'Life Cycle',
+  'LIF': 'Life Cycle',
   'LUB': 'Lubrication',
   'PDM': 'Predictive Maintenance',
   'PEM': 'Pre-emptive Maintenance',

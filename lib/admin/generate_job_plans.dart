@@ -247,7 +247,7 @@ Future<PMMaximo> generatePM(
           jpnumber, pmDetails.siteId!, maximoServerSelected, woType, 2);
       jpnumber = '${pmDetails.siteId}$jpnumber';
       if (counter > 0) {
-        if (woType != 'LC1') {
+        if (woType != 'LIF') {
           jpnumber = '$jpnumber$counter';
         } else {
           jpnumber = jpnumber.replaceFirst('!!!', '$counter');
