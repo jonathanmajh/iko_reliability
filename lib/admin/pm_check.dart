@@ -30,6 +30,15 @@ class _PmCheckPageState extends State<PmCheckPage> {
   List<dynamic> _selected = [];
   Map<String, dynamic> parsedTemplates = {};
   String temp = '';
+  final pmNameFieldController = TextEditingController();
+  final fmecaPackageController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    pmNameFieldController.dispose();
+    super.dispose();
+  }
 
   void _show(toastMsg) {
     final msg = toastMsg;
@@ -40,6 +49,10 @@ class _PmCheckPageState extends State<PmCheckPage> {
 
   List<Widget> detailedView(List<dynamic> state) {
     if (state.isNotEmpty) {
+      pmNameFieldController.text =
+          parsedTemplates[state[0]][state[1]].maximo.description;
+      fmecaPackageController.text =
+          parsedTemplates[state[0]][state[1]].maximo.jobplan.ikoPmpackage ?? '';
       return [
         GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -73,6 +86,45 @@ class _PmCheckPageState extends State<PmCheckPage> {
                     .maximo
                     .leadTime
                     .toString())),
+            ListTile(
+              title: const Text('Edit Pm Name'),
+              subtitle: TextField(
+                controller: pmNameFieldController,
+              ),
+            ),
+            ListTile(
+              title: const Text('Enter FMECA Package'),
+              subtitle: TextField(
+                controller: fmecaPackageController,
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                parsedTemplates[state[0]][state[1]].maximo.description =
+                    pmNameFieldController.text;
+                parsedTemplates[state[0]][state[1]].maximo.jobplan.description =
+                    pmNameFieldController.text;
+                if (parsedTemplates[state[0]][state[1]].maximo.route != null) {
+                  parsedTemplates[state[0]][state[1]].maximo.route.description =
+                      pmNameFieldController.text;
+                }
+                if (fmecaPackageController.text.isNotEmpty) {
+                  parsedTemplates[state[0]][state[1]].maximo.fmecaPM = true;
+                  parsedTemplates[state[0]][state[1]]
+                      .maximo
+                      .jobplan
+                      .ikoPmpackage = fmecaPackageController.text;
+                } else {
+                  parsedTemplates[state[0]][state[1]].maximo.fmecaPM = false;
+                  parsedTemplates[state[0]][state[1]]
+                      .maximo
+                      .jobplan
+                      .ikoPmpackage = null;
+                }
+                setState(() {});
+              },
+              child: const Text('Update PM'),
+            ),
             ElevatedButton(
               onPressed: () {
                 final thing =
