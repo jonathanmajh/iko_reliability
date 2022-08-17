@@ -93,7 +93,9 @@ Future<PMName> generateName(
       name = '$name${numberToLetter(counter)}';
     }
   } else {
-    name = '${name}A';
+    if (wotype == 'LIF') {
+      name = '${name}A';
+    }
   }
   return PMName(
     pmNumber: number,
