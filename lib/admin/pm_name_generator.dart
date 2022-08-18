@@ -62,9 +62,9 @@ Future<PMName> generateName(
 // add work order type
   if (wotype != 'LIF') {
     number = '$number$wotype';
-    name = '$name ${workType[wotype]}';
+    name = '$name${workType[wotype]}';
     replaceable[0] = '${replaceable[0]}$wotype';
-    replaceable[1] = '${replaceable[1]} ${workType[wotype]}';
+    replaceable[1] = '${replaceable[1]}${workType[wotype]}';
   } else {
     number = '${number}LC1';
     name = '$name - LC-';
