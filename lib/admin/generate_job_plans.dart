@@ -235,7 +235,7 @@ Future<PMMaximo> generatePM(
       ));
     } else {
       // tasks that have asset number goes in the child job plan for that asset
-      meter = generateMeterNumber(meters, task.metername, pmDetails.pmAsset);
+      meter = generateMeterNumber(meters, task.metername, task.assetNumber);
       var childTask = JobTaskMaximo(
         jptask: task.jptask,
         description: task.description,
