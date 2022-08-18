@@ -178,7 +178,7 @@ String? generateMeterNumber(
     return null;
   }
   String meter = '';
-  int meterCount = 0;
+  int meterCount = 1;
   if (meters.keys.contains(assetNumber)) {
     meter = '$metername${meterCount < 10 ? "0$meterCount" : meterCount}';
     while (meters[assetNumber]!.contains(meter)) {
