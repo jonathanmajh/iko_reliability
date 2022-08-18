@@ -74,6 +74,8 @@ void loadObservationList() async {
       var row = sheet.rows[i];
       try {
         if (row[0] != null) {
+          observations = [];
+          row[10] = row[10].toString().trim();
           observation = ObservationList(
             condition: row[12],
             extendedDescription: row[4],
@@ -91,8 +93,7 @@ void loadObservationList() async {
         }
         if (row[5] == null) {
           observation.observations = observations;
-          box.put(observation.meterGroup, observation);
-          observations = [];
+          await box.put(observation.meterGroup, observation);
         }
       } catch (err) {
         print('Row ${i + 1} is problematic\n$err');

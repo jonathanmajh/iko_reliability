@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:iko_reliability/admin/asset_storage.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 
@@ -17,9 +15,9 @@ class JobAssetMaximo {
 class JobLaborMaximo {
   final String laborType;
   final int quantity;
-  final double hours;
+  double hours;
 
-  const JobLaborMaximo({
+  JobLaborMaximo({
     required this.laborType,
     required this.quantity,
     required this.hours,
@@ -171,21 +169,43 @@ class PMMaximo {
   });
 }
 
+String? generateMeterNumber(
+    Map<String, List<String>> meters, String? metername, String? assetNumber) {
+  if (metername == null ||
+      metername == '' ||
+      assetNumber == null ||
+      assetNumber == '') {
+    return null;
+  }
+  String meter = '';
+  int meterCount = 0;
+  if (meters.keys.contains(assetNumber)) {
+    meter = '$metername${meterCount < 10 ? "0$meterCount" : meterCount}';
+    while (meters[assetNumber]!.contains(meter)) {
+      meterCount++;
+      meter = '$metername${meterCount < 10 ? "0$meterCount" : meterCount}';
+    }
+  } else {
+    meter = '${metername}01';
+  }
+  meters[assetNumber] = [meter];
+  return meter;
+}
+
 Future<PMMaximo> generatePM(
     ParsedTemplate pmDetails, String maximoServerSelected) async {
   List<JobTaskMaximo> mainJobTasks = [];
-  List<JobPlanMaximo> childJobPlans = [];
+  Map<String, JobPlanMaximo> childJobPlans = {};
   List<RouteStopMaximo> routeStops = [];
   Map<String, List<String>> meters = {};
   var sequence = 1;
   int routeTasks = 0;
   String routeType = 'NONE';
-  String meter = '';
-  int meterCount = 1;
+  String? meter;
   for (final task in pmDetails.tasks) {
     //count number of route task for calculating labor hours required
     //check if PM is child route, will set as TASK if there are child job tasks
-    if (task.metername == null || task.metername == '') {
+    if (task.assetNumber == null || task.assetNumber == '') {
       continue;
     } else {
       routeTasks++;
@@ -204,28 +224,18 @@ Future<PMMaximo> generatePM(
     }
   }
   for (final task in pmDetails.tasks) {
-    if (task.metername == null || task.metername == '') {
+    if (task.assetNumber == null || task.assetNumber == '') {
+      // everything that does not have an asset number falls under the main job plan
       mainJobTasks.add(JobTaskMaximo(
         jptask: task.jptask,
         description: task.description,
         longdescription: task.longdescription,
+        metername:
+            generateMeterNumber(meters, task.metername, pmDetails.pmAsset),
       ));
     } else {
-      if (task.assetNumber == null || task.assetNumber == '') {
-        print('asset number is empty, failed to generate child route job plan');
-      }
-      if (meters.keys.contains(task.assetNumber)) {
-        meter =
-            '${task.metername}${meterCount < 10 ? "0$meterCount" : meterCount}';
-        while (meters[task.assetNumber]!.contains(meter)) {
-          meterCount++;
-          meter =
-              '${task.metername}${meterCount < 10 ? "0$meterCount" : meterCount}';
-        }
-      } else {
-        meter = '${task.metername}01';
-      }
-      meters[task.assetNumber!] = [meter];
+      // tasks that have asset number goes in the child job plan for that asset
+      meter = generateMeterNumber(meters, task.metername, pmDetails.pmAsset);
       var childTask = JobTaskMaximo(
         jptask: task.jptask,
         description: task.description,
@@ -238,44 +248,56 @@ Future<PMMaximo> generatePM(
         hours: pmDetails.crafts[0].hours / routeTasks.toDouble(),
       );
       final asset = getAsset(pmDetails.siteId!, task.assetNumber!);
-      String jpnumber = pmDetails.uploads!.replaceable![0];
-      jpnumber = jpnumber.replaceFirst('XXXXX', asset.assetNumber);
-      String jpdescription = pmDetails.uploads!.replaceable![1];
-      jpdescription = jpdescription.replaceFirst('XXXXX', asset.name);
-      final woType = pmDetails.workOrderType!;
-      final counter = await findAvailablePMNumber(
-          jpnumber, pmDetails.siteId!, maximoServerSelected, woType, 2);
-      jpnumber = '${pmDetails.siteId}$jpnumber';
-      if (counter > 0) {
-        if (woType != 'LIF') {
-          jpnumber = '$jpnumber$counter';
-        } else {
-          jpnumber = jpnumber.replaceFirst('!!!', '$counter');
-          jpdescription =
-              jpdescription.replaceFirst('!!!', numberToLetter(counter));
+      String jpnumber;
+      if (childJobPlans.containsKey(asset.assetNumber)) {
+        jpnumber = childJobPlans[asset.assetNumber]!.jpnum;
+        childJobPlans[asset.assetNumber]!.jobtask.add(childTask);
+        childJobPlans[asset.assetNumber]!.jpduration =
+            childJobPlans[asset.assetNumber]!.jpduration +
+                (pmDetails.crafts[0].hours / routeTasks.toDouble());
+        childJobPlans[asset.assetNumber]!.joblabor[0].hours =
+            childJobPlans[asset.assetNumber]!.joblabor[0].hours +
+                (pmDetails.crafts[0].hours / routeTasks.toDouble());
+      } else {
+        jpnumber = pmDetails.uploads!.replaceable![0];
+        jpnumber = jpnumber.replaceFirst('XXXXX', asset.assetNumber);
+        String jpdescription = pmDetails.uploads!.replaceable![1];
+        jpdescription = jpdescription.replaceFirst('XXXXX', asset.name);
+        final woType = pmDetails.workOrderType!;
+        final counter = await findAvailablePMNumber(
+            jpnumber, pmDetails.siteId!, maximoServerSelected, woType, 2);
+        jpnumber = '${pmDetails.siteId}$jpnumber';
+        if (counter > 0) {
+          if (woType != 'LIF') {
+            jpnumber = '$jpnumber$counter';
+          } else {
+            jpnumber = jpnumber.replaceFirst('!!!', '$counter');
+            jpdescription =
+                jpdescription.replaceFirst('!!!', numberToLetter(counter));
+          }
         }
+        routeStops.add(RouteStopMaximo(
+            routeStopID: sequence,
+            assetNumber: asset.assetNumber,
+            stopSequence: sequence,
+            jpnum: jpnumber));
+        sequence++;
+        childJobPlans[asset.assetNumber] = JobPlanMaximo(
+          description: jpdescription,
+          ikoConditions: pmDetails.processCondition!,
+          ikoPmpackage: pmDetails.pmPackageNumber,
+          ikoWorktype: woType,
+          jpduration: pmDetails.crafts[0].hours / routeTasks.toDouble(),
+          jpnum: jpnumber,
+          persongroup: personGroups[pmDetails.crafts[0].laborType
+              .substring(pmDetails.crafts[0].laborType.length - 1)]!,
+          priority: 2,
+          templatetype: 'PM',
+          joblabor: [childLabor],
+          jobtask: [childTask],
+          jobasset: [JobAssetMaximo(assetNumber: asset.assetNumber)],
+        );
       }
-      routeStops.add(RouteStopMaximo(
-          routeStopID: sequence,
-          assetNumber: asset.assetNumber,
-          stopSequence: sequence,
-          jpnum: jpnumber));
-      sequence++;
-      childJobPlans.add(JobPlanMaximo(
-        description: jpdescription,
-        ikoConditions: pmDetails.processCondition!,
-        ikoPmpackage: pmDetails.pmPackageNumber,
-        ikoWorktype: woType,
-        jpduration: pmDetails.crafts[0].hours / routeTasks.toDouble(),
-        jpnum: jpnumber,
-        persongroup: personGroups[pmDetails.crafts[0].laborType
-            .substring(pmDetails.crafts[0].laborType.length - 1)]!,
-        priority: 2,
-        templatetype: 'PM',
-        joblabor: [childLabor],
-        jobtask: [childTask],
-        jobasset: [JobAssetMaximo(assetNumber: asset.assetNumber)],
-      ));
     }
   }
   double jobhrs = 0.0;
@@ -322,7 +344,7 @@ Future<PMMaximo> generatePM(
     description: pmDetails.uploads!.pmName,
     routeStopsBecome: routeType,
     routeStops: routeStops,
-    childJobPlans: childJobPlans,
+    childJobPlans: childJobPlans.values.toList(),
   );
   print('complete job plan generation');
   return PMMaximo(

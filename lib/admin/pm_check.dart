@@ -304,27 +304,10 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 child: const Text('LoadObservation'),
               ),
               ElevatedButton(
-                onPressed: () async {
-                  final thing = await uploadGeneric([
-                    'IKO-CAD',
-                    'AA',
-                    'AAS3200W1INRM',
-                    '0',
-                    'Cooling Section Spray Bars - 1 Weeks - Routine Inspection - Mechanical',
-                    '',
-                    'ACTIVE',
-                    'MECHSUP',
-                    'CR01',
-                    '2',
-                    'INR',
-                    'PM',
-                    '1',
-                    'N',
-                    'N',
-                    ''
-                  ], maximoServerSelected, 'JobPlan',
-                      '/maxrest/oslc/os/iko_jobplan');
+                onPressed: () {
+                  final thing = getObservation('CYLA00');
                   print(thing);
+                  print(thing.observations);
                 },
                 child: const Text('GetObservation'),
               ),

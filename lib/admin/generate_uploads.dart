@@ -7,6 +7,18 @@ import 'asset_storage.dart';
 
 Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
   Map<String, List<List<String>>> generated = {};
+  generated['Asset'] = [];
+  generated['AssetMeter'] = [];
+  generated['MeasurePoint'] = [];
+  generated['Meter'] = [];
+  generated['MeasurePoint2'] = [];
+  generated['JobPlan'] = [];
+  generated['JobMaterial'] = [];
+  generated['JobService'] = [];
+  generated['JobLabor'] = [];
+  generated['JPASSETLINK'] = [];
+  generated['JobTask'] = [];
+  generated['Route_Stop'] = [];
   // pm template
   generated['PM'] = [
     [
@@ -31,12 +43,6 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
     ]
   ];
   // job plan
-  generated['JobPlan'] = [];
-  generated['JobMaterial'] = [];
-  generated['JobService'] = [];
-  generated['JobLabor'] = [];
-  generated['JPASSETLINK'] = [];
-  generated['JobTask'] = [];
   generated = generateJobplan(
     pmpkg.jobplan,
     pmpkg.siteID,
@@ -54,7 +60,7 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
         pmpkg.route!.description,
       ]
     ];
-    generated['Route_Stop'] = [];
+
     for (final routeStop in pmpkg.route!.routeStops) {
       generated['Route_Stop']!.add([
         pmpkg.orgID,
@@ -69,77 +75,6 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
       ]);
     }
 
-    // Asset update for fmeca
-    generated['Asset'] = [];
-    generated['AssetMeter'] = [];
-    generated['MeasurePoint'] = [];
-    generated['Meter'] = [];
-    generated['MeasurePoint2'] = [];
-    if (pmpkg.jobplan.ikoPmpackage != null) {
-      for (final jobplan in pmpkg.route!.childJobPlans) {
-        final jobasset = jobplan.jobasset[0];
-        // TODO will not work if it is single asset PM
-        generated['Asset']!.add([
-          pmpkg.siteID,
-          jobasset.assetNumber,
-          pmpkg.jobplan.ikoPmpackage ?? '',
-        ]);
-      }
-    }
-    // Asset Meter + Meausure Point + AssetMeter + CBM Job Plans
-    for (final jobplan in pmpkg.route!.childJobPlans) {
-      final jobtask =
-          jobplan.jobtask[0]; // child job plans should only have 1 job task
-      if (jobtask.metername != null) {
-        for (final routeStops in pmpkg.route!.routeStops) {
-          if (routeStops.jpnum == jobplan.jpnum) {
-            generated['AssetMeter']!.add([
-              pmpkg.siteID,
-              routeStops.assetNumber,
-              jobtask.metername ?? '',
-            ]);
-            final asset = getAsset(pmpkg.siteID, routeStops.assetNumber);
-            final meter = getObservation(jobtask.metername!);
-            generated['MeasurePoint']!.add([
-              pmpkg.siteID,
-              routeStops.assetNumber,
-              jobtask.metername ?? '',
-              '${routeStops.assetNumber}${jobtask.metername}',
-              '${asset.name} - ${meter.inspect} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
-            ]);
-            generated['Meter']!.add([
-              jobtask.metername ?? '',
-              jobtask.metername ?? '',
-              'CHARACTERISTIC',
-              'M-${jobtask.metername!.substring(0, jobtask.metername!.length - 2)}'
-            ]);
-            final newGen = generateMeterJobplan(
-                getAsset(pmpkg.siteID, routeStops.assetNumber),
-                jobtask.metername!);
-            generated['JobPlan'] = [
-              ...generated['JobPlan']!,
-              ...newGen['JobPlan']!
-            ];
-            generated['JobLabor'] = [
-              ...generated['JobLabor']!,
-              ...newGen['JobLabor']!
-            ];
-            generated['JPASSETLINK'] = [
-              ...generated['JPASSETLINK']!,
-              ...newGen['JPASSETLINK']!
-            ];
-            generated['JobTask'] = [
-              ...generated['JobTask']!,
-              ...newGen['JobTask']!
-            ];
-            generated['MeasurePoint2'] = [
-              ...generated['MeasurePoint2']!,
-              ...newGen['MeasurePoint2']!
-            ];
-          }
-        }
-      }
-    }
     // child job plan
     if (pmpkg.route!.childJobPlans.isNotEmpty) {
       for (var jobplan in pmpkg.route!.childJobPlans) {
@@ -149,6 +84,70 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
           pmpkg.orgID,
           generated,
         );
+      }
+    }
+  }
+
+  // label asset as FMECA asset
+  if (pmpkg.jobplan.ikoPmpackage != null) {
+    for (final jobplan in pmpkg.route!.childJobPlans) {
+      final jobasset = jobplan.jobasset[0];
+      // TODO will not work if it is single asset PM
+      generated['Asset']!.add([
+        pmpkg.siteID,
+        jobasset.assetNumber,
+        pmpkg.jobplan.ikoPmpackage ?? '',
+      ]);
+    }
+  }
+  // Asset Meter + Meausure Point + AssetMeter + CBM Job Plans
+  for (final jobplan in [...pmpkg.route?.childJobPlans ?? [], pmpkg.jobplan]) {
+    for (final jobtask in jobplan.jobtask) {
+      // job plan can have multiple job tasks
+      if (jobtask.metername != null) {
+        String assetNumber = jobplan.jobasset[0].assetNumber;
+        generated['AssetMeter']!.add([
+          pmpkg.siteID,
+          assetNumber,
+          jobtask.metername ?? '',
+        ]);
+        final asset = getAsset(pmpkg.siteID, assetNumber);
+        final meter = getObservation(jobtask.metername!);
+        generated['MeasurePoint']!.add([
+          pmpkg.siteID,
+          assetNumber,
+          jobtask.metername ?? '',
+          '$assetNumber${jobtask.metername}',
+          '${asset.name} - ${meter.inspect} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
+        ]);
+        generated['Meter']!.add([
+          jobtask.metername ?? '',
+          jobtask.metername ?? '',
+          'CHARACTERISTIC',
+          'M-${jobtask.metername!.substring(0, jobtask.metername!.length - 2)}'
+        ]);
+        final newGen = generateMeterJobplan(
+            getAsset(pmpkg.siteID, assetNumber), jobtask.metername!);
+        generated['JobPlan'] = [
+          ...generated['JobPlan']!,
+          ...newGen['JobPlan']!
+        ];
+        generated['JobLabor'] = [
+          ...generated['JobLabor']!,
+          ...newGen['JobLabor']!
+        ];
+        generated['JPASSETLINK'] = [
+          ...generated['JPASSETLINK']!,
+          ...newGen['JPASSETLINK']!
+        ];
+        generated['JobTask'] = [
+          ...generated['JobTask']!,
+          ...newGen['JobTask']!
+        ];
+        generated['MeasurePoint2'] = [
+          ...generated['MeasurePoint2']!,
+          ...newGen['MeasurePoint2']!
+        ];
       }
     }
   }
@@ -257,13 +256,15 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
 Map<String, List<List<String>>> generateMeterJobplan(
     Asset asset, String meterCode) {
   Map<String, List<List<String>>> generated = {};
-  final meter = getObservation(meterCode);
-  final meterNumber = int.parse(meterCode.substring(meterCode.length - 2));
   generated['JobPlan'] = [];
+  generated['JobTask'] = [];
   generated['JobLabor'] = [];
   generated['JPASSETLINK'] = [];
-  generated['JobTask'] = [];
   generated['MeasurePoint2'] = [];
+
+  final meter = getObservation(meterCode);
+  final meterNumber = int.parse(meterCode.substring(meterCode.length - 2));
+
   for (final observation in meter.observations) {
     if (!['C01', 'C98'].contains(observation.code)) {
       final jpnum =

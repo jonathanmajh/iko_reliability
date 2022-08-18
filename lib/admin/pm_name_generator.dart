@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:iko_reliability/admin/maximo_jp_pm.dart';
 import 'package:iko_reliability/admin/pm_jp_storage.dart';
 
@@ -54,7 +52,7 @@ Future<PMName> generateName(
         '${replaceable[0]}${pmdetails.frequencyUnit}${pmdetails.frequency}';
     if (wotype != 'LIF') {
       replaceable[1] =
-          '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
+          '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]} - ';
       name =
           '$name - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]} - ';
     }
