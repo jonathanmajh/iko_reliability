@@ -19,17 +19,11 @@ class PmCheckPage extends StatefulWidget {
 }
 
 class _PmCheckPageState extends State<PmCheckPage> {
-  final optionListFilePath =
-      'http://operations.connect.na.local/support/Reliability/ReliabilityPublished/Templates/PM%20Request%20Template.xlsm';
-  Map<String, Map<String, String>> sites = {};
-  Map<String, Map<String, dynamic>> observationList = {};
-  Map<String, String> workOrderType = {};
   List<PlatformFile> templates = [];
-  bool optionOne = false;
   String maximoServerSelected = 'TEST';
   List<dynamic> _selected = [];
   Map<String, dynamic> parsedTemplates = {};
-  String temp = '';
+  String uploadDetails = '';
   final pmNameFieldController = TextEditingController();
   final fmecaPackageController = TextEditingController();
 
@@ -37,6 +31,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   void dispose() {
     // Clean up the controller when the widget is disposed.
     pmNameFieldController.dispose();
+    fmecaPackageController.dispose();
     super.dispose();
   }
 
@@ -130,7 +125,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 final thing =
                     generateUploads(parsedTemplates[state[0]][state[1]].maximo);
                 setState(() {
-                  temp = writeToCSV(thing);
+                  uploadDetails = writeToCSV(thing);
                 });
               },
               child: const Text('ConvertToTemplate'),
@@ -142,13 +137,13 @@ class _PmCheckPageState extends State<PmCheckPage> {
                     maximoServerSelected);
                 print('done');
                 setState(() {
-                  temp = writeToCSV(thing);
+                  uploadDetails = writeToCSV(thing);
                 });
                 // print(thing);
               },
               child: const Text('Just DO IT'),
             ),
-            SelectableText(temp)
+            SelectableText(uploadDetails)
           ],
         ))
       ];
@@ -239,19 +234,6 @@ class _PmCheckPageState extends State<PmCheckPage> {
     super.initState();
   }
 
-  void toggleOptionOne(bool value) {
-    if (optionOne) {
-      setState(() {
-        optionOne = false;
-        // reset table
-      });
-    } else {
-      setState(() {
-        optionOne = true;
-      });
-    }
-  }
-
   void changeMaximoEnvironment(String? value) {
     if (value == null) {
       return;
@@ -335,12 +317,6 @@ class _PmCheckPageState extends State<PmCheckPage> {
               'PM Settings',
               style: TextStyle(fontSize: 24),
             )),
-            ListTile(
-              leading: const Icon(Icons.message),
-              title: const Text('Option 1'),
-              subtitle: const Text('Option 1 help text'),
-              trailing: Switch(value: optionOne, onChanged: toggleOptionOne),
-            ),
             ListTile(
                 leading: const Icon(Icons.message),
                 title: const Text('Maximo Environment'),
