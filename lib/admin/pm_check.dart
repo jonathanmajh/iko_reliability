@@ -18,6 +18,28 @@ class PmCheckPage extends StatefulWidget {
   State<PmCheckPage> createState() => _PmCheckPageState();
 }
 
+class TemplateStatus with ChangeNotifier {
+  Map<String, dynamic> templatesMap = {};
+  String selectedFile = '';
+  String selectedTemplate = '';
+
+  void init(Map<String, dynamic> parsedTemplates) {
+    for (final filename in parsedTemplates.keys) {
+      templatesMap[filename] = {};
+      for (final template in parsedTemplates[filename]) {
+        templatesMap[filename][template] = {'status': 'processing'};
+      }
+    }
+    notifyListeners(); // probably need this? not sure
+  }
+
+  void updateStatus(
+      String selectedFile, String selectedTemplate, String status) {
+    templatesMap[selectedFile][selectedTemplate]['status'] = status;
+    notifyListeners();
+  }
+}
+
 class _PmCheckPageState extends State<PmCheckPage> {
   List<PlatformFile> templates = [];
   String maximoServerSelected = 'TEST';
@@ -35,6 +57,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
     super.dispose();
   }
 
+// for displaying bottom status notifications
   void _show(toastMsg) {
     final msg = toastMsg;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
