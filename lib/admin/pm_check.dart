@@ -3,12 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 import 'package:iko_reliability/admin/pm_name_generator.dart';
+import 'package:provider/provider.dart';
 
 import 'asset_storage.dart';
 import 'generate_job_plans.dart';
 import 'generate_uploads.dart';
 import 'maximo_jp_pm.dart';
 import 'observation_list_storage.dart';
+import 'template_notifier.dart';
 import 'upload_maximo.dart';
 
 class PmCheckPage extends StatefulWidget {
@@ -16,28 +18,6 @@ class PmCheckPage extends StatefulWidget {
 
   @override
   State<PmCheckPage> createState() => _PmCheckPageState();
-}
-
-class TemplateStatus with ChangeNotifier {
-  Map<String, dynamic> templatesMap = {};
-  String selectedFile = '';
-  String selectedTemplate = '';
-
-  void init(Map<String, dynamic> parsedTemplates) {
-    for (final filename in parsedTemplates.keys) {
-      templatesMap[filename] = {};
-      for (final template in parsedTemplates[filename]) {
-        templatesMap[filename][template] = {'status': 'processing'};
-      }
-    }
-    notifyListeners(); // probably need this? not sure
-  }
-
-  void updateStatus(
-      String selectedFile, String selectedTemplate, String status) {
-    templatesMap[selectedFile][selectedTemplate]['status'] = status;
-    notifyListeners();
-  }
 }
 
 class _PmCheckPageState extends State<PmCheckPage> {
@@ -68,9 +48,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
   List<Widget> detailedView(List<dynamic> state) {
     if (state.isNotEmpty) {
       pmNameFieldController.text =
-          parsedTemplates[state[0]][state[1]].maximo.description;
-      fmecaPackageController.text =
-          parsedTemplates[state[0]][state[1]].maximo.jobplan.ikoPmpackage ?? '';
+          parsedTemplates[state[0]][state[1]].processedTemplate.description;
+      fmecaPackageController.text = parsedTemplates[state[0]][state[1]]
+              .processedTemplate
+              .jobplan
+              .ikoPmpackage ??
+          '';
       return [
         GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -91,17 +74,20 @@ class _PmCheckPageState extends State<PmCheckPage> {
           primary: false,
           children: [
             ListTile(
-                title:
-                    Text(parsedTemplates[state[0]][state[1]].maximo.pmNumber)),
-            ListTile(
-                title: Text(
-                    parsedTemplates[state[0]][state[1]].maximo.description)),
-            ListTile(
-                title: Text(
-                    parsedTemplates[state[0]][state[1]].maximo.assetNumber)),
+                title: Text(parsedTemplates[state[0]][state[1]]
+                    .processedTemplate
+                    .pmNumber)),
             ListTile(
                 title: Text(parsedTemplates[state[0]][state[1]]
-                    .maximo
+                    .processedTemplate
+                    .description)),
+            ListTile(
+                title: Text(parsedTemplates[state[0]][state[1]]
+                    .processedTemplate
+                    .assetNumber)),
+            ListTile(
+                title: Text(parsedTemplates[state[0]][state[1]]
+                    .processedTemplate
                     .leadTime
                     .toString())),
             ListTile(
@@ -118,24 +104,36 @@ class _PmCheckPageState extends State<PmCheckPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                parsedTemplates[state[0]][state[1]].maximo.description =
-                    pmNameFieldController.text;
-                parsedTemplates[state[0]][state[1]].maximo.jobplan.description =
-                    pmNameFieldController.text;
-                if (parsedTemplates[state[0]][state[1]].maximo.route != null) {
-                  parsedTemplates[state[0]][state[1]].maximo.route.description =
-                      pmNameFieldController.text;
+                parsedTemplates[state[0]][state[1]]
+                    .processedTemplate
+                    .description = pmNameFieldController.text;
+                parsedTemplates[state[0]][state[1]]
+                    .processedTemplate
+                    .jobplan
+                    .description = pmNameFieldController.text;
+                if (parsedTemplates[state[0]][state[1]]
+                        .processedTemplate
+                        .route !=
+                    null) {
+                  parsedTemplates[state[0]][state[1]]
+                      .processedTemplate
+                      .route
+                      .description = pmNameFieldController.text;
                 }
                 if (fmecaPackageController.text.isNotEmpty) {
-                  parsedTemplates[state[0]][state[1]].maximo.fmecaPM = true;
                   parsedTemplates[state[0]][state[1]]
-                      .maximo
+                      .processedTemplate
+                      .fmecaPM = true;
+                  parsedTemplates[state[0]][state[1]]
+                      .processedTemplate
                       .jobplan
                       .ikoPmpackage = fmecaPackageController.text;
                 } else {
-                  parsedTemplates[state[0]][state[1]].maximo.fmecaPM = false;
                   parsedTemplates[state[0]][state[1]]
-                      .maximo
+                      .processedTemplate
+                      .fmecaPM = false;
+                  parsedTemplates[state[0]][state[1]]
+                      .processedTemplate
                       .jobplan
                       .ikoPmpackage = null;
                 }
@@ -145,8 +143,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                final thing =
-                    generateUploads(parsedTemplates[state[0]][state[1]].maximo);
+                final thing = generateUploads(
+                    parsedTemplates[state[0]][state[1]].processedTemplate);
                 setState(() {
                   uploadDetails = writeToCSV(thing);
                 });
@@ -156,7 +154,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
             ElevatedButton(
               onPressed: () async {
                 final thing = await uploadToMaximo(
-                    generateUploads(parsedTemplates[state[0]][state[1]].maximo),
+                    generateUploads(
+                        parsedTemplates[state[0]][state[1]].processedTemplate),
                     maximoServerSelected);
                 print('done');
                 setState(() {
@@ -183,9 +182,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
     }
   }
 
-  void pickTemplates() async {
-    print('Picking Files');
-    final stopwatch = Stopwatch()..start();
+  void pickTemplates(TemplateNotifier context) async {
+    Stopwatch stopwatch = Stopwatch()..start();
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
     List<PlatformFile> files = [];
@@ -196,60 +194,49 @@ class _PmCheckPageState extends State<PmCheckPage> {
     } else {
       msg = 'File selector cancelled';
     }
-    print('loaded files in ${stopwatch.elapsedMilliseconds} milliseconds');
     setState(() {
       templates = files;
       _show(msg);
     });
+    print('loaded files in ${stopwatch.elapsedMilliseconds} milliseconds');
+    stopwatch = Stopwatch()..start();
     if (files.isNotEmpty) {
       setState(() {
         print('Loading files...');
       });
 
-      var temp = await parseSpreadsheets(files);
-      setState(() {
-        for (var thing in temp) {
-          parsedTemplates[thing.keys.first] = thing[thing.keys.first];
+      var parsedTmpts = await parseSpreadsheets(files);
+      for (var thing in parsedTmpts) {
+        // parsedTemplates[thing.keys.first] = thing[thing.keys.first];
+        for (var template in thing.keys) {
+          for (var templateNumber in thing[template].keys) {
+            context.setParsedTemplate(
+                template, templateNumber, thing[template][templateNumber]);
+          }
         }
-        print(
-            'Parsed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
-      });
-      parseAllTemplates();
-    }
-  }
-
-  Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
-    List<Future> futures = [];
-    for (var file in files) {
-      futures
-          .add(compute(ParsedTemplate().fromExcel, [file.bytes!, file.name]));
-    }
-    return await Future.wait(futures);
-  }
-
-  void parseAllTemplates() {
-    print('parsing templates');
-    for (String ws in parsedTemplates.keys) {
-      for (int pmOrder in parsedTemplates[ws].keys) {
-        parseTemplate([ws, pmOrder]);
       }
-    }
-  }
+      print(
+          'Parsed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
+      stopwatch = Stopwatch()..start();
 
-  void parseTemplate(List<dynamic> parameters) async {
-    String ws = parameters[0];
-    int templateNumber = parameters[1];
-    var result = await generateName(
-        parsedTemplates[ws][templateNumber], maximoServerSelected);
-    setState(() {
-      parsedTemplates[ws][templateNumber].uploads = result;
-    });
-    generatePM(parsedTemplates[ws][templateNumber], maximoServerSelected)
-        .then((value) {
-      setState(() {
-        parsedTemplates[ws][templateNumber].maximo = value;
-      });
-    });
+      for (String ws in parsedTemplates.keys) {
+        //TODO need to retrive list of templates from TemplateNotifier
+        for (int templateNumber in parsedTemplates[ws].keys) {
+          generateName(
+                  parsedTemplates[ws][templateNumber], maximoServerSelected)
+              .then((value) => () {
+                    context.setNameTemplate(ws, templateNumber, value);
+                  });
+
+          generatePM(parsedTemplates[ws][templateNumber], maximoServerSelected)
+              .then((value) => setState(() {
+                    context.setProcessedTemplate(ws, templateNumber, value);
+                  }));
+        }
+      }
+      print(
+          'Processed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
+    }
   }
 
   @override
@@ -292,7 +279,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                   '\nClick on detected PMs to view details'),
               ElevatedButton(
                 onPressed: () {
-                  pickTemplates();
+                  pickTemplates(context.read<TemplateNotifier>());
                 },
                 child: const Text('Pick Files'),
               ),
@@ -388,11 +375,13 @@ class _PmCheckPageState extends State<PmCheckPage> {
         list.add(templateListItem(
           ws,
           pmOrder,
-          parsedTemplates[ws][pmOrder].uploads?.pmName ??
+          parsedTemplates[ws][pmOrder].generatedPmName?.pmName ??
               parsedTemplates[ws][pmOrder].pmName,
-          parsedTemplates[ws][pmOrder].uploads?.pmNumber ??
+          parsedTemplates[ws][pmOrder].generatedPmName?.pmNumber ??
               parsedTemplates[ws][pmOrder].pmNumber,
-          parsedTemplates[ws][pmOrder].uploads == null ? 'processing' : 'done',
+          parsedTemplates[ws][pmOrder].generatedPmName == null
+              ? 'processing'
+              : 'done',
         ));
       }
     }
@@ -411,7 +400,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
-            if (parsedTemplates[filename][templateNumber].maximo != null) {
+            if (parsedTemplates[filename][templateNumber].processedTemplate !=
+                null) {
               setState(() {
                 _selected = [filename, templateNumber];
               });
@@ -550,4 +540,12 @@ Widget statusIndicator(status) {
       )
     ],
   );
+}
+
+Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
+  List<Future> futures = [];
+  for (var file in files) {
+    futures.add(compute(ParsedTemplate().fromExcel, [file.bytes!, file.name]));
+  }
+  return await Future.wait(futures);
 }
