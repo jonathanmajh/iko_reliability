@@ -12,6 +12,7 @@ import 'maximo_jp_pm.dart';
 import 'observation_list_storage.dart';
 import 'template_notifier.dart';
 import 'upload_maximo.dart';
+import 'pm_widgets.dart';
 
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
@@ -199,50 +200,22 @@ class _PmCheckPageState extends State<PmCheckPage> {
       _show(msg);
     });
     print('loaded files in ${stopwatch.elapsedMilliseconds} milliseconds');
-    stopwatch = Stopwatch()..start();
-    if (files.isNotEmpty) {
+    if (files.isEmpty) {
       setState(() {
-        print('Loading files...');
+        print('No files selected files...');
       });
-
-      var parsedTmpts = await parseSpreadsheets(files);
-      for (var thing in parsedTmpts) {
-        // parsedTemplates[thing.keys.first] = thing[thing.keys.first];
-        for (var template in thing.keys) {
-          for (var templateNumber in thing[template].keys) {
-            context.setParsedTemplate(
-                template, templateNumber, thing[template][templateNumber]);
-          }
-        }
-      }
-      print(
-          'Parsed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
-      stopwatch = Stopwatch()..start();
-
-      for (String ws in parsedTemplates.keys) {
-        //TODO need to retrive list of templates from TemplateNotifier
-        for (int templateNumber in parsedTemplates[ws].keys) {
-          generateName(
-                  parsedTemplates[ws][templateNumber], maximoServerSelected)
-              .then((value) => () {
-                    context.setNameTemplate(ws, templateNumber, value);
-                  });
-
-          generatePM(parsedTemplates[ws][templateNumber], maximoServerSelected)
-              .then((value) => setState(() {
-                    context.setProcessedTemplate(ws, templateNumber, value);
-                  }));
-        }
-      }
-      print(
-          'Processed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
+    } else {
+      setState(() {
+        print('Processing files...');
+      });
+      processAllTemplates(context, files, maximoServerSelected);
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
 
   void changeMaximoEnvironment(String? value) {
     if (value == null) {
@@ -430,122 +403,44 @@ class _PmCheckPageState extends State<PmCheckPage> {
   }
 }
 
-Widget templateDescription(
-  String filename,
-  int templateNumber,
-  String pmName,
-  String pmNumber,
-  String status,
-) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: <Widget>[
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              pmNumber,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              pmName,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Padding(padding: EdgeInsets.only(bottom: 2.0)),
-            Text(
-              filename,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12.0,
-                color: Colors.black54,
-              ),
-            ),
-            Text(
-              'Template #$templateNumber',
-              style: const TextStyle(
-                fontSize: 12.0,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            statusIndicator(status),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
-Widget statusIndicator(status) {
-  Widget icon;
-  String text;
-  Color textColor;
-  switch (status) {
-    case 'processing':
-      icon = const SizedBox(
-        height: 24,
-        width: 24,
-        child: CircularProgressIndicator.adaptive(),
-      );
-
-      text = ' Processing';
-      textColor = const Color.fromRGBO(33, 150, 243, 1);
-      break;
-    case 'warning':
-      icon = const Icon(Icons.warning_rounded);
-      text = ' Warning';
-      textColor = const Color.fromRGBO(255, 235, 59, 1);
-      break;
-    case 'error':
-      icon = const Icon(Icons.report_rounded);
-      text = ' Error';
-      textColor = const Color.fromRGBO(244, 67, 54, 1);
-      break;
-    case 'done':
-      icon = const Icon(Icons.check_circle);
-      text = ' Finished';
-      textColor = const Color.fromRGBO(76, 175, 80, 1);
-      break;
-    default:
-      icon = const Icon(Icons.help);
-      text = ' Unknown';
-      textColor = const Color.fromRGBO(255, 235, 59, 1);
-  }
-  return Row(
-    children: [
-      icon,
-      Text(
-        text,
-        style: TextStyle(
-          fontSize: 20.0,
-          color: textColor,
-        ),
-      )
-    ],
-  );
-}
-
 Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
   List<Future> futures = [];
   for (var file in files) {
     futures.add(compute(ParsedTemplate().fromExcel, [file.bytes!, file.name]));
   }
   return await Future.wait(futures);
+}
+
+void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
+    String maximoServerSelected) async {
+  var stopwatch = Stopwatch()..start();
+
+  var parsedTmpts = await parseSpreadsheets(files);
+  for (var thing in parsedTmpts) {
+    for (var template in thing.keys) {
+      for (var templateNumber in thing[template].keys) {
+        context.setParsedTemplate(
+            template, templateNumber, thing[template][templateNumber]);
+      }
+    }
+  }
+  print('Parsed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
+  stopwatch = Stopwatch()..start();
+
+  for (String ws in context.getFiles()) {
+    for (int templateNumber in context.getTemplates(ws)) {
+      generateName(context.getParsedTemplate(ws, templateNumber),
+              maximoServerSelected)
+          .then((value) => () {
+                context.setNameTemplate(ws, templateNumber, value);
+              });
+
+      generatePM(context.getParsedTemplate(ws, templateNumber),
+              context.getPMName(ws, templateNumber), maximoServerSelected)
+          .then((value) => () {
+                context.setProcessedTemplate(ws, templateNumber, value);
+              });
+    }
+  }
+  print('Processed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
 }

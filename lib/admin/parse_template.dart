@@ -105,9 +105,9 @@ class ParsedTemplate {
   String? pmName;
   String? pmPackageNumber;
   String? routeNumber;
-  PMName? generatedPmName;
+  // PMName? generatedPmName;
   String? pmAsset; // the parent asset specified for the PM
-  PMMaximo? processedTemplate;
+  // PMMaximo? processedTemplate;
 
   ParsedTemplate({
     List<String>? assets,
@@ -123,9 +123,9 @@ class ParsedTemplate {
     this.pmName,
     this.pmPackageNumber,
     this.routeNumber,
-    this.generatedPmName,
+    // this.generatedPmName,
     this.pmAsset,
-    this.processedTemplate,
+    // this.processedTemplate,
     List<JobService>? services,
     List<JobTask>? tasks,
   })  : assets = assets ?? [],
