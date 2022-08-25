@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'template_notifier.dart';
+
 Widget templateDescription(
   String filename,
   int templateNumber,
-  String pmName,
-  String pmNumber,
-  String status,
+  TemplateNotifier context,
 ) {
+  final template = context.getFullTemplate(filename, templateNumber);
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: <Widget>[
@@ -15,7 +16,8 @@ Widget templateDescription(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              pmNumber,
+              template.nameTemplate?.pmNumber ??
+                  template.parsedTemplate.pmNumber,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -23,7 +25,7 @@ Widget templateDescription(
               ),
             ),
             Text(
-              pmName,
+              template.nameTemplate?.pmName ?? template.parsedTemplate.pmName,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -55,7 +57,7 @@ Widget templateDescription(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            statusIndicator(status),
+            statusIndicator(template.templateStatus),
           ],
         ),
       ),
@@ -110,4 +112,48 @@ Widget statusIndicator(status) {
       )
     ],
   );
+}
+
+List<Widget> buildPMList(TemplateNotifier context) {
+  List<Widget> list = [];
+  for (String ws in context.getFiles()) {
+    for (int templateNumber in context.getTemplates(ws)) {
+      list.add(templateListItem(
+        ws,
+        templateNumber,
+        context,
+      ));
+    }
+  }
+  return list;
+}
+
+Widget templateListItem(
+  String filename,
+  int templateNumber,
+  TemplateNotifier context,
+) {
+  return SizedBox(
+      height: 100,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          context.setSelectedTemplate(filename, templateNumber);
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
+                child: templateDescription(
+                  filename,
+                  templateNumber,
+                  context,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ));
 }

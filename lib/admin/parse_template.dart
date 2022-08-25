@@ -101,8 +101,8 @@ class ParsedTemplate {
   List<JobService> services;
   List<JobTask> tasks;
   String? nextDueDate;
-  String? pmNumber;
-  String? pmName;
+  String pmNumber;
+  String pmName;
   String? pmPackageNumber;
   String? routeNumber;
   // PMName? generatedPmName;
@@ -119,8 +119,8 @@ class ParsedTemplate {
     List<JobCraft>? crafts,
     List<JobMaterial>? materials,
     this.nextDueDate,
-    this.pmNumber,
-    this.pmName,
+    required this.pmNumber,
+    required this.pmName,
     this.pmPackageNumber,
     this.routeNumber,
     // this.generatedPmName,

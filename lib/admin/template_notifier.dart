@@ -5,13 +5,13 @@ import 'parse_template.dart';
 import 'pm_name_generator.dart';
 
 class TemplateStore {
-  ParsedTemplate? parsedTemplate;
+  ParsedTemplate parsedTemplate;
   PMName? nameTemplate;
   PMMaximo? processedTemplate;
   String templateStatus;
 
   TemplateStore({
-    this.parsedTemplate,
+    required this.parsedTemplate,
     this.nameTemplate,
     this.processedTemplate,
     required this.templateStatus,
@@ -20,7 +20,7 @@ class TemplateStore {
 
 class SelectedTemplate {
   String? selectedFile;
-  String? selectedTemplate;
+  int? selectedTemplate;
 
   SelectedTemplate({
     this.selectedFile,
@@ -39,9 +39,14 @@ class TemplateNotifier extends ChangeNotifier {
     }
   }
 
-  void setSelectedTemplate(String file, String template) {
+  TemplateStore getFullTemplate(String file, int template) {
+    return allTemplates[file]![template]!;
+  }
+
+  void setSelectedTemplate(String file, int template) {
     selectedTemplate.selectedFile = file;
     selectedTemplate.selectedTemplate = template;
+    notifyListeners();
   }
 
   SelectedTemplate getSelectedTemplate() {
@@ -53,23 +58,27 @@ class TemplateNotifier extends ChangeNotifier {
     addTemplate(file);
     allTemplates[file]![templateNumber] =
         TemplateStore(templateStatus: 'processing', parsedTemplate: template);
+    notifyListeners();
   }
 
   void setNameTemplate(String file, int templateNumber, PMName template) {
     addTemplate(file);
     allTemplates[file]![templateNumber]!.nameTemplate = template;
+    notifyListeners();
   }
 
   void setProcessedTemplate(
       String file, int templateNumber, PMMaximo template) {
     addTemplate(file);
     allTemplates[file]![templateNumber]!.processedTemplate = template;
-    updateStatus(file, templateNumber, 'processing-done');
+    setStatus(file, templateNumber, 'processing-done');
+    notifyListeners();
   }
 
-  void updateStatus(String file, int templateNumber, String status) {
+  void setStatus(String file, int templateNumber, String status) {
     addTemplate(file);
     allTemplates[file]![templateNumber]!.templateStatus = status;
+    notifyListeners();
   }
 
   ParsedTemplate getParsedTemplate(String file, int templateNumber) {
@@ -79,7 +88,7 @@ class TemplateNotifier extends ChangeNotifier {
     if (!allTemplates[file]!.keys.contains(templateNumber)) {
       throw Exception('Expected Parsed Template (2)');
     }
-    return allTemplates[file]![templateNumber]!.parsedTemplate!;
+    return allTemplates[file]![templateNumber]!.parsedTemplate;
   }
 
   PMName getPMName(String file, int templateNumber) {

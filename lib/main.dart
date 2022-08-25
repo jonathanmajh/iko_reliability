@@ -27,14 +27,26 @@ void main() async {
   runApp(MyApp());
 }
 
+class MaximoServerNotifier extends ChangeNotifier {
+  String maximoServerSelected = 'TEST';
+
+  void setServer(String server) {
+    maximoServerSelected = server;
+    notifyListeners();
+  }
+}
+
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
   final _appRouter = AppRouter();
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) => TemplateNotifier(),
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => TemplateNotifier()),
+          ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
+        ],
         child: MaterialApp.router(
           routerDelegate: _appRouter.delegate(),
           routeInformationParser: _appRouter.defaultRouteParser(),
