@@ -49,24 +49,13 @@ class _PMDetailViewState extends State<PMDetailView> {
             ),
           ),
           ElevatedButton(
-            // TODO update this function
             onPressed: () {
-              processedTemplate.description = pmNameFieldController.text;
-              processedTemplate.jobplan.description =
-                  pmNameFieldController.text;
-              if (processedTemplate.route != null) {
-                processedTemplate.route!.description =
-                    pmNameFieldController.text;
+              if (pmNameFieldController.text.isNotEmpty) {
+                value.setPMName(pmNameFieldController.text,
+                    selected.selectedFile!, selected.selectedTemplate!);
               }
-              if (fmecaPackageController.text.isNotEmpty) {
-                processedTemplate.fmecaPM = true;
-                processedTemplate.jobplan.ikoPmpackage =
-                    fmecaPackageController.text;
-              } else {
-                processedTemplate.fmecaPM = false;
-                processedTemplate.jobplan.ikoPmpackage = null;
-              }
-              setState(() {});
+              value.setPMPackage(fmecaPackageController.text,
+                  selected.selectedFile!, selected.selectedTemplate!);
             },
             child: const Text('Update PM'),
           ),

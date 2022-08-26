@@ -31,7 +31,7 @@ class SelectedTemplate {
 class TemplateNotifier extends ChangeNotifier {
   Map<String, Map<int, TemplateStore>> allTemplates = {};
   SelectedTemplate selectedTemplate = SelectedTemplate();
-
+// for set functions consider just assuming selected item
 // check and add file name to map if necessary
   void addTemplate(String file) {
     if (!allTemplates.keys.contains(file)) {
@@ -43,6 +43,11 @@ class TemplateNotifier extends ChangeNotifier {
     return allTemplates[file]![template]!;
   }
 
+  void clearTemplates() {
+    allTemplates = {};
+    notifyListeners();
+  }
+
   void setSelectedTemplate(String file, int template) {
     selectedTemplate.selectedFile = file;
     selectedTemplate.selectedTemplate = template;
@@ -51,6 +56,28 @@ class TemplateNotifier extends ChangeNotifier {
 
   SelectedTemplate getSelectedTemplate() {
     return selectedTemplate;
+  }
+
+  void setPMPackage(String packageName, String file, int template) {
+    final processedTemplate = allTemplates[file]![template]!.processedTemplate!;
+    if (packageName.isEmpty) {
+      processedTemplate.fmecaPM = false;
+      processedTemplate.jobplan.ikoPmpackage = null;
+    } else {
+      processedTemplate.fmecaPM = true;
+      processedTemplate.jobplan.ikoPmpackage = packageName;
+    }
+    notifyListeners();
+  }
+
+  void setPMName(String name, String file, int template) {
+    final processedTemplate = allTemplates[file]![template]!.processedTemplate!;
+    processedTemplate.description = name;
+    processedTemplate.jobplan.description = name;
+    if (processedTemplate.route != null) {
+      processedTemplate.route!.description = name;
+    }
+    notifyListeners();
   }
 
   void setParsedTemplate(

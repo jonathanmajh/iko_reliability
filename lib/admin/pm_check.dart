@@ -75,11 +75,9 @@ class _PmCheckPageState extends State<PmCheckPage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  final thing = getObservation('CYLA00');
-                  print(thing);
-                  print(thing.observations);
+                  context.read<TemplateNotifier>().clearTemplates();
                 },
-                child: const Text('GetObservation'),
+                child: const Text('Clear Templates'),
               ),
             ],
           ),
@@ -245,6 +243,7 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
 
   for (String ws in context.getFiles()) {
     for (int templateNumber in context.getTemplates(ws)) {
+      // TODO this is no longer async :(
       final value = await generateName(
         context.getParsedTemplate(ws, templateNumber),
         maximoServerSelected,
