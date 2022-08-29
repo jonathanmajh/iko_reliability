@@ -7,18 +7,20 @@ import 'asset_storage.dart';
 
 Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
   Map<String, List<List<String>>> generated = {};
+  generated['Meter'] = [];
   generated['Asset'] = [];
   generated['AssetMeter'] = [];
   generated['MeasurePoint'] = [];
-  generated['Meter'] = [];
   generated['MeasurePoint2'] = [];
+  generated['PM'] = [];
+  generated['Route'] = [];
+  generated['Route_Stop'] = [];
   generated['JobPlan'] = [];
   generated['JobMaterial'] = [];
   generated['JobService'] = [];
   generated['JobLabor'] = [];
   generated['JPASSETLINK'] = [];
   generated['JobTask'] = [];
-  generated['Route_Stop'] = [];
   // pm template
   generated['PM'] = [
     [

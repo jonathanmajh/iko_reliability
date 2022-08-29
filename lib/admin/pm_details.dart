@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iko_reliability/admin/consts.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -14,78 +15,166 @@ class PMDetailView extends StatefulWidget {
 }
 
 class _PMDetailViewState extends State<PMDetailView> {
-  String uploadDetails = '';
+  Map<String, List<List<String>>> uploadDetails = {};
 
   @override
   Widget build(BuildContext context) {
     TextEditingController pmNameFieldController = TextEditingController();
     TextEditingController fmecaPackageController = TextEditingController();
+    TextEditingController pmNumberFieldController = TextEditingController();
     return Consumer<TemplateNotifier>(builder: (context, value, child) {
       final selected = value.getSelectedTemplate();
       if (selected.selectedFile == null) {
-        return const Text('No Tempalte Selected');
+        return const Text('No Template Selected');
       }
       final processedTemplate = value.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);
       pmNameFieldController.text = processedTemplate!.description;
       fmecaPackageController.text =
           processedTemplate.jobplan.ikoPmpackage ?? '';
+      pmNumberFieldController.text = processedTemplate.pmNumber;
       return Expanded(
           child: ListView(
+        padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
         primary: false,
         children: [
-          ListTile(title: Text(processedTemplate.pmNumber)),
-          ListTile(title: Text(processedTemplate.description)),
-          ListTile(
-            title: const Text('Edit Pm Name'),
-            subtitle: TextField(
-              controller: pmNameFieldController,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                    if (pmNameFieldController.text.isNotEmpty) {
+                      value.setPMName(pmNameFieldController.text,
+                          selected.selectedFile!, selected.selectedTemplate!);
+                    }
+                    value.setPMPackage(fmecaPackageController.text,
+                        selected.selectedFile!, selected.selectedTemplate!);
+                  },
+                  child: Row(
+                    children: const [
+                      Icon(Icons.sync),
+                      Text(' Update PM'),
+                    ],
+                  )),
+              ElevatedButton(
+                  onPressed: () {
+                    value.setUploadDetails(
+                        selected.selectedFile!,
+                        selected.selectedTemplate!,
+                        generateUploads(processedTemplate));
+                  },
+                  child: Row(
+                    children: const [
+                      Icon(Icons.visibility),
+                      Text(' Preview'),
+                    ],
+                  )),
+              Consumer<MaximoServerNotifier>(builder: (context, maximo, child) {
+                return ElevatedButton(
+                    onPressed: () async {
+                      value.setUploadDetails(
+                          selected.selectedFile!,
+                          selected.selectedTemplate!,
+                          await uploadToMaximo(
+                              generateUploads(processedTemplate),
+                              maximo.maximoServerSelected));
+                      value.setStatus(selected.selectedFile!,
+                          selected.selectedTemplate!, 'done');
+                    },
+                    child: Row(
+                      children: const [
+                        Icon(Icons.cloud_upload),
+                        Text(' Upload'),
+                      ],
+                    ));
+              }),
+            ],
+          ),
+          const Divider(
+            height: 15,
+            thickness: 1,
+            indent: 10,
+            endIndent: 10,
+            color: Color.fromARGB(255, 255, 255, 255),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                  child: TextField(
+                      readOnly: true,
+                      controller: pmNumberFieldController,
+                      decoration: const InputDecoration(
+                        labelText: 'PM Number (Read Only)',
+                        border: OutlineInputBorder(),
+                      ))),
+              Expanded(
+                  child: TextField(
+                controller: fmecaPackageController,
+                decoration: const InputDecoration(
+                  labelText: 'Edit PMECA Package',
+                  border: OutlineInputBorder(),
+                ),
+              )),
+            ],
+          ),
+          const Divider(
+            height: 10,
+            thickness: 0,
+            indent: 0,
+            endIndent: 0,
+            color: Color.fromARGB(255, 255, 255, 255),
+          ),
+          TextField(
+            controller: pmNameFieldController,
+            decoration: const InputDecoration(
+              labelText: 'Edit PM Name',
+              border: OutlineInputBorder(),
             ),
           ),
-          ListTile(
-            title: const Text('Enter FMECA Package'),
-            subtitle: TextField(
-              controller: fmecaPackageController,
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (pmNameFieldController.text.isNotEmpty) {
-                value.setPMName(pmNameFieldController.text,
-                    selected.selectedFile!, selected.selectedTemplate!);
-              }
-              value.setPMPackage(fmecaPackageController.text,
-                  selected.selectedFile!, selected.selectedTemplate!);
-            },
-            child: const Text('Update PM'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final thing = generateUploads(processedTemplate);
-              setState(() {
-                uploadDetails = writeToCSV(thing);
-              });
-            },
-            child: const Text('ConvertToTemplate'),
-          ),
-          Consumer<MaximoServerNotifier>(builder: (context, value, child) {
-            return ElevatedButton(
-              onPressed: () async {
-                final thing = await uploadToMaximo(
-                    generateUploads(processedTemplate),
-                    value.maximoServerSelected);
-                print('done');
-                setState(() {
-                  uploadDetails = writeToCSV(thing);
-                });
-                // print(thing);
-              },
-              child: const Text('Just DO IT'),
-            );
-          }),
-          SelectableText(uploadDetails),
+          ...generateUploadDetailsList(value.getUploadDetails(),
+              value.getStatus() == 'done' ? true : false)
         ],
       ));
     });
   }
 }
+
+List<Widget> generateUploadDetailsList(
+    Map<String, List<List<String>>> uploadDetails, bool result) {
+  List<Widget> cards = [];
+  for (final table in uploadDetails.keys) {
+    List<Widget> rows = [];
+    rows.add(Text(tableHeaders[table]!.join(',')));
+    if (uploadDetails[table]!.isNotEmpty) {
+      for (final row in uploadDetails[table]!) {
+        if (result) {
+          final textColor = status[row.last] ?? Colors.purple;
+          rows.add(Text(
+            row.join(','),
+            style:
+                TextStyle(backgroundColor: textColor, fontFamily: 'RobotoMono'),
+          ));
+        } else {
+          rows.add(Text(
+            row.join(','),
+            style: const TextStyle(fontFamily: 'RobotoMono'),
+          ));
+        }
+      }
+      cards.add(Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [ListTile(title: Text(table)), ...rows],
+        ),
+      ));
+    }
+  }
+  return cards;
+}
+
+const status = {
+  '+': Colors.green,
+  '~': Colors.yellow,
+  '!': Colors.red,
+};

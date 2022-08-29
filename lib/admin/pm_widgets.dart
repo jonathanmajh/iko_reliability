@@ -9,10 +9,22 @@ Widget templateDescription(
 ) {
   final template = context.getFullTemplate(filename, templateNumber);
   return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: <Widget>[
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [statusIndicator(template.templateStatus)],
+      ),
+      const VerticalDivider(
+        width: 20,
+        thickness: 1,
+        indent: 10,
+        endIndent: 10,
+        color: Colors.grey,
+      ),
       Expanded(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
@@ -52,15 +64,6 @@ Widget templateDescription(
           ],
         ),
       ),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            statusIndicator(template.templateStatus),
-          ],
-        ),
-      ),
     ],
   );
 }
@@ -72,8 +75,8 @@ Widget statusIndicator(status) {
   switch (status) {
     case 'processing':
       icon = const SizedBox(
-        height: 24,
-        width: 24,
+        height: 35,
+        width: 35,
         child: CircularProgressIndicator.adaptive(),
       );
 
@@ -81,26 +84,51 @@ Widget statusIndicator(status) {
       textColor = const Color.fromRGBO(33, 150, 243, 1);
       break;
     case 'warning':
-      icon = const Icon(Icons.warning_rounded);
       text = ' Warning';
       textColor = const Color.fromRGBO(255, 235, 59, 1);
+      icon = Icon(
+        Icons.warning_rounded,
+        color: textColor,
+        size: 35,
+      );
+      break;
+    case 'processing-done':
+      text = ' Generated';
+      textColor = const Color.fromARGB(90, 0, 0, 0);
+      icon = Icon(
+        Icons.pause_circle_filled,
+        color: textColor,
+        size: 35,
+      );
       break;
     case 'error':
-      icon = const Icon(Icons.report_rounded);
       text = ' Error';
       textColor = const Color.fromRGBO(244, 67, 54, 1);
+      icon = Icon(
+        Icons.report_rounded,
+        color: textColor,
+        size: 35,
+      );
       break;
     case 'done':
-      icon = const Icon(Icons.check_circle);
       text = ' Finished';
       textColor = const Color.fromRGBO(76, 175, 80, 1);
+      icon = Icon(
+        Icons.check_circle,
+        color: textColor,
+        size: 35,
+      );
       break;
     default:
-      icon = const Icon(Icons.help);
       text = ' Unknown';
       textColor = const Color.fromRGBO(255, 235, 59, 1);
+      icon = Icon(
+        Icons.help,
+        color: textColor,
+        size: 35,
+      );
   }
-  return Row(
+  return Column(
     children: [
       icon,
       Text(
@@ -122,6 +150,13 @@ List<Widget> buildPMList(TemplateNotifier context) {
         ws,
         templateNumber,
         context,
+      ));
+      list.add(const Divider(
+        height: 5,
+        thickness: 1,
+        indent: 20,
+        endIndent: 20,
+        color: Colors.grey,
       ));
     }
   }
@@ -145,7 +180,7 @@ Widget templateListItem(
           children: <Widget>[
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
+                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                 child: templateDescription(
                   filename,
                   templateNumber,

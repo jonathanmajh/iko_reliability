@@ -9,13 +9,15 @@ class TemplateStore {
   PMName? nameTemplate;
   PMMaximo? processedTemplate;
   String templateStatus;
+  Map<String, List<List<String>>> uploadDetails;
 
-  TemplateStore({
-    required this.parsedTemplate,
-    this.nameTemplate,
-    this.processedTemplate,
-    required this.templateStatus,
-  });
+  TemplateStore(
+      {required this.parsedTemplate,
+      this.nameTemplate,
+      this.processedTemplate,
+      required this.templateStatus,
+      Map<String, List<List<String>>>? uploadDetails})
+      : uploadDetails = uploadDetails ?? {};
 }
 
 class SelectedTemplate {
@@ -45,6 +47,7 @@ class TemplateNotifier extends ChangeNotifier {
 
   void clearTemplates() {
     allTemplates = {};
+    selectedTemplate = SelectedTemplate();
     notifyListeners();
   }
 
@@ -88,6 +91,20 @@ class TemplateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setUploadDetails(String file, int template,
+      Map<String, List<List<String>>> uploadDetails) {
+    addTemplate(file);
+    allTemplates[file]![template]!.uploadDetails = uploadDetails;
+    notifyListeners();
+  }
+
+  Map<String, List<List<String>>> getUploadDetails() {
+    /// Return details for selected template
+    return allTemplates[selectedTemplate.selectedFile]![
+            selectedTemplate.selectedTemplate]!
+        .uploadDetails;
+  }
+
   void setNameTemplate(String file, int templateNumber, PMName template) {
     addTemplate(file);
     allTemplates[file]![templateNumber]!.nameTemplate = template;
@@ -106,6 +123,13 @@ class TemplateNotifier extends ChangeNotifier {
     addTemplate(file);
     allTemplates[file]![templateNumber]!.templateStatus = status;
     notifyListeners();
+  }
+
+  String getStatus() {
+    /// Get Status of currently selected template.
+    return allTemplates[selectedTemplate.selectedFile]![
+            selectedTemplate.selectedTemplate]!
+        .templateStatus;
   }
 
   ParsedTemplate getParsedTemplate(String file, int templateNumber) {

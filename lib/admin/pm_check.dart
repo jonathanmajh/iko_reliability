@@ -37,8 +37,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
       ),
       body: Column(
         children: <Widget>[
-          Row(children: const [
-            Flexible(
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            const Flexible(
                 child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
@@ -48,39 +48,20 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 'Click on detected PMs to view details ',
                 overflow: TextOverflow.ellipsis,
               ),
-            ))
+            )),
+            ElevatedButton(
+              onPressed: () {
+                pickTemplates(context);
+              },
+              child: const Text('Open PM Template'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.read<TemplateNotifier>().clearTemplates();
+              },
+              child: const Text('Clear Templates'),
+            ),
           ]),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  pickTemplates(context);
-                },
-                child: const Text('Open PM Template'),
-              ),
-              ElevatedButton(
-                // TODO sidebar
-                onPressed: () {
-                  loadHierarchy();
-                },
-                child: const Text('LoadAssets'),
-              ),
-              ElevatedButton(
-                // TODO sidebar
-                onPressed: () {
-                  loadObservationList();
-                },
-                child: const Text('LoadObservation'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  context.read<TemplateNotifier>().clearTemplates();
-                },
-                child: const Text('Clear Templates'),
-              ),
-            ],
-          ),
           const Divider(
             height: 20,
             thickness: 3,
@@ -93,7 +74,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                 SizedBox(
-                    width: 500,
+                    width: 550,
                     child: Consumer<TemplateNotifier>(
                         builder: (context, value, child) {
                       return ListView(
@@ -103,8 +84,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 const VerticalDivider(
                   width: 20,
                   thickness: 1,
-                  indent: 0,
-                  endIndent: 0,
+                  indent: 5,
+                  endIndent: 5,
                   color: Colors.grey,
                 ),
                 const Expanded(child: PMDetailView())
@@ -146,6 +127,15 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 subtitle: Text('Clear and Load Assets from Spreadsheet'),
                 trailing: ElevatedButton(
                   onPressed: loadHierarchy,
+                  child: Text('Load Asset'),
+                )),
+            const ListTile(
+                leading: Icon(Icons.message),
+                title: Text('Load Observation'),
+                subtitle:
+                    Text('Clear and Load Observation list from spreadsheet'),
+                trailing: ElevatedButton(
+                  onPressed: loadObservationList,
                   child: Text('Load Asset'),
                 )),
             const ListTile(
