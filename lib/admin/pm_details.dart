@@ -72,14 +72,12 @@ class _PMDetailViewState extends State<PMDetailView> {
               Consumer<MaximoServerNotifier>(builder: (context, maximo, child) {
                 return ElevatedButton(
                     onPressed: () async {
-                      value.setUploadDetails(
+                      await uploadToMaximo(
+                          generateUploads(processedTemplate),
+                          maximo.maximoServerSelected,
                           selected.selectedFile!,
                           selected.selectedTemplate!,
-                          await uploadToMaximo(
-                              generateUploads(processedTemplate),
-                              maximo.maximoServerSelected));
-                      value.setStatus(selected.selectedFile!,
-                          selected.selectedTemplate!, 'done');
+                          value);
                     },
                     child: Row(
                       children: const [
@@ -88,6 +86,7 @@ class _PMDetailViewState extends State<PMDetailView> {
                       ],
                     ));
               }),
+              Text('Lines Uploaded ${value}')
             ],
           ),
           const Divider(
@@ -132,8 +131,12 @@ class _PMDetailViewState extends State<PMDetailView> {
               border: OutlineInputBorder(),
             ),
           ),
-          ...generateUploadDetailsList(value.getUploadDetails(),
-              value.getStatus() == 'done' ? true : false)
+          ...generateUploadDetailsList(
+              value.getUploadDetails(),
+              (value.getStatus() == 'done') ||
+                      (value.getStatus() == 'uploading')
+                  ? true
+                  : false)
         ],
       ));
     });

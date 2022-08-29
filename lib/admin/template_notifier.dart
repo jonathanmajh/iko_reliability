@@ -10,14 +10,17 @@ class TemplateStore {
   PMMaximo? processedTemplate;
   String templateStatus;
   Map<String, List<List<String>>> uploadDetails;
+  int uploadedLines;
 
   TemplateStore(
       {required this.parsedTemplate,
       this.nameTemplate,
       this.processedTemplate,
       required this.templateStatus,
-      Map<String, List<List<String>>>? uploadDetails})
-      : uploadDetails = uploadDetails ?? {};
+      Map<String, List<List<String>>>? uploadDetails,
+      int? uploadedLines})
+      : uploadDetails = uploadDetails ?? {},
+        uploadedLines = uploadedLines ?? 0;
 }
 
 class SelectedTemplate {
@@ -49,6 +52,17 @@ class TemplateNotifier extends ChangeNotifier {
     allTemplates = {};
     selectedTemplate = SelectedTemplate();
     notifyListeners();
+  }
+
+  void setUploadedLines(String file, int template) {
+    allTemplates[file]![template]!.uploadedLines++;
+    notifyListeners();
+  }
+
+  int getUploadedLines() {
+    return allTemplates[selectedTemplate.selectedFile]![
+            selectedTemplate.selectedTemplate]!
+        .uploadedLines;
   }
 
   void setSelectedTemplate(String file, int template) {

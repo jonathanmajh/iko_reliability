@@ -1,13 +1,20 @@
 import 'dart:convert';
 import 'package:csv/csv.dart';
+import 'package:iko_reliability/admin/template_notifier.dart';
 import 'consts.dart';
 import 'maximo_jp_pm.dart';
 import 'package:http/http.dart' as http;
 
 Future<Map<String, List<List<String>>>> uploadToMaximo(
-    Map<String, List<List<String>>> uploadData, String env) async {
+  Map<String, List<List<String>>> uploadData,
+  String env,
+  String file,
+  int template,
+  TemplateNotifier templates,
+) async {
   // +: uploaded; ~: already exist; !: error
   bool result;
+  templates.setStatus(file, template, 'uploading');
   if (uploadData.containsKey('Meter')) {
     print('uploading meters');
     for (int i = 0; i < uploadData['Meter']!.length; i++) {
@@ -18,6 +25,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
           'Meter',
           '/maxrest/oslc/os/iko_meter',
         );
+        templates.setUploadedLines(file, template);
         if (result) {
           uploadData['Meter']![i].add('+');
         } else {
@@ -28,6 +36,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('AssetMeter')) {
     print('uploading assetmeters');
     // no checks, maximo will auto error out, can consider adding check for less errors
@@ -38,6 +47,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'AssetMeter',
         '/maxrest/oslc/os/iko_assetmeter',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['AssetMeter']![i].add('+');
       } else {
@@ -45,6 +55,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobPlan')) {
     print('uploading jobplan');
     for (int i = 0; i < uploadData['JobPlan']!.length; i++) {
@@ -60,6 +71,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'JobPlan',
         '/maxrest/oslc/os/iko_jobplan',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['JobPlan']![i].add('+');
       } else {
@@ -67,6 +79,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   } // should cache job plans that are brand new to save on later check
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('MeasurePoint')) {
     print('uploading measurepoint');
     for (int i = 0; i < uploadData['MeasurePoint']!.length; i++) {
@@ -78,6 +91,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
           'MeasurePoint',
           '/maxrest/oslc/os/iko_measurepoint',
         );
+        templates.setUploadedLines(file, template);
         if (result) {
           uploadData['MeasurePoint']![i].add('+');
         } else {
@@ -88,6 +102,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   } // should cache
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('MeasurePoint2')) {
     print('uploading measurepoint2');
     for (int i = 0; i < uploadData['MeasurePoint2']!.length; i++) {
@@ -99,6 +114,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
           'MeasurePoint2',
           '/maxrest/oslc/os/iko_measurepoint',
         );
+        templates.setUploadedLines(file, template);
         if (result) {
           uploadData['MeasurePoint2']![i].add('+');
         } else {
@@ -109,6 +125,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('Route')) {
     print('uploading route');
     // no checks
@@ -119,6 +136,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'Route',
         '/maxrest/oslc/os/iko_route',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['Route']![i].add('+');
       } else {
@@ -126,6 +144,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('Route_Stop')) {
     print('uploading routestop');
     // no checks
@@ -136,6 +155,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'Route_Stop',
         '/maxrest/oslc/os/iko_route_stop',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['Route_Stop']![i].add('+');
       } else {
@@ -143,6 +163,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('PM')) {
     print('uploading pm');
     // no checks
@@ -153,6 +174,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'PM',
         '/maxrest/oslc/os/iko_pm',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['PM']![i].add('+');
       } else {
@@ -160,6 +182,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobLabor')) {
     print('uploading joblabor');
     for (int i = 0; i < uploadData['JobLabor']!.length; i++) {
@@ -176,6 +199,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'JobLabor',
         '/maxrest/oslc/os/iko_joblabor',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['JobLabor']![i].add('+');
       } else {
@@ -183,6 +207,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JPASSETLINK')) {
     print('uploading jobasset');
     for (int i = 0; i < uploadData['JPASSETLINK']!.length; i++) {
@@ -203,6 +228,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'JPASSETLINK',
         '/maxrest/oslc/os/iko_jpassetlink',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['JPASSETLINK']![i].add('+');
       } else {
@@ -210,7 +236,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobTask')) {
     print('uploading jobtask');
     // no checks
@@ -228,6 +254,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'JobTask',
         '/maxrest/oslc/os/iko_jobtask',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['JobTask']![i].add('+');
       } else {
@@ -235,6 +262,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobMaterial')) {
     print('uploading jobmaterial');
     // no checks
@@ -245,6 +273,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'JobMaterial',
         '/maxrest/oslc/os/iko_jobmaterial',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['JobMaterial']![i].add('+');
       } else {
@@ -252,6 +281,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobService')) {
     print('uploading jobservice');
     // no checks
@@ -262,6 +292,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         'JobService',
         '/maxrest/oslc/os/iko_jobservice',
       );
+      templates.setUploadedLines(file, template);
       if (result) {
         uploadData['JobService']![i].add('+');
       } else {
@@ -269,6 +300,8 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
+  templates.setUploadDetails(file, template, uploadData);
+  templates.setStatus(file, template, 'done');
   return uploadData;
 }
 

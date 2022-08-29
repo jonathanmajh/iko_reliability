@@ -79,8 +79,16 @@ Widget statusIndicator(status) {
         width: 35,
         child: CircularProgressIndicator.adaptive(),
       );
-
       text = ' Processing';
+      textColor = const Color.fromRGBO(33, 150, 243, 1);
+      break;
+    case 'uploading':
+      icon = const SizedBox(
+        height: 35,
+        width: 35,
+        child: CircularProgressIndicator.adaptive(),
+      );
+      text = ' Uploading';
       textColor = const Color.fromRGBO(33, 150, 243, 1);
       break;
     case 'warning':
