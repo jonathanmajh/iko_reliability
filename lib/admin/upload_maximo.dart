@@ -16,7 +16,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   bool result;
   templates.setStatus(file, template, 'uploading');
   if (uploadData.containsKey('Meter')) {
-    print('uploading meters');
     for (int i = 0; i < uploadData['Meter']!.length; i++) {
       if (await isNewMeter(uploadData['Meter']![i][0], env)) {
         result = await uploadGeneric(
@@ -38,7 +37,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('AssetMeter')) {
-    print('uploading assetmeters');
     // no checks, maximo will auto error out, can consider adding check for less errors
     for (int i = 0; i < uploadData['AssetMeter']!.length; i++) {
       result = await uploadGeneric(
@@ -57,7 +55,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobPlan')) {
-    print('uploading jobplan');
     for (int i = 0; i < uploadData['JobPlan']!.length; i++) {
       if (uploadData['JobPlan']![i][10] == 'CBM') {
         if (!(await isNewJobPlan(uploadData['JobPlan']![i][2], env))) {
@@ -81,7 +78,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   } // should cache job plans that are brand new to save on later check
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('MeasurePoint')) {
-    print('uploading measurepoint');
     for (int i = 0; i < uploadData['MeasurePoint']!.length; i++) {
       if (await isNewMeasurePoint(uploadData['MeasurePoint']![i][3],
           uploadData['MeasurePoint']![i][0], env)) {
@@ -104,7 +100,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   } // should cache
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('MeasurePoint2')) {
-    print('uploading measurepoint2');
     for (int i = 0; i < uploadData['MeasurePoint2']!.length; i++) {
       if (await isNewMeasurePoint2(uploadData['MeasurePoint2']![i][3],
           uploadData['MeasurePoint2']![i][0], env)) {
@@ -127,7 +122,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('Route')) {
-    print('uploading route');
     // no checks
     for (int i = 0; i < uploadData['Route']!.length; i++) {
       result = await uploadGeneric(
@@ -146,7 +140,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('Route_Stop')) {
-    print('uploading routestop');
     // no checks
     for (int i = 0; i < uploadData['Route_Stop']!.length; i++) {
       result = await uploadGeneric(
@@ -165,7 +158,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('PM')) {
-    print('uploading pm');
     // no checks
     for (int i = 0; i < uploadData['PM']!.length; i++) {
       result = await uploadGeneric(
@@ -184,7 +176,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobLabor')) {
-    print('uploading joblabor');
     for (int i = 0; i < uploadData['JobLabor']!.length; i++) {
       if (uploadData['JobLabor']![i][2].contains('CBM')) {
         if (!(await isNewJobLabor(uploadData['JobLabor']![i][2],
@@ -209,7 +200,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JPASSETLINK')) {
-    print('uploading jobasset');
     for (int i = 0; i < uploadData['JPASSETLINK']!.length; i++) {
       if (uploadData['JPASSETLINK']![i][2].contains('CBM')) {
         if (!(await isNewJobAsset(
@@ -238,7 +228,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobTask')) {
-    print('uploading jobtask');
     // no checks
     for (int i = 0; i < uploadData['JobTask']!.length; i++) {
       if (uploadData['JobTask']![i][2].contains('CBM')) {
@@ -264,7 +253,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobMaterial')) {
-    print('uploading jobmaterial');
     // no checks
     for (int i = 0; i < uploadData['JobMaterial']!.length; i++) {
       result = await uploadGeneric(
@@ -283,7 +271,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobService')) {
-    print('uploading jobservice');
     // no checks
     for (int i = 0; i < uploadData['JobService']!.length; i++) {
       result = await uploadGeneric(

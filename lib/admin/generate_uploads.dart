@@ -7,6 +7,7 @@ import 'asset_storage.dart';
 
 Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
   Map<String, List<List<String>>> generated = {};
+  // TODO put templates in upload order consider different order for preview vs upload
   generated['Meter'] = [];
   generated['Asset'] = [];
   generated['AssetMeter'] = [];
