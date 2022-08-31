@@ -33,11 +33,9 @@ class _PMDetailViewState extends State<PMDetailView> {
       fmecaPackageController.text =
           processedTemplate.jobplan.ikoPmpackage ?? '';
       pmNumberFieldController.text = processedTemplate.pmNumber;
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
-        primary: false,
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          // TODO freeze / pin this row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -96,47 +94,55 @@ class _PMDetailViewState extends State<PMDetailView> {
             endIndent: 10,
             color: Color.fromARGB(255, 255, 255, 255),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                  child: TextField(
-                      readOnly: true,
-                      controller: pmNumberFieldController,
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
+              primary: false,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                        child: TextField(
+                            readOnly: true,
+                            controller: pmNumberFieldController,
+                            decoration: const InputDecoration(
+                              labelText: 'PM Number (Read Only)',
+                              border: OutlineInputBorder(),
+                            ))),
+                    Expanded(
+                        child: TextField(
+                      controller: fmecaPackageController,
                       decoration: const InputDecoration(
-                        labelText: 'PM Number (Read Only)',
+                        labelText: 'Edit PMECA Package',
                         border: OutlineInputBorder(),
-                      ))),
-              Expanded(
-                  child: TextField(
-                controller: fmecaPackageController,
-                decoration: const InputDecoration(
-                  labelText: 'Edit PMECA Package',
-                  border: OutlineInputBorder(),
+                      ),
+                    )),
+                  ],
                 ),
-              )),
-            ],
-          ),
-          const Divider(
-            height: 10,
-            thickness: 0,
-            indent: 0,
-            endIndent: 0,
-            color: Color.fromARGB(255, 255, 255, 255),
-          ),
-          TextField(
-            controller: pmNameFieldController,
-            decoration: const InputDecoration(
-              labelText: 'Edit PM Name',
-              border: OutlineInputBorder(),
+                const Divider(
+                  height: 10,
+                  thickness: 0,
+                  indent: 0,
+                  endIndent: 0,
+                  color: Color.fromARGB(255, 255, 255, 255),
+                ),
+                TextField(
+                  controller: pmNameFieldController,
+                  decoration: const InputDecoration(
+                    labelText: 'Edit PM Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                ...generateUploadDetailsList(
+                    value.getUploadDetails(),
+                    (value.getStatus() == 'done') ||
+                            (value.getStatus() == 'uploading')
+                        ? true
+                        : false)
+              ],
             ),
-          ),
-          ...generateUploadDetailsList(
-              value.getUploadDetails(),
-              (value.getStatus() == 'done') ||
-                      (value.getStatus() == 'uploading')
-                  ? true
-                  : false)
+          )
         ],
       );
     });
@@ -148,16 +154,22 @@ List<Widget> generateUploadDetailsList(
   List<Widget> cards = [];
   for (final table in uploadDetails.keys) {
     List<Widget> rows = [];
-    rows.add(Text(tableHeaders[table]!.join(',')));
+    rows.add(Container(
+        width: double.maxFinite,
+        color: Colors.black,
+        child: Text((tableHeaders[table]!.join(',')),
+            style: const TextStyle(color: Colors.white))));
     if (uploadDetails[table]!.isNotEmpty) {
       for (final row in uploadDetails[table]!) {
         if (result) {
-          final textColor = status[row.last] ?? Colors.purple;
-          rows.add(Text(
-            row.join(','),
-            style:
-                TextStyle(backgroundColor: textColor, fontFamily: 'RobotoMono'),
-          ));
+          final textColor = status[row.last] ?? Colors.white;
+          rows.add(Container(
+              width: double.maxFinite,
+              color: textColor,
+              child: Text(
+                row.join(','),
+                style: const TextStyle(fontFamily: 'RobotoMono'),
+              )));
         } else {
           rows.add(Text(
             row.join(','),

@@ -64,10 +64,10 @@ class _PmCheckPageState extends State<PmCheckPage> {
           ]),
           const Divider(
             height: 20,
-            thickness: 3,
+            thickness: 1,
             indent: 0,
             endIndent: 0,
-            color: Colors.black,
+            color: Colors.grey,
           ),
           Expanded(
               child: Row(

@@ -82,6 +82,7 @@ Asset getParent(Asset asset) {
 }
 
 Asset getAsset(String siteid, String assetNum) {
+  //http://nscandacmaxapp1/maxrest/oslc/os/mxasset?oslc.where=siteid=%22GV%22&oslc.select=assetnum,siteid,description,parent,status&_lid=majona&_lpwd=happy818
   // TODO get from Maximo after DB instead of default value
   final box = Hive.box('assets');
   final asset = box.get('$siteid|$assetNum',

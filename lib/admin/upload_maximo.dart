@@ -15,6 +15,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   // +: uploaded; ~: already exist; !: error
   bool result;
   templates.setStatus(file, template, 'uploading');
+  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('Meter')) {
     for (int i = 0; i < uploadData['Meter']!.length; i++) {
       if (await isNewMeter(uploadData['Meter']![i][0], env)) {
@@ -35,7 +36,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('AssetMeter')) {
     // no checks, maximo will auto error out, can consider adding check for less errors
     for (int i = 0; i < uploadData['AssetMeter']!.length; i++) {
@@ -53,7 +53,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobPlan')) {
     for (int i = 0; i < uploadData['JobPlan']!.length; i++) {
       if (uploadData['JobPlan']![i][10] == 'CBM') {
@@ -76,7 +75,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   } // should cache job plans that are brand new to save on later check
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('MeasurePoint')) {
     for (int i = 0; i < uploadData['MeasurePoint']!.length; i++) {
       if (await isNewMeasurePoint(uploadData['MeasurePoint']![i][3],
@@ -98,7 +96,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   } // should cache
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('MeasurePoint2')) {
     for (int i = 0; i < uploadData['MeasurePoint2']!.length; i++) {
       if (await isNewMeasurePoint2(uploadData['MeasurePoint2']![i][3],
@@ -120,7 +117,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('Route')) {
     // no checks
     for (int i = 0; i < uploadData['Route']!.length; i++) {
@@ -138,7 +134,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('Route_Stop')) {
     // no checks
     for (int i = 0; i < uploadData['Route_Stop']!.length; i++) {
@@ -156,7 +151,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('PM')) {
     // no checks
     for (int i = 0; i < uploadData['PM']!.length; i++) {
@@ -174,7 +168,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobLabor')) {
     for (int i = 0; i < uploadData['JobLabor']!.length; i++) {
       if (uploadData['JobLabor']![i][2].contains('CBM')) {
@@ -198,7 +191,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JPASSETLINK')) {
     for (int i = 0; i < uploadData['JPASSETLINK']!.length; i++) {
       if (uploadData['JPASSETLINK']![i][2].contains('CBM')) {
@@ -226,7 +218,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobTask')) {
     // no checks
     for (int i = 0; i < uploadData['JobTask']!.length; i++) {
@@ -251,7 +242,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobMaterial')) {
     // no checks
     for (int i = 0; i < uploadData['JobMaterial']!.length; i++) {
@@ -269,7 +259,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('JobService')) {
     // no checks
     for (int i = 0; i < uploadData['JobService']!.length; i++) {
@@ -287,7 +276,6 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
       }
     }
   }
-  templates.setUploadDetails(file, template, uploadData);
   templates.setStatus(file, template, 'done');
   return uploadData;
 }

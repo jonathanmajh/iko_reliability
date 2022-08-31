@@ -95,7 +95,6 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
   // if (pmpkg.jobplan.ikoPmpackage != null) {
   //   for (final jobplan in pmpkg.route?.childJobPlans ?? []) {
   //     final jobasset = jobplan.jobasset[0];
-  //     // TODO will not work if it is single asset PM
   //     generated['Asset']!.add([
   //       pmpkg.siteID,
   //       jobasset.assetNumber,
