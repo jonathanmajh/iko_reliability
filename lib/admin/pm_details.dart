@@ -33,8 +33,7 @@ class _PMDetailViewState extends State<PMDetailView> {
       fmecaPackageController.text =
           processedTemplate.jobplan.ikoPmpackage ?? '';
       pmNumberFieldController.text = processedTemplate.pmNumber;
-      return Expanded(
-          child: ListView(
+      return ListView(
         padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
         primary: false,
         children: [
@@ -139,7 +138,7 @@ class _PMDetailViewState extends State<PMDetailView> {
                   ? true
                   : false)
         ],
-      ));
+      );
     });
   }
 }
