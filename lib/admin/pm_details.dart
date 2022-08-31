@@ -38,6 +38,7 @@ class _PMDetailViewState extends State<PMDetailView> {
         padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
         primary: false,
         children: [
+          // TODO freeze / pin this row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -86,7 +87,7 @@ class _PMDetailViewState extends State<PMDetailView> {
                       ],
                     ));
               }),
-              Text('Lines Uploaded ${value}')
+              Text('Lines Uploaded: ${value.getUploadedLines()}')
             ],
           ),
           const Divider(
