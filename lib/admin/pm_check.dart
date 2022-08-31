@@ -217,8 +217,6 @@ Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
 
 void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
     String maximoServerSelected) async {
-  var stopwatch = Stopwatch()..start();
-
   var parsedTmpts = await parseSpreadsheets(files);
   for (var thing in parsedTmpts) {
     for (var template in thing.keys) {
@@ -228,9 +226,6 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
       }
     }
   }
-  print('Parsed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
-  stopwatch = Stopwatch()..start();
-
   for (String ws in context.getFiles()) {
     for (int templateNumber in context.getTemplates(ws)) {
       // TODO this is no longer async :(
@@ -238,17 +233,13 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
         context.getParsedTemplate(ws, templateNumber),
         maximoServerSelected,
       );
-      print('setting pm name');
       context.setNameTemplate(ws, templateNumber, value);
-
       final value2 = await generatePM(
         context.getParsedTemplate(ws, templateNumber),
         context.getPMName(ws, templateNumber),
         maximoServerSelected,
       );
       context.setProcessedTemplate(ws, templateNumber, value2);
-      print('done');
     }
   }
-  print('Processed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
 }

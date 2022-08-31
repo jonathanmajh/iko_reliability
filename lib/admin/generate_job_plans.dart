@@ -346,7 +346,6 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
     routeStops: routeStops,
     childJobPlans: childJobPlans.values.toList(),
   );
-  print('complete job plan generation');
   return PMMaximo(
     siteID: pmDetails.siteId!,
     pmNumber: pmName.pmNumber,
