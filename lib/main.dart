@@ -5,8 +5,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'admin/asset_storage.dart';
+import 'admin/db_drift.dart';
 import 'admin/observation_list_storage.dart';
 import 'admin/template_notifier.dart';
+
+MyDatabase? database;
 
 void main() async {
   await Hive.initFlutter();
@@ -24,6 +27,7 @@ void main() async {
   box.clear();
   box = Hive.box('routeNumber');
   box.clear();
+  database = MyDatabase();
   runApp(MyApp());
 }
 

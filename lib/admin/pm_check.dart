@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 import 'package:iko_reliability/admin/pm_name_generator.dart';
 import 'package:provider/provider.dart';
@@ -58,6 +59,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
             ElevatedButton(
               onPressed: () {
                 context.read<TemplateNotifier>().clearTemplates();
+                var box = Hive.box('jpNumber');
+                box.clear();
+                box = Hive.box('pmNumber');
+                box.clear();
+                box = Hive.box('routeNumber');
+                box.clear();
               },
               child: const Text('Clear Templates'),
             ),

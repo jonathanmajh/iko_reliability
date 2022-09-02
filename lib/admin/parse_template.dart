@@ -227,7 +227,8 @@ class ParsedTemplate {
           continue;
         }
 
-        if (row[3] == 'Route Assets (one per cell):') {
+        if (row[3] == 'Route Assets (one per cell):' ||
+            row[3] == 'Task Route Assets (one per cell):') {
           readRouteAsset = true;
         }
       }
