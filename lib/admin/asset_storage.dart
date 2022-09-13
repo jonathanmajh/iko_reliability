@@ -98,6 +98,10 @@ Asset getAsset(String siteid, String assetNum) {
   return asset;
 }
 
+// Asset getAssetMaximo(String siteid, String assetNum) {
+
+// }
+
 Asset getCommonParent(List<String> assets, String siteID) {
   if (assets.length == 1) {
     return getAsset(siteID, assets[0]);

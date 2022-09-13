@@ -7,7 +7,13 @@ Widget templateDescription(
   int templateNumber,
   TemplateNotifier context,
 ) {
+  Color vertCol = Colors.grey;
   final template = context.getFullTemplate(filename, templateNumber);
+  final selected = context.getSelectedTemplate();
+  if (selected.selectedFile == filename &&
+      selected.selectedTemplate == templateNumber) {
+    vertCol = Colors.red;
+  }
   return Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: <Widget>[
@@ -15,12 +21,12 @@ Widget templateDescription(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [statusIndicator(template.templateStatus)],
       ),
-      const VerticalDivider(
+      VerticalDivider(
         width: 20,
         thickness: 1,
         indent: 10,
         endIndent: 10,
-        color: Colors.grey,
+        color: vertCol,
       ),
       Expanded(
         child: Column(

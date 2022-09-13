@@ -233,20 +233,22 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
       }
     }
   }
-  for (String ws in context.getFiles()) {
-    for (int templateNumber in context.getTemplates(ws)) {
-      // TODO this is no longer async :(
-      final value = await generateName(
-        context.getParsedTemplate(ws, templateNumber),
-        maximoServerSelected,
-      );
-      context.setNameTemplate(ws, templateNumber, value);
-      final value2 = await generatePM(
-        context.getParsedTemplate(ws, templateNumber),
-        context.getPMName(ws, templateNumber),
-        maximoServerSelected,
-      );
-      context.setProcessedTemplate(ws, templateNumber, value2);
+  for (var thing in parsedTmpts) {
+    for (String ws in thing.keys) {
+      for (int templateNumber in thing[ws].keys) {
+        // TODO this is no longer async :(
+        final value = await generateName(
+          context.getParsedTemplate(ws, templateNumber),
+          maximoServerSelected,
+        );
+        context.setNameTemplate(ws, templateNumber, value);
+        final value2 = await generatePM(
+          context.getParsedTemplate(ws, templateNumber),
+          context.getPMName(ws, templateNumber),
+          maximoServerSelected,
+        );
+        context.setProcessedTemplate(ws, templateNumber, value2);
+      }
     }
   }
 }
