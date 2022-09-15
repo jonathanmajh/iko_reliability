@@ -11,6 +11,7 @@ class TemplateStore {
   String templateStatus;
   Map<String, List<List<String>>> uploadDetails;
   int uploadedLines;
+  List<String> statusMessages = [];
 
   TemplateStore(
       {required this.parsedTemplate,
@@ -57,6 +58,26 @@ class TemplateNotifier extends ChangeNotifier {
   void setUploadedLines(String file, int template) {
     allTemplates[file]![template]!.uploadedLines++;
     notifyListeners();
+  }
+
+  void addStatusMessage(String file, int template, String msg) {
+    allTemplates[file]![template]!.statusMessages.add(msg);
+    allTemplates[file]![template]!.templateStatus = 'error';
+    notifyListeners();
+  }
+
+  String getTemplateNumber(String file, int template) {
+    return allTemplates[file]![template]!.nameTemplate?.pmNumber ??
+        allTemplates[file]![template]!.parsedTemplate.pmNumber;
+  }
+
+  String getTemplateName(String file, int template) {
+    return allTemplates[file]![template]!.nameTemplate?.pmName ??
+        allTemplates[file]![template]!.parsedTemplate.pmName;
+  }
+
+  List<String> getStatusMessages(String file, int template) {
+    return allTemplates[file]![template]!.statusMessages;
   }
 
   int getUploadedLines() {
@@ -108,15 +129,20 @@ class TemplateNotifier extends ChangeNotifier {
   void setUploadDetails(String file, int template,
       Map<String, List<List<String>>> uploadDetails) {
     addTemplate(file);
+    if (uploadDetails.containsKey('Errors')) {
+      final errors = uploadDetails.remove('Errors');
+      for (final msg in errors!) {
+        addStatusMessage(file, template, msg[0]);
+      }
+    }
     allTemplates[file]![template]!.uploadDetails = uploadDetails;
     notifyListeners();
   }
 
-  Map<String, List<List<String>>> getUploadDetails() {
+  Map<String, List<List<String>>> getUploadDetails(
+      String file, int templateNumber) {
     /// Return details for selected template
-    return allTemplates[selectedTemplate.selectedFile]![
-            selectedTemplate.selectedTemplate]!
-        .uploadDetails;
+    return allTemplates[file]![templateNumber]!.uploadDetails;
   }
 
   void setNameTemplate(String file, int templateNumber, PMName template) {
@@ -139,11 +165,9 @@ class TemplateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  String getStatus() {
+  String getStatus(String file, int templateNumber) {
     /// Get Status of currently selected template.
-    return allTemplates[selectedTemplate.selectedFile]![
-            selectedTemplate.selectedTemplate]!
-        .templateStatus;
+    return allTemplates[file]![templateNumber]!.templateStatus;
   }
 
   ParsedTemplate getParsedTemplate(String file, int templateNumber) {

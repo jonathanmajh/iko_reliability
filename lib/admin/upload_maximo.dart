@@ -6,7 +6,6 @@ import 'maximo_jp_pm.dart';
 import 'package:http/http.dart' as http;
 
 Future<Map<String, List<List<String>>>> uploadToMaximo(
-  Map<String, List<List<String>>> uploadData,
   String env,
   String file,
   int template,
@@ -14,6 +13,12 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
 ) async {
   // +: uploaded; ~: already exist; !: error
   bool result;
+  if (templates.getStatus(file, template) == 'error') {
+    throw Exception(
+        'Please fix errors in template before upload: $file: $template');
+  }
+  List<String> newJobPlans = [];
+  var uploadData = templates.getUploadDetails(file, template);
   templates.setStatus(file, template, 'uploading');
   templates.setUploadDetails(file, template, uploadData);
   if (uploadData.containsKey('Meter')) {
@@ -60,6 +65,8 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
           uploadData['JobPlan']![i].add('~');
           continue;
         }
+        // if the CBM job plan is new add it to list
+        newJobPlans.add(uploadData['JobPlan']![i][2]);
       }
       result = await uploadGeneric(
         uploadData['JobPlan']![i],
@@ -74,7 +81,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['JobPlan']![i].add('!');
       }
     }
-  } // should cache job plans that are brand new to save on later check
+  }
   if (uploadData.containsKey('MeasurePoint')) {
     for (int i = 0; i < uploadData['MeasurePoint']!.length; i++) {
       if (await isNewMeasurePoint(uploadData['MeasurePoint']![i][3],
@@ -170,7 +177,8 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   if (uploadData.containsKey('JobLabor')) {
     for (int i = 0; i < uploadData['JobLabor']!.length; i++) {
-      if (uploadData['JobLabor']![i][2].contains('CBM')) {
+      if (uploadData['JobLabor']![i][2].contains('CBM') &&
+          !(newJobPlans.contains(uploadData['JobLabor']![i][2]))) {
         if (!(await isNewJobLabor(uploadData['JobLabor']![i][2],
             uploadData['JobLabor']![i][7], env))) {
           uploadData['JobLabor']![i].add('~');
@@ -193,7 +201,8 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   if (uploadData.containsKey('JPASSETLINK')) {
     for (int i = 0; i < uploadData['JPASSETLINK']!.length; i++) {
-      if (uploadData['JPASSETLINK']![i][2].contains('CBM')) {
+      if (uploadData['JPASSETLINK']![i][2].contains('CBM') &&
+          !(newJobPlans.contains(uploadData['JPASSETLINK']![i][2]))) {
         if (!(await isNewJobAsset(
           uploadData['JPASSETLINK']![i][2],
           uploadData['JPASSETLINK']![i][7],
@@ -221,7 +230,8 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   if (uploadData.containsKey('JobTask')) {
     // no checks
     for (int i = 0; i < uploadData['JobTask']!.length; i++) {
-      if (uploadData['JobTask']![i][2].contains('CBM')) {
+      if (uploadData['JobTask']![i][2].contains('CBM') &&
+          !(newJobPlans.contains(uploadData['JobTask']![i][2]))) {
         if (!(await isNewJobTask(
             uploadData['JobTask']![i][2], uploadData['JobTask']![i][4], env))) {
           uploadData['JobTask']![i].add('~');
@@ -430,7 +440,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     if (parsed['totaldoc'] != null && parsed['validdoc'] != null) {
       if (parsed['totaldoc'] == parsed['validdoc']) {
         // preview passed
-        header.remove('preview');
+        // TODO header.remove('preview');
         try {
           response = await http.post(
             Uri.parse(

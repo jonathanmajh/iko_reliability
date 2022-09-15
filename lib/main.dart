@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'admin/asset_storage.dart';
 import 'admin/db_drift.dart';
+import 'admin/end_drawer.dart';
 import 'admin/observation_list_storage.dart';
 import 'admin/template_notifier.dart';
 
@@ -56,29 +57,23 @@ class MyApp extends StatelessWidget {
           routeInformationParser: _appRouter.defaultRouteParser(),
           title: 'Flutter Demo',
           theme: ThemeData(
-            // This is the theme of your application.
-            //
-            // Try running your application with "flutter run". You'll see the
-            // application has a blue toolbar. Then, without quitting the app, try
-            // changing the primarySwatch below to Colors.green and then invoke
-            // "hot reload" (press "r" in the console where you ran "flutter run",
-            // or simply save your changes to "hot reload" in a Flutter IDE).
-            // Notice that the counter didn't reset back to zero; the application
-            // is not restarted.
-            primarySwatch: Colors.blue,
-          ),
+              useMaterial3: true,
+              // primarySwatch: Colors.red,
+              colorSchemeSeed: const Color(0xFFFF0000)),
+          darkTheme: ThemeData.dark().copyWith(useMaterial3: true),
+          themeMode: ThemeMode.system,
         ));
   }
 }
 
-class GHFlutter extends StatefulWidget {
-  const GHFlutter({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  State<GHFlutter> createState() => _GHFlutterState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _GHFlutterState extends State<GHFlutter> {
+class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
@@ -88,24 +83,36 @@ class _GHFlutterState extends State<GHFlutter> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("app title"),
+          title: const Text("IKO Reliability Maximo Tool (beta)"),
         ),
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: Text(
-                  'Drawer Header',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
+              DrawerHeader(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'IKO Reliability Maximo',
+                    style: TextStyle(
+                      // color: Colors.white,
+                      fontSize: 24,
+                    ),
                   ),
-                ),
-              ),
+                  Text(
+                    'display name...',
+                    style: TextStyle(
+                      // color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text('userid'),
+                  Text('Status'),
+                  Text('environment'),
+                ],
+              )),
               const ListTile(
                 leading: Icon(Icons.message),
                 title: Text('Home'),
@@ -179,6 +186,7 @@ class _GHFlutterState extends State<GHFlutter> {
             title: Text(
                 'For Asset Criticality Generator, save the processed breakdown data into sharepoint'),
           )
-        ]));
+        ]),
+        endDrawer: const EndDrawer());
   }
 }

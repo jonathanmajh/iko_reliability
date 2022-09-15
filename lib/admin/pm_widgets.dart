@@ -8,7 +8,6 @@ Widget templateDescription(
   TemplateNotifier context,
 ) {
   Color vertCol = Colors.grey;
-  final template = context.getFullTemplate(filename, templateNumber);
   final selected = context.getSelectedTemplate();
   if (selected.selectedFile == filename &&
       selected.selectedTemplate == templateNumber) {
@@ -17,9 +16,14 @@ Widget templateDescription(
   return Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: <Widget>[
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [statusIndicator(template.templateStatus)],
+      SizedBox(
+        width: 100,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            statusIndicator(context.getStatus(filename, templateNumber))
+          ],
+        ),
       ),
       VerticalDivider(
         width: 20,
@@ -34,8 +38,7 @@ Widget templateDescription(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              template.nameTemplate?.pmNumber ??
-                  template.parsedTemplate.pmNumber,
+              context.getTemplateNumber(filename, templateNumber),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -43,7 +46,7 @@ Widget templateDescription(
               ),
             ),
             Text(
-              template.nameTemplate?.pmName ?? template.parsedTemplate.pmName,
+              context.getTemplateName(filename, templateNumber),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -173,6 +176,12 @@ List<Widget> buildPMList(TemplateNotifier context) {
         color: Colors.grey,
       ));
     }
+  }
+  if (list.isEmpty) {
+    list.add(const Text('Open PM Template - Select and parse template files'));
+    list.add(const Text('Clear Templates - Clears all templates from program'));
+    list.add(const Text('Parsed PMs will appear in below list'));
+    list.add(const Text('Click on PMs in list to view details'));
   }
   return list;
 }

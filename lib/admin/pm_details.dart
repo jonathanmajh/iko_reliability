@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:iko_reliability/admin/consts.dart';
 import 'package:provider/provider.dart';
@@ -27,11 +29,16 @@ class _PMDetailViewState extends State<PMDetailView> {
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
+      final statusMessages = value.getStatusMessages(
+          selected.selectedFile!, selected.selectedTemplate!);
       final processedTemplate = value.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);
-      pmNameFieldController.text = processedTemplate!.description;
+      if (processedTemplate == null) {
+        return const Text('Please wait while template is being processed...');
+      }
+      pmNameFieldController.text = processedTemplate.description;
       fmecaPackageController.text =
-          processedTemplate.jobplan.ikoPmpackage ?? '';
+          processedTemplate.jobplan.ikoPmpackage ?? fmecaPackageController.text;
       pmNumberFieldController.text = processedTemplate.pmNumber;
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -70,12 +77,22 @@ class _PMDetailViewState extends State<PMDetailView> {
               Consumer<MaximoServerNotifier>(builder: (context, maximo, child) {
                 return ElevatedButton(
                     onPressed: () async {
-                      await uploadToMaximo(
-                          generateUploads(processedTemplate),
-                          maximo.maximoServerSelected,
+                      value.setUploadDetails(
                           selected.selectedFile!,
                           selected.selectedTemplate!,
-                          value);
+                          generateUploads(processedTemplate));
+                      try {
+                        await uploadToMaximo(
+                            maximo.maximoServerSelected,
+                            selected.selectedFile!,
+                            selected.selectedTemplate!,
+                            value);
+                      } catch (e) {
+                        value.addStatusMessage(selected.selectedFile!,
+                            selected.selectedTemplate!, '$e');
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text('$e')));
+                      }
                     },
                     child: Row(
                       children: const [
@@ -110,6 +127,13 @@ class _PMDetailViewState extends State<PMDetailView> {
                               labelText: 'PM Number (Read Only)',
                               border: OutlineInputBorder(),
                             ))),
+                    const VerticalDivider(
+                      width: 10,
+                      thickness: 1,
+                      indent: 5,
+                      endIndent: 5,
+                      color: Colors.white,
+                    ),
                     Expanded(
                         child: TextField(
                       controller: fmecaPackageController,
@@ -121,6 +145,7 @@ class _PMDetailViewState extends State<PMDetailView> {
                   ],
                 ),
                 const Divider(
+                  // spacer
                   height: 10,
                   thickness: 0,
                   indent: 0,
@@ -134,12 +159,55 @@ class _PMDetailViewState extends State<PMDetailView> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                ...generateUploadDetailsList(
-                    value.getUploadDetails(),
-                    (value.getStatus() == 'done') ||
-                            (value.getStatus() == 'uploading')
-                        ? true
-                        : false)
+                const Divider(
+                  height: 15,
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 10,
+                  color: Color.fromARGB(255, 124, 124, 124),
+                ),
+                Card(
+                  child: ExpansionTile(
+                    title: const Text('Processing Log'),
+                    children: <Widget>[
+                      statusMessages.isEmpty
+                          ? const Center(child: Text('Processing...'))
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: statusMessages.length,
+                              prototypeItem: ListTile(
+                                title: Text(statusMessages.first),
+                              ),
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  title: Text(statusMessages[index]),
+                                );
+                              },
+                            ),
+                    ],
+                  ),
+                ),
+                const Divider(
+                  height: 15,
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 10,
+                  color: Color.fromARGB(255, 124, 124, 124),
+                ),
+                Card(
+                    child: ExpansionTile(
+                        title: const Text('Upload Details'),
+                        children: generateUploadDetailsList(
+                            value.getUploadDetails(selected.selectedFile!,
+                                selected.selectedTemplate!),
+                            (value.getStatus(selected.selectedFile!,
+                                            selected.selectedTemplate!) ==
+                                        'done') ||
+                                    (value.getStatus(selected.selectedFile!,
+                                            selected.selectedTemplate!) ==
+                                        'uploading')
+                                ? true
+                                : false)))
               ],
             ),
           )
@@ -178,11 +246,11 @@ List<Widget> generateUploadDetailsList(
         }
       }
       cards.add(Card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [ListTile(title: Text(table)), ...rows],
-        ),
-      ));
+          child: ExpansionTile(
+        title: Text(table),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        children: rows,
+      )));
     }
   }
   return cards;

@@ -105,5 +105,9 @@ void loadObservationList() async {
 
 ObservationList getObservation(String meterCode) {
   final box = Hive.box('observationList');
-  return box.get(meterCode.substring(0, meterCode.length - 2));
+  final meter = box.get(meterCode.substring(0, meterCode.length - 2));
+  if (meter == null) {
+    throw Exception('Meter "$meterCode" cannot be found');
+  }
+  return meter;
 }

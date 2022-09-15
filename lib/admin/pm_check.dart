@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../main.dart';
 import 'asset_storage.dart';
+import 'end_drawer.dart';
 import 'generate_job_plans.dart';
 import 'maximo_jp_pm.dart';
 import 'observation_list_storage.dart';
@@ -38,43 +39,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
       ),
       body: Column(
         children: <Widget>[
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Flexible(
-                child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Click "Pick Files" and select PM templates to get started. '
-                'Click "Restart" to remove all PMs '
-                'Detected PMs will appear in below list '
-                'Click on detected PMs to view details ',
-                overflow: TextOverflow.ellipsis,
-              ),
-            )),
-            ElevatedButton(
-              onPressed: () {
-                pickTemplates(context);
-              },
-              child: const Text('Open PM Template'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                context.read<TemplateNotifier>().clearTemplates();
-                var box = Hive.box('jpNumber');
-                box.clear();
-                box = Hive.box('pmNumber');
-                box.clear();
-                box = Hive.box('routeNumber');
-                box.clear();
-              },
-              child: const Text('Clear Templates'),
-            ),
-          ]),
           const Divider(
-            height: 20,
+            height: 10,
             thickness: 1,
             indent: 0,
             endIndent: 0,
-            color: Colors.grey,
+            color: Colors.white,
           ),
           Expanded(
               child: Row(
@@ -84,8 +54,45 @@ class _PmCheckPageState extends State<PmCheckPage> {
                     width: 550,
                     child: Consumer<TemplateNotifier>(
                         builder: (context, value, child) {
-                      return ListView(
-                        children: buildPMList(value),
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    pickTemplates(context);
+                                  },
+                                  child: const Text('Open PM Template'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    context
+                                        .read<TemplateNotifier>()
+                                        .clearTemplates();
+                                    var box = Hive.box('jpNumber');
+                                    box.clear();
+                                    box = Hive.box('pmNumber');
+                                    box.clear();
+                                    box = Hive.box('routeNumber');
+                                    box.clear();
+                                  },
+                                  child: const Text('Clear Templates'),
+                                ),
+                              ]),
+                          const Divider(
+                            height: 15,
+                            thickness: 1,
+                            indent: 10,
+                            endIndent: 10,
+                            color: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          Expanded(
+                              child: ListView(
+                            children: buildPMList(value),
+                          ))
+                        ],
                       );
                     })),
                 const VerticalDivider(
@@ -95,68 +102,18 @@ class _PmCheckPageState extends State<PmCheckPage> {
                   endIndent: 5,
                   color: Colors.grey,
                 ),
-                const Expanded(child: PMDetailView())
+                const Expanded(child: PMDetailView()),
+                const VerticalDivider(
+                  width: 8,
+                  thickness: 1,
+                  indent: 5,
+                  endIndent: 5,
+                  color: Colors.white,
+                ),
               ]))
         ],
       ),
-      endDrawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            const DrawerHeader(
-                child: Text(
-              'PM Settings',
-              style: TextStyle(fontSize: 24),
-            )),
-            ListTile(
-                leading: const Icon(Icons.message),
-                title: const Text('Maximo Environment'),
-                subtitle:
-                    const Text('Toggle which environment to apply changes to'),
-                trailing: Consumer<MaximoServerNotifier>(
-                    builder: (context, value, child) {
-                  return DropdownButton(
-                    value: value.maximoServerSelected,
-                    onChanged: (String? newValue) {
-                      changeMaximoEnvironment(newValue);
-                    },
-                    items: maximoServerDomains.keys
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  );
-                })),
-            const ListTile(
-                leading: Icon(Icons.message),
-                title: Text('Load Asset'),
-                subtitle: Text('Clear and Load Assets from Spreadsheet'),
-                trailing: ElevatedButton(
-                  onPressed: loadHierarchy,
-                  child: Text('Load Asset'),
-                )),
-            const ListTile(
-                leading: Icon(Icons.message),
-                title: Text('Load Observation'),
-                subtitle:
-                    Text('Clear and Load Observation list from spreadsheet'),
-                trailing: ElevatedButton(
-                  onPressed: loadObservationList,
-                  child: Text('Load Asset'),
-                )),
-            const ListTile(
-              // a spacer
-              title: Text(''),
-            ),
-            Center(
-                child: ElevatedButton(
-              onPressed: _closeEndDrawer,
-              child: const Text('Close Drawer'),
-            )),
-          ],
-        ),
-      ),
+      endDrawer: const EndDrawer(),
     );
   }
 
@@ -197,18 +154,6 @@ class _PmCheckPageState extends State<PmCheckPage> {
       final maximo = context.read<MaximoServerNotifier>();
       processAllTemplates(template, files, maximo.maximoServerSelected);
     }
-  }
-
-  void changeMaximoEnvironment(String? value) {
-    if (value == null) {
-      return;
-    }
-    var maximo = context.read<MaximoServerNotifier>();
-    maximo.setServer(value);
-  }
-
-  void _closeEndDrawer() {
-    Navigator.of(context).pop();
   }
 }
 

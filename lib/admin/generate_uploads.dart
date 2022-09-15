@@ -21,6 +21,7 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
   generated['JobTask'] = [];
   generated['JobMaterial'] = [];
   generated['JobService'] = [];
+  generated['Errors'] = [];
   // pm template
   generated['PM'] = [
     [
@@ -113,14 +114,18 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
           jobtask.metername ?? '',
         ]);
         final asset = getAsset(pmpkg.siteID, assetNumber);
-        final meter = getObservation(jobtask.metername!);
-        generated['MeasurePoint']!.add([
-          pmpkg.siteID,
-          assetNumber,
-          jobtask.metername ?? '',
-          '$assetNumber${jobtask.metername}',
-          '${asset.name} - ${meter.inspect} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
-        ]);
+        try {
+          final meter = getObservation(jobtask.metername!);
+          generated['MeasurePoint']!.add([
+            pmpkg.siteID,
+            assetNumber,
+            jobtask.metername ?? '',
+            '$assetNumber${jobtask.metername}',
+            '${asset.name} - ${meter.inspect} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
+          ]);
+        } catch (e) {
+          generated['Errors']!.add(['$e']);
+        }
         generated['Meter']!.add([
           jobtask.metername ?? '',
           jobtask.metername ?? '',
@@ -149,12 +154,11 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
           ...generated['MeasurePoint2']!,
           ...newGen['MeasurePoint2']!
         ];
+        generated['Errors'] = [...generated['Errors']!, ...newGen['Errors']!];
       }
     }
   }
 
-  // give me space damn it
-  // asdfasdf
   return generated;
 }
 
@@ -262,8 +266,15 @@ Map<String, List<List<String>>> generateMeterJobplan(
   generated['JobLabor'] = [];
   generated['JPASSETLINK'] = [];
   generated['MeasurePoint2'] = [];
+  generated['Errors'] = [];
+  ObservationList meter;
+  try {
+    meter = getObservation(meterCode);
+  } catch (e) {
+    generated['Errors']!.add(['$e']);
+    return generated;
+  }
 
-  final meter = getObservation(meterCode);
   final meterNumber = int.parse(meterCode.substring(meterCode.length - 2));
 
   for (final observation in meter.observations) {
