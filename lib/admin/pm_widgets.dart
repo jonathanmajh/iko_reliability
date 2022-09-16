@@ -77,7 +77,7 @@ Widget templateDescription(
   );
 }
 
-Widget statusIndicator(status) {
+Widget statusIndicator(String status) {
   Widget icon;
   String text;
   Color textColor;
@@ -88,7 +88,7 @@ Widget statusIndicator(status) {
         width: 35,
         child: CircularProgressIndicator.adaptive(),
       );
-      text = ' Processing';
+      text = 'Processing';
       textColor = const Color.fromRGBO(33, 150, 243, 1);
       break;
     case 'uploading':
@@ -97,11 +97,11 @@ Widget statusIndicator(status) {
         width: 35,
         child: CircularProgressIndicator.adaptive(),
       );
-      text = ' Uploading';
+      text = 'Uploading';
       textColor = const Color.fromRGBO(33, 150, 243, 1);
       break;
     case 'warning':
-      text = ' Warning';
+      text = 'Warning';
       textColor = const Color.fromRGBO(255, 235, 59, 1);
       icon = Icon(
         Icons.warning_rounded,
@@ -110,7 +110,7 @@ Widget statusIndicator(status) {
       );
       break;
     case 'processing-done':
-      text = ' Generated';
+      text = 'Generated';
       textColor = const Color.fromARGB(90, 0, 0, 0);
       icon = Icon(
         Icons.pause_circle_filled,
@@ -119,7 +119,7 @@ Widget statusIndicator(status) {
       );
       break;
     case 'error':
-      text = ' Error';
+      text = 'Error';
       textColor = const Color.fromRGBO(244, 67, 54, 1);
       icon = Icon(
         Icons.report_rounded,
@@ -128,7 +128,7 @@ Widget statusIndicator(status) {
       );
       break;
     case 'done':
-      text = ' Finished';
+      text = 'Finished';
       textColor = const Color.fromRGBO(76, 175, 80, 1);
       icon = Icon(
         Icons.check_circle,
@@ -137,7 +137,7 @@ Widget statusIndicator(status) {
       );
       break;
     default:
-      text = ' Unknown';
+      text = 'Unknown';
       textColor = const Color.fromRGBO(255, 235, 59, 1);
       icon = Icon(
         Icons.help,

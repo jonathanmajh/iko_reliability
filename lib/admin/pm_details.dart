@@ -44,9 +44,17 @@ class _PMDetailViewState extends State<PMDetailView> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ElevatedButton(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(18),
+                      bottomLeft: Radius.circular(18),
+                    ),
+                  ))),
                   onPressed: () {
                     if (pmNameFieldController.text.isNotEmpty) {
                       value.setPMName(pmNameFieldController.text,
@@ -62,6 +70,11 @@ class _PMDetailViewState extends State<PMDetailView> {
                     ],
                   )),
               ElevatedButton(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(),
+                  ))),
                   onPressed: () {
                     value.setUploadDetails(
                         selected.selectedFile!,
@@ -76,6 +89,12 @@ class _PMDetailViewState extends State<PMDetailView> {
                   )),
               Consumer<MaximoServerNotifier>(builder: (context, maximo, child) {
                 return ElevatedButton(
+                    style: ButtonStyle(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(),
+                    ))),
                     onPressed: () async {
                       value.setUploadDetails(
                           selected.selectedFile!,
@@ -101,7 +120,18 @@ class _PMDetailViewState extends State<PMDetailView> {
                       ],
                     ));
               }),
-              Text('Lines Uploaded: ${value.getUploadedLines()}')
+              ElevatedButton(
+                style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(18),
+                    bottomRight: Radius.circular(18),
+                  ),
+                ))),
+                onPressed: (() {}),
+                child: Text('Lines Uploaded: ${value.getUploadedLines()}'),
+              ),
             ],
           ),
           const Divider(
@@ -159,19 +189,20 @@ class _PMDetailViewState extends State<PMDetailView> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const Divider(
-                  height: 15,
-                  thickness: 1,
-                  indent: 10,
-                  endIndent: 10,
-                  color: Color.fromARGB(255, 124, 124, 124),
-                ),
                 Card(
                   child: ExpansionTile(
                     title: const Text('Processing Log'),
                     children: <Widget>[
                       statusMessages.isEmpty
-                          ? const Center(child: Text('Processing...'))
+                          ? const Center(
+                              child: Divider(
+                                height: 15,
+                                thickness: 1,
+                                indent: 10,
+                                endIndent: 10,
+                                color: Color.fromARGB(0, 0, 0, 0),
+                              ),
+                            )
                           : ListView.builder(
                               shrinkWrap: true,
                               itemCount: statusMessages.length,
@@ -186,13 +217,6 @@ class _PMDetailViewState extends State<PMDetailView> {
                             ),
                     ],
                   ),
-                ),
-                const Divider(
-                  height: 15,
-                  thickness: 1,
-                  indent: 10,
-                  endIndent: 10,
-                  color: Color.fromARGB(255, 124, 124, 124),
                 ),
                 Card(
                     child: ExpansionTile(

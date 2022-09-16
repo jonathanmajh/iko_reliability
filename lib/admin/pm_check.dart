@@ -58,15 +58,38 @@ class _PmCheckPageState extends State<PmCheckPage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 ElevatedButton(
+                                  style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(18),
+                                      bottomLeft: Radius.circular(18),
+                                    ),
+                                  ))),
                                   onPressed: () {
                                     pickTemplates(context);
                                   },
-                                  child: const Text('Open PM Template'),
+                                  child: Row(
+                                    children: const [
+                                      Icon(Icons.file_open),
+                                      Text(' Open Templates'),
+                                    ],
+                                  ),
                                 ),
                                 ElevatedButton(
+                                  style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(18),
+                                      bottomRight: Radius.circular(18),
+                                    ),
+                                  ))),
                                   onPressed: () {
                                     context
                                         .read<TemplateNotifier>()
@@ -78,7 +101,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
                                     box = Hive.box('routeNumber');
                                     box.clear();
                                   },
-                                  child: const Text('Clear Templates'),
+                                  child: Row(
+                                    children: const [
+                                      Icon(Icons.delete_sweep),
+                                      Text(' Clear Templates'),
+                                    ],
+                                  ),
                                 ),
                               ]),
                           const Divider(
