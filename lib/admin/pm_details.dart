@@ -38,7 +38,7 @@ class _PMDetailViewState extends State<PMDetailView> {
       }
       pmNameFieldController.text = processedTemplate.description;
       fmecaPackageController.text =
-          processedTemplate.jobplan.ikoPmpackage ?? fmecaPackageController.text;
+          processedTemplate.jobplan.ikoPmpackage ?? '';
       pmNumberFieldController.text = processedTemplate.pmNumber;
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,

@@ -440,7 +440,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     if (parsed['totaldoc'] != null && parsed['validdoc'] != null) {
       if (parsed['totaldoc'] == parsed['validdoc']) {
         // preview passed
-        // TODO header.remove('preview');
+        header.remove('preview');
         try {
           response = await http.post(
             Uri.parse(
