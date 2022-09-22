@@ -400,8 +400,8 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     } catch (err) {
       return {'status': 'Failed to Connect'};
     }
-    print('get response');
-    print(response.body);
+    print('get response received');
+    // print(response.body);
     var parsed = jsonDecode(response.body);
     if (response.statusCode == 200) {
       if (parsed['rdfs:member'] != null) {

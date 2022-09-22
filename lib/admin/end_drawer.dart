@@ -3,11 +3,19 @@ import 'package:provider/provider.dart';
 
 import '../main.dart';
 import 'asset_storage.dart';
+import 'consts.dart';
 import 'maximo_jp_pm.dart';
 import 'observation_list_storage.dart';
 
-class EndDrawer extends StatelessWidget {
+class EndDrawer extends StatefulWidget {
   const EndDrawer({Key? key}) : super(key: key);
+
+  @override
+  State<EndDrawer> createState() => _EndDrawerState();
+}
+
+class _EndDrawerState extends State<EndDrawer> {
+  String siteid = '';
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +30,13 @@ class EndDrawer extends StatelessWidget {
           ListTile(
               leading: const Icon(Icons.message),
               title: const Text('Maximo Environment'),
-              subtitle:
-                  const Text('Toggle which environment to apply changes to'),
+              subtitle: const Text('Select which environment to work with'),
               trailing: Consumer<MaximoServerNotifier>(
                   builder: (context, value, child) {
                 return DropdownButton(
                   value: value.maximoServerSelected,
                   onChanged: (String? newValue) {
-                    context.read<MaximoServerNotifier>().setServer(newValue!);
+                    value.setServer(newValue!);
                   },
                   items: maximoServerDomains.keys
                       .map<DropdownMenuItem<String>>((String value) {
@@ -40,13 +47,31 @@ class EndDrawer extends StatelessWidget {
                   }).toList(),
                 );
               })),
-          const ListTile(
-              leading: Icon(Icons.message),
-              title: Text('Load Asset'),
-              subtitle: Text('Clear and Load Assets from Spreadsheet'),
+          ListTile(
+              title: const Text('Load Assets From Maximo'),
+              subtitle: DropdownButton(
+                onChanged: (String? newValue) {
+                  setState(() {
+                    siteid = newValue ?? '';
+                  });
+                },
+                value: siteid,
+                items: [
+                  '',
+                  'All',
+                  ...siteIDAndDescription.keys,
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(siteIDAndDescription[value] ??
+                        (value == '' ? 'Please Select a Site' : 'All Sites')),
+                    // ?? value = '' ? 'Please Select a Site' : 'All Sites'
+                  );
+                }).toList(),
+              ),
               trailing: ElevatedButton(
-                onPressed: loadHierarchy,
-                child: Text('Load Asset'),
+                onPressed: () => maximoAssetCaller(siteid, context),
+                child: const Text('Load'),
               )),
           const ListTile(
               leading: Icon(Icons.message),

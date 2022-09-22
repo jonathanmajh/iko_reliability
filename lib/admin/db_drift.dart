@@ -137,7 +137,6 @@ LazyDatabase _openConnection() {
 String generateHierarchy(
     String assetnum, Map<String, Map<String, String?>> assets) {
   if (assets[assetnum]?['parent'] == null) {
-    print('generated hierarchy for $assetnum');
     return assetnum;
   }
   return '${generateHierarchy(assets[assetnum]!['parent']!, assets)},$assetnum';

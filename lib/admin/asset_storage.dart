@@ -1,6 +1,12 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
+
+import '../main.dart';
+import 'consts.dart';
+import 'upload_maximo.dart';
 
 part 'asset_storage.g.dart';
 
@@ -31,9 +37,11 @@ class Asset {
 }
 
 Map<String, Map<String, Asset>> assetCache = {};
+// cache for assets for performance
 // {siteid : {assetnum: Asset}}
 
 void loadHierarchy() async {
+  //deprecated
   print('Picking Files');
   FilePickerResult? result =
       await FilePicker.platform.pickFiles(allowMultiple: false, withData: true);
@@ -82,25 +90,44 @@ Asset getParent(Asset asset) {
 }
 
 Asset getAsset(String siteid, String assetNum) {
-  //http://nscandacmaxapp1/maxrest/oslc/os/mxasset?oslc.where=siteid=%22GV%22&oslc.select=assetnum,siteid,description,parent,status&_lid=majona&_lpwd=happy818
-  // TODO get from Maximo after DB instead of default value
   final box = Hive.box('assets');
-  final asset = box.get('$siteid|$assetNum',
-      defaultValue: Asset(
-          assetNumber: assetNum,
-          name: '$assetNum-Description',
-          parent: null,
-          siteid: siteid));
+  final asset = box.get('$siteid|$assetNum');
+  if (asset == null) {
+    throw Exception('Asset: $assetNum at site: $siteid cannot be found');
+  }
   if (!assetCache.containsKey(siteid)) {
     assetCache[siteid] = {};
   }
   assetCache[siteid]![assetNum] = asset;
+
   return asset;
 }
 
-// Asset getAssetMaximo(String siteid, String assetNum) {
-
-// }
+Future<String> getAssetMaximo(String siteid, String env) async {
+  // maybe a return to indicate completion
+  final result = await maximoRequest(
+      '/maxrest/oslc/os/mxasset?oslc.where=siteid=%22$siteid%22&oslc.select=assetnum,siteid,description,parent',
+      'get',
+      env);
+  final box = Hive.box('assets');
+  if (result['rdfs:member'].length > 0) {
+    for (var row in result['rdfs:member'].toList()) {
+      var asset = Asset(
+        assetNumber: row['spi:assetnum'],
+        name: row['spi:description'] ?? 'Asset has NO description in Maximo',
+        parent: row['spi:parent'],
+        siteid: row['spi:siteid'],
+      );
+      asset.hierarchy = findParent(asset);
+      if (!assetCache.containsKey(asset.siteid)) {
+        assetCache[asset.siteid] = {};
+      }
+      assetCache[asset.siteid]![asset.assetNumber] = asset;
+      box.put('${asset.siteid}|${asset.assetNumber}', asset);
+    }
+  }
+  return 'Complete';
+}
 
 Asset getCommonParent(List<String> assets, String siteID) {
   if (assets.length == 1) {
@@ -120,4 +147,32 @@ Asset getCommonParent(List<String> assets, String siteID) {
   }
   return getAsset(
       siteID, commonHierarchy.substring(commonHierarchy.length - 5));
+}
+
+void maximoAssetCaller(String siteid, BuildContext context) async {
+  // some logic to update assets depending on what is selected
+  List<String> siteids = [];
+  if (siteid == 'All') {
+    siteids = siteIDAndDescription.keys.toList();
+  } else if (siteid == '') {
+    return;
+  } else {
+    siteids = [siteid];
+  }
+  for (final siteid in siteids) {
+    try {
+      await getAssetMaximo(
+          siteid,
+          Provider.of<MaximoServerNotifier>(context, listen: false)
+              .maximoServerSelected);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Fail to update $siteid'),
+      ));
+      continue;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Updated $siteid'),
+    ));
+  }
 }

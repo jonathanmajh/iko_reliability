@@ -7,11 +7,8 @@ import 'package:iko_reliability/admin/pm_name_generator.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
-import 'asset_storage.dart';
 import 'end_drawer.dart';
 import 'generate_job_plans.dart';
-import 'maximo_jp_pm.dart';
-import 'observation_list_storage.dart';
 import 'pm_details.dart';
 import 'template_notifier.dart';
 import 'pm_widgets.dart';
@@ -210,17 +207,22 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
     for (String ws in thing.keys) {
       for (int templateNumber in thing[ws].keys) {
         // TODO this is no longer async :(
-        final value = await generateName(
-          context.getParsedTemplate(ws, templateNumber),
-          maximoServerSelected,
-        );
-        context.setNameTemplate(ws, templateNumber, value);
-        final value2 = await generatePM(
-          context.getParsedTemplate(ws, templateNumber),
-          context.getPMName(ws, templateNumber),
-          maximoServerSelected,
-        );
-        context.setProcessedTemplate(ws, templateNumber, value2);
+        try {
+          final value = await generateName(
+            context.getParsedTemplate(ws, templateNumber),
+            maximoServerSelected,
+          );
+          context.setNameTemplate(ws, templateNumber, value);
+          final value2 = await generatePM(
+            context.getParsedTemplate(ws, templateNumber),
+            context.getPMName(ws, templateNumber),
+            maximoServerSelected,
+          );
+          context.setProcessedTemplate(ws, templateNumber, value2);
+        } catch (e) {
+          print(e);
+          context.addStatusMessage(ws, templateNumber, '$e');
+        }
       }
     }
   }

@@ -69,6 +69,31 @@ final siteIDAndOrgID = {
   'KLU': 'IKO-EU',
 };
 
+final siteIDAndDescription = {
+  'AA': 'AA: IKO Brampton',
+  'ANT': 'ANT: Antwerp',
+  'BA': 'BA: Calgary',
+  'BL': 'BL: Hagerstown',
+  'CA': 'CA: Kankakee',
+  'CAM': 'CAM: Appley Bridge',
+  'COM': 'COM: Combronde',
+  'GC': 'GC: Sumas',
+  'GE': 'GE: Ashcroft',
+  'GH': 'GH: Hawkesbury',
+  'GI': 'GI: Madoc',
+  'GJ': 'GJ: CRC Toronto',
+  'GK': 'GK: IG Brampton',
+  'GM': 'GM:IG High River',
+  'GP': 'GP:CRC Brampton',
+  'GR': 'GR: BramCal',
+  'GS': 'GS: Sylacauga',
+  'GV': 'GV: Hillsboro',
+  'GX': 'GX: MaxiMix',
+  'PBM': 'PBM: Senica',
+  'RAM': 'RAM: Alconbury',
+  'KLU': 'KLU: Klundert',
+};
+
 const tableHeaders = {
   'PM': [
     'SITEID',
