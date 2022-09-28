@@ -24,6 +24,7 @@ class _PMDetailViewState extends State<PMDetailView> {
     TextEditingController pmNumberFieldController = TextEditingController();
     return Consumer<TemplateNotifier>(builder: (context, value, child) {
       final selected = value.getSelectedTemplate();
+      bool notProcessed = false;
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
@@ -32,12 +33,12 @@ class _PMDetailViewState extends State<PMDetailView> {
       final processedTemplate = value.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);
       if (processedTemplate == null) {
-        return const Text('Please wait while template is being processed...');
+        notProcessed = true;
       }
-      pmNameFieldController.text = processedTemplate.description;
+      pmNameFieldController.text = processedTemplate?.description ?? 'TBD...';
       fmecaPackageController.text =
-          processedTemplate.jobplan.ikoPmpackage ?? '';
-      pmNumberFieldController.text = processedTemplate.pmNumber;
+          processedTemplate?.jobplan.ikoPmpackage ?? '';
+      pmNumberFieldController.text = processedTemplate?.pmNumber ?? 'TBD...';
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -73,12 +74,14 @@ class _PMDetailViewState extends State<PMDetailView> {
                           const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(),
                   ))),
-                  onPressed: () {
-                    value.setUploadDetails(
-                        selected.selectedFile!,
-                        selected.selectedTemplate!,
-                        generateUploads(processedTemplate));
-                  },
+                  onPressed: notProcessed
+                      ? null
+                      : () {
+                          value.setUploadDetails(
+                              selected.selectedFile!,
+                              selected.selectedTemplate!,
+                              generateUploads(processedTemplate!));
+                        },
                   child: Row(
                     children: const [
                       Icon(Icons.visibility),
@@ -93,24 +96,26 @@ class _PMDetailViewState extends State<PMDetailView> {
                                 const RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(),
                     ))),
-                    onPressed: () async {
-                      value.setUploadDetails(
-                          selected.selectedFile!,
-                          selected.selectedTemplate!,
-                          generateUploads(processedTemplate));
-                      try {
-                        await uploadToMaximo(
-                            maximo.maximoServerSelected,
-                            selected.selectedFile!,
-                            selected.selectedTemplate!,
-                            value);
-                      } catch (e) {
-                        value.addStatusMessage(selected.selectedFile!,
-                            selected.selectedTemplate!, '$e');
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(SnackBar(content: Text('$e')));
-                      }
-                    },
+                    onPressed: notProcessed
+                        ? null
+                        : () async {
+                            value.setUploadDetails(
+                                selected.selectedFile!,
+                                selected.selectedTemplate!,
+                                generateUploads(processedTemplate!));
+                            try {
+                              await uploadToMaximo(
+                                  maximo.maximoServerSelected,
+                                  selected.selectedFile!,
+                                  selected.selectedTemplate!,
+                                  value);
+                            } catch (e) {
+                              value.addStatusMessage(selected.selectedFile!,
+                                  selected.selectedTemplate!, '$e');
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text('$e')));
+                            }
+                          },
                     child: Row(
                       children: const [
                         Icon(Icons.cloud_upload),

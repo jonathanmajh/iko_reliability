@@ -2,6 +2,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:hive/hive.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
+import '../main.dart';
+
 part 'observation_list_storage.g.dart';
 
 @HiveType(typeId: 3)
@@ -59,6 +61,7 @@ class ObservationList {
 
 void loadObservationList() async {
   print('Picking Files');
+  List<String> messages = [];
   FilePickerResult? result =
       await FilePicker.platform.pickFiles(allowMultiple: false, withData: true);
   List<PlatformFile> files = [];
@@ -96,11 +99,12 @@ void loadObservationList() async {
           await box.put(observation.meterGroup, observation);
         }
       } catch (err) {
-        print('Row ${i + 1} is problematic\n$err');
+        messages.add('Row ${i + 1} is problematic\n$err');
       }
     }
   }
-  print('Finished Loading');
+  messages.add('Finished Loading');
+  showDataAlert(messages, 'Observation List Loaded');
 }
 
 ObservationList getObservation(String meterCode) {

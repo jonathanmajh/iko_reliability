@@ -21,23 +21,10 @@ class _AssetPageState extends State<AssetPage> {
   bool showHierarchy = false;
   dynamic _assets;
   List<TreeNode> _treenodes = [];
-  String _stateMessage = 'There is nothing here';
   dynamic gridData;
   final TreeController _controller = TreeController(allNodesExpanded: true);
 
   Future<void> selectedSite(String? siteid) async {
-    if (showHierarchy == false) {
-      setState(() {
-        _stateMessage = 'showHierarchy not selected';
-      });
-      return;
-    }
-    if (siteid == null) {
-      setState(() {
-        _stateMessage = 'Site Selected was not hillsboro';
-      });
-      return;
-    }
     if (siteid == 'GV: Hillsboro') {
       final String data =
           await rootBundle.loadString('lib\\admin\\GVAssets.json');

@@ -1,4 +1,4 @@
-package com.example.flutter_application_1
+package com.jonathanmajh.iko_reliability_flutter
 
 import io.flutter.embedding.android.FlutterActivity
 

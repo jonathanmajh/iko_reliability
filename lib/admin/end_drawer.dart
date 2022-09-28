@@ -28,7 +28,6 @@ class _EndDrawerState extends State<EndDrawer> {
             style: TextStyle(fontSize: 24),
           )),
           ListTile(
-              leading: const Icon(Icons.message),
               title: const Text('Maximo Environment'),
               subtitle: const Text('Select which environment to work with'),
               trailing: Consumer<MaximoServerNotifier>(
@@ -74,13 +73,12 @@ class _EndDrawerState extends State<EndDrawer> {
                 child: const Text('Load'),
               )),
           const ListTile(
-              leading: Icon(Icons.message),
               title: Text('Load Observation'),
               subtitle:
                   Text('Clear and Load Observation list from spreadsheet'),
               trailing: ElevatedButton(
                 onPressed: loadObservationList,
-                child: Text('Load Asset'),
+                child: Text('Load'),
               )),
           const ListTile(
             // a spacer

@@ -152,6 +152,7 @@ Asset getCommonParent(List<String> assets, String siteID) {
 void maximoAssetCaller(String siteid, BuildContext context) async {
   // some logic to update assets depending on what is selected
   List<String> siteids = [];
+  List<String> messages = [];
   if (siteid == 'All') {
     siteids = siteIDAndDescription.keys.toList();
   } else if (siteid == '') {
@@ -166,13 +167,10 @@ void maximoAssetCaller(String siteid, BuildContext context) async {
           Provider.of<MaximoServerNotifier>(context, listen: false)
               .maximoServerSelected);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Fail to update $siteid'),
-      ));
+      messages.add('Fail to update $siteid');
       continue;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Updated $siteid'),
-    ));
+    messages.add('Updated $siteid');
   }
+  showDataAlert(messages, 'Site Assets Loaded');
 }

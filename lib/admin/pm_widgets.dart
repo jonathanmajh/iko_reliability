@@ -192,26 +192,27 @@ Widget templateListItem(
   TemplateNotifier context,
 ) {
   return SizedBox(
-      height: 100,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          context.setSelectedTemplate(filename, templateNumber);
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-                child: templateDescription(
-                  filename,
-                  templateNumber,
-                  context,
-                ),
+    height: 100,
+    child: GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        context.setSelectedTemplate(filename, templateNumber);
+      },
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+              child: templateDescription(
+                filename,
+                templateNumber,
+                context,
               ),
             ),
-          ],
-        ),
-      ));
+          ),
+        ],
+      ),
+    ),
+  );
 }
