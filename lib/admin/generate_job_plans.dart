@@ -192,8 +192,8 @@ String? generateMeterNumber(
   return meter;
 }
 
-Future<PMMaximo> generatePM(
-    ParsedTemplate pmDetails, String maximoServerSelected) async {
+Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
+    String maximoServerSelected) async {
   List<JobTaskMaximo> mainJobTasks = [];
   Map<String, JobPlanMaximo> childJobPlans = {};
   List<RouteStopMaximo> routeStops = [];
@@ -259,9 +259,9 @@ Future<PMMaximo> generatePM(
             childJobPlans[asset.assetNumber]!.joblabor[0].hours +
                 (pmDetails.crafts[0].hours / routeTasks.toDouble());
       } else {
-        jpnumber = pmDetails.uploads!.replaceable![0];
+        jpnumber = pmName.replaceable![0];
         jpnumber = jpnumber.replaceFirst('XXXXX', asset.assetNumber);
-        String jpdescription = pmDetails.uploads!.replaceable![1];
+        String jpdescription = pmName.replaceable![1];
         jpdescription = jpdescription.replaceFirst('XXXXX', asset.name);
         final woType = pmDetails.workOrderType!;
         final counter = await findAvailablePMNumber(
@@ -325,12 +325,12 @@ Future<PMMaximo> generatePM(
     ));
   }
   var mainJobPlan = JobPlanMaximo(
-      description: pmDetails.uploads!.pmName,
+      description: pmName.pmName,
       ikoConditions: pmDetails.processCondition!,
       ikoPmpackage: pmDetails.pmPackageNumber,
       ikoWorktype: pmDetails.workOrderType!,
       jpduration: jobhrs,
-      jpnum: pmDetails.uploads!.jpNumber,
+      jpnum: pmName.jpNumber,
       persongroup: personGroups[pmDetails.crafts[0].laborType]!,
       priority: 2,
       templatetype: 'PM',
@@ -338,25 +338,24 @@ Future<PMMaximo> generatePM(
       jobmaterial: jobmats,
       jobservice: jobservs,
       jobtask: mainJobTasks,
-      jobasset: [JobAssetMaximo(assetNumber: pmDetails.uploads!.commonParent)]);
+      jobasset: [JobAssetMaximo(assetNumber: pmName.commonParent)]);
   var route = RouteMaximo(
-    routeNumber: pmDetails.uploads!.pmNumber,
-    description: pmDetails.uploads!.pmName,
+    routeNumber: pmName.pmNumber,
+    description: pmName.pmName,
     routeStopsBecome: routeType,
     routeStops: routeStops,
     childJobPlans: childJobPlans.values.toList(),
   );
-  print('complete job plan generation');
   return PMMaximo(
     siteID: pmDetails.siteId!,
-    pmNumber: pmDetails.uploads!.pmNumber,
-    description: pmDetails.uploads!.pmName,
+    pmNumber: pmName.pmNumber,
+    description: pmName.pmName,
     jobplan: mainJobPlan,
     frequency: pmDetails.frequency!,
     personGroup: personGroups[
         pmDetails.crafts[0].laborType]!, // take first craft as primary craft
     freqUnit: pmDetails.frequencyUnit!,
-    assetNumber: pmDetails.uploads!.commonParent,
+    assetNumber: pmName.commonParent,
     leadTime: calcLeadTime(pmDetails.frequency!, pmDetails.frequencyUnit!),
     orgID: siteIDAndOrgID[pmDetails.siteId!]!,
     route: routeType != 'NONE' ? route : null,

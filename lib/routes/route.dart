@@ -9,7 +9,7 @@ import '../test/test.dart';
 @MaterialAutoRouter(
   replaceInRouteName: 'Page,Route',
   routes: <AutoRoute>[
-    AutoRoute(path: "/", page: GHFlutter, initial: true),
+    AutoRoute(path: "/", page: HomePage, initial: true),
     AutoRoute(path: "/test", page: MyTestPage),
     // AutoRoute(path: "/readbook", page: EpubPage),
     AutoRoute(path: "/asset", page: AssetPage),

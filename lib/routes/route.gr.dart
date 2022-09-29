@@ -10,6 +10,7 @@
 //
 // ignore_for_file: type=lint
 
+// ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i6;
 import 'package:flutter/material.dart' as _i7;
 
@@ -25,9 +26,9 @@ class AppRouter extends _i6.RootStackRouter {
 
   @override
   final Map<String, _i6.PageFactory> pagesMap = {
-    GHFlutter.name: (routeData) {
+    HomeRoute.name: (routeData) {
       return _i6.MaterialPageX<dynamic>(
-          routeData: routeData, child: const _i1.GHFlutter());
+          routeData: routeData, child: const _i1.HomePage());
     },
     MyTestRoute.name: (routeData) {
       return _i6.MaterialPageX<dynamic>(
@@ -49,7 +50,7 @@ class AppRouter extends _i6.RootStackRouter {
 
   @override
   List<_i6.RouteConfig> get routes => [
-        _i6.RouteConfig(GHFlutter.name, path: '/'),
+        _i6.RouteConfig(HomeRoute.name, path: '/'),
         _i6.RouteConfig(MyTestRoute.name, path: '/test'),
         _i6.RouteConfig(AssetRoute.name, path: '/asset'),
         _i6.RouteConfig(ContractorRoute.name, path: '/contractor'),
@@ -58,11 +59,11 @@ class AppRouter extends _i6.RootStackRouter {
 }
 
 /// generated route for
-/// [_i1.GHFlutter]
-class GHFlutter extends _i6.PageRouteInfo<void> {
-  const GHFlutter() : super(GHFlutter.name, path: '/');
+/// [_i1.HomePage]
+class HomeRoute extends _i6.PageRouteInfo<void> {
+  const HomeRoute() : super(HomeRoute.name, path: '/');
 
-  static const String name = 'GHFlutter';
+  static const String name = 'HomeRoute';
 }
 
 /// generated route for

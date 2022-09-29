@@ -1,9 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:iko_reliability/admin/generate_job_plans.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
-
-import 'pm_name_generator.dart';
 
 const frequencyUnits = ['D', 'W', 'M', 'Y'];
 
@@ -101,13 +98,13 @@ class ParsedTemplate {
   List<JobService> services;
   List<JobTask> tasks;
   String? nextDueDate;
-  String? pmNumber;
-  String? pmName;
+  String pmNumber;
+  String pmName;
   String? pmPackageNumber;
   String? routeNumber;
-  PMName? uploads;
-  String? pmAsset;
-  PMMaximo? maximo;
+  // PMName? generatedPmName;
+  String? pmAsset; // the parent asset specified for the PM
+  // PMMaximo? processedTemplate;
 
   ParsedTemplate({
     List<String>? assets,
@@ -119,13 +116,13 @@ class ParsedTemplate {
     List<JobCraft>? crafts,
     List<JobMaterial>? materials,
     this.nextDueDate,
-    this.pmNumber,
-    this.pmName,
+    required this.pmNumber,
+    required this.pmName,
     this.pmPackageNumber,
     this.routeNumber,
-    this.uploads,
+    // this.generatedPmName,
     this.pmAsset,
-    this.maximo,
+    // this.processedTemplate,
     List<JobService>? services,
     List<JobTask>? tasks,
   })  : assets = assets ?? [],
@@ -230,7 +227,8 @@ class ParsedTemplate {
           continue;
         }
 
-        if (row[3] == 'Route Assets (one per cell):') {
+        if (row[3] == 'Route Assets (one per cell):' ||
+            row[3] == 'Task Route Assets (one per cell):') {
           readRouteAsset = true;
         }
       }

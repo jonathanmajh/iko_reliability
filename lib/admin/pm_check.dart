@@ -1,15 +1,17 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:iko_reliability/admin/parse_template.dart';
 import 'package:iko_reliability/admin/pm_name_generator.dart';
+import 'package:provider/provider.dart';
 
-import 'asset_storage.dart';
+import '../main.dart';
+import 'end_drawer.dart';
 import 'generate_job_plans.dart';
-import 'generate_uploads.dart';
-import 'maximo_jp_pm.dart';
-import 'observation_list_storage.dart';
-import 'upload_maximo.dart';
+import 'pm_details.dart';
+import 'template_notifier.dart';
+import 'pm_widgets.dart';
 
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
@@ -19,27 +21,128 @@ class PmCheckPage extends StatefulWidget {
 }
 
 class _PmCheckPageState extends State<PmCheckPage> {
-  final optionListFilePath =
-      'http://operations.connect.na.local/support/Reliability/ReliabilityPublished/Templates/PM%20Request%20Template.xlsm';
-  Map<String, Map<String, String>> sites = {};
-  Map<String, Map<String, dynamic>> observationList = {};
-  Map<String, String> workOrderType = {};
   List<PlatformFile> templates = [];
-  bool optionOne = false;
-  String maximoServerSelected = 'TEST';
-  List<dynamic> _selected = [];
-  Map<String, dynamic> parsedTemplates = {};
-  String temp = '';
-  final pmNameFieldController = TextEditingController();
-  final fmecaPackageController = TextEditingController();
+  String uploadDetails = '';
 
   @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    pmNameFieldController.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("PM Verify and Upload"),
+        // keep back button with a right side hamburger menu
+        leading: (ModalRoute.of(context)?.canPop ?? false)
+            ? const BackButton()
+            : null,
+      ),
+      body: Column(
+        children: <Widget>[
+          const Divider(
+            height: 10,
+            thickness: 1,
+            indent: 0,
+            endIndent: 0,
+            color: Colors.white,
+          ),
+          Expanded(
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                SizedBox(
+                    width: 550,
+                    child: Consumer<TemplateNotifier>(
+                        builder: (context, value, child) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                ElevatedButton(
+                                  style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(18),
+                                      bottomLeft: Radius.circular(18),
+                                    ),
+                                  ))),
+                                  onPressed: () {
+                                    pickTemplates(context);
+                                  },
+                                  child: Row(
+                                    children: const [
+                                      Icon(Icons.file_open),
+                                      Text(' Open Templates'),
+                                    ],
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(18),
+                                      bottomRight: Radius.circular(18),
+                                    ),
+                                  ))),
+                                  onPressed: () {
+                                    context
+                                        .read<TemplateNotifier>()
+                                        .clearTemplates();
+                                    var box = Hive.box('jpNumber');
+                                    box.clear();
+                                    box = Hive.box('pmNumber');
+                                    box.clear();
+                                    box = Hive.box('routeNumber');
+                                    box.clear();
+                                  },
+                                  child: Row(
+                                    children: const [
+                                      Icon(Icons.delete_sweep),
+                                      Text(' Clear Templates'),
+                                    ],
+                                  ),
+                                ),
+                              ]),
+                          const Divider(
+                            height: 15,
+                            thickness: 1,
+                            indent: 10,
+                            endIndent: 10,
+                            color: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          Expanded(
+                              child: ListView(
+                            children: buildPMList(value),
+                          ))
+                        ],
+                      );
+                    })),
+                const VerticalDivider(
+                  width: 20,
+                  thickness: 1,
+                  indent: 5,
+                  endIndent: 5,
+                  color: Colors.grey,
+                ),
+                const Expanded(child: PMDetailView()),
+                const VerticalDivider(
+                  width: 8,
+                  thickness: 1,
+                  indent: 5,
+                  endIndent: 5,
+                  color: Colors.white,
+                ),
+              ]))
+        ],
+      ),
+      endDrawer: const EndDrawer(),
+    );
   }
 
+// for displaying bottom status notifications
   void _show(toastMsg) {
     final msg = toastMsg;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -47,127 +150,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
     ));
   }
 
-  List<Widget> detailedView(List<dynamic> state) {
-    if (state.isNotEmpty) {
-      pmNameFieldController.text =
-          parsedTemplates[state[0]][state[1]].maximo.description;
-      fmecaPackageController.text =
-          parsedTemplates[state[0]][state[1]].maximo.jobplan.ikoPmpackage ?? '';
-      return [
-        GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              setState(() {
-                _selected = [];
-              });
-            },
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Icon(Icons.keyboard_double_arrow_right),
-                  Icon(Icons.keyboard_double_arrow_right),
-                  Icon(Icons.keyboard_double_arrow_right),
-                ])),
-        Expanded(
-            child: ListView(
-          primary: false,
-          children: [
-            ListTile(
-                title:
-                    Text(parsedTemplates[state[0]][state[1]].maximo.pmNumber)),
-            ListTile(
-                title: Text(
-                    parsedTemplates[state[0]][state[1]].maximo.description)),
-            ListTile(
-                title: Text(
-                    parsedTemplates[state[0]][state[1]].maximo.assetNumber)),
-            ListTile(
-                title: Text(parsedTemplates[state[0]][state[1]]
-                    .maximo
-                    .leadTime
-                    .toString())),
-            ListTile(
-              title: const Text('Edit Pm Name'),
-              subtitle: TextField(
-                controller: pmNameFieldController,
-              ),
-            ),
-            ListTile(
-              title: const Text('Enter FMECA Package'),
-              subtitle: TextField(
-                controller: fmecaPackageController,
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                parsedTemplates[state[0]][state[1]].maximo.description =
-                    pmNameFieldController.text;
-                parsedTemplates[state[0]][state[1]].maximo.jobplan.description =
-                    pmNameFieldController.text;
-                if (parsedTemplates[state[0]][state[1]].maximo.route != null) {
-                  parsedTemplates[state[0]][state[1]].maximo.route.description =
-                      pmNameFieldController.text;
-                }
-                if (fmecaPackageController.text.isNotEmpty) {
-                  parsedTemplates[state[0]][state[1]].maximo.fmecaPM = true;
-                  parsedTemplates[state[0]][state[1]]
-                      .maximo
-                      .jobplan
-                      .ikoPmpackage = fmecaPackageController.text;
-                } else {
-                  parsedTemplates[state[0]][state[1]].maximo.fmecaPM = false;
-                  parsedTemplates[state[0]][state[1]]
-                      .maximo
-                      .jobplan
-                      .ikoPmpackage = null;
-                }
-                setState(() {});
-              },
-              child: const Text('Update PM'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final thing =
-                    generateUploads(parsedTemplates[state[0]][state[1]].maximo);
-                setState(() {
-                  temp = writeToCSV(thing);
-                });
-              },
-              child: const Text('ConvertToTemplate'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final thing = await uploadToMaximo(
-                    generateUploads(parsedTemplates[state[0]][state[1]].maximo),
-                    maximoServerSelected);
-                print('done');
-                setState(() {
-                  temp = writeToCSV(thing);
-                });
-                // print(thing);
-              },
-              child: const Text('Just DO IT'),
-            ),
-            SelectableText(temp)
-          ],
-        ))
-      ];
-    } else {
-      return const [
-        VerticalDivider(
-          width: 20,
-          thickness: 1,
-          indent: 20,
-          endIndent: 0,
-          color: Colors.grey,
-        )
-      ];
-    }
-  }
-
-  void pickTemplates() async {
-    print('Picking Files');
-    final stopwatch = Stopwatch()..start();
+  void pickTemplates(BuildContext context) async {
+    Stopwatch stopwatch = Stopwatch()..start();
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
     List<PlatformFile> files = [];
@@ -178,377 +162,68 @@ class _PmCheckPageState extends State<PmCheckPage> {
     } else {
       msg = 'File selector cancelled';
     }
-    print('loaded files in ${stopwatch.elapsedMilliseconds} milliseconds');
     setState(() {
       templates = files;
       _show(msg);
     });
-    if (files.isNotEmpty) {
+    print('loaded files in ${stopwatch.elapsedMilliseconds} milliseconds');
+    if (files.isEmpty) {
       setState(() {
-        print('Loading files...');
-      });
-
-      var temp = await parseSpreadsheets(files);
-      setState(() {
-        for (var thing in temp) {
-          parsedTemplates[thing.keys.first] = thing[thing.keys.first];
-        }
-        print(
-            'Parsed templates in ${stopwatch.elapsedMilliseconds} milliseconds');
-      });
-      parseAllTemplates();
-    }
-  }
-
-  Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
-    List<Future> futures = [];
-    for (var file in files) {
-      futures
-          .add(compute(ParsedTemplate().fromExcel, [file.bytes!, file.name]));
-    }
-    return await Future.wait(futures);
-  }
-
-  void parseAllTemplates() {
-    print('parsing templates');
-    for (String ws in parsedTemplates.keys) {
-      for (int pmOrder in parsedTemplates[ws].keys) {
-        parseTemplate([ws, pmOrder]);
-      }
-    }
-  }
-
-  void parseTemplate(List<dynamic> parameters) async {
-    String ws = parameters[0];
-    int templateNumber = parameters[1];
-    var result = await generateName(
-        parsedTemplates[ws][templateNumber], maximoServerSelected);
-    setState(() {
-      parsedTemplates[ws][templateNumber].uploads = result;
-    });
-    generatePM(parsedTemplates[ws][templateNumber], maximoServerSelected)
-        .then((value) {
-      setState(() {
-        parsedTemplates[ws][templateNumber].maximo = value;
-      });
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void toggleOptionOne(bool value) {
-    if (optionOne) {
-      setState(() {
-        optionOne = false;
-        // reset table
+        print('No files selected files...');
       });
     } else {
       setState(() {
-        optionOne = true;
+        print('Processing files...');
       });
+      final template = context.read<TemplateNotifier>();
+      final maximo = context.read<MaximoServerNotifier>();
+      processAllTemplates(template, files, maximo.maximoServerSelected);
     }
   }
+}
 
-  void changeMaximoEnvironment(String? value) {
-    if (value == null) {
-      return;
-    }
-    setState(() {
-      maximoServerSelected = value;
-      // TODO reset table generated information
-    });
+Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
+  List<Future> futures = [];
+  for (var file in files) {
+    futures.add(compute(
+        ParsedTemplate(pmName: 'Error', pmNumber: 'Error').fromExcel,
+        [file.bytes!, file.name]));
   }
+  return await Future.wait(futures);
+}
 
-  void _closeEndDrawer() {
-    Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("PM Verify and Upload"),
-        leading: (ModalRoute.of(context)?.canPop ?? false)
-            ? const BackButton()
-            : null,
-      ),
-      body: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              const Text(
-                  'Click "Pick Files" and select PM templates to get started.'
-                  '\nClick "Restart" to remove all PMs'
-                  '\nDetected PMs will appear in below list'
-                  '\nClick on detected PMs to view details'),
-              ElevatedButton(
-                onPressed: () {
-                  pickTemplates();
-                },
-                child: const Text('Pick Files'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  loadHierarchy();
-                },
-                child: const Text('LoadAssets'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  loadObservationList();
-                },
-                child: const Text('LoadObservation'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  final thing = getObservation('CYLA00');
-                  print(thing);
-                  print(thing.observations);
-                },
-                child: const Text('GetObservation'),
-              ),
-            ],
-          ),
-          Expanded(
-              child: parsedTemplates.isNotEmpty
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                            Expanded(
-                                child: ListView(
-                              children: buildPMList(parsedTemplates),
-                            ))
-                          ] +
-                          detailedView(_selected))
-                  : const Text("Waiting for Data"))
-        ],
-      ),
-      endDrawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            const DrawerHeader(
-                child: Text(
-              'PM Settings',
-              style: TextStyle(fontSize: 24),
-            )),
-            ListTile(
-              leading: const Icon(Icons.message),
-              title: const Text('Option 1'),
-              subtitle: const Text('Option 1 help text'),
-              trailing: Switch(value: optionOne, onChanged: toggleOptionOne),
-            ),
-            ListTile(
-                leading: const Icon(Icons.message),
-                title: const Text('Maximo Environment'),
-                subtitle:
-                    const Text('Toggle which environment to apply changes to'),
-                trailing: DropdownButton(
-                  value: maximoServerSelected,
-                  onChanged: (String? newValue) {
-                    changeMaximoEnvironment(newValue);
-                  },
-                  items: maximoServerDomains.keys
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                )),
-            const ListTile(
-                leading: Icon(Icons.message),
-                title: Text('Load Asset'),
-                subtitle: Text('Clear and Load Assets from Spreadsheet'),
-                trailing: ElevatedButton(
-                  onPressed: loadHierarchy,
-                  child: Text('Load Asset'),
-                )),
-            const ListTile(
-              // a spacer
-              title: Text(''),
-            ),
-            Center(
-                child: ElevatedButton(
-              onPressed: _closeEndDrawer,
-              child: const Text('Close Drawer'),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> buildPMList(parsedTemplates) {
-    List<Widget> list = [];
-    for (String ws in parsedTemplates.keys) {
-      for (int pmOrder in parsedTemplates[ws].keys) {
-        list.add(templateListItem(
-          ws,
-          pmOrder,
-          parsedTemplates[ws][pmOrder].uploads?.pmName ??
-              parsedTemplates[ws][pmOrder].pmName,
-          parsedTemplates[ws][pmOrder].uploads?.pmNumber ??
-              parsedTemplates[ws][pmOrder].pmNumber,
-          parsedTemplates[ws][pmOrder].uploads == null ? 'processing' : 'done',
-        ));
+void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
+    String maximoServerSelected) async {
+  var parsedTmpts = await parseSpreadsheets(files);
+  for (var thing in parsedTmpts) {
+    for (var template in thing.keys) {
+      for (var templateNumber in thing[template].keys) {
+        context.setParsedTemplate(
+            template, templateNumber, thing[template][templateNumber]);
       }
     }
-    return list;
   }
-
-  Widget templateListItem(
-    String filename,
-    int templateNumber,
-    String pmName,
-    String pmNumber,
-    String status,
-  ) {
-    return SizedBox(
-        height: 100,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            if (parsedTemplates[filename][templateNumber].maximo != null) {
-              setState(() {
-                _selected = [filename, templateNumber];
-              });
-            } else {
-              _show('Template is still being parsed...');
-            }
-          },
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
-                  child: templateDescription(
-                    filename,
-                    templateNumber,
-                    pmName,
-                    pmNumber,
-                    status,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ));
+  for (var thing in parsedTmpts) {
+    for (String ws in thing.keys) {
+      for (int templateNumber in thing[ws].keys) {
+        // TODO this is no longer async :(
+        try {
+          final value = await generateName(
+            context.getParsedTemplate(ws, templateNumber),
+            maximoServerSelected,
+          );
+          context.setNameTemplate(ws, templateNumber, value);
+          final value2 = await generatePM(
+            context.getParsedTemplate(ws, templateNumber),
+            context.getPMName(ws, templateNumber),
+            maximoServerSelected,
+          );
+          context.setProcessedTemplate(ws, templateNumber, value2);
+        } catch (e) {
+          print(e);
+          context.addStatusMessage(ws, templateNumber, '$e');
+        }
+      }
+    }
   }
-}
-
-Widget templateDescription(
-  String filename,
-  int templateNumber,
-  String pmName,
-  String pmNumber,
-  String status,
-) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: <Widget>[
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              pmNumber,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              pmName,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Padding(padding: EdgeInsets.only(bottom: 2.0)),
-            Text(
-              filename,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12.0,
-                color: Colors.black54,
-              ),
-            ),
-            Text(
-              'Template #$templateNumber',
-              style: const TextStyle(
-                fontSize: 12.0,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            statusIndicator(status),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
-Widget statusIndicator(status) {
-  Widget icon;
-  String text;
-  Color textColor;
-  switch (status) {
-    case 'processing':
-      icon = const SizedBox(
-        height: 24,
-        width: 24,
-        child: CircularProgressIndicator.adaptive(),
-      );
-
-      text = ' Processing';
-      textColor = const Color.fromRGBO(33, 150, 243, 1);
-      break;
-    case 'warning':
-      icon = const Icon(Icons.warning_rounded);
-      text = ' Warning';
-      textColor = const Color.fromRGBO(255, 235, 59, 1);
-      break;
-    case 'error':
-      icon = const Icon(Icons.report_rounded);
-      text = ' Error';
-      textColor = const Color.fromRGBO(244, 67, 54, 1);
-      break;
-    case 'done':
-      icon = const Icon(Icons.check_circle);
-      text = ' Finished';
-      textColor = const Color.fromRGBO(76, 175, 80, 1);
-      break;
-    default:
-      icon = const Icon(Icons.help);
-      text = ' Unknown';
-      textColor = const Color.fromRGBO(255, 235, 59, 1);
-  }
-  return Row(
-    children: [
-      icon,
-      Text(
-        text,
-        style: TextStyle(
-          fontSize: 20.0,
-          color: textColor,
-        ),
-      )
-    ],
-  );
 }
