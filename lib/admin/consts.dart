@@ -222,3 +222,15 @@ const tableHeaders = {
   'Meter': ['METERNAME', 'DESCRIPTION', 'METERTYPE', 'DOMAINID'],
   'MeasurePoint2': ['SITEID', 'POINTNUM', 'VALUE', 'JPNUM'],
 };
+
+Map<String, String> maximoServerDomains = {
+  'PROD': 'http://nscandacmaxapp1.na.iko/maxrest/oslc/os/',
+  'TEST': 'http://nsmaxim1app1.na.iko/maxrest/oslc/os/',
+  'DEV': 'http://nscandacmaxdev1.na.iko/maxrest/oslc/os/',
+  'MASDEV': 'https://dev.manage.dev.iko.max-it-eam.com/maximo/api/os/'
+};
+
+// TODO login management
+Map<String, String> apiKeys = {
+  'MASDEV': 'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
+};

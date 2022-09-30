@@ -106,7 +106,7 @@ Asset getAsset(String siteid, String assetNum) {
 Future<String> getAssetMaximo(String siteid, String env) async {
   // maybe a return to indicate completion
   final result = await maximoRequest(
-      '/maxrest/oslc/os/mxasset?oslc.where=siteid=%22$siteid%22&oslc.select=assetnum,siteid,description,parent',
+      'mxasset?oslc.where=siteid=%22$siteid%22&oslc.select=assetnum,siteid,description,parent',
       'get',
       env);
   final box = Hive.box('assets');

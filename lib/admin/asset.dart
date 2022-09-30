@@ -85,7 +85,7 @@ class _AssetPageState extends State<AssetPage> {
             child: const Text('Load GX Assets'),
             onPressed: () async {
               final result = await maximoRequest(
-                  '/maxrest/oslc/os/mxasset?oslc.where=siteid=%22GX%22&oslc.select=assetnum,siteid,description,parent,status,changedate',
+                  'mxasset?oslc.where=siteid=%22GX%22&oslc.select=assetnum,siteid,description,parent,status,changedate',
                   'get',
                   'TEST');
               Map<String, Map<String, String?>> thing = {};

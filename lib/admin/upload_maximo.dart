@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:iko_reliability/admin/template_notifier.dart';
 import 'consts.dart';
-import 'maximo_jp_pm.dart';
 import 'package:http/http.dart' as http;
 
 Future<Map<String, List<List<String>>>> uploadToMaximo(
@@ -28,7 +27,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
           uploadData['Meter']![i],
           env,
           'Meter',
-          '/maxrest/oslc/os/iko_meter',
+          'iko_meter',
         );
         templates.setUploadedLines(file, template);
         if (result) {
@@ -48,7 +47,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['AssetMeter']![i],
         env,
         'AssetMeter',
-        '/maxrest/oslc/os/iko_assetmeter',
+        'iko_assetmeter',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -72,7 +71,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['JobPlan']![i],
         env,
         'JobPlan',
-        '/maxrest/oslc/os/iko_jobplan',
+        'iko_jobplan',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -90,7 +89,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
           uploadData['MeasurePoint']![i],
           env,
           'MeasurePoint',
-          '/maxrest/oslc/os/iko_measurepoint',
+          'iko_measurepoint',
         );
         templates.setUploadedLines(file, template);
         if (result) {
@@ -111,7 +110,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
           uploadData['MeasurePoint2']![i],
           env,
           'MeasurePoint2',
-          '/maxrest/oslc/os/iko_measurepoint',
+          'iko_measurepoint',
         );
         templates.setUploadedLines(file, template);
         if (result) {
@@ -131,7 +130,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['Route']![i],
         env,
         'Route',
-        '/maxrest/oslc/os/iko_route',
+        'iko_route',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -148,7 +147,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['Route_Stop']![i],
         env,
         'Route_Stop',
-        '/maxrest/oslc/os/iko_route_stop',
+        'iko_route_stop',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -165,7 +164,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['PM']![i],
         env,
         'PM',
-        '/maxrest/oslc/os/iko_pm',
+        'iko_pm',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -189,7 +188,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['JobLabor']![i],
         env,
         'JobLabor',
-        '/maxrest/oslc/os/iko_joblabor',
+        'iko_joblabor',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -217,7 +216,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['JPASSETLINK']![i],
         env,
         'JPASSETLINK',
-        '/maxrest/oslc/os/iko_jpassetlink',
+        'iko_jpassetlink',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -242,7 +241,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['JobTask']![i],
         env,
         'JobTask',
-        '/maxrest/oslc/os/iko_jobtask',
+        'iko_jobtask',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -259,7 +258,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['JobMaterial']![i],
         env,
         'JobMaterial',
-        '/maxrest/oslc/os/iko_jobmaterial',
+        'iko_jobmaterial',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -276,7 +275,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
         uploadData['JobService']![i],
         env,
         'JobService',
-        '/maxrest/oslc/os/iko_jobservice',
+        'iko_jobservice',
       );
       templates.setUploadedLines(file, template);
       if (result) {
@@ -294,7 +293,7 @@ Future<bool> isNewJobLabor(
     String jpNumber, String orgid, String maximoEnvironment) async {
   // is only needed for CBMs
   final url =
-      '/maxrest/oslc/os/iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber" and joblabor.orgid="$orgid"';
+      'iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber" and joblabor.orgid="$orgid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -307,7 +306,7 @@ Future<bool> isNewJobTask(
     String jpNumber, String jptask, String maximoEnvironment) async {
   // is only needed for CBMs
   final url =
-      '/maxrest/oslc/os/iko_jobtask?oslc.select=*&oslc.where=jpnum="$jpNumber" and jobtask.jptask="$jptask"';
+      'iko_jobtask?oslc.select=*&oslc.where=jpnum="$jpNumber" and jobtask.jptask="$jptask"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -320,7 +319,7 @@ Future<bool> isNewJobAsset(String jpNumber, String siteid, String assetnum,
     String maximoEnvironment) async {
   // is only needed for CBMs
   final url =
-      '/maxrest/oslc/os/iko_jpassetlink?oslc.select=*&oslc.where=jpnum="$jpNumber" and JPASSETSPLINK.siteid="$siteid" and JPASSETSPLINK.assetnum="$assetnum"';
+      'iko_jpassetlink?oslc.select=*&oslc.where=jpnum="$jpNumber" and JPASSETSPLINK.siteid="$siteid" and JPASSETSPLINK.assetnum="$assetnum"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -331,8 +330,7 @@ Future<bool> isNewJobAsset(String jpNumber, String siteid, String assetnum,
 
 Future<bool> isNewJobPlan(String jpNumber, String maximoEnvironment) async {
   // is only needed for CBMs
-  final url =
-      '/maxrest/oslc/os/iko_jobplan?oslc.select=jpnum&oslc.where=jpnum="$jpNumber"';
+  final url = 'iko_jobplan?oslc.select=jpnum&oslc.where=jpnum="$jpNumber"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -344,7 +342,7 @@ Future<bool> isNewJobPlan(String jpNumber, String maximoEnvironment) async {
 Future<bool> isNewMeasurePoint(
     String measurePoint, String siteid, String maximoEnvironment) async {
   final url =
-      '/maxrest/oslc/os/iko_measurepoint?oslc.select=pointnum&oslc.where=pointnum="$measurePoint" and siteid="$siteid"';
+      'iko_measurepoint?oslc.select=pointnum&oslc.where=pointnum="$measurePoint" and siteid="$siteid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -356,7 +354,7 @@ Future<bool> isNewMeasurePoint(
 Future<bool> isNewMeasurePoint2(
     String jpnum, String siteid, String maximoEnvironment) async {
   final url =
-      '/maxrest/oslc/os/iko_measurepoint?oslc.select=charpointaction&oslc.where=charpointaction.jpnum="$jpnum" and siteid="$siteid"';
+      'iko_measurepoint?oslc.select=charpointaction&oslc.where=charpointaction.jpnum="$jpnum" and siteid="$siteid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -367,7 +365,7 @@ Future<bool> isNewMeasurePoint2(
 
 Future<bool> isNewMeter(String meterName, String maximoEnvironment) async {
   final url =
-      '/maxrest/oslc/os/iko_meter?oslc.select=metername&oslc.where=metername="$meterName"';
+      'iko_meter?oslc.select=metername&oslc.where=metername="$meterName"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;
@@ -378,7 +376,6 @@ Future<bool> isNewMeter(String meterName, String maximoEnvironment) async {
 
 Future<bool> uploadGeneric(List<String> data, String maximoEnvironment,
     String table, String url) async {
-  // first preview the upload
   final result = await maximoRequest(url, 'post', maximoEnvironment,
       const ListToCsvConverter().convert([tableHeaders[table], data]));
   if (result['status'] == 'uploaded') {
@@ -392,16 +389,25 @@ Future<bool> uploadGeneric(List<String> data, String maximoEnvironment,
 
 Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     [String? body, Map<String, String>? header]) async {
-  url = 'http://${maximoServerDomains[env]}.na.iko$url';
+  url = '${maximoServerDomains[env]}$url';
+  header ??= {};
+  if (!apiKeys.containsKey(env)) {
+    if (url.contains('?')) {
+      url = '$url&_lid=majona&_lpwd=happy818';
+    } else {
+      url = '$url?_lid=majona&_lpwd=happy818';
+    }
+  } else {
+    header['apikey'] = apiKeys[env]!;
+  }
   http.Response response;
   if (type == 'get') {
     try {
-      response = await http.get(Uri.parse('$url&_lid=majona&_lpwd=happy818'));
+      response = await http.get(Uri.parse(url), headers: header);
     } catch (err) {
       return {'status': 'Failed to Connect'};
     }
     print('get response received');
-    // print(response.body);
     var parsed = jsonDecode(response.body);
     if (response.statusCode == 200) {
       if (parsed['rdfs:member'] != null) {
@@ -413,20 +419,26 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
       parsed['status'] = 'results';
       return parsed;
     } else {
-      return parsed + {'status': 'Invalid Response Code from Maximo'};
+      parsed['status'] = 'Invalid Response Code from Maximo';
+      return parsed;
     }
   } else if (type == 'post') {
-    header ??= {'preview': '1', 'Content-Type': 'text/plain'};
+    header['preview'] = '1';
+    header['Content-Type'] = 'text/plain';
     try {
       response = await http.post(
-        Uri.parse('$url?action=importfile&lean=1&_lid=majona&_lpwd=happy818'),
+        Uri.parse(
+          url.contains('?')
+              ? '$url&action=importfile&lean=1'
+              : '$url?action=importfile&lean=1',
+        ),
         headers: header,
         body: body,
       );
     } catch (err) {
       return {'status': 'Failed to Connect'};
     }
-    print('post response');
+    print('post preview response');
     print(response.body);
     var parsed = jsonDecode(response.body);
     if (parsed['Error'] != null) {
@@ -444,7 +456,10 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
         try {
           response = await http.post(
             Uri.parse(
-                '$url?action=importfile&lean=1&_lid=majona&_lpwd=happy818'),
+              url.contains('?')
+                  ? '$url&action=importfile&lean=1'
+                  : '$url?action=importfile&lean=1',
+            ),
             headers: header,
             body: body,
           );

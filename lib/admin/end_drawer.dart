@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../main.dart';
 import 'asset_storage.dart';
 import 'consts.dart';
-import 'maximo_jp_pm.dart';
 import 'observation_list_storage.dart';
 
 class EndDrawer extends StatefulWidget {
