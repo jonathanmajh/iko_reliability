@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import '../admin/asset.dart';
 import '../admin/contractor.dart';
 import '../admin/pm_check.dart';
+import '../admin/pm_meter_update.dart';
 import '../main.dart';
 import '../test/test.dart';
 
@@ -15,6 +16,7 @@ import '../test/test.dart';
     AutoRoute(path: "/asset", page: AssetPage),
     AutoRoute(path: "/contractor", page: ContractorPage),
     AutoRoute(path: "/pm/check", page: PmCheckPage),
+    AutoRoute(path: "/pm/update-meter", page: PmMeterUpdatePage),
   ],
 )
 class $AppRouter {}

@@ -108,8 +108,13 @@ void loadObservationList() async {
 }
 
 ObservationList getObservation(String meterCode) {
+  if (meterCode.isEmpty) {
+    throw Exception('No Meter Entered');
+  }
   final box = Hive.box('observationList');
-  final meter = box.get(meterCode.substring(0, meterCode.length - 2));
+  var meter = box.get(meterCode.substring(0, meterCode.length - 2));
+  // maybe the number code has already been removed
+  meter ??= box.get(meterCode);
   if (meter == null) {
     throw Exception('Meter "$meterCode" cannot be found');
   }

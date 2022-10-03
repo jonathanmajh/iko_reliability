@@ -156,6 +156,15 @@ class _HomePageState extends State<HomePage> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.settings),
+                  title: const Text('Update PM Meters'),
+                  onTap: () {
+                    context.router.pushNamed("/pm/update-meter");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
                   title: const Text('Create Assets'),
                   onTap: () {
                     context.router.pushNamed("/asset");

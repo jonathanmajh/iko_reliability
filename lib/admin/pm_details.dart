@@ -16,12 +16,12 @@ class PMDetailView extends StatefulWidget {
 
 class _PMDetailViewState extends State<PMDetailView> {
   Map<String, List<List<String>>> uploadDetails = {};
+  TextEditingController pmNameFieldController = TextEditingController();
+  TextEditingController fmecaPackageController = TextEditingController();
+  TextEditingController pmNumberFieldController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController pmNameFieldController = TextEditingController();
-    TextEditingController fmecaPackageController = TextEditingController();
-    TextEditingController pmNumberFieldController = TextEditingController();
     return Consumer<TemplateNotifier>(builder: (context, value, child) {
       final selected = value.getSelectedTemplate();
       bool notProcessed = false;
