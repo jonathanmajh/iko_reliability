@@ -1,5 +1,5 @@
-import 'package:iko_reliability/admin/generate_uploads.dart';
-import 'package:iko_reliability/admin/observation_list_storage.dart';
+import 'package:iko_reliability_flutter/admin/generate_uploads.dart';
+import 'package:iko_reliability_flutter/admin/observation_list_storage.dart';
 
 import 'upload_maximo.dart';
 

@@ -1,6 +1,4 @@
-import 'package:iko_reliability/admin/upload_maximo.dart';
-
-import 'consts.dart';
+import 'package:iko_reliability_flutter/admin/upload_maximo.dart';
 
 Future<bool> existPmNumberMaximo(
     String pmNumber, String siteid, String env) async {

@@ -2,8 +2,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:iko_reliability/admin/parse_template.dart';
-import 'package:iko_reliability/admin/pm_name_generator.dart';
+import 'package:iko_reliability_flutter/admin/parse_template.dart';
+import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';

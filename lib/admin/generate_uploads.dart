@@ -1,7 +1,7 @@
 import 'package:csv/csv.dart';
-import 'package:iko_reliability/admin/consts.dart';
-import 'package:iko_reliability/admin/generate_job_plans.dart';
-import 'package:iko_reliability/admin/observation_list_storage.dart';
+import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/admin/generate_job_plans.dart';
+import 'package:iko_reliability_flutter/admin/observation_list_storage.dart';
 
 import 'asset_storage.dart';
 

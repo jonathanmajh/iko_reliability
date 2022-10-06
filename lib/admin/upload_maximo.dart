@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:csv/csv.dart';
-import 'package:iko_reliability/admin/template_notifier.dart';
+import 'package:iko_reliability_flutter/admin/template_notifier.dart';
 import 'consts.dart';
 import 'package:http/http.dart' as http;
 

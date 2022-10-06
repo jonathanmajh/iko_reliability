@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iko_reliability/admin/observation_list_storage.dart';
+import 'package:iko_reliability_flutter/admin/observation_list_storage.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';

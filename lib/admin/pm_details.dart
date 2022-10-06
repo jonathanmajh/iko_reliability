@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iko_reliability/admin/consts.dart';
+import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';

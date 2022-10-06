@@ -394,6 +394,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  jinja:
+    dependency: transitive
+    description:
+      name: jinja
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.4"
   js:
     dependency: transitive
     description:
@@ -672,6 +679,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.23.2"
+  squirrel:
+    dependency: "direct dev"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "985ba60fe584e14ee03826449e99d570372b5ca3"
+      url: "https://github.com/RustamG/squirrel-flutter.git"
+    source: git
+    version: "0.2.0"
   stack_trace:
     dependency: transitive
     description:

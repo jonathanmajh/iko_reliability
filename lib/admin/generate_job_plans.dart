@@ -1,5 +1,5 @@
-import 'package:iko_reliability/admin/asset_storage.dart';
-import 'package:iko_reliability/admin/parse_template.dart';
+import 'package:iko_reliability_flutter/admin/asset_storage.dart';
+import 'package:iko_reliability_flutter/admin/parse_template.dart';
 
 import 'consts.dart';
 import 'pm_name_generator.dart';

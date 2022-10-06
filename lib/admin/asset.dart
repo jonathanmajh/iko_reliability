@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
-import 'package:iko_reliability/admin/upload_maximo.dart';
+import 'package:iko_reliability_flutter/admin/upload_maximo.dart';
 
 import '../main.dart';
 
