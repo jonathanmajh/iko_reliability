@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:iko_reliability/admin/observation_list_storage.dart';
+import 'package:provider/provider.dart';
 
+import '../main.dart';
 import 'end_drawer.dart';
+import 'pm_meter_update_functions.dart';
 
 class PmMeterUpdatePage extends StatefulWidget {
   const PmMeterUpdatePage({Key? key}) : super(key: key);
@@ -13,7 +16,7 @@ class PmMeterUpdatePage extends StatefulWidget {
 class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
   TextEditingController meterNameController = TextEditingController();
   TextEditingController oldMeterNameController = TextEditingController();
-  List<String> affectedPMs = ['asdf', 'asdf', 'asdf', 'sdfg', 'sdfhg', 'dfgh'];
+  List<JobPlanMeterCheckMaximo> affectedJobPlans = [];
   ObservationList? meterDetails;
   ObservationList? oldMeterDetails;
   // observation list objs (new, old)
@@ -33,9 +36,9 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
         children: [
           SizedBox(
             width: 550,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: ListView(
+              // mainAxisAlignment: MainAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -50,15 +53,48 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                           bottomLeft: Radius.circular(18),
                         ),
                       ))),
-                      onPressed: () {
-                        setState(() {
-                          meterDetails =
-                              getObservation(meterNameController.text);
-                          if (oldMeterNameController.text.isNotEmpty) {
-                            oldMeterDetails =
-                                getObservation(oldMeterNameController.text);
-                          }
-                        });
+                      onPressed: () async {
+                        try {
+                          meterNameController.text =
+                              meterNameController.text.toUpperCase();
+                          final temp = getObservation(meterNameController.text);
+                          setState(() {
+                            meterDetails = temp;
+                          });
+                        } catch (e) {
+                          // widget already takes care of null case
+                        }
+                        try {
+                          oldMeterNameController.text =
+                              oldMeterNameController.text.toUpperCase();
+                          final temp =
+                              getObservation(oldMeterNameController.text);
+                          setState(() {
+                            oldMeterDetails = temp;
+                          });
+                        } catch (e) {
+                          // widget already takes care of null case
+                        }
+                        if (oldMeterNameController.text.isNotEmpty) {
+                          final temp = await getJobtasks(
+                              oldMeterNameController.text,
+                              Provider.of<MaximoServerNotifier>(context,
+                                      listen: false)
+                                  .maximoServerSelected);
+                          setState(() {
+                            affectedJobPlans.addAll(temp);
+                          });
+                        }
+                        if (meterNameController.text.isNotEmpty) {
+                          final temp = await getJobtasks(
+                              meterNameController.text,
+                              Provider.of<MaximoServerNotifier>(context,
+                                      listen: false)
+                                  .maximoServerSelected);
+                          setState(() {
+                            affectedJobPlans.addAll(temp);
+                          });
+                        }
                       },
                       child: Row(
                         children: const [
@@ -118,7 +154,7 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                   ),
                 ),
                 observationDetails(meterDetails, ''),
-                observationDetails(meterDetails, 'Old '),
+                observationDetails(oldMeterDetails, 'Old '),
                 const Text('Pm Update Page'),
               ],
             ),
@@ -133,10 +169,13 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
           Expanded(
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: affectedPMs.length,
+              itemCount: affectedJobPlans.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(affectedPMs[index]),
+                  leading: Text(affectedJobPlans[index].siteid),
+                  title: Text(affectedJobPlans[index].jpnum),
+                  subtitle: Text(affectedJobPlans[index].description),
+                  trailing: Text(affectedJobPlans[index].assetnum),
                 );
               },
             ),
@@ -150,7 +189,15 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
 
 Widget observationDetails(ObservationList? observation, String whichMeter) {
   if (observation == null) {
-    return Container();
+    return Card(
+      child: ExpansionTile(
+        title: Text('${whichMeter}Meter'),
+        children: const [
+          Text(
+              'No Meter Entered or Meter cannot be found, please check observation list')
+        ],
+      ),
+    );
   }
   return Card(
     child: ExpansionTile(

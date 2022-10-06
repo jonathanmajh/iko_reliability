@@ -401,7 +401,10 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     header['apikey'] = apiKeys[env]!;
   }
   http.Response response;
-  if (type == 'get') {
+  if (type == 'get' || type == 'api') {
+    if (type == 'api') {
+      url = url.replaceAll('/os/', '/script/');
+    }
     try {
       response = await http.get(Uri.parse(url), headers: header);
     } catch (err) {
