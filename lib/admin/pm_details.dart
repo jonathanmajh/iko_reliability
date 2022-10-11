@@ -28,6 +28,17 @@ class _PMDetailViewState extends State<PMDetailView> {
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
+      final details = generateUploadDetailsList(
+          value.getUploadDetails(
+              selected.selectedFile!, selected.selectedTemplate!),
+          (value.getStatus(
+                          selected.selectedFile!, selected.selectedTemplate!) ==
+                      'done') ||
+                  (value.getStatus(
+                          selected.selectedFile!, selected.selectedTemplate!) ==
+                      'uploading')
+              ? true
+              : false);
       final statusMessages = value.getStatusMessages(
           selected.selectedFile!, selected.selectedTemplate!);
       final processedTemplate = value.getProcessedTemplate(
@@ -94,7 +105,10 @@ class _PMDetailViewState extends State<PMDetailView> {
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                                 const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(18),
+                        bottomRight: Radius.circular(18),
+                      ),
                     ))),
                     onPressed: notProcessed
                         ? null
@@ -123,18 +137,6 @@ class _PMDetailViewState extends State<PMDetailView> {
                       ],
                     ));
               }),
-              ElevatedButton(
-                style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(18),
-                    bottomRight: Radius.circular(18),
-                  ),
-                ))),
-                onPressed: (() {}),
-                child: Text('Lines Uploaded: ${value.getUploadedLines()}'),
-              ),
             ],
           ),
           const Divider(
@@ -214,19 +216,12 @@ class _PMDetailViewState extends State<PMDetailView> {
                       )
                     : Container(),
                 Card(
-                    child: ExpansionTile(
-                        title: const Text('Upload Details'),
-                        children: generateUploadDetailsList(
-                            value.getUploadDetails(selected.selectedFile!,
-                                selected.selectedTemplate!),
-                            (value.getStatus(selected.selectedFile!,
-                                            selected.selectedTemplate!) ==
-                                        'done') ||
-                                    (value.getStatus(selected.selectedFile!,
-                                            selected.selectedTemplate!) ==
-                                        'uploading')
-                                ? true
-                                : false)))
+                  child: ExpansionTile(
+                    title: const Text('Upload Details'),
+                    subtitle: details.removeLast(),
+                    children: details,
+                  ),
+                )
               ],
             ),
           )
@@ -239,6 +234,9 @@ class _PMDetailViewState extends State<PMDetailView> {
 List<Widget> generateUploadDetailsList(
     Map<String, List<List<String>>> uploadDetails, bool result) {
   List<Widget> cards = [];
+  int warnings = 0;
+  int errors = 0;
+  int info = 0;
   for (final table in uploadDetails.keys) {
     List<Widget> rows = [];
     rows.add(Container(
@@ -250,6 +248,13 @@ List<Widget> generateUploadDetailsList(
       for (final row in uploadDetails[table]!) {
         if (result) {
           final textColor = status[row.last] ?? Colors.white;
+          if (row.last == '!') {
+            errors++;
+          } else if (row.last == '~') {
+            warnings++;
+          } else if (row.last == '+') {
+            info++;
+          }
           rows.add(Container(
               width: double.maxFinite,
               color: textColor,
@@ -272,6 +277,7 @@ List<Widget> generateUploadDetailsList(
       )));
     }
   }
+  cards.add(Text('Errors: $errors, Warnings: $warnings, Uploaded: $info'));
   return cards;
 }
 
