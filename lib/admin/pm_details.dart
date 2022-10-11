@@ -192,21 +192,12 @@ class _PMDetailViewState extends State<PMDetailView> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                Card(
-                  child: ExpansionTile(
-                    title: const Text('Processing Log'),
-                    children: <Widget>[
-                      statusMessages.isEmpty
-                          ? const Center(
-                              child: Divider(
-                                height: 15,
-                                thickness: 1,
-                                indent: 10,
-                                endIndent: 10,
-                                color: Color.fromARGB(0, 0, 0, 0),
-                              ),
-                            )
-                          : ListView.builder(
+                statusMessages.isNotEmpty
+                    ? Card(
+                        child: ExpansionTile(
+                          title: const Text('Processing Log'),
+                          children: <Widget>[
+                            ListView.builder(
                               shrinkWrap: true,
                               itemCount: statusMessages.length,
                               prototypeItem: ListTile(
@@ -218,9 +209,10 @@ class _PMDetailViewState extends State<PMDetailView> {
                                 );
                               },
                             ),
-                    ],
-                  ),
-                ),
+                          ],
+                        ),
+                      )
+                    : Container(),
                 Card(
                     child: ExpansionTile(
                         title: const Text('Upload Details'),
