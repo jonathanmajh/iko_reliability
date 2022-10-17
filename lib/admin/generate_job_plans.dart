@@ -340,8 +340,8 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       jobtask: mainJobTasks,
       jobasset: [JobAssetMaximo(assetNumber: pmName.commonParent)]);
   var route = RouteMaximo(
-    routeNumber: pmName.pmNumber,
-    description: pmName.pmName,
+    routeNumber: pmName.routeNumber ?? pmName.pmNumber,
+    description: pmName.routeName ?? pmName.pmName,
     routeStopsBecome: routeType,
     routeStops: routeStops,
     childJobPlans: childJobPlans.values.toList(),
@@ -360,7 +360,8 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
     orgID: siteIDAndOrgID[pmDetails.siteId!]!,
     route: routeType != 'NONE' ? route : null,
     targetStartTime: '08:00:00',
-    // TODO ikoPMHistoryNotes: ikoPMHistoryNotes,
+    // ikoPMHistoryNotes: ikoPMHistoryNotes,
+    // dont have spot on template, perhaps just leave it as a UI thing?
     fmecaPM: null != pmDetails.pmPackageNumber,
     nextDate: pmDetails.nextDueDate,
   );

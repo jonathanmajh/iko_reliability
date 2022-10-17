@@ -23,6 +23,7 @@ flutter packages pub run build_runner watch / build
 flutter pub get
 flutter upgrade
 
+flutter build windows
 flutter pub run squirrel:installer_windows
 
 select assetnum, location, parent, description, siteid, status, changedate from asset where siteid = 'gv'

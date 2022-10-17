@@ -101,10 +101,11 @@ class ParsedTemplate {
   String pmNumber;
   String pmName;
   String? pmPackageNumber;
-  String? routeNumber;
-  // PMName? generatedPmName;
+  String? routeCode;
+  String? routeName; // TODO replace this with loaded value list + editor later
   String? pmAsset; // the parent asset specified for the PM
-  // PMMaximo? processedTemplate;
+  String? suggestedPmNumber;
+  String? suggestedPmName;
 
   ParsedTemplate({
     List<String>? assets,
@@ -119,10 +120,11 @@ class ParsedTemplate {
     required this.pmNumber,
     required this.pmName,
     this.pmPackageNumber,
-    this.routeNumber,
-    // this.generatedPmName,
+    this.routeCode,
+    this.routeName,
+    this.suggestedPmName,
     this.pmAsset,
-    // this.processedTemplate,
+    this.suggestedPmNumber,
     List<JobService>? services,
     List<JobTask>? tasks,
   })  : assets = assets ?? [],
@@ -165,18 +167,26 @@ class ParsedTemplate {
             workOrderType = 'LIF';
           }
           pmTemplates[filename][pmNumber] = ParsedTemplate(
-              nextDueDate: nextRow[2]?.substring(0, 10),
-              siteId: nextRow[3],
-              frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))
-                  ? nextRow[4].substring(0, 1)
-                  : null,
-              frequency: nextRow[5],
-              workOrderType: workOrderType,
-              processCondition: nextRow[7].substring(0, 4),
-              pmAsset: nextRow[0],
-              pmName: nextRow[8] ?? 'Generating Name...',
-              pmNumber: decoder.tables[sheet]!.rows[i + 2][8] ??
-                  'Generating Number...');
+            nextDueDate: nextRow[2]?.substring(0, 10),
+            siteId: nextRow[3],
+            frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))
+                ? nextRow[4].substring(0, 1)
+                : null,
+            frequency: nextRow[5],
+            workOrderType: workOrderType,
+            processCondition: nextRow[7].substring(0, 4),
+            pmAsset: nextRow[0],
+            pmName: nextRow[8] ?? 'Generating Name...',
+            pmNumber:
+                decoder.tables[sheet]!.rows[i + 2][8] ?? 'Generating Number...',
+            suggestedPmName: nextRow[8],
+            suggestedPmNumber: decoder.tables[sheet]!.rows[i + 2][8],
+            routeName:
+                (nextRow[9] == 'Select Route (Optional)' ? null : nextRow[9]),
+            routeCode: (nextRow[9] == 'Select Route (Optional)'
+                ? null
+                : decoder.tables[sheet]!.rows[i + 2][9]),
+          );
         }
         if (row[7] != null && readTasks) {
           pmTemplates[filename][pmNumber].tasks.add(JobTask(

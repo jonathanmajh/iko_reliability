@@ -70,6 +70,10 @@ class _PMDetailViewState extends State<PMDetailView> {
                       value.setPMName(pmNameFieldController.text,
                           selected.selectedFile!, selected.selectedTemplate!);
                     }
+                    if (pmNumberFieldController.text.isNotEmpty) {
+                      value.setPMNumber(pmNumberFieldController.text,
+                          selected.selectedFile!, selected.selectedTemplate!);
+                    }
                     value.setPMPackage(fmecaPackageController.text,
                         selected.selectedFile!, selected.selectedTemplate!);
                   },
@@ -156,10 +160,10 @@ class _PMDetailViewState extends State<PMDetailView> {
                   children: [
                     Expanded(
                         child: TextField(
-                            readOnly: true,
                             controller: pmNumberFieldController,
                             decoration: const InputDecoration(
-                              labelText: 'PM Number (Read Only)',
+                              labelText:
+                                  'PM Number (NO DUPLICATE CHECK IF CHANGED)',
                               border: OutlineInputBorder(),
                             ))),
                     const VerticalDivider(

@@ -9,6 +9,8 @@ class PMName {
   String pmNumber;
   String pmName;
   String jpNumber;
+  String? routeNumber;
+  String? routeName;
   String commonParent;
   List<String>? replaceable;
 
@@ -16,6 +18,8 @@ class PMName {
     required this.pmNumber,
     required this.pmName,
     required this.jpNumber,
+    this.routeNumber,
+    this.routeName,
     required this.commonParent,
     this.replaceable,
   });
@@ -25,6 +29,8 @@ Future<PMName> generateName(
     ParsedTemplate pmdetails, String maximoServerSelected) async {
   String number = '';
   String name = '';
+  String? routeNumber;
+  String? routeName;
   Asset asset;
   String commonParent;
   if (pmdetails.assets.isEmpty) {
@@ -33,10 +39,15 @@ Future<PMName> generateName(
     asset = getCommonParent(pmdetails.assets, pmdetails.siteId!);
   }
   commonParent = asset.assetNumber;
-  if (pmdetails.routeNumber != null) {
-    number = pmdetails.routeNumber!;
-    name = '[RouteName]';
-    // TODO proper handling of route naming
+  if (pmdetails.routeCode != null) {
+    number = await findAvailableRouteCode(
+      pmdetails.routeCode!,
+      pmdetails.siteId!,
+      maximoServerSelected,
+    );
+    name = '${pmdetails.routeName} Route ${int.parse(number.substring(3))}';
+    routeName = name;
+    routeNumber = number;
   } else {
     number = asset.assetNumber;
     name = asset.name;
@@ -101,12 +112,38 @@ Future<PMName> generateName(
     jpNumber: '${pmdetails.siteId!}$number',
     replaceable: replaceable,
     commonParent: commonParent,
+    routeName: routeName,
+    routeNumber: routeNumber,
   );
 }
 
+Future<String> findAvailableRouteCode(
+  String routeCode,
+  String siteID,
+  String server,
+) async {
+  int counter = 1;
+  String routeNumber = '$routeCode${"$counter".padLeft(3, "0")}';
+  bool unAvailable =
+      await existRouteNumberMaximo(routeNumber, siteID, server) ||
+          existRouteNumberCache(routeNumber, siteID);
+  while (unAvailable) {
+    counter++;
+    routeNumber = '$routeCode${"$counter".padLeft(3, "0")}';
+    unAvailable = await existRouteNumberMaximo(routeNumber, siteID, server) ||
+        existRouteNumberCache(routeNumber, siteID);
+  }
+  return routeNumber;
+}
+
 // consider making recursive would probably be cleaner
-Future<int> findAvailablePMNumber(String pmNumber, String siteID, String server,
-    String woType, int checkType) async {
+Future<int> findAvailablePMNumber(
+  String pmNumber,
+  String siteID,
+  String server,
+  String woType,
+  int checkType,
+) async {
   // checkType 1 = PM + JP
   // checkType 2 = JP
   // checkType 3 = PM + JP + Route

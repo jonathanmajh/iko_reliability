@@ -118,6 +118,17 @@ class TemplateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setPMNumber(String number, String file, int template) {
+    final processedTemplate = allTemplates[file]![template]!.processedTemplate!;
+    processedTemplate.pmNumber = number;
+    processedTemplate.jobplan.jpnum = '${processedTemplate.siteID}$number';
+    // TODO seperate out route number + name
+    if (processedTemplate.route != null) {
+      processedTemplate.route!.routeNumber = number;
+    }
+    notifyListeners();
+  }
+
   void setParsedTemplate(
       String file, int templateNumber, ParsedTemplate template) {
     addTemplate(file);
