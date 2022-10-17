@@ -166,14 +166,14 @@ class _PmCheckPageState extends State<PmCheckPage> {
       templates = files;
       _show(msg);
     });
-    print('loaded files in ${stopwatch.elapsedMilliseconds} milliseconds');
+    debugPrint('loaded files in ${stopwatch.elapsedMilliseconds} milliseconds');
     if (files.isEmpty) {
       setState(() {
-        print('No files selected files...');
+        debugPrint('No files selected files...');
       });
     } else {
       setState(() {
-        print('Processing files...');
+        debugPrint('Processing files...');
       });
       final template = context.read<TemplateNotifier>();
       final maximo = context.read<MaximoServerNotifier>();
@@ -220,7 +220,7 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
           );
           context.setProcessedTemplate(ws, templateNumber, value2);
         } catch (e) {
-          print(e);
+          debugPrint(e.toString());
           context.addStatusMessage(ws, templateNumber, '$e');
         }
       }

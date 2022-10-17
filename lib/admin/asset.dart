@@ -101,16 +101,16 @@ class _AssetPageState extends State<AssetPage> {
                   };
                 }
               }
-              print('adding assets to db');
+              debugPrint('adding assets to db');
               await database!.addAssets(thing);
-              print('finished adding assets to DB');
+              debugPrint('finished adding assets to DB');
             },
           ),
           ElevatedButton(
               child: const Text('Display GX Assets'),
               onPressed: () async {
                 final thing2 = await generateNodes('A0001', 'GX');
-                print('generated nodes');
+                debugPrint('generated nodes');
                 setState(() {
                   _treenodes = thing2;
                 });

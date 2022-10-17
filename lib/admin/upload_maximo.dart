@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:csv/csv.dart';
+import 'package:flutter/widgets.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
 import 'consts.dart';
 import 'package:http/http.dart' as http;
@@ -379,10 +380,10 @@ Future<bool> uploadGeneric(List<String> data, String maximoEnvironment,
   final result = await maximoRequest(url, 'post', maximoEnvironment,
       const ListToCsvConverter().convert([tableHeaders[table], data]));
   if (result['status'] == 'uploaded') {
-    print('uploaded');
+    debugPrint('uploaded');
     return true;
   } else {
-    print(result.toString());
+    debugPrint(result.toString());
     return false;
   }
 }
@@ -410,7 +411,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     } catch (err) {
       return {'status': 'Failed to Connect'};
     }
-    print('get response received');
+    debugPrint('get response received');
     var parsed = jsonDecode(response.body);
     if (response.statusCode == 200) {
       if (parsed['rdfs:member'] != null) {
@@ -441,8 +442,8 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     } catch (err) {
       return {'status': 'Failed to Connect'};
     }
-    print('post preview response');
-    print(response.body);
+    debugPrint('post preview response');
+    debugPrint(response.body);
     var parsed = jsonDecode(response.body);
     if (parsed['Error'] != null) {
       return {'status': response.body};
@@ -469,8 +470,8 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
         } catch (err) {
           return {'status': 'Failed to Connect'};
         }
-        print('post response');
-        print(response.body);
+        debugPrint('post response');
+        debugPrint(response.body);
         parsed = jsonDecode(response.body);
         if (parsed['Error'] != null) {
           return {'status': response.body};

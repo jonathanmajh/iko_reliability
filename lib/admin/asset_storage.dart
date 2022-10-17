@@ -42,7 +42,7 @@ Map<String, Map<String, Asset>> assetCache = {};
 
 void loadHierarchy() async {
   //deprecated
-  print('Picking Files');
+  debugPrint('Picking Files');
   FilePickerResult? result =
       await FilePicker.platform.pickFiles(allowMultiple: false, withData: true);
   List<PlatformFile> files = [];
@@ -64,7 +64,7 @@ void loadHierarchy() async {
       box.put('${asset.siteid}|${asset.assetNumber}', asset);
     }
   }
-  print('Finished Loading');
+  debugPrint('Finished Loading');
 }
 
 String findParent(Asset asset) {

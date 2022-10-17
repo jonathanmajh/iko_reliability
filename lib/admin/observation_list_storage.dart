@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
@@ -60,7 +61,7 @@ class ObservationList {
 }
 
 void loadObservationList() async {
-  print('Picking Files');
+  debugPrint('Picking Files');
   List<String> messages = [];
   FilePickerResult? result =
       await FilePicker.platform.pickFiles(allowMultiple: false, withData: true);
