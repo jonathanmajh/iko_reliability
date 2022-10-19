@@ -72,7 +72,7 @@ void loadObservationList() async {
     var sheet = decoder.tables.values.first;
     final box = Hive.box('observationList');
     await box.clear();
-    var observation;
+    ObservationList? observation;
     List<Observations> observations = [];
     for (var i = 1; i < sheet.maxRows; i++) {
       var row = sheet.rows[i];
@@ -96,7 +96,7 @@ void loadObservationList() async {
               Observations(code: row[5], description: row[6], action: row[7]));
         }
         if (row[5] == null) {
-          observation.observations = observations;
+          observation!.observations = observations;
           await box.put(observation.meterGroup, observation);
         }
       } catch (err) {

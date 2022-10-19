@@ -15,8 +15,140 @@ class PMDetailView extends StatefulWidget {
   State<PMDetailView> createState() => _PMDetailViewState();
 }
 
-class _PMDetailViewState extends State<PMDetailView> {
+class _PMDetailViewState extends State<PMDetailView>
+    with SingleTickerProviderStateMixin {
   Map<String, List<List<String>>> uploadDetails = {};
+  List<Widget> fabList = [];
+  static const List<Tab> myTabs = <Tab>[
+    Tab(
+        icon: Icon(
+      Icons.tune,
+      color: Color.fromRGBO(255, 0, 0, 1),
+    )),
+    Tab(
+        icon: Icon(
+      Icons.cloud_upload,
+      color: Color.fromRGBO(255, 0, 0, 1),
+    )),
+    Tab(
+        icon: Icon(
+      Icons.edit_note,
+      color: Color.fromRGBO(255, 0, 0, 1),
+    )),
+  ];
+
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _tabController = TabController(vsync: this, length: myTabs.length);
+    _updateFab();
+    _tabController.addListener(() {
+      _updateFab();
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _updateFab([bool show = false]) {
+    final index = _tabController.index;
+    List<Widget> temp = [];
+    if (index == 0) {
+      temp.add(FloatingActionButton(
+        heroTag: UniqueKey(),
+        onPressed: () {},
+        child: const Icon(Icons.navigate_next),
+      ));
+    } else if (index == 1) {
+      if (show) {
+        temp = [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: FloatingActionButton.extended(
+              heroTag: UniqueKey(),
+              onPressed: () {},
+              label: const Text('Preview'),
+              icon: const Icon(Icons.file_open_rounded),
+            ),
+          ),
+          Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+              child: FloatingActionButton.extended(
+                heroTag: UniqueKey(),
+                onPressed: () {},
+                label: const Text('Upload'),
+                icon: const Icon(Icons.delete_sweep),
+              )),
+          FloatingActionButton(
+            heroTag: UniqueKey(),
+            onPressed: () {
+              _updateFab();
+            },
+            child: const Icon(Icons.close),
+          ),
+        ];
+      } else {
+        temp.add(
+          FloatingActionButton(
+            heroTag: UniqueKey(),
+            onPressed: () {
+              _updateFab(true);
+            },
+            child: const Icon(Icons.add),
+          ),
+        );
+      }
+    } else {
+      // index = 2
+      if (show) {
+        temp = [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: FloatingActionButton.extended(
+              heroTag: UniqueKey(),
+              onPressed: () {},
+              label: const Text('Export'),
+              icon: const Icon(Icons.file_open_rounded),
+            ),
+          ),
+          Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+              child: FloatingActionButton.extended(
+                heroTag: UniqueKey(),
+                onPressed: () {},
+                label: const Text('Import'),
+                icon: const Icon(Icons.delete_sweep),
+              )),
+          FloatingActionButton(
+            heroTag: UniqueKey(),
+            onPressed: () {
+              _updateFab();
+            },
+            child: const Icon(Icons.close),
+          ),
+        ];
+      } else {
+        temp.add(
+          FloatingActionButton(
+            heroTag: UniqueKey(),
+            onPressed: () {
+              _updateFab(true);
+            },
+            child: const Icon(Icons.add),
+          ),
+        );
+      }
+    }
+    setState(() {
+      fabList = temp;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,23 +157,23 @@ class _PMDetailViewState extends State<PMDetailView> {
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
-      return DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.directions_car)),
-              Tab(icon: Icon(Icons.directions_transit)),
-              Tab(icon: Icon(Icons.directions_bike)),
-            ],
-          ),
-          body: TabBarView(
-            children: [
-              PMDetails(),
-              Icon(Icons.directions_car),
-              uploadDetailsTab(value),
-            ],
-          ),
+      return Scaffold(
+        appBar: TabBar(
+          controller: _tabController,
+          tabs: myTabs,
+        ),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: fabList,
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            const PMDetails(),
+            uploadDetailsTab(value),
+            const Text('tab for upload from folder of csv files'),
+          ],
         ),
       );
     });
@@ -143,11 +275,10 @@ class _PMDetailsState extends State<PMDetails> {
       fmecaPackageController.text =
           processedTemplate?.jobplan.ikoPmpackage ?? '';
       pmNumberFieldController.text = processedTemplate?.pmNumber ?? 'TBD...';
-      return Expanded(
-          child: ListView(
-              padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
-              primary: false,
-              children: [
+      return ListView(
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
+          primary: false,
+          children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -288,7 +419,7 @@ class _PMDetailsState extends State<PMDetails> {
                       pmNameFieldController.text.length > 100 ? null : '',
                   suffixText: null),
             ),
-          ]));
+          ]);
     });
   }
 }
@@ -307,40 +438,38 @@ Widget uploadDetailsTab(TemplateNotifier value) {
           : false);
   final statusMessages = value.getStatusMessages(
       selected.selectedFile!, selected.selectedTemplate!);
-  return Expanded(
-    child: ListView(
-      padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
-      primary: false,
-      children: [
-        statusMessages.isNotEmpty
-            ? Card(
-                child: ExpansionTile(
-                  title: const Text('Processing Log'),
-                  children: <Widget>[
-                    ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: statusMessages.length,
-                      prototypeItem: ListTile(
-                        title: Text(statusMessages.first),
-                      ),
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(statusMessages[index]),
-                        );
-                      },
+  return ListView(
+    padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
+    primary: false,
+    children: [
+      statusMessages.isNotEmpty
+          ? Card(
+              child: ExpansionTile(
+                title: const Text('Processing Log'),
+                children: <Widget>[
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: statusMessages.length,
+                    prototypeItem: ListTile(
+                      title: Text(statusMessages.first),
                     ),
-                  ],
-                ),
-              )
-            : Container(),
-        Card(
-          child: ExpansionTile(
-            title: const Text('Upload Details'),
-            subtitle: details.removeLast(),
-            children: details,
-          ),
-        )
-      ],
-    ),
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(statusMessages[index]),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            )
+          : Container(),
+      Card(
+        child: ExpansionTile(
+          title: const Text('Upload Details'),
+          subtitle: details.removeLast(),
+          children: details,
+        ),
+      )
+    ],
   );
 }

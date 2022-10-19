@@ -21,5 +21,8 @@
             "type": "dart",
             "flutterMode": "release"
         }
+    ],
+    "git.ignoredRepositories" : [
+        "C:\\Users\\majona\\Downloads\\flutter_windows_2.10.4-stable"
     ]
 }

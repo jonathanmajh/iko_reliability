@@ -23,6 +23,84 @@ class PmCheckPage extends StatefulWidget {
 class _PmCheckPageState extends State<PmCheckPage> {
   List<PlatformFile> templates = [];
   String uploadDetails = '';
+  List<Widget> fabList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _updateFab();
+  }
+
+  void _updateFab() {
+    List<Widget> temp = [];
+    if (fabList.length == 1) {
+      // populate with 3 options
+      temp = [
+        Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: FloatingActionButton.extended(
+              heroTag: UniqueKey(),
+              onPressed: () {
+                _updateFab();
+              },
+              label: const Text('Add'),
+              icon: const Icon(Icons.add),
+            )),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+          child: FloatingActionButton.extended(
+            heroTag: UniqueKey(),
+            onPressed: () {
+              pickTemplates(navigatorKey.currentContext!);
+              _updateFab();
+            },
+            label: const Text('Open'),
+            icon: const Icon(Icons.file_open_rounded),
+          ),
+        ),
+        Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: FloatingActionButton.extended(
+              heroTag: UniqueKey(),
+              onPressed: () {
+                navigatorKey.currentContext!
+                    .read<TemplateNotifier>()
+                    .clearTemplates();
+                var box = Hive.box('jpNumber');
+                box.clear();
+                box = Hive.box('pmNumber');
+                box.clear();
+                box = Hive.box('routeNumber');
+                box.clear();
+                _updateFab();
+              },
+              label: const Text('Clear'),
+              icon: const Icon(Icons.delete_sweep),
+            )),
+        FloatingActionButton(
+          heroTag: UniqueKey(),
+          onPressed: () {
+            _updateFab();
+          },
+          child: const Icon(Icons.close),
+        ),
+      ];
+    } else {
+      temp = [
+        FloatingActionButton(
+          heroTag: UniqueKey(),
+          onPressed: () {
+            _updateFab();
+          },
+          child: const Icon(Icons.add),
+        )
+      ];
+    }
+
+    setState(() {
+      fabList = temp;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +111,21 @@ class _PmCheckPageState extends State<PmCheckPage> {
         leading: (ModalRoute.of(context)?.canPop ?? false)
             ? const BackButton()
             : null,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+            ),
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: fabList,
       ),
       body: Column(
         children: <Widget>[
