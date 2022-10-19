@@ -51,7 +51,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
           child: FloatingActionButton.extended(
             heroTag: UniqueKey(),
             onPressed: () {
-              pickTemplates(navigatorKey.currentContext!);
+              pickTemplates(context);
               _updateFab();
             },
             label: const Text('Open'),
@@ -63,9 +63,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
             child: FloatingActionButton.extended(
               heroTag: UniqueKey(),
               onPressed: () {
-                navigatorKey.currentContext!
-                    .read<TemplateNotifier>()
-                    .clearTemplates();
+                context.read<TemplateNotifier>().clearTemplates();
                 var box = Hive.box('jpNumber');
                 box.clear();
                 box = Hive.box('pmNumber');

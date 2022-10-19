@@ -62,19 +62,33 @@ class _PMDetailViewState extends State<PMDetailView>
     if (index == 0) {
       temp.add(FloatingActionButton(
         heroTag: UniqueKey(),
-        onPressed: () {},
+        onPressed: () {
+          _tabController.animateTo(1);
+        },
         child: const Icon(Icons.navigate_next),
       ));
     } else if (index == 1) {
       if (show) {
+        final value = context.read<TemplateNotifier>();
+        final selected = value.getSelectedTemplate();
+        final processedTemplate = value.getProcessedTemplate(
+            selected.selectedFile!, selected.selectedTemplate!);
         temp = [
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
             child: FloatingActionButton.extended(
               heroTag: UniqueKey(),
-              onPressed: () {},
+              onPressed: () {
+                if (processedTemplate != null) {
+                  value.setUploadDetails(
+                      selected.selectedFile!,
+                      selected.selectedTemplate!,
+                      generateUploads(processedTemplate));
+                }
+                _updateFab();
+              },
               label: const Text('Preview'),
-              icon: const Icon(Icons.file_open_rounded),
+              icon: const Icon(Icons.visibility),
             ),
           ),
           Padding(
@@ -83,7 +97,7 @@ class _PMDetailViewState extends State<PMDetailView>
                 heroTag: UniqueKey(),
                 onPressed: () {},
                 label: const Text('Upload'),
-                icon: const Icon(Icons.delete_sweep),
+                icon: const Icon(Icons.cloud_upload),
               )),
           FloatingActionButton(
             heroTag: UniqueKey(),
@@ -308,27 +322,6 @@ class _PMDetailsState extends State<PMDetails> {
                       children: const [
                         Icon(Icons.sync),
                         Text(' Update PM'),
-                      ],
-                    )),
-                ElevatedButton(
-                    style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                                const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(),
-                    ))),
-                    onPressed: notProcessed
-                        ? null
-                        : () {
-                            value.setUploadDetails(
-                                selected.selectedFile!,
-                                selected.selectedTemplate!,
-                                generateUploads(processedTemplate!));
-                          },
-                    child: Row(
-                      children: const [
-                        Icon(Icons.visibility),
-                        Text(' Preview'),
                       ],
                     )),
                 Consumer<MaximoServerNotifier>(
