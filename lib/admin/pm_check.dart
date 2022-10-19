@@ -144,10 +144,9 @@ class _PmCheckPageState extends State<PmCheckPage> {
                     width: 550,
                     child: Consumer<TemplateNotifier>(
                         builder: (context, value, child) {
-                      return Expanded(
-                          child: ListView(
+                      return ListView(
                         children: buildPMList(value),
-                      ));
+                      );
                     })),
                 const VerticalDivider(
                   width: 20,
