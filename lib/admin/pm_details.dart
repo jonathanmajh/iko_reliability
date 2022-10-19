@@ -259,16 +259,19 @@ class PMDetails extends StatefulWidget {
 
 class _PMDetailsState extends State<PMDetails> {
   TextEditingController pmNameFieldController = TextEditingController();
-  TextEditingController fmecaPackageController = TextEditingController();
   TextEditingController pmNumberFieldController = TextEditingController();
+  TextEditingController fmecaPackageController = TextEditingController();
+  TextEditingController routeNameFieldController = TextEditingController();
+  TextEditingController routeNumberFieldController = TextEditingController();
 
   @override
   void dispose() {
     // Clean up the controller when the widget is removed from the widget tree.
-    // This also removes the _printLatestValue listener.
     pmNameFieldController.dispose();
     fmecaPackageController.dispose();
     pmNumberFieldController.dispose();
+    routeNameFieldController.dispose();
+    routeNumberFieldController.dispose();
     super.dispose();
   }
 
@@ -289,6 +292,10 @@ class _PMDetailsState extends State<PMDetails> {
       fmecaPackageController.text =
           processedTemplate?.jobplan.ikoPmpackage ?? '';
       pmNumberFieldController.text = processedTemplate?.pmNumber ?? 'TBD...';
+      routeNameFieldController.text =
+          processedTemplate?.route?.description ?? '';
+      routeNumberFieldController.text =
+          processedTemplate?.route?.routeNumber ?? '';
       return ListView(
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
           primary: false,
@@ -387,8 +394,57 @@ class _PMDetailsState extends State<PMDetails> {
                     child: TextField(
                   controller: fmecaPackageController,
                   decoration: const InputDecoration(
-                    labelText: 'Edit PMECA Package',
+                    labelText: 'Edit FMECA Package',
                     border: OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.save),
+                    ),
+                  ),
+                )),
+              ],
+            ),
+            const Divider(
+              // spacer
+              height: 10,
+              thickness: 0,
+              indent: 0,
+              endIndent: 0,
+              color: Color.fromARGB(255, 255, 255, 255),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                    child: TextField(
+                        controller: routeNameFieldController,
+                        decoration: const InputDecoration(
+                          labelText: 'Edit Route Name',
+                          border: OutlineInputBorder(),
+                        ))),
+                const Icon(Icons.link),
+                Expanded(
+                    child: TextField(
+                  controller: routeNumberFieldController,
+                  decoration: InputDecoration(
+                    labelText: 'Edit Route Code',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        if (routeNumberFieldController.text.isNotEmpty &&
+                            routeNameFieldController.text.isNotEmpty) {
+                          value.setRouteInfo(
+                              routeNumberFieldController.text,
+                              routeNameFieldController.text,
+                              selected.selectedFile!,
+                              selected.selectedTemplate!,
+                              Provider.of<MaximoServerNotifier>(context,
+                                      listen: false)
+                                  .maximoServerSelected);
+                        }
+                      },
+                      icon: const Icon(Icons.sync),
+                    ),
                   ),
                 )),
               ],
@@ -402,16 +458,18 @@ class _PMDetailsState extends State<PMDetails> {
               color: Color.fromARGB(255, 255, 255, 255),
             ),
             TextField(
-              controller: pmNameFieldController,
-              maxLength: 100,
-              maxLengthEnforcement: MaxLengthEnforcement.none,
-              decoration: InputDecoration(
+                controller: pmNameFieldController,
+                maxLength: 100,
+                maxLengthEnforcement: MaxLengthEnforcement.none,
+                decoration: const InputDecoration(
                   labelText: 'Edit PM Name',
-                  border: const OutlineInputBorder(),
-                  counterText:
-                      pmNameFieldController.text.length > 100 ? null : '',
-                  suffixText: null),
-            ),
+                  border: OutlineInputBorder(),
+                  counterText: '',
+                  suffixIcon: IconButton(
+                    onPressed: null,
+                    icon: Icon(Icons.save),
+                  ),
+                )),
           ]);
     });
   }

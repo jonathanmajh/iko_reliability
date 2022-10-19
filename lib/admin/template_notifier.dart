@@ -118,14 +118,35 @@ class TemplateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setRouteInfo(String code, String description, String file, int template,
+      String maximoServerSelected) async {
+    final parsedTemplate = allTemplates[file]![template]!.parsedTemplate;
+    parsedTemplate.routeCode = code;
+    parsedTemplate.routeName = description;
+    try {
+      setParsedTemplate(file, template, parsedTemplate);
+      final value = await generateName(
+        parsedTemplate,
+        maximoServerSelected,
+      );
+      setNameTemplate(file, template, value);
+      final value2 = await generatePM(
+        parsedTemplate,
+        getPMName(file, template),
+        maximoServerSelected,
+      );
+      setProcessedTemplate(file, template, value2);
+    } catch (e) {
+      debugPrint(e.toString());
+      addStatusMessage(file, template, '$e');
+    }
+    notifyListeners();
+  }
+
   void setPMNumber(String number, String file, int template) {
     final processedTemplate = allTemplates[file]![template]!.processedTemplate!;
     processedTemplate.pmNumber = number;
     processedTemplate.jobplan.jpnum = '${processedTemplate.siteID}$number';
-    // TODO seperate out route number + name
-    if (processedTemplate.route != null) {
-      processedTemplate.route!.routeNumber = number;
-    }
     notifyListeners();
   }
 
