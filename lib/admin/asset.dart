@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:iko_reliability_flutter/admin/upload_maximo.dart';
 
-import '../main.dart';
+// import '../main.dart';
 
 class AssetPage extends StatefulWidget {
   const AssetPage({Key? key}) : super(key: key);
@@ -102,7 +102,7 @@ class _AssetPageState extends State<AssetPage> {
                 }
               }
               debugPrint('adding assets to db');
-              await database!.addAssets(thing);
+              // await database!.addAssets(thing);
               debugPrint('finished adding assets to DB');
             },
           ),
@@ -128,16 +128,16 @@ class _AssetPageState extends State<AssetPage> {
 }
 
 Future<List<TreeNode>> generateNodes(String assetnum, String siteid) async {
-  final children = await database!.getChildAssets(assetnum, siteid);
+  // final children = await database!.getChildAssets(assetnum, siteid);
   List<TreeNode> nodes = [];
-  if (children.isEmpty) {
-    return [];
-  }
-  for (final asset in children) {
-    nodes.add(TreeNode(
-      content: Text('${asset.assetnum} - ${asset.description}'),
-      children: await generateNodes(asset.assetnum, siteid),
-    ));
-  }
+  // if (children.isEmpty) {
+  //   return [];
+  // }
+  // for (final asset in children) {
+  //   nodes.add(TreeNode(
+  //     content: Text('${asset.assetnum} - ${asset.description}'),
+  //     children: await generateNodes(asset.assetnum, siteid),
+  //   ));
+  // }
   return nodes;
 }

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../main.dart';
 import 'asset_storage.dart';
 import 'consts.dart';
-import 'observation_list_storage.dart';
 
 class EndDrawer extends StatefulWidget {
   const EndDrawer({Key? key}) : super(key: key);
@@ -63,7 +62,6 @@ class _EndDrawerState extends State<EndDrawer> {
                     value: value,
                     child: Text(siteIDAndDescription[value] ??
                         (value == '' ? 'Please Select a Site' : 'All Sites')),
-                    // ?? value = '' ? 'Please Select a Site' : 'All Sites'
                   );
                 }).toList(),
               ),
@@ -71,13 +69,16 @@ class _EndDrawerState extends State<EndDrawer> {
                 onPressed: () => maximoAssetCaller(siteid, context),
                 child: const Text('Load'),
               )),
-          const ListTile(
-              title: Text('Load Observation'),
-              subtitle:
-                  Text('Clear and Load Observation list from spreadsheet'),
+          ListTile(
+              title: const Text('Load Observation'),
+              subtitle: const Text(
+                  'Clear and Load Observation list from spreadsheet'),
               trailing: ElevatedButton(
-                onPressed: loadObservationList,
-                child: Text('Load'),
+                onPressed: () {
+                  database!.clearMeters();
+                  database!.addMeters();
+                },
+                child: const Text('Load'),
               )),
           const ListTile(
             // a spacer
