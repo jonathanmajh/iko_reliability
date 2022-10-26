@@ -193,7 +193,7 @@ class ParsedTemplate {
               jptask: row[6],
               description: row[7],
               assetNumber: row[4],
-              metername: row[10],
+              metername: row[5],
               longdescription: row[8]));
           if (row[4] != null) {
             pmTemplates[filename][pmNumber].assets.add(row[4]);

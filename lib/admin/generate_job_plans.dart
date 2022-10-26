@@ -1,6 +1,7 @@
 import 'package:iko_reliability_flutter/admin/asset_storage.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 
+import '../main.dart';
 import 'consts.dart';
 import 'pm_name_generator.dart';
 
@@ -169,24 +170,26 @@ class PMMaximo {
   });
 }
 
-String? generateMeterNumber(
-    Map<String, List<String>> meters, String? metername, String? assetNumber) {
+Future<String?> generateMeterNumber(Map<String, List<String>> meters,
+    String? metername, String? assetNumber, String condition) async {
   if (metername == null ||
       metername == '' ||
       assetNumber == null ||
       assetNumber == '') {
     return null;
   }
+  final meterObj = await database!.getMeterByDescription(metername, condition);
   String meter = '';
   int meterCount = 1;
   if (meters.keys.contains(assetNumber)) {
-    meter = '$metername${meterCount < 10 ? "0$meterCount" : meterCount}';
+    meter = '${meterObj.meter}${meterCount < 10 ? "0$meterCount" : meterCount}';
     while (meters[assetNumber]!.contains(meter)) {
       meterCount++;
-      meter = '$metername${meterCount < 10 ? "0$meterCount" : meterCount}';
+      meter =
+          '${meterObj.meter}${meterCount < 10 ? "0$meterCount" : meterCount}';
     }
   } else {
-    meter = '${metername}01';
+    meter = '${meterObj.meter}01';
   }
   meters[assetNumber] = [meter];
   return meter;
@@ -230,12 +233,13 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         jptask: task.jptask,
         description: task.description,
         longdescription: task.longdescription,
-        metername:
-            generateMeterNumber(meters, task.metername, pmDetails.pmAsset),
+        metername: await generateMeterNumber(meters, task.metername,
+            pmDetails.pmAsset, pmDetails.processCondition!),
       ));
     } else {
       // tasks that have asset number goes in the child job plan for that asset
-      meter = generateMeterNumber(meters, task.metername, task.assetNumber);
+      meter = await generateMeterNumber(meters, task.metername,
+          task.assetNumber, pmDetails.processCondition!);
       var childTask = JobTaskMaximo(
         jptask: task.jptask,
         description: task.description,

@@ -184,6 +184,26 @@ class MyDatabase extends _$MyDatabase {
         meterObj[0].craft,
         observation);
   }
+
+  Future<Meter> getMeterByDescription(
+      String meterName, String condition) async {
+    var meterObj = await (select(meterDBs)
+          ..where((t) =>
+              t.inspect.equals(meterName) & t.condition.equals(condition)))
+        .get();
+    var observation = await (select(observations)
+          ..where((t) => t.meter.equals(meterObj[0].meter)))
+        .get();
+    return Meter(
+        meterObj[0].meter,
+        meterObj[0].inspect,
+        meterObj[0].description,
+        meterObj[0].frequency,
+        meterObj[0].freqUnit,
+        meterObj[0].condition,
+        meterObj[0].craft,
+        observation);
+  }
 }
 
 LazyDatabase _openConnection() {

@@ -78,7 +78,7 @@ class _PMDetailViewState extends State<PMDetailView>
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
             child: FloatingActionButton.extended(
               heroTag: UniqueKey(),
-              onPressed: () {
+              onPressed: () async {
                 if (processedTemplate != null) {
                   value.setUploadDetails(
                       selected.selectedFile!,
@@ -283,6 +283,12 @@ class _PMDetailsState extends State<PMDetails> {
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
+      final parsedTemplate = value.getParsedTemplate(
+          selected.selectedFile!, selected.selectedTemplate!);
+      bool hasRouteCode = false;
+      if (parsedTemplate.routeCode != null) {
+        hasRouteCode = true;
+      }
       final processedTemplate = value.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);
       if (processedTemplate == null) {
@@ -303,34 +309,6 @@ class _PMDetailsState extends State<PMDetails> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                ElevatedButton(
-                    style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                                const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(18),
-                        bottomLeft: Radius.circular(18),
-                      ),
-                    ))),
-                    onPressed: () {
-                      if (pmNameFieldController.text.isNotEmpty) {
-                        value.setPMName(pmNameFieldController.text,
-                            selected.selectedFile!, selected.selectedTemplate!);
-                      }
-                      if (pmNumberFieldController.text.isNotEmpty) {
-                        value.setPMNumber(pmNumberFieldController.text,
-                            selected.selectedFile!, selected.selectedTemplate!);
-                      }
-                      value.setPMPackage(fmecaPackageController.text,
-                          selected.selectedFile!, selected.selectedTemplate!);
-                    },
-                    child: Row(
-                      children: const [
-                        Icon(Icons.sync),
-                        Text(' Update PM'),
-                      ],
-                    )),
                 Consumer<MaximoServerNotifier>(
                     builder: (context, maximo, child) {
                   return ElevatedButton(
@@ -378,10 +356,21 @@ class _PMDetailsState extends State<PMDetails> {
                 Expanded(
                     child: TextField(
                         controller: pmNumberFieldController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText:
                               'PM Number (NO DUPLICATE CHECK IF CHANGED)',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              value.setPMNumber(
+                                pmNumberFieldController.text,
+                                selected.selectedFile!,
+                                selected.selectedTemplate!,
+                                // hasRouteCode,
+                              );
+                            },
+                            icon: const Icon(Icons.save),
+                          ),
                         ))),
                 const VerticalDivider(
                   width: 10,
@@ -393,12 +382,15 @@ class _PMDetailsState extends State<PMDetails> {
                 Expanded(
                     child: TextField(
                   controller: fmecaPackageController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Edit FMECA Package',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
-                      onPressed: null,
-                      icon: Icon(Icons.save),
+                      onPressed: () {
+                        value.setPMPackage(fmecaPackageController.text,
+                            selected.selectedFile!, selected.selectedTemplate!);
+                      },
+                      icon: const Icon(Icons.save),
                     ),
                   ),
                 )),
@@ -461,13 +453,20 @@ class _PMDetailsState extends State<PMDetails> {
                 controller: pmNameFieldController,
                 maxLength: 100,
                 maxLengthEnforcement: MaxLengthEnforcement.none,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Edit PM Name',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   counterText: '',
                   suffixIcon: IconButton(
-                    onPressed: null,
-                    icon: Icon(Icons.save),
+                    onPressed: () {
+                      value.setPMName(
+                        pmNameFieldController.text,
+                        selected.selectedFile!,
+                        selected.selectedTemplate!,
+                        // hasRouteCode,
+                      );
+                    },
+                    icon: const Icon(Icons.save),
                   ),
                 )),
           ]);
