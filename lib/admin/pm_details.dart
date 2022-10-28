@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:provider/provider.dart';
 
@@ -70,6 +69,7 @@ class _PMDetailViewState extends State<PMDetailView>
     } else if (index == 1) {
       if (show) {
         final value = context.read<TemplateNotifier>();
+        final maximo = context.read<MaximoServerNotifier>();
         final selected = value.getSelectedTemplate();
         final processedTemplate = value.getProcessedTemplate(
             selected.selectedFile!, selected.selectedTemplate!);
@@ -95,7 +95,25 @@ class _PMDetailViewState extends State<PMDetailView>
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
               child: FloatingActionButton.extended(
                 heroTag: UniqueKey(),
-                onPressed: () {},
+                onPressed: () async {
+                  value.setUploadDetails(
+                      selected.selectedFile!,
+                      selected.selectedTemplate!,
+                      generateUploads(processedTemplate!));
+                  try {
+                    await uploadToMaximo(
+                        maximo.maximoServerSelected,
+                        selected.selectedFile!,
+                        selected.selectedTemplate!,
+                        value);
+                  } catch (e) {
+                    value.addStatusMessage(selected.selectedFile!,
+                        selected.selectedTemplate!, '$e');
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text('$e')));
+                  }
+                  _updateFab();
+                },
                 label: const Text('Upload'),
                 icon: const Icon(Icons.cloud_upload),
               )),
@@ -283,12 +301,6 @@ class _PMDetailsState extends State<PMDetails> {
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
-      final parsedTemplate = value.getParsedTemplate(
-          selected.selectedFile!, selected.selectedTemplate!);
-      bool hasRouteCode = false;
-      if (parsedTemplate.routeCode != null) {
-        hasRouteCode = true;
-      }
       final processedTemplate = value.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);
       if (processedTemplate == null) {
@@ -306,50 +318,6 @@ class _PMDetailsState extends State<PMDetails> {
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
           primary: false,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Consumer<MaximoServerNotifier>(
-                    builder: (context, maximo, child) {
-                  return ElevatedButton(
-                      style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(18),
-                          bottomRight: Radius.circular(18),
-                        ),
-                      ))),
-                      onPressed: notProcessed
-                          ? null
-                          : () async {
-                              value.setUploadDetails(
-                                  selected.selectedFile!,
-                                  selected.selectedTemplate!,
-                                  generateUploads(processedTemplate!));
-                              try {
-                                await uploadToMaximo(
-                                    maximo.maximoServerSelected,
-                                    selected.selectedFile!,
-                                    selected.selectedTemplate!,
-                                    value);
-                              } catch (e) {
-                                value.addStatusMessage(selected.selectedFile!,
-                                    selected.selectedTemplate!, '$e');
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('$e')));
-                              }
-                            },
-                      child: Row(
-                        children: const [
-                          Icon(Icons.cloud_upload),
-                          Text(' Upload'),
-                        ],
-                      ));
-                }),
-              ],
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -451,12 +419,9 @@ class _PMDetailsState extends State<PMDetails> {
             ),
             TextField(
                 controller: pmNameFieldController,
-                maxLength: 100,
-                maxLengthEnforcement: MaxLengthEnforcement.none,
                 decoration: InputDecoration(
                   labelText: 'Edit PM Name',
                   border: const OutlineInputBorder(),
-                  counterText: '',
                   suffixIcon: IconButton(
                     onPressed: () {
                       value.setPMName(

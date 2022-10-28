@@ -40,12 +40,14 @@ Future<PMName> generateName(
   }
   commonParent = asset.assetNumber;
   if (pmdetails.routeCode != null) {
+    // use route naming scheme if route code is specified
     number = await findAvailableRouteCode(
       pmdetails.routeCode!,
       pmdetails.siteId!,
       maximoServerSelected,
     );
-    name = '${pmdetails.routeName} Route ${int.parse(number.substring(3))}';
+    name =
+        '${pmdetails.routeName} Route ${int.parse(number.substring(3))} - ${asset.name}';
     routeName = name;
     routeNumber = number;
   } else {
