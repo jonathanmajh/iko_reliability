@@ -100,6 +100,7 @@ class _PMDetailViewState extends State<PMDetailView>
                       selected.selectedFile!,
                       selected.selectedTemplate!,
                       generateUploads(processedTemplate!));
+                  _updateFab();
                   try {
                     await uploadToMaximo(
                         maximo.maximoServerSelected,
@@ -112,7 +113,6 @@ class _PMDetailViewState extends State<PMDetailView>
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text('$e')));
                   }
-                  _updateFab();
                 },
                 label: const Text('Upload'),
                 icon: const Icon(Icons.cloud_upload),
