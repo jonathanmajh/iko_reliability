@@ -112,9 +112,14 @@ class TemplateNotifier extends ChangeNotifier {
     final processedTemplate = allTemplates[file]![template]!.processedTemplate!;
     processedTemplate.description = name;
     processedTemplate.jobplan.description = name;
-    // if (processedTemplate.route != null) {
-    //   processedTemplate.route!.description = name;
-    // }
+    notifyListeners();
+  }
+
+  void setRouteName(String name, String file, int template) {
+    final processedTemplate = allTemplates[file]![template]!.processedTemplate!;
+    if (processedTemplate.route != null) {
+      processedTemplate.route!.description = name;
+    }
     notifyListeners();
   }
 

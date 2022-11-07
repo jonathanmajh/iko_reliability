@@ -378,10 +378,20 @@ class _PMDetailsState extends State<PMDetails> {
                 Expanded(
                     child: TextField(
                         controller: routeNameFieldController,
-                        decoration: const InputDecoration(
-                          labelText: 'Edit Route Name',
-                          border: OutlineInputBorder(),
-                        ))),
+                        decoration: InputDecoration(
+                            labelText: 'Edit Route Name',
+                            border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                value.setRouteName(
+                                  pmNameFieldController.text,
+                                  selected.selectedFile!,
+                                  selected.selectedTemplate!,
+                                  // hasRouteCode,
+                                );
+                              },
+                              icon: const Icon(Icons.save),
+                            )))),
                 const Icon(Icons.link),
                 Expanded(
                     child: TextField(
