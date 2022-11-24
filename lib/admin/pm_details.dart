@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:provider/provider.dart';
 
@@ -429,6 +430,8 @@ class _PMDetailsState extends State<PMDetails> {
             ),
             TextField(
                 controller: pmNameFieldController,
+                maxLength: 100,
+                maxLengthEnforcement: MaxLengthEnforcement.none,
                 decoration: InputDecoration(
                   labelText: 'Edit PM Name',
                   border: const OutlineInputBorder(),

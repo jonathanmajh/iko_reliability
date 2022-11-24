@@ -166,8 +166,20 @@ class ParsedTemplate {
           if (workOrderType == 'LC1') {
             workOrderType = 'LIF';
           }
+          var nextDate;
+          if (nextRow[2] != null) {
+            if (nextRow[2] is String) {
+              nextDate = nextRow[2].substring(0, 10);
+            } else {
+              nextDate = DateTime.fromMillisecondsSinceEpoch(
+                      (nextRow[2] - 25569) * 86400000,
+                      isUtc: true)
+                  .toString()
+                  .substring(0, 10);
+            }
+          }
           pmTemplates[filename][pmNumber] = ParsedTemplate(
-            nextDueDate: nextRow[2]?.substring(0, 10),
+            nextDueDate: nextDate,
             siteId: nextRow[3].toString().toUpperCase(),
             frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))
                 ? nextRow[4].substring(0, 1)
