@@ -1,6 +1,6 @@
 import 'package:iko_reliability_flutter/admin/generate_uploads.dart';
-import 'package:iko_reliability_flutter/admin/observation_list_storage.dart';
 
+import 'db_drift.dart';
 import 'upload_maximo.dart';
 
 class AssetMeterMaximo {
@@ -74,9 +74,9 @@ List<String> assetMeterPairs(
 }
 
 List<JobPlanMeterCheckMaximo> jobTaskUpdates(
-    List<JobPlanMeterCheckMaximo> jobplans, ObservationList meterDetails) {
+    List<JobPlanMeterCheckMaximo> jobplans, Meter meterDetails) {
   List<JobPlanMeterCheckMaximo> result = [];
-  final details = jobTaskFormat(meterDetails.extendedDescription);
+  final details = jobTaskFormat(meterDetails.description);
   for (final jobplan in jobplans) {
     if (details != jobplan.details) {
       result.add(jobplan);

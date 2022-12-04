@@ -84,7 +84,7 @@ class _PMDetailViewState extends State<PMDetailView>
                   value.setUploadDetails(
                       selected.selectedFile!,
                       selected.selectedTemplate!,
-                      generateUploads(processedTemplate));
+                      await generateUploads(processedTemplate));
                 }
                 _updateFab();
               },
@@ -100,7 +100,7 @@ class _PMDetailViewState extends State<PMDetailView>
                   value.setUploadDetails(
                       selected.selectedFile!,
                       selected.selectedTemplate!,
-                      generateUploads(processedTemplate!));
+                      await generateUploads(processedTemplate!));
                   _updateFab();
                   try {
                     await uploadToMaximo(
@@ -205,7 +205,12 @@ class _PMDetailViewState extends State<PMDetailView>
           children: [
             const PMDetails(),
             uploadDetailsTab(value),
-            const Text('tab for upload from folder of csv files'),
+            ElevatedButton(
+              onPressed: () {
+                copyExportDetails(value);
+              },
+              child: const Text('Copy details to clipboard'),
+            ),
           ],
         ),
       );
@@ -500,4 +505,14 @@ Widget uploadDetailsTab(TemplateNotifier value) {
       )
     ],
   );
+}
+
+void copyExportDetails(TemplateNotifier value) {
+  final selected = value.getSelectedTemplate();
+  final details = value.getUploadDetails(
+      selected.selectedFile!, selected.selectedTemplate!);
+
+  Clipboard.setData(ClipboardData(text: details.toString())).then((_) {
+    return;
+  });
 }

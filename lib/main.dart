@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'admin/asset_storage.dart';
 import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
-import 'admin/observation_list_storage.dart';
 import 'admin/template_notifier.dart';
 
 MyDatabase? database;
@@ -16,13 +15,13 @@ final navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(AssetAdapter());
-  Hive.registerAdapter(ObservationsAdapter());
-  Hive.registerAdapter(ObservationListAdapter());
+  // Hive.registerAdapter(ObservationsAdapter());
+  // Hive.registerAdapter(ObservationListAdapter());
   await Hive.openBox('assets');
   await Hive.openBox('pmNumber');
   await Hive.openBox('jpNumber');
   await Hive.openBox('routeNumber');
-  await Hive.openBox('observationList');
+  // await Hive.openBox('observationList');
   var box = Hive.box('jpNumber');
   box.clear();
   box = Hive.box('pmNumber');

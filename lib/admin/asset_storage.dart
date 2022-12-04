@@ -167,7 +167,7 @@ void maximoAssetCaller(String siteid, BuildContext context) async {
           Provider.of<MaximoServerNotifier>(context, listen: false)
               .maximoServerSelected);
     } catch (e) {
-      messages.add('Fail to update $siteid');
+      messages.add('Fail to update $siteid: ${e.toString()}');
       continue;
     }
     messages.add('Updated $siteid');

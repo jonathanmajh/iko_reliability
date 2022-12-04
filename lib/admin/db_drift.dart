@@ -128,6 +128,7 @@ class MyDatabase extends _$MyDatabase {
     List<MeterDBsCompanion> meterInserts = [];
     List<ObservationsCompanion> observationInserts = [];
     String meterCode = '';
+    List<String> meterObservationUnique = [];
     for (var i = 1; i < sheet.maxRows; i++) {
       var row = sheet.rows[i];
       try {
@@ -152,25 +153,36 @@ class MyDatabase extends _$MyDatabase {
                 action: Value(row[7]),
                 meter: Value(meterCode)),
           );
+          if (meterObservationUnique.contains('${row[5]}$meterCode')) {
+            messages.add('${row[5]} : $meterCode already exists');
+          }
+          meterObservationUnique.add('${row[5]}$meterCode');
         }
       } catch (err) {
         messages.add('Row ${i + 1} is problematic\n$err');
       }
     }
-    await batch((batch) {
-      batch.insertAll(meterDBs, meterInserts);
-    });
-    await batch((batch) {
-      batch.insertAll(observations, observationInserts);
-    });
+    try {
+      await batch((batch) {
+        batch.insertAll(meterDBs, meterInserts);
+      });
+    } catch (e) {
+      messages.add('Error inserting Meters. ${e.toString()}');
+    }
+    try {
+      await batch((batch) {
+        batch.insertAll(observations, observationInserts);
+      });
+    } catch (e) {
+      messages.add('Error inserting Observations. ${e.toString()}');
+    }
     messages.add('Finished Loading');
     showDataAlert(messages, 'Observation List Loaded');
   }
 
   Future<Meter> getMeter(String meterCode) async {
-    var meterObj = await (select(meterDBs)
-          ..where((t) => t.inspect.equals(meterCode)))
-        .get();
+    var meterObj =
+        await (select(meterDBs)..where((t) => t.meter.equals(meterCode))).get();
     var observation = await (select(observations)
           ..where((t) => t.meter.equals(meterCode)))
         .get();
@@ -187,22 +199,27 @@ class MyDatabase extends _$MyDatabase {
 
   Future<Meter> getMeterByDescription(
       String meterName, String condition) async {
-    var meterObj = await (select(meterDBs)
-          ..where((t) =>
-              t.inspect.equals(meterName) & t.condition.equals(condition)))
-        .get();
-    var observation = await (select(observations)
-          ..where((t) => t.meter.equals(meterObj[0].meter)))
-        .get();
-    return Meter(
-        meterObj[0].meter,
-        meterObj[0].inspect,
-        meterObj[0].description,
-        meterObj[0].frequency,
-        meterObj[0].freqUnit,
-        meterObj[0].condition,
-        meterObj[0].craft,
-        observation);
+    try {
+      var meterObj = await (select(meterDBs)
+            ..where((t) =>
+                t.inspect.equals(meterName) & t.condition.equals(condition)))
+          .get();
+      var observation = await (select(observations)
+            ..where((t) => t.meter.equals(meterObj[0].meter)))
+          .get();
+      return Meter(
+          meterObj[0].meter,
+          meterObj[0].inspect,
+          meterObj[0].description,
+          meterObj[0].frequency,
+          meterObj[0].freqUnit,
+          meterObj[0].condition,
+          meterObj[0].craft,
+          observation);
+    } catch (e) {
+      throw Exception(
+          'No meter can be found for the following combination: $meterName : $condition : ${e.toString()}');
+    }
   }
 }
 

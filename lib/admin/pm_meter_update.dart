@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/admin/observation_list_storage.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
+import 'db_drift.dart';
 import 'end_drawer.dart';
 import 'pm_meter_update_functions.dart';
 
@@ -17,8 +17,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
   TextEditingController meterNameController = TextEditingController();
   TextEditingController oldMeterNameController = TextEditingController();
   List<JobPlanMeterCheckMaximo> affectedJobPlans = [];
-  ObservationList? meterDetails;
-  ObservationList? oldMeterDetails;
+  Meter? meterDetails;
+  Meter? oldMeterDetails;
   // observation list objs (new, old)
 
   @override
@@ -57,7 +57,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         try {
                           meterNameController.text =
                               meterNameController.text.toUpperCase();
-                          final temp = getObservation(meterNameController.text);
+                          final temp = await database!
+                              .getMeter(meterNameController.text);
                           setState(() {
                             meterDetails = temp;
                           });
@@ -67,8 +68,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         try {
                           oldMeterNameController.text =
                               oldMeterNameController.text.toUpperCase();
-                          final temp =
-                              getObservation(oldMeterNameController.text);
+                          final temp = await database!
+                              .getMeter(oldMeterNameController.text);
                           setState(() {
                             oldMeterDetails = temp;
                           });
@@ -187,7 +188,7 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
   }
 }
 
-Widget observationDetails(ObservationList? observation, String whichMeter) {
+Widget observationDetails(Meter? observation, String whichMeter) {
   if (observation == null) {
     return Card(
       child: ExpansionTile(
@@ -205,13 +206,13 @@ Widget observationDetails(ObservationList? observation, String whichMeter) {
       expandedCrossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: Text(observation.meterGroup),
+          leading: Text(observation.meter),
           title: Text(observation.inspect),
           subtitle: Text('Inspect ${observation.inspect}'),
         ),
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text(observation.extendedDescription),
+          child: Text(observation.description),
         ),
         ListView.builder(
           shrinkWrap: true,

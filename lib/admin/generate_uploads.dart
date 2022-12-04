@@ -1,11 +1,12 @@
 import 'package:csv/csv.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:iko_reliability_flutter/admin/generate_job_plans.dart';
-import 'package:iko_reliability_flutter/admin/observation_list_storage.dart';
 
+import '../main.dart';
 import 'asset_storage.dart';
+import 'db_drift.dart';
 
-Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
+Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
   Map<String, List<List<String>>> generated = {};
   generated['Asset'] = [];
   generated['Meter'] = [];
@@ -115,7 +116,8 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
         ]);
         final asset = getAsset(pmpkg.siteID, assetNumber);
         try {
-          final meter = getObservation(jobtask.metername!);
+          final meter = await database!.getMeter(
+              jobtask.metername!.substring(0, jobtask.metername!.length - 2));
           generated['MeasurePoint']!.add([
             pmpkg.siteID,
             assetNumber,
@@ -132,7 +134,7 @@ Map<String, List<List<String>>> generateUploads(PMMaximo pmpkg) {
           'CHARACTERISTIC',
           'M-${jobtask.metername!.substring(0, jobtask.metername!.length - 2)}'
         ]);
-        final newGen = generateMeterJobplan(
+        final newGen = await generateMeterJobplan(
             getAsset(pmpkg.siteID, assetNumber), jobtask.metername!);
         generated['JobPlan'] = [
           ...generated['JobPlan']!,
@@ -258,8 +260,8 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
   return generated;
 }
 
-Map<String, List<List<String>>> generateMeterJobplan(
-    Asset asset, String meterCode) {
+Future<Map<String, List<List<String>>>> generateMeterJobplan(
+    Asset asset, String meterCode) async {
   Map<String, List<List<String>>> generated = {};
   generated['JobPlan'] = [];
   generated['JobTask'] = [];
@@ -267,9 +269,10 @@ Map<String, List<List<String>>> generateMeterJobplan(
   generated['JPASSETLINK'] = [];
   generated['MeasurePoint2'] = [];
   generated['Errors'] = [];
-  ObservationList meter;
+  Meter meter;
   try {
-    meter = getObservation(meterCode);
+    meter =
+        await database!.getMeter(meterCode.substring(0, meterCode.length - 2));
   } catch (e) {
     generated['Errors']!.add(['$e']);
     return generated;
