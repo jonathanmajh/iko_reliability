@@ -115,8 +115,9 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
           jobtask.metername ?? '',
         ]);
         final asset = getAsset(pmpkg.siteID, assetNumber);
+        Meter? meter;
         try {
-          final meter = await database!.getMeter(
+          meter = await database!.getMeter(
               jobtask.metername!.substring(0, jobtask.metername!.length - 2));
           generated['MeasurePoint']!.add([
             pmpkg.siteID,
@@ -127,10 +128,11 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
           ]);
         } catch (e) {
           generated['Errors']!.add(['$e']);
+          meter = null;
         }
         generated['Meter']!.add([
           jobtask.metername ?? '',
-          jobtask.metername ?? '',
+          '${meter?.inspect ?? ''} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
           'CHARACTERISTIC',
           'M-${jobtask.metername!.substring(0, jobtask.metername!.length - 2)}'
         ]);

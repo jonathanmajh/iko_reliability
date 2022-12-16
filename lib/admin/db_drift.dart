@@ -56,15 +56,9 @@ class MeterDBs extends Table {
 }
 
 class Meter extends MeterDB {
-  Meter(
-      String meter,
-      String inspect,
-      String description,
-      int frequency,
-      String freqUnit,
-      String condition,
-      String craft,
-      List<Observation> observations)
+  List<Observation> observations;
+  Meter(meter, inspect, description, frequency, freqUnit, condition, craft,
+      this.observations)
       : super(
           meter: meter,
           inspect: inspect,
@@ -74,7 +68,6 @@ class Meter extends MeterDB {
           condition: condition,
           craft: craft,
         );
-  List<Observation> observations = [];
 }
 
 @DriftDatabase(tables: [Settings, MeterDBs, Observations])
@@ -167,14 +160,14 @@ class MyDatabase extends _$MyDatabase {
         batch.insertAll(meterDBs, meterInserts);
       });
     } catch (e) {
-      messages.add('Error inserting Meters. ${e.toString()}');
+      messages.add('Error inserting Meters\n${e.toString()}');
     }
     try {
       await batch((batch) {
         batch.insertAll(observations, observationInserts);
       });
     } catch (e) {
-      messages.add('Error inserting Observations. ${e.toString()}');
+      messages.add('Error inserting Observations\n${e.toString()}');
     }
     messages.add('Finished Loading');
     showDataAlert(messages, 'Observation List Loaded');

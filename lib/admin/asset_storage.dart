@@ -111,6 +111,21 @@ Future<String> getAssetMaximo(String siteid, String env) async {
       env);
   final box = Hive.box('assets');
   if (result['rdfs:member'].length > 0) {
+    // save once without the hierarchy field then loop through again adding hierarchy
+    // because the parent assets might not always come before the child assets
+    for (var row in result['rdfs:member'].toList()) {
+      var asset = Asset(
+        assetNumber: row['spi:assetnum'],
+        name: row['spi:description'] ?? 'Asset has NO description in Maximo',
+        parent: row['spi:parent'],
+        siteid: row['spi:siteid'],
+      );
+      if (!assetCache.containsKey(asset.siteid)) {
+        assetCache[asset.siteid] = {};
+      }
+      assetCache[asset.siteid]![asset.assetNumber] = asset;
+      box.put('${asset.siteid}|${asset.assetNumber}', asset);
+    }
     for (var row in result['rdfs:member'].toList()) {
       var asset = Asset(
         assetNumber: row['spi:assetnum'],
@@ -119,9 +134,6 @@ Future<String> getAssetMaximo(String siteid, String env) async {
         siteid: row['spi:siteid'],
       );
       asset.hierarchy = findParent(asset);
-      if (!assetCache.containsKey(asset.siteid)) {
-        assetCache[asset.siteid] = {};
-      }
       assetCache[asset.siteid]![asset.assetNumber] = asset;
       box.put('${asset.siteid}|${asset.assetNumber}', asset);
     }

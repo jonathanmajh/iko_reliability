@@ -1,3 +1,4 @@
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
@@ -511,8 +512,12 @@ void copyExportDetails(TemplateNotifier value) {
   final selected = value.getSelectedTemplate();
   final details = value.getUploadDetails(
       selected.selectedFile!, selected.selectedTemplate!);
-
-  Clipboard.setData(ClipboardData(text: details.toString())).then((_) {
+  String allData = '';
+  for (final tables in details.keys) {
+    allData =
+        '$allData\n$tables\n${const ListToCsvConverter().convert(details[tables])}';
+  }
+  Clipboard.setData(ClipboardData(text: allData)).then((_) {
     return;
   });
 }
