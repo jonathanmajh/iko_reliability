@@ -1,12 +1,7 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
-
+import './connections/connection.dart' as impl;
 import '../main.dart';
 
 part 'db_drift.g.dart';
@@ -72,8 +67,10 @@ class Meter extends MeterDB {
 
 @DriftDatabase(tables: [Settings, MeterDBs, Observations])
 class MyDatabase extends _$MyDatabase {
-  MyDatabase() : super(_openConnection());
+  MyDatabase() : super.connect(impl.connect());
 
+  MyDatabase.forTesting(DatabaseConnection connection)
+      : super.connect(connection);
   // you should bump this number whenever you change or add a table definition.
   @override
   int get schemaVersion => 1;
@@ -214,17 +211,6 @@ class MyDatabase extends _$MyDatabase {
           'No meter can be found for the following combination: $meterName : $condition : ${e.toString()}');
     }
   }
-}
-
-LazyDatabase _openConnection() {
-  // the LazyDatabase util lets us find the right location for the file async.
-  return LazyDatabase(() async {
-    // put the database file, called db.sqlite here, into the documents folder
-    // for your app.
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'db.sqlite'));
-    return NativeDatabase(file, logStatements: true);
-  });
 }
 
 String generateHierarchy(

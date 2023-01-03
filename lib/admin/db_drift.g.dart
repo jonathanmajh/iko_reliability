@@ -2,10 +2,6 @@
 
 part of 'db_drift.dart';
 
-// **************************************************************************
-// DriftDatabaseGenerator
-// **************************************************************************
-
 // ignore_for_file: type=lint
 class Setting extends DataClass implements Insertable<Setting> {
   final String key;
@@ -120,12 +116,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $SettingsTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _keyMeta = const VerificationMeta('key');
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
   late final GeneratedColumn<String> key = GeneratedColumn<String>(
       'key', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _valueMeta = const VerificationMeta('value');
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
   @override
   late final GeneratedColumn<String> value = GeneratedColumn<String>(
       'value', aliasedName, false,
@@ -162,9 +158,9 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   Setting map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Setting(
-      key: attachedDatabase.options.types
+      key: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
-      value: attachedDatabase.options.types
+      value: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}value'])!,
     );
   }
@@ -408,38 +404,42 @@ class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $MeterDBsTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _meterMeta = const VerificationMeta('meter');
+  static const VerificationMeta _meterMeta = const VerificationMeta('meter');
   @override
   late final GeneratedColumn<String> meter = GeneratedColumn<String>(
       'meter', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _inspectMeta = const VerificationMeta('inspect');
+  static const VerificationMeta _inspectMeta =
+      const VerificationMeta('inspect');
   @override
   late final GeneratedColumn<String> inspect = GeneratedColumn<String>(
       'inspect', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _descriptionMeta =
+  static const VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _frequencyMeta = const VerificationMeta('frequency');
+  static const VerificationMeta _frequencyMeta =
+      const VerificationMeta('frequency');
   @override
   late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
       'frequency', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
-  final VerificationMeta _freqUnitMeta = const VerificationMeta('freqUnit');
+  static const VerificationMeta _freqUnitMeta =
+      const VerificationMeta('freqUnit');
   @override
   late final GeneratedColumn<String> freqUnit = GeneratedColumn<String>(
       'freq_unit', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _conditionMeta = const VerificationMeta('condition');
+  static const VerificationMeta _conditionMeta =
+      const VerificationMeta('condition');
   @override
   late final GeneratedColumn<String> condition = GeneratedColumn<String>(
       'condition', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _craftMeta = const VerificationMeta('craft');
+  static const VerificationMeta _craftMeta = const VerificationMeta('craft');
   @override
   late final GeneratedColumn<String> craft = GeneratedColumn<String>(
       'craft', aliasedName, false,
@@ -509,19 +509,19 @@ class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
   MeterDB map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MeterDB(
-      meter: attachedDatabase.options.types
+      meter: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}meter'])!,
-      inspect: attachedDatabase.options.types
+      inspect: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}inspect'])!,
-      description: attachedDatabase.options.types
+      description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      frequency: attachedDatabase.options.types
+      frequency: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}frequency'])!,
-      freqUnit: attachedDatabase.options.types
+      freqUnit: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}freq_unit'])!,
-      condition: attachedDatabase.options.types
+      condition: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}condition'])!,
-      craft: attachedDatabase.options.types
+      craft: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}craft'])!,
     );
   }
@@ -701,23 +701,23 @@ class $ObservationsTable extends Observations
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $ObservationsTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _meterMeta = const VerificationMeta('meter');
+  static const VerificationMeta _meterMeta = const VerificationMeta('meter');
   @override
   late final GeneratedColumn<String> meter = GeneratedColumn<String>(
       'meter', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _codeMeta = const VerificationMeta('code');
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
   @override
   late final GeneratedColumn<String> code = GeneratedColumn<String>(
       'code', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _descriptionMeta =
+  static const VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _actionMeta = const VerificationMeta('action');
+  static const VerificationMeta _actionMeta = const VerificationMeta('action');
   @override
   late final GeneratedColumn<String> action = GeneratedColumn<String>(
       'action', aliasedName, true,
@@ -766,13 +766,13 @@ class $ObservationsTable extends Observations
   Observation map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Observation(
-      meter: attachedDatabase.options.types
+      meter: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}meter'])!,
-      code: attachedDatabase.options.types
+      code: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}code'])!,
-      description: attachedDatabase.options.types
+      description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      action: attachedDatabase.options.types
+      action: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}action']),
     );
   }
@@ -785,11 +785,12 @@ class $ObservationsTable extends Observations
 
 abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(e);
+  _$MyDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final $SettingsTable settings = $SettingsTable(this);
   late final $MeterDBsTable meterDBs = $MeterDBsTable(this);
   late final $ObservationsTable observations = $ObservationsTable(this);
   @override
-  Iterable<TableInfo<Table, dynamic>> get allTables =>
+  Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>

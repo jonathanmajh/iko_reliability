@@ -202,7 +202,7 @@ class ParsedTemplate {
         }
         if (row[7] != null && readTasks) {
           pmTemplates[filename][pmNumber].tasks.add(JobTask(
-              jptask: row[6],
+              jptask: row[6], // TODO show error for missing jptask number
               description: row[7],
               assetNumber: row[4],
               metername: row[5],
