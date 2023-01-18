@@ -226,6 +226,17 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       sequence++;
     }
   }
+  double jobhrs = 0.0;
+  List<JobLaborMaximo> joblabs = [];
+  for (final joblabor in pmDetails.crafts) {
+    // job plan duration should be max craft hours
+    jobhrs = jobhrs < joblabor.hours ? joblabor.hours : jobhrs;
+    joblabs.add(JobLaborMaximo(
+      laborType: joblabor.laborType,
+      quantity: joblabor.quantity,
+      hours: joblabor.hours,
+    ));
+  }
   for (final task in pmDetails.tasks) {
     if (task.assetNumber == null || task.assetNumber == '') {
       // everything that does not have an asset number falls under the main job plan
@@ -249,19 +260,20 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       var childLabor = JobLaborMaximo(
         laborType: pmDetails.crafts[0].laborType,
         quantity: pmDetails.crafts[0].quantity,
-        hours: pmDetails.crafts[0].hours / routeTasks.toDouble(),
+        hours: jobhrs / routeTasks.toDouble(),
       );
       final asset = getAsset(pmDetails.siteId!, task.assetNumber!);
       String jpnumber;
+      // if asset already has a child job plan entry add the additional task and adjust hours
       if (childJobPlans.containsKey(asset.assetNumber)) {
         jpnumber = childJobPlans[asset.assetNumber]!.jpnum;
         childJobPlans[asset.assetNumber]!.jobtask.add(childTask);
         childJobPlans[asset.assetNumber]!.jpduration =
             childJobPlans[asset.assetNumber]!.jpduration +
-                (pmDetails.crafts[0].hours / routeTasks.toDouble());
+                (jobhrs / routeTasks.toDouble());
         childJobPlans[asset.assetNumber]!.joblabor[0].hours =
-            childJobPlans[asset.assetNumber]!.joblabor[0].hours +
-                (pmDetails.crafts[0].hours / routeTasks.toDouble());
+            childJobPlans[asset.assetNumber]!.jpduration;
+        // else we make new child job plan entry
       } else {
         jpnumber = pmName.replaceable![0];
         jpnumber = jpnumber.replaceFirst('XXXXX', asset.assetNumber);
@@ -291,7 +303,7 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
           ikoConditions: pmDetails.processCondition!,
           ikoPmpackage: pmDetails.pmPackageNumber,
           ikoWorktype: woType,
-          jpduration: pmDetails.crafts[0].hours / routeTasks.toDouble(),
+          jpduration: jobhrs / routeTasks.toDouble(),
           jpnum: jpnumber,
           persongroup: personGroups[pmDetails.crafts[0].laborType
               .substring(pmDetails.crafts[0].laborType.length - 1)]!,
@@ -303,16 +315,6 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         );
       }
     }
-  }
-  double jobhrs = 0.0;
-  List<JobLaborMaximo> joblabs = [];
-  for (final joblabor in pmDetails.crafts) {
-    jobhrs = jobhrs + joblabor.hours;
-    joblabs.add(JobLaborMaximo(
-      laborType: joblabor.laborType,
-      quantity: joblabor.quantity,
-      hours: joblabor.hours,
-    ));
   }
   List<JobMaterialMaximo> jobmats = [];
   for (final jobmaterial in pmDetails.materials) {

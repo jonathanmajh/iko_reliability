@@ -170,12 +170,13 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
     String siteID, String orgID, Map<String, List<List<String>>> generated) {
   generated['JobPlan']!.add([
     // consider constants moving into object
+    // if len(description) > 100 then put it into extended description
     orgID,
     siteID,
     jobplan.jpnum,
     '0', // PLUSCREVNUM
-    jobplan.description,
-    '', // details
+    jobplan.description.length > 100 ? 'CHANGE ME!' : jobplan.description,
+    jobplan.description.length > 100 ? jobplan.description : '',
     'ACTIVE', // STATUS
     jobplan.persongroup,
     jobplan.ikoConditions,
