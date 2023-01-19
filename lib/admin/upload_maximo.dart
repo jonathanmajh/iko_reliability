@@ -21,6 +21,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   var uploadData = templates.getUploadDetails(file, template);
   templates.setStatus(file, template, 'uploading');
   templates.setUploadDetails(file, template, uploadData);
+  var stop = false;
   if (uploadData.containsKey('Meter')) {
     for (int i = 0; i < uploadData['Meter']!.length; i++) {
       if (await isNewMeter(uploadData['Meter']![i][0], env)) {
@@ -35,10 +36,17 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
           uploadData['Meter']![i].add('+');
         } else {
           uploadData['Meter']![i].add('!');
+          stop = true;
         }
       } else {
         uploadData['Meter']![i].add('~');
       }
+    }
+    if (stop) {
+      templates.addStatusMessage(file, template,
+          'Please add missing Meter Domains, then retry upload again');
+      templates.setStatus(file, template, 'retry');
+      return uploadData;
     }
   }
   if (uploadData.containsKey('AssetMeter')) {
@@ -177,13 +185,10 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   }
   if (uploadData.containsKey('JobLabor')) {
     for (int i = 0; i < uploadData['JobLabor']!.length; i++) {
-      if (uploadData['JobLabor']![i][2].contains('CBM') &&
-          !(newJobPlans.contains(uploadData['JobLabor']![i][2]))) {
-        if (!(await isNewJobLabor(uploadData['JobLabor']![i][2],
-            uploadData['JobLabor']![i][7], env))) {
-          uploadData['JobLabor']![i].add('~');
-          continue;
-        }
+      if (!(await isNewJobLabor(
+          uploadData['JobLabor']![i][2], uploadData['JobLabor']![i][7], env))) {
+        uploadData['JobLabor']![i].add('~');
+        continue;
       }
       result = await uploadGeneric(
         uploadData['JobLabor']![i],
@@ -292,7 +297,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
 
 Future<bool> isNewJobLabor(
     String jpNumber, String orgid, String maximoEnvironment) async {
-  // is only needed for CBMs
+  // do for all in case of retries
   final url =
       'iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber" and joblabor.orgid="$orgid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);

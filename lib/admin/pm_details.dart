@@ -220,7 +220,9 @@ class _PMDetailViewState extends State<PMDetailView>
 }
 
 List<Widget> generateUploadDetailsList(
-    Map<String, List<List<String>>> uploadDetails, bool result) {
+  Map<String, List<List<String>>> uploadDetails,
+  bool result, // if highlighting will be applied
+) {
   List<Widget> cards = [];
   int warnings = 0;
   int errors = 0;
@@ -461,15 +463,12 @@ class _PMDetailsState extends State<PMDetails> {
 Widget uploadDetailsTab(TemplateNotifier value) {
   final selected = value.getSelectedTemplate();
   final details = generateUploadDetailsList(
-      value.getUploadDetails(
-          selected.selectedFile!, selected.selectedTemplate!),
-      (value.getStatus(selected.selectedFile!, selected.selectedTemplate!) ==
-                  'done') ||
-              (value.getStatus(
-                      selected.selectedFile!, selected.selectedTemplate!) ==
-                  'uploading')
-          ? true
-          : false);
+    value.getUploadDetails(selected.selectedFile!, selected.selectedTemplate!),
+    (['done', 'uploading', 'retry'].contains(value.getStatus(
+            selected.selectedFile!, selected.selectedTemplate!)))
+        ? true
+        : false,
+  );
   final statusMessages = value.getStatusMessages(
       selected.selectedFile!, selected.selectedTemplate!);
   return ListView(
@@ -514,8 +513,12 @@ void copyExportDetails(TemplateNotifier value) {
       selected.selectedFile!, selected.selectedTemplate!);
   String allData = '';
   for (final tables in details.keys) {
-    allData =
-        '$allData\n$tables\n${const ListToCsvConverter().convert(details[tables])}';
+    allData = '''
+$allData\n
+$tables
+${const ListToCsvConverter().convert([tableHeaders[tables]])}
+${const ListToCsvConverter().convert(details[tables])}
+''';
   }
   Clipboard.setData(ClipboardData(text: allData)).then((_) {
     return;

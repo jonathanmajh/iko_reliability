@@ -92,17 +92,6 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
     }
   }
 
-  // label asset as FMECA asset not really necessary anymore
-  // if (pmpkg.jobplan.ikoPmpackage != null) {
-  //   for (final jobplan in pmpkg.route?.childJobPlans ?? []) {
-  //     final jobasset = jobplan.jobasset[0];
-  //     generated['Asset']!.add([
-  //       pmpkg.siteID,
-  //       jobasset.assetNumber,
-  //       pmpkg.jobplan.ikoPmpackage ?? '',
-  //     ]);
-  //   }
-  // }
   // Asset Meter + Meausure Point + AssetMeter + CBM Job Plans
   for (final jobplan in [...pmpkg.route?.childJobPlans ?? [], pmpkg.jobplan]) {
     for (final jobtask in jobplan.jobtask) {

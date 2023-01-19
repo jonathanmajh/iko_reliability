@@ -109,6 +109,15 @@ Widget statusIndicator(String status) {
         size: 35,
       );
       break;
+    case 'retry':
+      text = 'Retry';
+      textColor = Color.fromARGB(255, 255, 166, 0);
+      icon = Icon(
+        Icons.sync_problem,
+        color: textColor,
+        size: 35,
+      );
+      break;
     case 'processing-done':
       text = 'Generated';
       textColor = const Color.fromARGB(90, 0, 0, 0);
