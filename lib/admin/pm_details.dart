@@ -70,10 +70,11 @@ class _PMDetailViewState extends State<PMDetailView>
       ));
     } else if (index == 1) {
       if (show) {
-        final value = context.read<TemplateNotifier>();
+        final templateNotifier = context.read<TemplateNotifier>();
+        final uploadNotifier = context.read<UploadNotifier>();
         final maximo = context.read<MaximoServerNotifier>();
-        final selected = value.getSelectedTemplate();
-        final processedTemplate = value.getProcessedTemplate(
+        final selected = templateNotifier.getSelectedTemplate();
+        final processedTemplate = templateNotifier.getProcessedTemplate(
             selected.selectedFile!, selected.selectedTemplate!);
         temp = [
           Padding(
@@ -82,10 +83,19 @@ class _PMDetailViewState extends State<PMDetailView>
               heroTag: UniqueKey(),
               onPressed: () async {
                 if (processedTemplate != null) {
-                  value.setUploadDetails(
-                      selected.selectedFile!,
-                      selected.selectedTemplate!,
-                      await generateUploads(processedTemplate));
+                  var upload = await generateUploads(processedTemplate);
+                  if (upload.containsKey('Errors')) {
+                    final errors = upload.remove('Errors');
+                    for (final msg in errors!) {
+                      templateNotifier.addStatusMessage(selected.selectedFile!,
+                          selected.selectedTemplate!, msg[0]);
+                    }
+                  }
+                  uploadNotifier.setUploadDetails(
+                    selected.selectedFile!,
+                    selected.selectedTemplate!,
+                    upload,
+                  );
                 }
                 _updateFab();
               },
@@ -98,19 +108,30 @@ class _PMDetailViewState extends State<PMDetailView>
               child: FloatingActionButton.extended(
                 heroTag: UniqueKey(),
                 onPressed: () async {
-                  value.setUploadDetails(
-                      selected.selectedFile!,
-                      selected.selectedTemplate!,
-                      await generateUploads(processedTemplate!));
+                  var upload = await generateUploads(processedTemplate!);
+                  if (upload.containsKey('Errors')) {
+                    final errors = upload.remove('Errors');
+                    for (final msg in errors!) {
+                      templateNotifier.addStatusMessage(selected.selectedFile!,
+                          selected.selectedTemplate!, msg[0]);
+                    }
+                  }
+                  uploadNotifier.setUploadDetails(
+                    selected.selectedFile!,
+                    selected.selectedTemplate!,
+                    upload,
+                  );
                   _updateFab();
                   try {
                     await uploadToMaximo(
-                        maximo.maximoServerSelected,
-                        selected.selectedFile!,
-                        selected.selectedTemplate!,
-                        value);
+                      maximo.maximoServerSelected,
+                      selected.selectedFile!,
+                      selected.selectedTemplate!,
+                      templateNotifier,
+                      uploadNotifier,
+                    );
                   } catch (e) {
-                    value.addStatusMessage(selected.selectedFile!,
+                    templateNotifier.addStatusMessage(selected.selectedFile!,
                         selected.selectedTemplate!, '$e');
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text('$e')));
@@ -192,29 +213,32 @@ class _PMDetailViewState extends State<PMDetailView>
         return const Text('No Template Selected');
       }
       return Scaffold(
-        appBar: TabBar(
-          controller: _tabController,
-          tabs: myTabs,
-        ),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: fabList,
-        ),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            const PMDetails(),
-            uploadDetailsTab(value),
-            ElevatedButton(
-              onPressed: () {
-                copyExportDetails(value);
-              },
-              child: const Text('Copy details to clipboard'),
-            ),
-          ],
-        ),
-      );
+          appBar: TabBar(
+            controller: _tabController,
+            tabs: myTabs,
+          ),
+          floatingActionButton: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: fabList,
+          ),
+          body: Consumer<UploadNotifier>(
+            builder: (context, uploadNotifier, child) {
+              return TabBarView(
+                controller: _tabController,
+                children: [
+                  const PMDetails(),
+                  uploadDetailsTab(value, uploadNotifier),
+                  ElevatedButton(
+                    onPressed: () {
+                      copyExportDetails(value, uploadNotifier);
+                    },
+                    child: const Text('Copy details to clipboard'),
+                  ),
+                ],
+              );
+            },
+          ));
     });
   }
 }
@@ -304,13 +328,14 @@ class _PMDetailsState extends State<PMDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TemplateNotifier>(builder: (context, value, child) {
-      final selected = value.getSelectedTemplate();
+    return Consumer<TemplateNotifier>(
+        builder: (context, templateNotifier, child) {
+      final selected = templateNotifier.getSelectedTemplate();
       bool notProcessed = false;
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
-      final processedTemplate = value.getProcessedTemplate(
+      final processedTemplate = templateNotifier.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);
       if (processedTemplate == null) {
         notProcessed = true;
@@ -339,7 +364,7 @@ class _PMDetailsState extends State<PMDetails> {
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             onPressed: () {
-                              value.setPMNumber(
+                              templateNotifier.setPMNumber(
                                 pmNumberFieldController.text,
                                 selected.selectedFile!,
                                 selected.selectedTemplate!,
@@ -364,8 +389,10 @@ class _PMDetailsState extends State<PMDetails> {
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       onPressed: () {
-                        value.setPMPackage(fmecaPackageController.text,
-                            selected.selectedFile!, selected.selectedTemplate!);
+                        templateNotifier.setPMPackage(
+                            fmecaPackageController.text,
+                            selected.selectedFile!,
+                            selected.selectedTemplate!);
                       },
                       icon: const Icon(Icons.save),
                     ),
@@ -392,7 +419,7 @@ class _PMDetailsState extends State<PMDetails> {
                             border: const OutlineInputBorder(),
                             suffixIcon: IconButton(
                               onPressed: () {
-                                value.setRouteName(
+                                templateNotifier.setRouteName(
                                   pmNameFieldController.text,
                                   selected.selectedFile!,
                                   selected.selectedTemplate!,
@@ -412,7 +439,7 @@ class _PMDetailsState extends State<PMDetails> {
                       onPressed: () {
                         if (routeNumberFieldController.text.isNotEmpty &&
                             routeNameFieldController.text.isNotEmpty) {
-                          value.setRouteInfo(
+                          templateNotifier.setRouteInfo(
                               routeNumberFieldController.text,
                               routeNameFieldController.text,
                               selected.selectedFile!,
@@ -445,7 +472,7 @@ class _PMDetailsState extends State<PMDetails> {
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     onPressed: () {
-                      value.setPMName(
+                      templateNotifier.setPMName(
                         pmNameFieldController.text,
                         selected.selectedFile!,
                         selected.selectedTemplate!,
@@ -460,16 +487,18 @@ class _PMDetailsState extends State<PMDetails> {
   }
 }
 
-Widget uploadDetailsTab(TemplateNotifier value) {
-  final selected = value.getSelectedTemplate();
+Widget uploadDetailsTab(
+    TemplateNotifier templateNotifier, UploadNotifier uploadNotifier) {
+  final selected = templateNotifier.getSelectedTemplate();
   final details = generateUploadDetailsList(
-    value.getUploadDetails(selected.selectedFile!, selected.selectedTemplate!),
-    (['done', 'uploading', 'retry'].contains(value.getStatus(
+    uploadNotifier.getUploadDetails(
+        selected.selectedFile!, selected.selectedTemplate!),
+    (['done', 'uploading', 'retry'].contains(templateNotifier.getStatus(
             selected.selectedFile!, selected.selectedTemplate!)))
         ? true
         : false,
   );
-  final statusMessages = value.getStatusMessages(
+  final statusMessages = templateNotifier.getStatusMessages(
       selected.selectedFile!, selected.selectedTemplate!);
   return ListView(
     padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
@@ -507,9 +536,10 @@ Widget uploadDetailsTab(TemplateNotifier value) {
   );
 }
 
-void copyExportDetails(TemplateNotifier value) {
-  final selected = value.getSelectedTemplate();
-  final details = value.getUploadDetails(
+void copyExportDetails(
+    TemplateNotifier templateNotifier, UploadNotifier uploadNotifier) {
+  final selected = templateNotifier.getSelectedTemplate();
+  final details = uploadNotifier.getUploadDetails(
       selected.selectedFile!, selected.selectedTemplate!);
   String allData = '';
   for (final tables in details.keys) {

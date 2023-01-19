@@ -52,6 +52,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => TemplateNotifier()),
+        ChangeNotifierProvider(create: (context) => UploadNotifier()),
         ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
       ],
       child: MaterialApp.router(

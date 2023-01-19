@@ -9,18 +9,23 @@ class TemplateStore {
   PMName? nameTemplate;
   PMMaximo? processedTemplate;
   String templateStatus;
-  Map<String, List<List<String>>> uploadDetails;
-  int uploadedLines;
   List<String> statusMessages = [];
 
-  TemplateStore(
-      {required this.parsedTemplate,
-      this.nameTemplate,
-      this.processedTemplate,
-      required this.templateStatus,
-      Map<String, List<List<String>>>? uploadDetails,
-      int? uploadedLines})
-      : uploadDetails = uploadDetails ?? {},
+  TemplateStore({
+    required this.parsedTemplate,
+    this.nameTemplate,
+    this.processedTemplate,
+    required this.templateStatus,
+  });
+}
+
+class UploadStore {
+  Map<String, List<List<String>>> uploadDetails;
+  int uploadedLines;
+  UploadStore({
+    Map<String, List<List<String>>>? uploadDetails,
+    int? uploadedLines,
+  })  : uploadDetails = uploadDetails ?? {},
         uploadedLines = uploadedLines ?? 0;
 }
 
@@ -34,10 +39,39 @@ class SelectedTemplate {
   });
 }
 
+class UploadNotifier extends ChangeNotifier {
+  Map<String, Map<int, UploadStore>> templateUpload = {};
+  void addTemplate(String file) {
+    if (!templateUpload.keys.contains(file)) {
+      templateUpload[file] = {};
+    }
+  }
+
+  void clearTemplates() {
+    templateUpload = {};
+    notifyListeners();
+  }
+
+  void setUploadDetails(String file, int template,
+      Map<String, List<List<String>>> uploadDetails) {
+    addTemplate(file);
+    if (!templateUpload[file]!.containsKey(template)) {
+      templateUpload[file]![template] = UploadStore();
+    }
+    templateUpload[file]![template]!.uploadDetails = uploadDetails;
+    notifyListeners();
+  }
+
+  Map<String, List<List<String>>> getUploadDetails(
+      String file, int templateNumber) {
+    /// Return details for selected template
+    return templateUpload[file]?[templateNumber]?.uploadDetails ?? {};
+  }
+}
+
 class TemplateNotifier extends ChangeNotifier {
   Map<String, Map<int, TemplateStore>> allTemplates = {};
   SelectedTemplate selectedTemplate = SelectedTemplate();
-// for set functions consider just assuming selected item
 // check and add file name to map if necessary
   void addTemplate(String file) {
     if (!allTemplates.keys.contains(file)) {
@@ -45,18 +79,9 @@ class TemplateNotifier extends ChangeNotifier {
     }
   }
 
-  TemplateStore getFullTemplate(String file, int template) {
-    return allTemplates[file]![template]!;
-  }
-
   void clearTemplates() {
     allTemplates = {};
     selectedTemplate = SelectedTemplate();
-    notifyListeners();
-  }
-
-  void setUploadedLines(String file, int template) {
-    allTemplates[file]![template]!.uploadedLines++;
     notifyListeners();
   }
 
@@ -78,12 +103,6 @@ class TemplateNotifier extends ChangeNotifier {
 
   List<String> getStatusMessages(String file, int template) {
     return allTemplates[file]![template]!.statusMessages;
-  }
-
-  int getUploadedLines() {
-    return allTemplates[selectedTemplate.selectedFile]![
-            selectedTemplate.selectedTemplate]!
-        .uploadedLines;
   }
 
   void setSelectedTemplate(String file, int template) {
@@ -161,25 +180,6 @@ class TemplateNotifier extends ChangeNotifier {
     allTemplates[file]![templateNumber] =
         TemplateStore(templateStatus: 'processing', parsedTemplate: template);
     notifyListeners();
-  }
-
-  void setUploadDetails(String file, int template,
-      Map<String, List<List<String>>> uploadDetails) {
-    addTemplate(file);
-    if (uploadDetails.containsKey('Errors')) {
-      final errors = uploadDetails.remove('Errors');
-      for (final msg in errors!) {
-        addStatusMessage(file, template, msg[0]);
-      }
-    }
-    allTemplates[file]![template]!.uploadDetails = uploadDetails;
-    notifyListeners();
-  }
-
-  Map<String, List<List<String>>> getUploadDetails(
-      String file, int templateNumber) {
-    /// Return details for selected template
-    return allTemplates[file]![templateNumber]!.uploadDetails;
   }
 
   void setNameTemplate(String file, int templateNumber, PMName template) {
