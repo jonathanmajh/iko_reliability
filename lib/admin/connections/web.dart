@@ -30,7 +30,8 @@ DatabaseConnection connect({bool isInWebWorker = false}) {
         SqliteEnvironment(fileSystem: fs),
       );
 
-      final databaseImpl = WasmDatabase(sqlite3: sqlite3, path: 'app.db');
+      final databaseImpl =
+          WasmDatabase(sqlite3: sqlite3, path: 'iko_reliability.db');
       return DatabaseConnection(databaseImpl);
     }));
   }

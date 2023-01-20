@@ -7,6 +7,7 @@ import '../main.dart';
 part 'db_drift.g.dart';
 
 class Settings extends Table {
+  // ENV_USERID,ENV_PASS,ENV_APIKEY
   TextColumn get key => text()();
   TextColumn get value => text()();
 
@@ -102,6 +103,19 @@ class MyDatabase extends _$MyDatabase {
   void clearMeters() {
     delete(meterDBs).go();
     delete(observations).go();
+  }
+
+  Future<void> addUpdateSettings(String key, String value) async {
+    into(settings).insertOnConflictUpdate(Setting(key: key, value: value));
+  }
+
+  Future<Setting> getSettings(String key) async {
+    final result = await (select(settings)..where((tbl) => tbl.key.equals(key)))
+        .getSingleOrNull();
+    if (result == null) {
+      return Setting(key: key, value: '');
+    }
+    return result;
   }
 
   Future<void> addMeters() async {

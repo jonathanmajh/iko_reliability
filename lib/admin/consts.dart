@@ -232,5 +232,5 @@ Map<String, String> maximoServerDomains = {
 
 // TODO login management
 Map<String, String> apiKeys = {
-  'MASDEV': 'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
+  'MASDEV': '' //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
 };

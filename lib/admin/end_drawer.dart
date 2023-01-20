@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/admin/db_drift.dart';
+import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -14,6 +16,18 @@ class EndDrawer extends StatefulWidget {
 
 class _EndDrawerState extends State<EndDrawer> {
   String siteid = '';
+  TextEditingController useridController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController apikeyController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is removed from the widget tree.
+    useridController.dispose();
+    passwordController.dispose();
+    apikeyController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +58,71 @@ class _EndDrawerState extends State<EndDrawer> {
                   }).toList(),
                 );
               })),
+          Consumer<MaximoServerNotifier>(builder: (context, maximo, child) {
+            return FutureBuilder<Credentials>(
+                future: getLoginMaximo(maximo.maximoServerSelected),
+                builder: ((context, snapshot) {
+                  useridController.text = snapshot.data?.login ?? '';
+                  passwordController.text = snapshot.data?.password ?? '';
+                  apikeyController.text = snapshot.data?.password ?? '';
+                  if (apiKeys.containsKey(maximo.maximoServerSelected)) {
+                    return ListTile(
+                      title: const Text('Maximo API Key'),
+                      subtitle: TextField(
+                        controller: apikeyController,
+                        decoration: const InputDecoration(labelText: 'API Key'),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.login),
+                        onPressed: () {
+                          print('object');
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                'Attempting to Login to: ${maximo.maximoServerSelected}'),
+                          ));
+                          getUserMaximo(
+                              useridController.text,
+                              passwordController.text,
+                              maximo.maximoServerSelected);
+                        },
+                      ),
+                    );
+                  } else {
+                    return ListTile(
+                      title: const Text('Maximo Login'),
+                      subtitle: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          TextField(
+                            controller: useridController,
+                            decoration:
+                                const InputDecoration(labelText: 'Login'),
+                          ),
+                          TextField(
+                            controller: passwordController,
+                            decoration:
+                                const InputDecoration(labelText: 'Password'),
+                          ),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.login),
+                        onPressed: () {
+                          print('object');
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                'Attempting to Login to: ${maximo.maximoServerSelected}'),
+                          ));
+                          getUserMaximo(
+                              useridController.text,
+                              passwordController.text,
+                              maximo.maximoServerSelected);
+                        },
+                      ),
+                    );
+                  }
+                }));
+          }),
           ListTile(
               title: const Text('Load Assets From Maximo'),
               subtitle: DropdownButton(

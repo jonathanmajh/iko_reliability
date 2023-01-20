@@ -14,7 +14,7 @@ DatabaseConnection connect() {
 
     // We use `path_provider` to find a suitable path to store our data in.
     final appDir = await getApplicationDocumentsDirectory();
-    final dbPath = p.join(appDir.path, 'todos.db');
+    final dbPath = p.join(appDir.path, 'iko_reliability.db');
 
     return NativeDatabase.createBackgroundConnection(File(dbPath));
   }));
