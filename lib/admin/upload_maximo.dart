@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:flutter/widgets.dart';
+import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
+import 'package:iko_reliability_flutter/main.dart';
 import 'consts.dart';
 import 'package:http/http.dart' as http;
 
@@ -397,15 +399,16 @@ Future<bool> uploadGeneric(List<String> data, String maximoEnvironment,
 Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     [String? body, Map<String, String>? header]) async {
   url = '${maximoServerDomains[env]}$url';
+  final login = await getLoginMaximo(env);
   header ??= {};
   if (!apiKeys.containsKey(env)) {
     if (url.contains('?')) {
-      url = '$url&_lid=majona&_lpwd=happy818';
+      url = '$url&_lid=${login.login}&_lpwd=${login.password}';
     } else {
-      url = '$url?_lid=majona&_lpwd=happy818';
+      url = '$url?_lid=${login.login}&_lpwd=${login.password}';
     }
   } else {
-    header['apikey'] = apiKeys[env]!;
+    header['apikey'] = login.password;
   }
   http.Response response;
   if (type == 'get' || type == 'api') {
