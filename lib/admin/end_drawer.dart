@@ -16,6 +16,7 @@ class EndDrawer extends StatefulWidget {
 
 class _EndDrawerState extends State<EndDrawer> {
   String siteid = '';
+  bool _passVisibility = true;
   TextEditingController useridController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController apikeyController = TextEditingController();
@@ -100,8 +101,19 @@ class _EndDrawerState extends State<EndDrawer> {
                           ),
                           TextField(
                             controller: passwordController,
-                            decoration:
-                                const InputDecoration(labelText: 'Password'),
+                            obscureText: _passVisibility,
+                            decoration: InputDecoration(
+                                labelText: 'Password',
+                                suffixIcon: IconButton(
+                                  icon: _passVisibility
+                                      ? const Icon(Icons.visibility_off)
+                                      : const Icon(Icons.visibility),
+                                  onPressed: () {
+                                    _passVisibility = !_passVisibility;
+
+                                    setState(() {});
+                                  },
+                                )),
                           ),
                         ],
                       ),
