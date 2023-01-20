@@ -3,7 +3,6 @@ import 'package:csv/csv.dart';
 import 'package:flutter/widgets.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
-import 'package:iko_reliability_flutter/main.dart';
 import 'consts.dart';
 import 'package:http/http.dart' as http;
 

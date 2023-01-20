@@ -331,15 +331,11 @@ class _PMDetailsState extends State<PMDetails> {
     return Consumer<TemplateNotifier>(
         builder: (context, templateNotifier, child) {
       final selected = templateNotifier.getSelectedTemplate();
-      bool notProcessed = false;
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
       final processedTemplate = templateNotifier.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);
-      if (processedTemplate == null) {
-        notProcessed = true;
-      }
       pmNameFieldController.text = processedTemplate?.description ?? 'TBD...';
       fmecaPackageController.text =
           processedTemplate?.jobplan.ikoPmpackage ?? '';

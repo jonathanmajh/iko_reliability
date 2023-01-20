@@ -111,7 +111,7 @@ Widget statusIndicator(String status) {
       break;
     case 'retry':
       text = 'Retry';
-      textColor = Color.fromARGB(255, 255, 166, 0);
+      textColor = const Color.fromARGB(255, 255, 166, 0);
       icon = Icon(
         Icons.sync_problem,
         color: textColor,

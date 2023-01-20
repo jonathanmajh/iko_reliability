@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/admin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:provider/provider.dart';
 
@@ -76,7 +75,6 @@ class _EndDrawerState extends State<EndDrawer> {
                       trailing: IconButton(
                         icon: const Icon(Icons.login),
                         onPressed: () {
-                          print('object');
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(
                                 'Attempting to Login to: ${maximo.maximoServerSelected}'),
@@ -120,7 +118,6 @@ class _EndDrawerState extends State<EndDrawer> {
                       trailing: IconButton(
                         icon: const Icon(Icons.login),
                         onPressed: () {
-                          print('object');
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(
                                 'Attempting to Login to: ${maximo.maximoServerSelected}'),
