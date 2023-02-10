@@ -12,11 +12,10 @@ Future<Map<String, dynamic>> getUserMaximo(
   Map<String, String> header = {};
   if (userid == '[APIKEY]') {
     header['apikey'] = password;
-    url = url.replaceAll('/os/', '/script/');
   } else {
-    url = url.replaceAll('/os/', '/');
     url = '$url?_lid=$userid&_lpwd=$password';
   }
+  url = url.replaceAll('/os/', '/');
   http.Response response;
   try {
     response = await http.get(Uri.parse(url), headers: header);

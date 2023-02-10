@@ -18,14 +18,12 @@ class _EndDrawerState extends State<EndDrawer> {
   bool _passVisibility = true;
   TextEditingController useridController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController apikeyController = TextEditingController();
 
   @override
   void dispose() {
     // Clean up the controller when the widget is removed from the widget tree.
     useridController.dispose();
     passwordController.dispose();
-    apikeyController.dispose();
     super.dispose();
   }
 
@@ -64,12 +62,11 @@ class _EndDrawerState extends State<EndDrawer> {
                 builder: ((context, snapshot) {
                   useridController.text = snapshot.data?.login ?? '';
                   passwordController.text = snapshot.data?.password ?? '';
-                  apikeyController.text = snapshot.data?.password ?? '';
                   if (apiKeys.containsKey(maximo.maximoServerSelected)) {
                     return ListTile(
                       title: const Text('Maximo API Key'),
                       subtitle: TextField(
-                        controller: apikeyController,
+                        controller: passwordController,
                         decoration: const InputDecoration(labelText: 'API Key'),
                       ),
                       trailing: IconButton(
