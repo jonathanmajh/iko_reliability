@@ -352,6 +352,13 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
     routeStops: routeStops,
     childJobPlans: childJobPlans.values.toList(),
   );
+  // check frequency
+  if (!frequencyUnits.contains(pmDetails.frequencyUnit)) {
+    throw Exception('Frequency Unit "${pmDetails.frequency}" is invalid');
+  }
+  if ((pmDetails.frequency ?? 0) < 1) {
+    throw Exception('Frequency "${pmDetails.frequency}" is invalid');
+  }
   return PMMaximo(
     siteID: pmDetails.siteId!,
     pmNumber: pmName.pmNumber,

@@ -181,9 +181,8 @@ class ParsedTemplate {
           pmTemplates[filename][pmNumber] = ParsedTemplate(
             nextDueDate: nextDate,
             siteId: nextRow[3].toString().toUpperCase(),
-            frequencyUnit: frequencyUnits.contains(nextRow[4].substring(0, 1))
-                ? nextRow[4].substring(0, 1)
-                : null,
+            frequencyUnit:
+                nextRow[4]?.substring(0, 1)?.toString().toUpperCase(),
             frequency: nextRow[5],
             workOrderType: workOrderType,
             processCondition: nextRow[7].substring(0, 4),
