@@ -93,7 +93,7 @@ Asset getAsset(String siteid, String assetNum) {
   final box = Hive.box('assets');
   final asset = box.get('$siteid|$assetNum');
   if (asset == null) {
-    throw Exception('Asset: $assetNum at site: $siteid cannot be found');
+    throw Exception('Asset: "$assetNum" at site: "$siteid" does not exist');
   }
   if (!assetCache.containsKey(siteid)) {
     assetCache[siteid] = {};

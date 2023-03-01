@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
-const frequencyUnits = ['D', 'W', 'M', 'Y'];
+const frequencyUnits = ['D', 'W', 'M', 'Y', 'J']; // J for job plan
 
 double parseTime(dynamic text) {
   var hour = 0.0;

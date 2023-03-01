@@ -356,8 +356,11 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
   if (!frequencyUnits.contains(pmDetails.frequencyUnit)) {
     throw Exception('Frequency Unit "${pmDetails.frequency}" is invalid');
   }
-  if ((pmDetails.frequency ?? 0) < 1) {
+  if ((pmDetails.frequency ?? 0) < 1 && pmDetails.frequencyUnit != 'J') {
     throw Exception('Frequency "${pmDetails.frequency}" is invalid');
+  }
+  if (pmDetails.frequencyUnit == 'J') {
+    pmDetails.frequency = -1;
   }
   return PMMaximo(
     siteID: pmDetails.siteId!,
@@ -369,7 +372,9 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         pmDetails.crafts[0].laborType]!, // take first craft as primary craft
     freqUnit: pmDetails.frequencyUnit!,
     assetNumber: pmName.commonParent,
-    leadTime: calcLeadTime(pmDetails.frequency!, pmDetails.frequencyUnit!),
+    leadTime: pmDetails.frequencyUnit != 'J'
+        ? calcLeadTime(pmDetails.frequency!, pmDetails.frequencyUnit!)
+        : 0,
     orgID: siteIDAndOrgID[pmDetails.siteId!]!,
     route: routeType != 'NONE' ? route : null,
     targetStartTime: '08:00:00',

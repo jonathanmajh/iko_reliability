@@ -23,29 +23,31 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
   generated['JobMaterial'] = [];
   generated['JobService'] = [];
   generated['Errors'] = [];
-  // pm template
-  generated['PM'] = [
-    [
-      pmpkg.siteID,
-      pmpkg.pmNumber,
-      pmpkg.description,
-      pmpkg.jobplan.jpnum,
-      pmpkg.woStatus,
-      pmpkg.personGroup,
-      pmpkg.frequency.toString(),
-      freqUnitToString[pmpkg.freqUnit]!.toUpperCase(),
-      pmpkg.pmAssetWOGen ? 'Y' : 'N',
-      pmpkg.assetNumber,
-      pmpkg.route?.routeNumber ?? '',
-      pmpkg.leadTime.toString(),
-      pmpkg.priority.toString(),
-      pmpkg.nextDate == null ? '' : '${pmpkg.nextDate}T00:00:00',
-      pmpkg.orgID,
-      pmpkg.targetStartTime,
-      pmpkg.ikoPMHistoryNotes ?? '',
-      pmpkg.fmecaPM ? 'Y' : 'N'
-    ]
-  ];
+  // pm
+  if (pmpkg.freqUnit != 'J') {
+    generated['PM'] = [
+      [
+        pmpkg.siteID,
+        pmpkg.pmNumber,
+        pmpkg.description,
+        pmpkg.jobplan.jpnum,
+        pmpkg.woStatus,
+        pmpkg.personGroup,
+        pmpkg.frequency.toString(),
+        freqUnitToString[pmpkg.freqUnit]!.toUpperCase(),
+        pmpkg.pmAssetWOGen ? 'Y' : 'N',
+        pmpkg.assetNumber,
+        pmpkg.route?.routeNumber ?? '',
+        pmpkg.leadTime.toString(),
+        pmpkg.priority.toString(),
+        pmpkg.nextDate == null ? '' : '${pmpkg.nextDate}T00:00:00',
+        pmpkg.orgID,
+        pmpkg.targetStartTime,
+        pmpkg.ikoPMHistoryNotes ?? '',
+        pmpkg.fmecaPM ? 'Y' : 'N'
+      ]
+    ];
+  }
   // job plan
   generated = generateJobplan(
     pmpkg.jobplan,
@@ -54,41 +56,56 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
     generated,
   );
   // route
-  if (pmpkg.route != null) {
-    generated['Route'] = [
-      [
-        pmpkg.orgID,
-        pmpkg.siteID,
-        pmpkg.route!.routeNumber,
-        pmpkg.route!.routeStopsBecome,
-        pmpkg.route!.description,
-      ]
-    ];
+  if (pmpkg.freqUnit != 'J') {
+    if (pmpkg.route != null) {
+      generated['Route'] = [
+        [
+          pmpkg.orgID,
+          pmpkg.siteID,
+          pmpkg.route!.routeNumber,
+          pmpkg.route!.routeStopsBecome,
+          pmpkg.route!.description,
+        ]
+      ];
 
+      for (final routeStop in pmpkg.route!.routeStops) {
+        generated['Route_Stop']!.add([
+          pmpkg.orgID,
+          pmpkg.siteID,
+          pmpkg.route!.routeNumber,
+          routeStop.stopSequence.toString(),
+          routeStop.assetNumber,
+          routeStop.jpnum ?? '',
+          routeStop.stopSequence.toString(),
+          pmpkg.orgID,
+          pmpkg.siteID,
+        ]);
+      }
+
+      // child job plan
+      if (pmpkg.route!.childJobPlans.isNotEmpty) {
+        for (var jobplan in pmpkg.route!.childJobPlans) {
+          generated = generateJobplan(
+            jobplan,
+            pmpkg.siteID,
+            pmpkg.orgID,
+            generated,
+          );
+        }
+      }
+    }
+  } else {
     for (final routeStop in pmpkg.route!.routeStops) {
-      generated['Route_Stop']!.add([
+      generated['JPASSETLINK']!.add([
         pmpkg.orgID,
         pmpkg.siteID,
-        pmpkg.route!.routeNumber,
-        routeStop.stopSequence.toString(),
+        pmpkg.jobplan.jpnum,
+        '0', //PLUSCREVNUM
         routeStop.assetNumber,
-        routeStop.jpnum ?? '',
-        routeStop.stopSequence.toString(),
+        '0', //ISDEFAULTASSETSP
         pmpkg.orgID,
         pmpkg.siteID,
       ]);
-    }
-
-    // child job plan
-    if (pmpkg.route!.childJobPlans.isNotEmpty) {
-      for (var jobplan in pmpkg.route!.childJobPlans) {
-        generated = generateJobplan(
-          jobplan,
-          pmpkg.siteID,
-          pmpkg.orgID,
-          generated,
-        );
-      }
     }
   }
 
@@ -171,7 +188,8 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
     jobplan.ikoConditions,
     jobplan.priority.toString(),
     jobplan.ikoWorktype,
-    'PM', // TEMPLATETYPE
+    generated['PM']?.isNotEmpty ?? false ? 'PM' : 'STANDARD', // TEMPLATETYPE
+    // PM is created before job plan, if no PM then it is a standard job plan
     jobplan.jpduration.toString(),
     'N', //downtime
     'N', //interruptible

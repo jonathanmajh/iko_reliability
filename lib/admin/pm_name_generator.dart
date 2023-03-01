@@ -65,17 +65,17 @@ Future<PMName> generateName(
         '${replaceable[0]}${pmdetails.frequencyUnit}${pmdetails.frequency}';
     if (wotype != 'LIF') {
       replaceable[1] =
-          '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]} - ';
+          '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
       name =
-          '$name - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]} - ';
+          '$name - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
     }
   }
 // add work order type
   if (wotype != 'LIF') {
     number = '$number$wotype';
-    name = '$name${workType[wotype]}';
+    name = '$name - ${workType[wotype]}';
     replaceable[0] = '${replaceable[0]}$wotype';
-    replaceable[1] = '${replaceable[1]}${workType[wotype]}';
+    replaceable[1] = '${replaceable[1]} - ${workType[wotype]}';
   } else {
     number = '${number}LC1';
     name = '$name - LC-';
