@@ -187,7 +187,7 @@ class ParsedTemplate {
             frequency: nextRow[5],
             workOrderType: workOrderType,
             processCondition: nextRow[7].substring(0, 4),
-            pmAsset: nextRow[0],
+            pmAsset: nextRow[0]?.toString().toUpperCase(),
             pmName: nextRow[8] ?? 'Generating Name...',
             pmNumber:
                 decoder.tables[sheet]!.rows[i + 2][8] ?? 'Generating Number...',
@@ -204,7 +204,7 @@ class ParsedTemplate {
           pmTemplates[filename][pmNumber].tasks.add(JobTask(
               jptask: row[6], // TODO show error for missing jptask number
               description: row[7],
-              assetNumber: row[4],
+              assetNumber: row[4]?.toString().toUpperCase(),
               metername: row[5],
               longdescription: row[8]));
           if (row[4] != null) {
