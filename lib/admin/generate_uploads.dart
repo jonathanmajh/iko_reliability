@@ -56,56 +56,41 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
     generated,
   );
   // route
-  if (pmpkg.freqUnit != 'J') {
-    if (pmpkg.route != null) {
-      generated['Route'] = [
-        [
-          pmpkg.orgID,
-          pmpkg.siteID,
-          pmpkg.route!.routeNumber,
-          pmpkg.route!.routeStopsBecome,
-          pmpkg.route!.description,
-        ]
-      ];
-
-      for (final routeStop in pmpkg.route!.routeStops) {
-        generated['Route_Stop']!.add([
-          pmpkg.orgID,
-          pmpkg.siteID,
-          pmpkg.route!.routeNumber,
-          routeStop.stopSequence.toString(),
-          routeStop.assetNumber,
-          routeStop.jpnum ?? '',
-          routeStop.stopSequence.toString(),
-          pmpkg.orgID,
-          pmpkg.siteID,
-        ]);
-      }
-
-      // child job plan
-      if (pmpkg.route!.childJobPlans.isNotEmpty) {
-        for (var jobplan in pmpkg.route!.childJobPlans) {
-          generated = generateJobplan(
-            jobplan,
-            pmpkg.siteID,
-            pmpkg.orgID,
-            generated,
-          );
-        }
-      }
-    }
-  } else {
-    for (final routeStop in pmpkg.route!.routeStops) {
-      generated['JPASSETLINK']!.add([
+  if (pmpkg.route != null) {
+    generated['Route'] = [
+      [
         pmpkg.orgID,
         pmpkg.siteID,
-        pmpkg.jobplan.jpnum,
-        '0', //PLUSCREVNUM
+        pmpkg.route!.routeNumber,
+        pmpkg.route!.routeStopsBecome,
+        pmpkg.route!.description,
+      ]
+    ];
+
+    for (final routeStop in pmpkg.route!.routeStops) {
+      generated['Route_Stop']!.add([
+        pmpkg.orgID,
+        pmpkg.siteID,
+        pmpkg.route!.routeNumber,
+        routeStop.stopSequence.toString(),
         routeStop.assetNumber,
-        '0', //ISDEFAULTASSETSP
+        routeStop.jpnum ?? '',
+        routeStop.stopSequence.toString(),
         pmpkg.orgID,
         pmpkg.siteID,
       ]);
+    }
+
+    // child job plan
+    if (pmpkg.route!.childJobPlans.isNotEmpty) {
+      for (var jobplan in pmpkg.route!.childJobPlans) {
+        generated = generateJobplan(
+          jobplan,
+          pmpkg.siteID,
+          pmpkg.orgID,
+          generated,
+        );
+      }
     }
   }
 
