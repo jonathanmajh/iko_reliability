@@ -22,9 +22,8 @@ jobs:
       run: flutter pub run squirrel:installer_windows
     - name: get version name
       run: |
-        VERSION=${GITHUB_REF_NAME#v}
-        echo Version: $VERSION
-        echo "VERSION=${VERSION:1}" >> $GITHUB_ENV
+        $env:VERSION=$env:GITHUB_REF_NAME.substring(1)
+        echo Version: $env:VERSION
 
     - name: Release
       uses: softprops/action-gh-release@v1
