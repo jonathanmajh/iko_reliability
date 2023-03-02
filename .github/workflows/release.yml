@@ -6,6 +6,7 @@ on:
   push:
     tags:
       - 'v*'
+    branches: [ master ]
 
 jobs:
   publish_on_win:
@@ -19,11 +20,11 @@ jobs:
       run: flutter build windows
     - name: packaging in squirrel
       run: flutter pub run squirrel:installer_windows
+    - name: get version name
       run: |
         VERSION=${GITHUB_REF_NAME#v}
         echo Version: $VERSION
         echo "VERSION=${VERSION:1}" >> $GITHUB_ENV
-      run: mv releases/iko_reliability_flutter-*-full.nupkg
 
     - name: Release
       uses: softprops/action-gh-release@v1
