@@ -26,4 +26,4 @@ flutter upgrade
 flutter build windows
 flutter pub run squirrel:installer_windows
 
-select assetnum, location, parent, description, siteid, status, changedate from asset where siteid = 'gv'
+git tag -a v1.0.0 -m "some message"
