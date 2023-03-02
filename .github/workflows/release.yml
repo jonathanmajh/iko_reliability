@@ -6,7 +6,6 @@ on:
   push:
     tags:
       - 'v*'
-    branches: [ master ]
 
 jobs:
   publish_on_win:
