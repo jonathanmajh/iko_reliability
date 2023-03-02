@@ -11,7 +11,7 @@ jobs:
   publish_on_win:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2       
+    - uses: actions/checkout@v3
     - uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
@@ -19,9 +19,16 @@ jobs:
       run: flutter build windows
     - name: packaging in squirrel
       run: flutter pub run squirrel:installer_windows
+      run: |
+        VERSION=${GITHUB_REF_NAME#v}
+        echo Version: $VERSION
+        echo "VERSION=${VERSION:1}" >> $GITHUB_ENV
+      run: mv releases/iko_reliability_flutter-*-full.nupkg
 
-    - name: publish
-      uses: actions/upload-artifact@v2
+    - name: Release
+      uses: softprops/action-gh-release@v1
       with: 
-        name: assets-for-download
-        path: releases
+        files: |
+          iko_reliability_flutter-${VERSION}-full.nupkg
+          RELEASES
+          Setup.exe
