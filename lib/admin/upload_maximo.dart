@@ -188,7 +188,12 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   if (uploadData.containsKey('JobLabor')) {
     for (int i = 0; i < uploadData['JobLabor']!.length; i++) {
       if (!(await isNewJobLabor(
-          uploadData['JobLabor']![i][2], uploadData['JobLabor']![i][7], env))) {
+        uploadData['JobLabor']![i][2], //jpnum
+        uploadData['JobLabor']![i][7], //orgid
+        uploadData['JobLabor']![i][4], //craft
+        uploadData['JobLabor']![i][5], //hour
+        env,
+      ))) {
         uploadData['JobLabor']![i].add('~');
         continue;
       }
@@ -297,11 +302,11 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   return uploadData;
 }
 
-Future<bool> isNewJobLabor(
-    String jpNumber, String orgid, String maximoEnvironment) async {
+Future<bool> isNewJobLabor(String jpNumber, String orgid, String craft,
+    String hours, String maximoEnvironment) async {
   // do for all in case of retries
   final url =
-      'iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber" and joblabor.orgid="$orgid"';
+      'iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber" and joblabor.orgid="$orgid" and joblabor.craft="$craft" and joblabor.laborhrs="$hours"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
     return true;

@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
@@ -41,10 +42,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
             child: FloatingActionButton.extended(
               heroTag: UniqueKey(),
               onPressed: () {
+                copyTemplates(context.read<TemplateNotifier>().getAllPmnum());
                 _updateFab();
               },
-              label: const Text('Add'),
-              icon: const Icon(Icons.add),
+              label: const Text('Copy'),
+              tooltip: 'Copy filenames and PM number to clipboard',
+              icon: const Icon(Icons.content_copy),
             )),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
@@ -54,6 +57,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
               pickTemplates(context);
               _updateFab();
             },
+            tooltip: 'Select files to load PM templates',
             label: const Text('Open'),
             icon: const Icon(Icons.file_open_rounded),
           ),
@@ -72,6 +76,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 box.clear();
                 _updateFab();
               },
+              tooltip: 'Clear PM templates',
               label: const Text('Clear'),
               icon: const Icon(Icons.delete_sweep),
             )),
@@ -174,6 +179,19 @@ class _PmCheckPageState extends State<PmCheckPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),
     ));
+  }
+
+  void copyTemplates(Map<String, List<String>> data) {
+    String allData = '';
+    for (String filename in data.keys) {
+      allData = '$allData\n$filename';
+      for (String pmnum in data[filename]!) {
+        allData = '$allData\n - $pmnum';
+      }
+    }
+    Clipboard.setData(ClipboardData(text: allData)).then((_) {
+      return;
+    });
   }
 
   void pickTemplates(BuildContext context) async {

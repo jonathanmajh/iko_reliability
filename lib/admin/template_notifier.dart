@@ -256,4 +256,17 @@ class TemplateNotifier extends ChangeNotifier {
     }
     return allTemplates[filename]!.keys.toList();
   }
+
+  Map<String, List<String>> getAllPmnum() {
+    Map<String, List<String>> data = {};
+    List<String> pmnums = [];
+    for (String file in allTemplates.keys) {
+      for (int template in getTemplates(file)) {
+        pmnums.add(getTemplateNumber(file, template));
+      }
+      data[file] = pmnums;
+      pmnums = [];
+    }
+    return data;
+  }
 }
