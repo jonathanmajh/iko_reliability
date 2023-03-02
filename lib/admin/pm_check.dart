@@ -220,6 +220,7 @@ Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
 
 void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
     String maximoServerSelected) async {
+  context.setLoading(true);
   var parsedTmpts = await parseSpreadsheets(files);
   for (var thing in parsedTmpts) {
     for (var template in thing.keys) {
@@ -252,4 +253,5 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
       }
     }
   }
+  context.setLoading(false);
 }

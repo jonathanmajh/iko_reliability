@@ -72,11 +72,20 @@ class UploadNotifier extends ChangeNotifier {
 class TemplateNotifier extends ChangeNotifier {
   Map<String, Map<int, TemplateStore>> allTemplates = {};
   SelectedTemplate selectedTemplate = SelectedTemplate();
+  bool loadingFiles = false;
 // check and add file name to map if necessary
   void addTemplate(String file) {
     if (!allTemplates.keys.contains(file)) {
       allTemplates[file] = {};
     }
+  }
+
+  void setLoading(bool status) {
+    loadingFiles = status;
+  }
+
+  bool getLoading() {
+    return loadingFiles;
   }
 
   void clearTemplates() {

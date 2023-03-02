@@ -168,14 +168,14 @@ Widget statusIndicator(String status) {
   );
 }
 
-List<Widget> buildPMList(TemplateNotifier context) {
+List<Widget> buildPMList(TemplateNotifier templateNotify) {
   List<Widget> list = [];
-  for (String ws in context.getFiles()) {
-    for (int templateNumber in context.getTemplates(ws)) {
+  for (String ws in templateNotify.getFiles()) {
+    for (int templateNumber in templateNotify.getTemplates(ws)) {
       list.add(templateListItem(
         ws,
         templateNumber,
-        context,
+        templateNotify,
       ));
       list.add(const Divider(
         height: 5,
@@ -185,6 +185,18 @@ List<Widget> buildPMList(TemplateNotifier context) {
         color: Colors.grey,
       ));
     }
+  }
+  if (templateNotify.getLoading()) {
+    list.add(Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const <Widget>[
+          SizedBox(
+            height: 100,
+            width: 100,
+            child: CircularProgressIndicator.adaptive(),
+          )
+        ]));
   }
   if (list.isEmpty) {
     list.add(const Text('Open PM Template - Select and parse template files'));
