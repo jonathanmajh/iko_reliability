@@ -155,16 +155,17 @@ class _EndDrawerState extends State<EndDrawer> {
                 child: const Text('Load'),
               )),
           ListTile(
-              title: const Text('Load Observation'),
-              subtitle: const Text(
-                  'Clear and Load Observation list from spreadsheet'),
-              trailing: ElevatedButton(
-                onPressed: () {
-                  database!.clearMeters();
-                  database!.addMeters();
-                },
-                child: const Text('Load'),
-              )),
+            title: const Text('Load Observation'),
+            subtitle:
+                const Text('Clear and Load Observation list from spreadsheet'),
+            trailing: ElevatedButton(
+              onPressed: () {
+                database!.clearMeters();
+                database!.addMeters();
+              },
+              child: const Text('Load'),
+            ),
+          ),
           const ListTile(
             // a spacer
             title: Text(''),

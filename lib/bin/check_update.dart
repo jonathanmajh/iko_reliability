@@ -18,7 +18,7 @@ Future<bool> checkUpdate() async {
   }
   var parsed = jsonDecode(response.body);
   if (response.statusCode == 200) {
-    print(parsed);
+    // print(parsed);
     if (parsed['tag_name'] != null) {
       if (parsed['tag_name'] != 'v$curVersion') {
         print('update check true');

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'admin/asset_storage.dart';
 import 'admin/db_drift.dart';
@@ -88,7 +89,23 @@ class _HomePageState extends State<HomePage> {
       onDrawerChanged: (isOpened) async {
         final update = await checkUpdate();
         if (update) {
-          showDataAlert(['Update available'], 'Update Checker');
+          showDataAlert(
+              ['Update available'],
+              'Update Checker',
+              [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        launchUrl(Uri.parse(
+                            'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
+                      },
+                      child: const Text('Download Update'),
+                    ),
+                  ],
+                ),
+              ]);
         }
       },
       appBar: AppBar(
@@ -210,7 +227,8 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-showDataAlert(List<String> messages, String title) {
+showDataAlert(List<String> messages, String title,
+    [List<Widget> widgets = const []]) {
   showDialog(
     context: navigatorKey.currentContext!,
     builder: (context) {
@@ -237,20 +255,28 @@ showDataAlert(List<String> messages, String title) {
             child: Container(
               padding: const EdgeInsets.all(8.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  // Text(
-                  //   "Mension Your ID ",
-                  // ),
-                  // const TextField(
-                  //   decoration: InputDecoration(
-                  //       border: OutlineInputBorder(),
-                  //       hintText: 'Enter Id here',
-                  //       labelText: 'ID'),
-                  // ),
                   ...messageListTile(messages),
+                  const Divider(
+                    // spacer
+                    height: 10,
+                    thickness: 0,
+                    indent: 0,
+                    endIndent: 0,
+                    color: Color.fromARGB(0, 255, 255, 255),
+                  ),
+                  ...widgets,
+                  const Divider(
+                    // spacer
+                    height: 10,
+                    thickness: 0,
+                    indent: 0,
+                    endIndent: 0,
+                    color: Color.fromARGB(0, 255, 255, 255),
+                  ),
                   Center(
                     child: SizedBox(
                       width: 200,
