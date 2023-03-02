@@ -231,7 +231,6 @@ Map<String, String> maximoServerDomains = {
   'MASTEST': 'https://test.manage.test.iko.max-it-eam.com/maximo/api/os/'
 };
 
-// TODO login management
 Map<String, String> apiKeys = {
   'MASDEV': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
   'MASTEST': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'

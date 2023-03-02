@@ -3,7 +3,7 @@ description: IKO Reliability Tool
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.0.0
 
 environment:
     sdk: '>=2.16.2 <3.0.0'
@@ -19,7 +19,7 @@ dependencies:
     wakelock_web: ^0.4.0
     html: ^0.15.0
     dropdown_search: ^5.0.1
-    pluto_grid: ^5.0.0
+    pluto_grid: ^6.0.2
     file_picker: ^5.0.0
     spreadsheet_decoder: ^2.0.2
     hive_flutter: ^1.1.0
@@ -53,9 +53,10 @@ flutter:
 
 squirrel:
   windows:
-    appIcon: C:\Users\majona\GitHub\iko_reliability_flutter\iko_logo.ico
-    appFriendlyName: IKO Reliability Tool
-    appDescription: IKO Reliability Tool
+    appIcon: iko_logo.ico
+    appFriendlyName: IKO Reliability PM Tool
+    appDescription: IKO Reliability PM Tool
     authors: Jonathan
+    loadingGif: iko_logo.gif
     # uninstallIconPngUrl: iko_logo.png
-    releaseDirectory: C:\Users\majona\Desktop\Flutter
+    releaseDirectory: releases
