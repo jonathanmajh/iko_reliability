@@ -27,5 +27,3 @@ flutter build windows
 flutter pub run squirrel:installer_windows
 
 git tag -a v1.0.0 -m "some message"
-
-https://api.github.com/repos/jonathanmajh/iko_reliability/releases/latest

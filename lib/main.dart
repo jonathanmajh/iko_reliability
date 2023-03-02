@@ -8,6 +8,7 @@ import 'admin/asset_storage.dart';
 import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
+import 'bin/check_update.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -84,6 +85,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      onDrawerChanged: (isOpened) async {
+        final update = await checkUpdate();
+        if (update) {
+          showDataAlert(['Update available'], 'Update Checker');
+        }
+      },
       appBar: AppBar(
         title: const Text("IKO Reliability Maximo Tool (beta)"),
       ),

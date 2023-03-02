@@ -28,6 +28,4 @@ jobs:
       uses: softprops/action-gh-release@v1
       with: 
         files: |
-          releases/iko_reliability_flutter-$env:VERSION-full.nupkg
-          releases/RELEASES
-          releases/Setup.exe
+          releases/*
