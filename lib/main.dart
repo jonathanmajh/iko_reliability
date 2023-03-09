@@ -152,13 +152,22 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ExpansionTile(
-              title: const Text("Request PMs"),
+              title: const Text("Assets"),
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.settings),
-                  title: const Text('Assets'),
+                  title: const Text('Create Assets'),
                   onTap: () {
                     context.router.pushNamed("/asset");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Asset Criticality'),
+                  onTap: () {
+                    context.router.pushNamed("/asset/criticality");
                     // change app state...
                     Navigator.pop(context); // close the drawer
                   },

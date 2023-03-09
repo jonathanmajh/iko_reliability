@@ -2,7 +2,6 @@ import 'package:iko_reliability_flutter/admin/maximo_jp_pm.dart';
 import 'package:iko_reliability_flutter/admin/pm_jp_storage.dart';
 
 import '../main.dart';
-import 'asset_storage.dart';
 import 'consts.dart';
 import 'db_drift.dart';
 import 'parse_template.dart';
