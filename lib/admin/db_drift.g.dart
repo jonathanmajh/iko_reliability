@@ -3,6 +3,66 @@
 part of 'db_drift.dart';
 
 // ignore_for_file: type=lint
+class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+      'key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+      'value', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [key, value];
+  @override
+  String get aliasedName => _alias ?? 'settings';
+  @override
+  String get actualTableName => 'settings';
+  @override
+  VerificationContext validateIntegrity(Insertable<Setting> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  Setting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Setting(
+      key: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      value: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}value'])!,
+    );
+  }
+
+  @override
+  $SettingsTable createAlias(String alias) {
+    return $SettingsTable(attachedDatabase, alias);
+  }
+}
+
 class Setting extends DataClass implements Insertable<Setting> {
   final String key;
   final String value;
@@ -111,63 +171,136 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   }
 }
 
-class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
+class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $SettingsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  $MeterDBsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _meterMeta = const VerificationMeta('meter');
   @override
-  late final GeneratedColumn<String> key = GeneratedColumn<String>(
-      'key', aliasedName, false,
+  late final GeneratedColumn<String> meter = GeneratedColumn<String>(
+      'meter', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  static const VerificationMeta _inspectMeta =
+      const VerificationMeta('inspect');
   @override
-  late final GeneratedColumn<String> value = GeneratedColumn<String>(
-      'value', aliasedName, false,
+  late final GeneratedColumn<String> inspect = GeneratedColumn<String>(
+      'inspect', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _frequencyMeta =
+      const VerificationMeta('frequency');
+  @override
+  late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
+      'frequency', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _freqUnitMeta =
+      const VerificationMeta('freqUnit');
+  @override
+  late final GeneratedColumn<String> freqUnit = GeneratedColumn<String>(
+      'freq_unit', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _conditionMeta =
+      const VerificationMeta('condition');
+  @override
+  late final GeneratedColumn<String> condition = GeneratedColumn<String>(
+      'condition', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _craftMeta = const VerificationMeta('craft');
+  @override
+  late final GeneratedColumn<String> craft = GeneratedColumn<String>(
+      'craft', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [key, value];
+  List<GeneratedColumn> get $columns =>
+      [meter, inspect, description, frequency, freqUnit, condition, craft];
   @override
-  String get aliasedName => _alias ?? 'settings';
+  String get aliasedName => _alias ?? 'meter_d_bs';
   @override
-  String get actualTableName => 'settings';
+  String get actualTableName => 'meter_d_bs';
   @override
-  VerificationContext validateIntegrity(Insertable<Setting> instance,
+  VerificationContext validateIntegrity(Insertable<MeterDB> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('key')) {
+    if (data.containsKey('meter')) {
       context.handle(
-          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+          _meterMeta, meter.isAcceptableOrUnknown(data['meter']!, _meterMeta));
     } else if (isInserting) {
-      context.missing(_keyMeta);
+      context.missing(_meterMeta);
     }
-    if (data.containsKey('value')) {
-      context.handle(
-          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+    if (data.containsKey('inspect')) {
+      context.handle(_inspectMeta,
+          inspect.isAcceptableOrUnknown(data['inspect']!, _inspectMeta));
     } else if (isInserting) {
-      context.missing(_valueMeta);
+      context.missing(_inspectMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('frequency')) {
+      context.handle(_frequencyMeta,
+          frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta));
+    } else if (isInserting) {
+      context.missing(_frequencyMeta);
+    }
+    if (data.containsKey('freq_unit')) {
+      context.handle(_freqUnitMeta,
+          freqUnit.isAcceptableOrUnknown(data['freq_unit']!, _freqUnitMeta));
+    } else if (isInserting) {
+      context.missing(_freqUnitMeta);
+    }
+    if (data.containsKey('condition')) {
+      context.handle(_conditionMeta,
+          condition.isAcceptableOrUnknown(data['condition']!, _conditionMeta));
+    } else if (isInserting) {
+      context.missing(_conditionMeta);
+    }
+    if (data.containsKey('craft')) {
+      context.handle(
+          _craftMeta, craft.isAcceptableOrUnknown(data['craft']!, _craftMeta));
+    } else if (isInserting) {
+      context.missing(_craftMeta);
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {key};
+  Set<GeneratedColumn> get $primaryKey => {meter};
   @override
-  Setting map(Map<String, dynamic> data, {String? tablePrefix}) {
+  MeterDB map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Setting(
-      key: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
-      value: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}value'])!,
+    return MeterDB(
+      meter: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}meter'])!,
+      inspect: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}inspect'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      frequency: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}frequency'])!,
+      freqUnit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}freq_unit'])!,
+      condition: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}condition'])!,
+      craft: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}craft'])!,
     );
   }
 
   @override
-  $SettingsTable createAlias(String alias) {
-    return $SettingsTable(attachedDatabase, alias);
+  $MeterDBsTable createAlias(String alias) {
+    return $MeterDBsTable(attachedDatabase, alias);
   }
 }
 
@@ -399,21 +532,21 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
   }
 }
 
-class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
+class $ObservationsTable extends Observations
+    with TableInfo<$ObservationsTable, Observation> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $MeterDBsTable(this.attachedDatabase, [this._alias]);
+  $ObservationsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _meterMeta = const VerificationMeta('meter');
   @override
   late final GeneratedColumn<String> meter = GeneratedColumn<String>(
       'meter', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _inspectMeta =
-      const VerificationMeta('inspect');
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
   @override
-  late final GeneratedColumn<String> inspect = GeneratedColumn<String>(
-      'inspect', aliasedName, false,
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+      'code', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
@@ -421,38 +554,19 @@ class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _frequencyMeta =
-      const VerificationMeta('frequency');
+  static const VerificationMeta _actionMeta = const VerificationMeta('action');
   @override
-  late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
-      'frequency', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _freqUnitMeta =
-      const VerificationMeta('freqUnit');
+  late final GeneratedColumn<String> action = GeneratedColumn<String>(
+      'action', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
-  late final GeneratedColumn<String> freqUnit = GeneratedColumn<String>(
-      'freq_unit', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _conditionMeta =
-      const VerificationMeta('condition');
+  List<GeneratedColumn> get $columns => [meter, code, description, action];
   @override
-  late final GeneratedColumn<String> condition = GeneratedColumn<String>(
-      'condition', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _craftMeta = const VerificationMeta('craft');
+  String get aliasedName => _alias ?? 'observations';
   @override
-  late final GeneratedColumn<String> craft = GeneratedColumn<String>(
-      'craft', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+  String get actualTableName => 'observations';
   @override
-  List<GeneratedColumn> get $columns =>
-      [meter, inspect, description, frequency, freqUnit, condition, craft];
-  @override
-  String get aliasedName => _alias ?? 'meter_d_bs';
-  @override
-  String get actualTableName => 'meter_d_bs';
-  @override
-  VerificationContext validateIntegrity(Insertable<MeterDB> instance,
+  VerificationContext validateIntegrity(Insertable<Observation> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -462,11 +576,11 @@ class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
     } else if (isInserting) {
       context.missing(_meterMeta);
     }
-    if (data.containsKey('inspect')) {
-      context.handle(_inspectMeta,
-          inspect.isAcceptableOrUnknown(data['inspect']!, _inspectMeta));
+    if (data.containsKey('code')) {
+      context.handle(
+          _codeMeta, code.isAcceptableOrUnknown(data['code']!, _codeMeta));
     } else if (isInserting) {
-      context.missing(_inspectMeta);
+      context.missing(_codeMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
@@ -476,59 +590,33 @@ class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
-    if (data.containsKey('frequency')) {
-      context.handle(_frequencyMeta,
-          frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta));
-    } else if (isInserting) {
-      context.missing(_frequencyMeta);
-    }
-    if (data.containsKey('freq_unit')) {
-      context.handle(_freqUnitMeta,
-          freqUnit.isAcceptableOrUnknown(data['freq_unit']!, _freqUnitMeta));
-    } else if (isInserting) {
-      context.missing(_freqUnitMeta);
-    }
-    if (data.containsKey('condition')) {
-      context.handle(_conditionMeta,
-          condition.isAcceptableOrUnknown(data['condition']!, _conditionMeta));
-    } else if (isInserting) {
-      context.missing(_conditionMeta);
-    }
-    if (data.containsKey('craft')) {
-      context.handle(
-          _craftMeta, craft.isAcceptableOrUnknown(data['craft']!, _craftMeta));
-    } else if (isInserting) {
-      context.missing(_craftMeta);
+    if (data.containsKey('action')) {
+      context.handle(_actionMeta,
+          action.isAcceptableOrUnknown(data['action']!, _actionMeta));
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {meter};
+  Set<GeneratedColumn> get $primaryKey => {meter, code};
   @override
-  MeterDB map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Observation map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MeterDB(
+    return Observation(
       meter: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}meter'])!,
-      inspect: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}inspect'])!,
+      code: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}code'])!,
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      frequency: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}frequency'])!,
-      freqUnit: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}freq_unit'])!,
-      condition: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}condition'])!,
-      craft: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}craft'])!,
+      action: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}action']),
     );
   }
 
   @override
-  $MeterDBsTable createAlias(String alias) {
-    return $MeterDBsTable(attachedDatabase, alias);
+  $ObservationsTable createAlias(String alias) {
+    return $ObservationsTable(attachedDatabase, alias);
   }
 }
 
@@ -695,21 +783,16 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
   }
 }
 
-class $ObservationsTable extends Observations
-    with TableInfo<$ObservationsTable, Observation> {
+class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ObservationsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _meterMeta = const VerificationMeta('meter');
+  $AssetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _assetnumMeta =
+      const VerificationMeta('assetnum');
   @override
-  late final GeneratedColumn<String> meter = GeneratedColumn<String>(
-      'meter', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _codeMeta = const VerificationMeta('code');
-  @override
-  late final GeneratedColumn<String> code = GeneratedColumn<String>(
-      'code', aliasedName, false,
+  late final GeneratedColumn<String> assetnum = GeneratedColumn<String>(
+      'assetnum', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
@@ -717,33 +800,50 @@ class $ObservationsTable extends Observations
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _actionMeta = const VerificationMeta('action');
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumn<String> action = GeneratedColumn<String>(
-      'action', aliasedName, true,
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
+  @override
+  late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
+      'siteid', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _changedateMeta =
+      const VerificationMeta('changedate');
+  @override
+  late final GeneratedColumn<String> changedate = GeneratedColumn<String>(
+      'changedate', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _hierarchyMeta =
+      const VerificationMeta('hierarchy');
+  @override
+  late final GeneratedColumn<String> hierarchy = GeneratedColumn<String>(
+      'hierarchy', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _parentMeta = const VerificationMeta('parent');
+  @override
+  late final GeneratedColumn<String> parent = GeneratedColumn<String>(
+      'parent', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [meter, code, description, action];
+  List<GeneratedColumn> get $columns =>
+      [assetnum, description, status, siteid, changedate, hierarchy, parent];
   @override
-  String get aliasedName => _alias ?? 'observations';
+  String get aliasedName => _alias ?? 'assets';
   @override
-  String get actualTableName => 'observations';
+  String get actualTableName => 'assets';
   @override
-  VerificationContext validateIntegrity(Insertable<Observation> instance,
+  VerificationContext validateIntegrity(Insertable<Asset> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('meter')) {
-      context.handle(
-          _meterMeta, meter.isAcceptableOrUnknown(data['meter']!, _meterMeta));
+    if (data.containsKey('assetnum')) {
+      context.handle(_assetnumMeta,
+          assetnum.isAcceptableOrUnknown(data['assetnum']!, _assetnumMeta));
     } else if (isInserting) {
-      context.missing(_meterMeta);
-    }
-    if (data.containsKey('code')) {
-      context.handle(
-          _codeMeta, code.isAcceptableOrUnknown(data['code']!, _codeMeta));
-    } else if (isInserting) {
-      context.missing(_codeMeta);
+      context.missing(_assetnumMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
@@ -753,33 +853,296 @@ class $ObservationsTable extends Observations
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
-    if (data.containsKey('action')) {
-      context.handle(_actionMeta,
-          action.isAcceptableOrUnknown(data['action']!, _actionMeta));
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('siteid')) {
+      context.handle(_siteidMeta,
+          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+    } else if (isInserting) {
+      context.missing(_siteidMeta);
+    }
+    if (data.containsKey('changedate')) {
+      context.handle(
+          _changedateMeta,
+          changedate.isAcceptableOrUnknown(
+              data['changedate']!, _changedateMeta));
+    } else if (isInserting) {
+      context.missing(_changedateMeta);
+    }
+    if (data.containsKey('hierarchy')) {
+      context.handle(_hierarchyMeta,
+          hierarchy.isAcceptableOrUnknown(data['hierarchy']!, _hierarchyMeta));
+    }
+    if (data.containsKey('parent')) {
+      context.handle(_parentMeta,
+          parent.isAcceptableOrUnknown(data['parent']!, _parentMeta));
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {meter, code};
+  Set<GeneratedColumn> get $primaryKey => {siteid, assetnum};
   @override
-  Observation map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Asset map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Observation(
-      meter: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}meter'])!,
-      code: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}code'])!,
+    return Asset(
+      assetnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}assetnum'])!,
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      action: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}action']),
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      siteid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
+      changedate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}changedate'])!,
+      hierarchy: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}hierarchy']),
+      parent: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}parent']),
     );
   }
 
   @override
-  $ObservationsTable createAlias(String alias) {
-    return $ObservationsTable(attachedDatabase, alias);
+  $AssetsTable createAlias(String alias) {
+    return $AssetsTable(attachedDatabase, alias);
+  }
+}
+
+class Asset extends DataClass implements Insertable<Asset> {
+  final String assetnum;
+  final String description;
+  final String status;
+  final String siteid;
+  final String changedate;
+  final String? hierarchy;
+  final String? parent;
+  const Asset(
+      {required this.assetnum,
+      required this.description,
+      required this.status,
+      required this.siteid,
+      required this.changedate,
+      this.hierarchy,
+      this.parent});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['assetnum'] = Variable<String>(assetnum);
+    map['description'] = Variable<String>(description);
+    map['status'] = Variable<String>(status);
+    map['siteid'] = Variable<String>(siteid);
+    map['changedate'] = Variable<String>(changedate);
+    if (!nullToAbsent || hierarchy != null) {
+      map['hierarchy'] = Variable<String>(hierarchy);
+    }
+    if (!nullToAbsent || parent != null) {
+      map['parent'] = Variable<String>(parent);
+    }
+    return map;
+  }
+
+  AssetsCompanion toCompanion(bool nullToAbsent) {
+    return AssetsCompanion(
+      assetnum: Value(assetnum),
+      description: Value(description),
+      status: Value(status),
+      siteid: Value(siteid),
+      changedate: Value(changedate),
+      hierarchy: hierarchy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hierarchy),
+      parent:
+          parent == null && nullToAbsent ? const Value.absent() : Value(parent),
+    );
+  }
+
+  factory Asset.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Asset(
+      assetnum: serializer.fromJson<String>(json['assetnum']),
+      description: serializer.fromJson<String>(json['description']),
+      status: serializer.fromJson<String>(json['status']),
+      siteid: serializer.fromJson<String>(json['siteid']),
+      changedate: serializer.fromJson<String>(json['changedate']),
+      hierarchy: serializer.fromJson<String?>(json['hierarchy']),
+      parent: serializer.fromJson<String?>(json['parent']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'assetnum': serializer.toJson<String>(assetnum),
+      'description': serializer.toJson<String>(description),
+      'status': serializer.toJson<String>(status),
+      'siteid': serializer.toJson<String>(siteid),
+      'changedate': serializer.toJson<String>(changedate),
+      'hierarchy': serializer.toJson<String?>(hierarchy),
+      'parent': serializer.toJson<String?>(parent),
+    };
+  }
+
+  Asset copyWith(
+          {String? assetnum,
+          String? description,
+          String? status,
+          String? siteid,
+          String? changedate,
+          Value<String?> hierarchy = const Value.absent(),
+          Value<String?> parent = const Value.absent()}) =>
+      Asset(
+        assetnum: assetnum ?? this.assetnum,
+        description: description ?? this.description,
+        status: status ?? this.status,
+        siteid: siteid ?? this.siteid,
+        changedate: changedate ?? this.changedate,
+        hierarchy: hierarchy.present ? hierarchy.value : this.hierarchy,
+        parent: parent.present ? parent.value : this.parent,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Asset(')
+          ..write('assetnum: $assetnum, ')
+          ..write('description: $description, ')
+          ..write('status: $status, ')
+          ..write('siteid: $siteid, ')
+          ..write('changedate: $changedate, ')
+          ..write('hierarchy: $hierarchy, ')
+          ..write('parent: $parent')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      assetnum, description, status, siteid, changedate, hierarchy, parent);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Asset &&
+          other.assetnum == this.assetnum &&
+          other.description == this.description &&
+          other.status == this.status &&
+          other.siteid == this.siteid &&
+          other.changedate == this.changedate &&
+          other.hierarchy == this.hierarchy &&
+          other.parent == this.parent);
+}
+
+class AssetsCompanion extends UpdateCompanion<Asset> {
+  final Value<String> assetnum;
+  final Value<String> description;
+  final Value<String> status;
+  final Value<String> siteid;
+  final Value<String> changedate;
+  final Value<String?> hierarchy;
+  final Value<String?> parent;
+  const AssetsCompanion({
+    this.assetnum = const Value.absent(),
+    this.description = const Value.absent(),
+    this.status = const Value.absent(),
+    this.siteid = const Value.absent(),
+    this.changedate = const Value.absent(),
+    this.hierarchy = const Value.absent(),
+    this.parent = const Value.absent(),
+  });
+  AssetsCompanion.insert({
+    required String assetnum,
+    required String description,
+    required String status,
+    required String siteid,
+    required String changedate,
+    this.hierarchy = const Value.absent(),
+    this.parent = const Value.absent(),
+  })  : assetnum = Value(assetnum),
+        description = Value(description),
+        status = Value(status),
+        siteid = Value(siteid),
+        changedate = Value(changedate);
+  static Insertable<Asset> custom({
+    Expression<String>? assetnum,
+    Expression<String>? description,
+    Expression<String>? status,
+    Expression<String>? siteid,
+    Expression<String>? changedate,
+    Expression<String>? hierarchy,
+    Expression<String>? parent,
+  }) {
+    return RawValuesInsertable({
+      if (assetnum != null) 'assetnum': assetnum,
+      if (description != null) 'description': description,
+      if (status != null) 'status': status,
+      if (siteid != null) 'siteid': siteid,
+      if (changedate != null) 'changedate': changedate,
+      if (hierarchy != null) 'hierarchy': hierarchy,
+      if (parent != null) 'parent': parent,
+    });
+  }
+
+  AssetsCompanion copyWith(
+      {Value<String>? assetnum,
+      Value<String>? description,
+      Value<String>? status,
+      Value<String>? siteid,
+      Value<String>? changedate,
+      Value<String?>? hierarchy,
+      Value<String?>? parent}) {
+    return AssetsCompanion(
+      assetnum: assetnum ?? this.assetnum,
+      description: description ?? this.description,
+      status: status ?? this.status,
+      siteid: siteid ?? this.siteid,
+      changedate: changedate ?? this.changedate,
+      hierarchy: hierarchy ?? this.hierarchy,
+      parent: parent ?? this.parent,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (assetnum.present) {
+      map['assetnum'] = Variable<String>(assetnum.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (siteid.present) {
+      map['siteid'] = Variable<String>(siteid.value);
+    }
+    if (changedate.present) {
+      map['changedate'] = Variable<String>(changedate.value);
+    }
+    if (hierarchy.present) {
+      map['hierarchy'] = Variable<String>(hierarchy.value);
+    }
+    if (parent.present) {
+      map['parent'] = Variable<String>(parent.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssetsCompanion(')
+          ..write('assetnum: $assetnum, ')
+          ..write('description: $description, ')
+          ..write('status: $status, ')
+          ..write('siteid: $siteid, ')
+          ..write('changedate: $changedate, ')
+          ..write('hierarchy: $hierarchy, ')
+          ..write('parent: $parent')
+          ..write(')'))
+        .toString();
   }
 }
 
@@ -789,10 +1152,11 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   late final $SettingsTable settings = $SettingsTable(this);
   late final $MeterDBsTable meterDBs = $MeterDBsTable(this);
   late final $ObservationsTable observations = $ObservationsTable(this);
+  late final $AssetsTable assets = $AssetsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [settings, meterDBs, observations];
+      [settings, meterDBs, observations, assets];
 }

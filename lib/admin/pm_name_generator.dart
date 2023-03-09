@@ -1,8 +1,10 @@
 import 'package:iko_reliability_flutter/admin/maximo_jp_pm.dart';
 import 'package:iko_reliability_flutter/admin/pm_jp_storage.dart';
 
+import '../main.dart';
 import 'asset_storage.dart';
 import 'consts.dart';
+import 'db_drift.dart';
 import 'parse_template.dart';
 
 class PMName {
@@ -34,11 +36,11 @@ Future<PMName> generateName(
   Asset asset;
   String commonParent;
   if (pmdetails.assets.isEmpty) {
-    asset = getAsset(pmdetails.siteId!, pmdetails.pmAsset!);
+    asset = await database!.getAsset(pmdetails.siteId!, pmdetails.pmAsset!);
   } else {
-    asset = getCommonParent(pmdetails.assets, pmdetails.siteId!);
+    asset = await getCommonParent(pmdetails.assets, pmdetails.siteId!);
   }
-  commonParent = asset.assetNumber;
+  commonParent = asset.assetnum;
   if (pmdetails.routeCode != null) {
     // use route naming scheme if route code is specified
     number = await findAvailableRouteCode(
@@ -47,12 +49,12 @@ Future<PMName> generateName(
       maximoServerSelected,
     );
     name =
-        '${pmdetails.routeName} Route ${int.parse(number.substring(3))} - ${asset.name}';
+        '${pmdetails.routeName} Route ${int.parse(number.substring(3))} - ${asset.description}';
     routeName = name;
     routeNumber = number;
   } else {
-    number = asset.assetNumber;
-    name = asset.name;
+    number = asset.assetnum;
+    name = asset.description;
   }
   var replaceable = ['XXXXX', 'XXXXX'];
   // number, name | XXXXX asset number, !!! duplicate counter

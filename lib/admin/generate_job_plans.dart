@@ -1,4 +1,3 @@
-import 'package:iko_reliability_flutter/admin/asset_storage.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 
 import '../main.dart';
@@ -262,23 +261,24 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         quantity: pmDetails.crafts[0].quantity,
         hours: jobhrs / routeTasks.toDouble(),
       );
-      final asset = getAsset(pmDetails.siteId!, task.assetNumber!);
+      final asset =
+          await database!.getAsset(pmDetails.siteId!, task.assetNumber!);
       String jpnumber;
       // if asset already has a child job plan entry add the additional task and adjust hours
-      if (childJobPlans.containsKey(asset.assetNumber)) {
-        jpnumber = childJobPlans[asset.assetNumber]!.jpnum;
-        childJobPlans[asset.assetNumber]!.jobtask.add(childTask);
-        childJobPlans[asset.assetNumber]!.jpduration =
-            childJobPlans[asset.assetNumber]!.jpduration +
+      if (childJobPlans.containsKey(asset.assetnum)) {
+        jpnumber = childJobPlans[asset.assetnum]!.jpnum;
+        childJobPlans[asset.assetnum]!.jobtask.add(childTask);
+        childJobPlans[asset.assetnum]!.jpduration =
+            childJobPlans[asset.assetnum]!.jpduration +
                 (jobhrs / routeTasks.toDouble());
-        childJobPlans[asset.assetNumber]!.joblabor[0].hours =
-            childJobPlans[asset.assetNumber]!.jpduration;
+        childJobPlans[asset.assetnum]!.joblabor[0].hours =
+            childJobPlans[asset.assetnum]!.jpduration;
         // else we make new child job plan entry
       } else {
         jpnumber = pmName.replaceable![0];
-        jpnumber = jpnumber.replaceFirst('XXXXX', asset.assetNumber);
+        jpnumber = jpnumber.replaceFirst('XXXXX', asset.assetnum);
         String jpdescription = pmName.replaceable![1];
-        jpdescription = jpdescription.replaceFirst('XXXXX', asset.name);
+        jpdescription = jpdescription.replaceFirst('XXXXX', asset.description);
         final woType = pmDetails.workOrderType!;
         final counter = await findAvailablePMNumber(
             jpnumber, pmDetails.siteId!, maximoServerSelected, woType, 2);
@@ -294,11 +294,11 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         }
         routeStops.add(RouteStopMaximo(
             routeStopID: sequence,
-            assetNumber: asset.assetNumber,
+            assetNumber: asset.assetnum,
             stopSequence: sequence,
             jpnum: jpnumber));
         sequence++;
-        childJobPlans[asset.assetNumber] = JobPlanMaximo(
+        childJobPlans[asset.assetnum] = JobPlanMaximo(
           description: jpdescription,
           ikoConditions: pmDetails.processCondition!,
           ikoPmpackage: pmDetails.pmPackageNumber,
@@ -311,7 +311,7 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
           templatetype: 'PM',
           joblabor: [childLabor],
           jobtask: [childTask],
-          jobasset: [JobAssetMaximo(assetNumber: asset.assetNumber)],
+          jobasset: [JobAssetMaximo(assetNumber: asset.assetnum)],
         );
       }
     }

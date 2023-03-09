@@ -3,7 +3,6 @@ import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:iko_reliability_flutter/admin/generate_job_plans.dart';
 
 import '../main.dart';
-import 'asset_storage.dart';
 import 'db_drift.dart';
 
 Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
@@ -105,7 +104,7 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
           assetNumber,
           jobtask.metername ?? '',
         ]);
-        final asset = getAsset(pmpkg.siteID, assetNumber);
+        final asset = await database!.getAsset(pmpkg.siteID, assetNumber);
         Meter? meter;
         try {
           meter = await database!.getMeter(
@@ -115,7 +114,7 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
             assetNumber,
             jobtask.metername ?? '',
             '$assetNumber${jobtask.metername}',
-            '${asset.name} - ${meter.inspect} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
+            '${asset.description} - ${meter.inspect} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
           ]);
         } catch (e) {
           generated['Errors']!.add(['$e']);
@@ -128,7 +127,8 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
           'M-${jobtask.metername!.substring(0, jobtask.metername!.length - 2)}'
         ]);
         final newGen = await generateMeterJobplan(
-            getAsset(pmpkg.siteID, assetNumber), jobtask.metername!);
+            await database!.getAsset(pmpkg.siteID, assetNumber),
+            jobtask.metername!);
         generated['JobPlan'] = [
           ...generated['JobPlan']!,
           ...newGen['JobPlan']!
@@ -278,13 +278,13 @@ Future<Map<String, List<List<String>>>> generateMeterJobplan(
   for (final observation in meter.observations) {
     if (!['C01', 'C98'].contains(observation.code)) {
       final jpnum =
-          '${asset.assetNumber}${meterCode}CBM${meter.craft}${observation.code.substring(1, 3)}';
+          '${asset.assetnum}${meterCode}CBM${meter.craft}${observation.code.substring(1, 3)}';
       generated['JobPlan']!.add([
         '', //orgid
         '', //siteid
         jpnum,
         '0', //pluscrevnum
-        '${asset.name} ${meter.inspect} $meterNumber - CBM - ${crafts[meter.craft]}',
+        '${asset.description} ${meter.inspect} $meterNumber - CBM - ${crafts[meter.craft]}',
         '${meter.inspect} $meterNumber - ${observation.description} - ${observation.action} ${meter.inspect} $meterNumber',
         'ACTIVE',
         personGroups[meter.craft]!,
@@ -345,14 +345,14 @@ Future<Map<String, List<List<String>>>> generateMeterJobplan(
         '',
         jpnum,
         '0', //PLUSCREVNUM
-        asset.assetNumber,
+        asset.assetnum,
         '0', //ISDEFAULTASSETSP
         siteIDAndOrgID[asset.siteid]!,
         asset.siteid,
       ]);
       generated['MeasurePoint2']!.add([
         asset.siteid,
-        '${asset.assetNumber}$meterCode',
+        '${asset.assetnum}$meterCode',
         observation.code,
         jpnum,
       ]);

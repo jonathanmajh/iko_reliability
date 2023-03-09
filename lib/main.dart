@@ -5,7 +5,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'admin/asset_storage.dart';
 import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
@@ -16,10 +15,10 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   await Hive.initFlutter();
-  Hive.registerAdapter(AssetAdapter());
+  // Hive.registerAdapter(AssetAdapter());
   // Hive.registerAdapter(ObservationsAdapter());
   // Hive.registerAdapter(ObservationListAdapter());
-  await Hive.openBox('assets');
+  // await Hive.openBox('assets');
   await Hive.openBox('pmNumber');
   await Hive.openBox('jpNumber');
   await Hive.openBox('routeNumber');

@@ -3,8 +3,8 @@ import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
-import 'asset_storage.dart';
 import 'consts.dart';
+import 'db_drift.dart';
 
 class EndDrawer extends StatefulWidget {
   const EndDrawer({Key? key}) : super(key: key);
@@ -150,9 +150,14 @@ class _EndDrawerState extends State<EndDrawer> {
                   );
                 }).toList(),
               ),
-              trailing: ElevatedButton(
-                onPressed: () => maximoAssetCaller(siteid, context),
-                child: const Text('Load'),
+              trailing: Consumer<MaximoServerNotifier>(
+                builder: (context, maximo, child) {
+                  return ElevatedButton(
+                    onPressed: () =>
+                        maximoAssetCaller(siteid, maximo.maximoServerSelected),
+                    child: const Text('Load'),
+                  );
+                },
               )),
           ListTile(
             title: const Text('Load Observation'),
