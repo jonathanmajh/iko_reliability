@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:provider/provider.dart';
 
 import '../admin/db_drift.dart';
 import '../main.dart';
@@ -29,15 +28,55 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
     columns.addAll([
       PlutoColumn(
+        title: 'Hierarchy',
+        field: 'hierarchy',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
         title: 'Asset Number',
         field: 'assetnum',
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
-        title: 'Parent',
-        field: 'parent',
-        type: PlutoColumnType.text(),
-      ),
+          title: 'Action',
+          field: 'action',
+          type: PlutoColumnType.text(),
+          renderer: (rendererContext) {
+            return Row(
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.refresh,
+                  ),
+                  onPressed: () {
+                    print(rendererContext.rowIdx);
+                    stateManager
+                        .getRowByIdx(rendererContext.rowIdx)!
+                        .cells['system']!
+                        .value = 'asdfasdf';
+                    stateManager.notifyListeners();
+                    refreshAsset(
+                        rendererContext.row.cells['assetnum']!.value, 'GH');
+                  },
+                  iconSize: 18,
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(0),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.info,
+                  ),
+                  onPressed: () {
+                    refreshAsset(
+                        rendererContext.row.cells['assetnum']!.value, 'GH');
+                  },
+                  iconSize: 18,
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(0),
+                ),
+              ],
+            );
+          }),
       PlutoColumn(
         title: 'Description',
         field: 'description',
@@ -63,16 +102,16 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       //   field: 'prodLine',
       //   type: PlutoColumnType.text(defaultValue: '1'),
       // ),
-      // PlutoColumn(
-      //   title: 'Frequency of Breakdown',
-      //   field: 'frequency',
-      //   type: PlutoColumnType.text(defaultValue: '1'),
-      // ),
-      // PlutoColumn(
-      //   title: 'Downtime',
-      //   field: 'downtime',
-      //   type: PlutoColumnType.text(defaultValue: '1'),
-      // ),
+      PlutoColumn(
+        title: 'Frequency of Breakdown',
+        field: 'frequency',
+        type: PlutoColumnType.text(defaultValue: '1'),
+      ),
+      PlutoColumn(
+        title: 'Downtime',
+        field: 'downtime',
+        type: PlutoColumnType.text(defaultValue: '1'),
+      ),
     ]);
     _loadData().then((fetchedRows) {
       PlutoGridStateManager.initializeRowsAsync(
@@ -87,7 +126,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   Future<List<PlutoRow>> _loadData() async {
-    final dbrows = await database!.getSiteAssets('GX');
+    final dbrows = await database!.getSiteAssets('GH');
     for (var row in dbrows) {
       siteAssets[row.assetnum] = row;
       if (parentAssets.containsKey(row.parent)) {
@@ -110,6 +149,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'description': PlutoCell(value: child.description),
             'priority': PlutoCell(value: 0),
             'system': PlutoCell(value: ''),
+            'action': PlutoCell(value: ''),
+            'frequency': PlutoCell(value: ''),
+            'downtime': PlutoCell(value: ''),
+            'hierarchy': PlutoCell(value: ''),
           },
           type: PlutoRowType.group(
               children: FilteredList<PlutoRow>(
@@ -123,6 +166,25 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   void collapseRows() {
     for (var row in stateManager.iterateAllRow) {
       print(row.cells.values.first.value);
+    }
+  }
+
+  void refreshAsset(String assetnum, [String? siteid]) async {
+    await database!.getWorkOrderMaximo(
+        assetnum, context.read<MaximoServerNotifier>().maximoServerSelected);
+    var wos = await database!.getAssetWorkorders(assetnum, siteid);
+    double downtime = 0;
+    int dtEvents = wos.length;
+    for (var wo in wos) {
+      downtime += wo.downtime;
+    }
+    for (var row in stateManager.iterateRowAndGroup) {
+      if (row.cells['assetnum']!.value == assetnum) {
+        row.cells['downtime']!.value =
+            '${downtime.floor()}:${((downtime - downtime.floor()) * 60).toStringAsFixed(0).padLeft(2, "0")}';
+        row.cells['frequency']!.value = dtEvents;
+        stateManager.notifyListeners();
+      }
     }
   }
 
