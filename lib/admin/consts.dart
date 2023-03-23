@@ -70,28 +70,28 @@ final siteIDAndOrgID = {
 };
 
 final siteIDAndDescription = {
-  'AA': 'AA: IKO Brampton',
+  'RAM': 'RAM: Alconbury',
   'ANT': 'ANT: Antwerp',
-  'BA': 'BA: Calgary',
-  'BL': 'BL: Hagerstown',
-  'CA': 'CA: Kankakee',
   'CAM': 'CAM: Appley Bridge',
-  'COM': 'COM: Combronde',
-  'GC': 'GC: Sumas',
   'GE': 'GE: Ashcroft',
-  'GH': 'GH: Hawkesbury',
-  'GI': 'GI: Madoc',
-  'GJ': 'GJ: CRC Toronto',
-  'GK': 'GK: IG Brampton',
-  'GM': 'GM:IG High River',
-  'GP': 'GP:CRC Brampton',
   'GR': 'GR: BramCal',
-  'GS': 'GS: Sylacauga',
+  'GP': 'GP:CRC Brampton',
+  'AA': 'AA: IKO Brampton',
+  'GK': 'GK: IG Brampton',
+  'BA': 'BA: Calgary',
+  'COM': 'COM: Combronde',
+  'BL': 'BL: Hagerstown',
+  'GH': 'GH: Hawkesbury',
+  'GM': 'GM: High River',
   'GV': 'GV: Hillsboro',
+  'CA': 'CA: Kankakee',
+  'KLU': 'KLU: Klundert',
+  'GI': 'GI: Madoc',
   'GX': 'GX: MaxiMix',
   'PBM': 'PBM: Senica',
-  'RAM': 'RAM: Alconbury',
-  'KLU': 'KLU: Klundert',
+  'GC': 'GC: Sumas',
+  'GS': 'GS: Sylacauga',
+  'GJ': 'GJ: CRC Toronto',
 };
 
 const tableHeaders = {
@@ -234,4 +234,170 @@ Map<String, String> maximoServerDomains = {
 Map<String, String> apiKeys = {
   'MASDEV': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
   'MASTEST': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
+};
+
+Map<int, Map<String, dynamic>> frequencyRating = {
+  1: {
+    'description': '1 Per 5 Years',
+    'likelihood': 'Remote',
+    'longdesc':
+        'Remote probability of occurrence; unlikely for failure to occur. Personnel are regularly trained and tested on tools and updated proceedures associated.',
+    'low': 0.0,
+    'high': 0.33,
+  },
+  2: {
+    'description': '1 Per 3 Years',
+    'likelihood': 'Very Low',
+    'longdesc':
+        'Very low failure rate.  Similar to design that has, in the past, had very low failure rates for given volume. Personnel are trained and tested on tools and proceedures associated.',
+    'low': 0.33,
+    'high': 0.5,
+  },
+  3: {
+    'description': '1 Per 2 Years',
+    'likelihood': 'Low',
+    'longdesc':
+        'Low failure rate. Similar to design that has, in the past, had low failure rates for the given volume. Personnel are trained on tools and proceedures annually.',
+    'low': 0.5,
+    'high': 1.0,
+  },
+  4: {
+    'description': '1 Per Year',
+    'likelihood': 'Occasional',
+    'longdesc':
+        'Occasional failure rate. Similar to design that has, in the past, had occasional failure rates for the given volume. Personnel are trained on tools and proceedures.',
+    'low': 1.0,
+    'high': 2.0,
+  },
+  5: {
+    'description': '1 Per 6 Months',
+    'likelihood': 'Occasional to Moderate',
+    'longdesc':
+        'Occasional to moderate failure rate. Similar to design that has, in the past, had occasional to moderate failure rates for the given volume. Personnel have been trained on proceedures but no formal training program.',
+    'low': 2.0,
+    'high': 3.0,
+  },
+  6: {
+    'description': '1 Per 4 Months',
+    'likelihood': 'Moderate',
+    'longdesc':
+        'Moderate failure rate. Similar to design that has, in the past, had moderate failure rates for the given volume. Personnel have proceedures but do not reference on a regular basis.',
+    'low': 3.0,
+    'high': 6.0,
+  },
+  7: {
+    'description': '1 Per 2 Months',
+    'likelihood': 'Moderate to High',
+    'longdesc':
+        'Moderate to high failure rate. Similar to design that has, in the past, had moderate to high failure rates for the given volume. Personnel were trained years ago and proceedures do not exist or have not been reviewed.',
+    'low': 6.0,
+    'high': 12.0,
+  },
+  8: {
+    'description': '1 Per Month',
+    'likelihood': 'High',
+    'longdesc':
+        'High failure rate. Similar to design that has, in the past, had high failure rates that have caused problems. Training is informal by word of mouth.',
+    'low': 12.0,
+    'high': 52.0,
+  },
+  9: {
+    'description': '1 Per Week',
+    'likelihood': 'High to Very High',
+    'longdesc':
+        'High to very high failure rate. Highly likely to cause problems. Personnel were trained years ago and proceedures do not exist or have not been reviewed.',
+    'low': 52.0,
+    'high': 104.0,
+  },
+  10: {
+    'description': '2 Per Week',
+    'likelihood': 'Very High',
+    'longdesc':
+        'Very high failure rate. Certain to cause problems. Training, tools and proceedures do not exist or are outdated.',
+    'low': 104.0,
+    'high': 9999999.0,
+  },
+};
+
+Map<int, Map<String, dynamic>> impactRating = {
+  1: {
+    'description': 'No Down Time',
+    'likelihood': 'None',
+    'longdesc':
+        'No reason to expect failure to have any effect on safety, health, environmental or system production. ',
+    'low': 0.0,
+    'high': 0.0,
+  },
+  2: {
+    'description': '0 to 2 Hours',
+    'likelihood': 'Very Low',
+    'longdesc':
+        'Minor disruption to system function. Repair of failure can be accomplished during trouble call. (25% rate reduction)',
+    'low': 0.0,
+    'high': 2.0,
+  },
+  3: {
+    'description': '2 to 5 Hours',
+    'likelihood': 'Occasional',
+    'longdesc':
+        'Minor disruption to system function. Repair of failure may be longer than trouble call but does not delay system production. (50% rate reduction)',
+    'low': 2.0,
+    'high': 5.0,
+  },
+  4: {
+    'description': '5 to 10 Hours',
+    'likelihood': 'Occasional to Moderate',
+    'longdesc':
+        'Moderate disruption to system function. Some portion of system production may need to be reworked or process delayed. (75% rate reduction)',
+    'low': 5.0,
+    'high': 10.0,
+  },
+  5: {
+    'description': '10 to 20 Hours',
+    'likelihood': 'Moderate',
+    'longdesc':
+        'Moderate disruption to system function. All system production may need to be reworked or process delayed. (Down 12 hours)',
+    'low': 10.0,
+    'high': 20.0,
+  },
+  6: {
+    'description': '20 to 30 Hours',
+    'likelihood': 'Moderate to High',
+    'longdesc':
+        'Moderate disruption to system function. Some portion of system production is lost. Moderate delay in restoring system function. (Down 1 day)',
+    'low': 20.0,
+    'high': 30.0,
+  },
+  7: {
+    'description': '1 to 3 Days',
+    'likelihood': 'High',
+    'longdesc':
+        'High disruption to system function. Some portion of system production is lost.  Significant delay in restoring system function. (Down 3 days)',
+    'low': 30.0,
+    'high': 72.0,
+  },
+  8: {
+    'description': '3 Days to 1 Week',
+    'likelihood': 'Very High',
+    'longdesc':
+        'Very high disruption to System function. All system production is lost. Significant delay in restoring system function. (Down 1 week)',
+    'low': 72.0,
+    'high': 168.0,
+  },
+  9: {
+    'description': 'Health Safety Environmental (with warning)',
+    'likelihood': 'Hazardous(with warning)',
+    'longdesc':
+        'Potential health, safety, or environmental issue. Failure will occur with warning.',
+    'low': 168.0,
+    'high': 720.0,
+  },
+  10: {
+    'description': 'Health Safety Environment (without warning)',
+    'likelihood': 'Hazardous(without warning)',
+    'longdesc':
+        'Potential health, safety, or environmental issue. Failure will occur without warning. ',
+    'low': 720.0,
+    'high': 9999999.0,
+  },
 };

@@ -70,6 +70,7 @@ class Assets extends Table {
   TextColumn get changedate => text()();
   TextColumn get hierarchy => text().nullable()();
   TextColumn? get parent => text().nullable()();
+  IntColumn get priority => integer()();
 
   @override
   Set<Column> get primaryKey => {siteid, assetnum};
@@ -77,7 +78,21 @@ class Assets extends Table {
 
 Map<String, Map<String, Asset>> assetCache = {};
 
-@DriftDatabase(tables: [Settings, MeterDBs, Observations, Assets])
+class Workorders extends Table {
+  TextColumn get wonum => text()();
+  TextColumn get description => text()();
+  TextColumn get status => text()();
+  TextColumn get siteid => text()();
+  TextColumn get reportdate => text()();
+  RealColumn get downtime => real()();
+  TextColumn get type => text()();
+  TextColumn get assetnum => text()();
+
+  @override
+  Set<Column> get primaryKey => {siteid, wonum};
+}
+
+@DriftDatabase(tables: [Settings, MeterDBs, Observations, Assets, Workorders])
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super.connect(impl.connect());
 
@@ -188,6 +203,73 @@ class MyDatabase extends _$MyDatabase {
         observation);
   }
 
+  Future getWorkOrderMaximo(String assetnum, String env) async {
+    // maybe a return to indicate completion
+    List<String> messages = [];
+    final result = await maximoRequest(
+        'iko_wo?oslc.select=wonum,siteid,description,status,reportdate,IKO_DOWNTIME,WORKTYPE,assetnum&oslc.where=assetnum="$assetnum" and IKO_DOWNTIME>0&lean=1',
+        'get',
+        env);
+    if (result['member'].length > 0) {
+      List<WorkordersCompanion> woInserts = [];
+      // save once without the hierarchy field then loop through again adding hierarchy
+      // because the parent assets might not always come before the child assets
+      for (var row in result['member'].toList()) {
+        woInserts.add(
+          WorkordersCompanion.insert(
+            wonum: row['wonum'],
+            description:
+                row['description'] ?? 'WO has NO description in Maximo',
+            downtime: row['iko_downtime'],
+            siteid: row['siteid'],
+            status: row['status'],
+            type: row['worktype'],
+            reportdate: row['reportdate'],
+            assetnum: row['assetnum'],
+          ),
+        );
+      }
+      try {
+        await batch((batch) {
+          batch.insertAllOnConflictUpdate(workorders, woInserts);
+        });
+      } catch (e) {
+        messages.add('Error inserting Meters\n${e.toString()}');
+      }
+    }
+  }
+
+  Future<List<Workorder>> getAssetWorkorders(String assetnum,
+      [String? siteid, String? date]) async {
+    if (siteid == null) {
+      if (date == null) {
+        return await (select(workorders)
+              ..where((t) => t.assetnum.equals(assetnum)))
+            .get();
+      } else {
+        return await (select(workorders)
+              ..where((t) =>
+                  t.assetnum.equals(assetnum) &
+                  t.reportdate.isBiggerThanValue(date)))
+            .get();
+      }
+    } else {
+      if (date == null) {
+        return await (select(workorders)
+              ..where(
+                  (t) => t.assetnum.equals(assetnum) & t.siteid.equals(siteid)))
+            .get();
+      } else {
+        return await (select(workorders)
+              ..where((t) =>
+                  t.assetnum.equals(assetnum) &
+                  t.siteid.equals(siteid) &
+                  t.reportdate.isBiggerThanValue(date)))
+            .get();
+      }
+    }
+  }
+
   Future<Meter> getMeterByDescription(
       String meterName, String condition) async {
     try {
@@ -217,23 +299,24 @@ class MyDatabase extends _$MyDatabase {
     // maybe a return to indicate completion
     List<String> messages = [];
     final result = await maximoRequest(
-        'mxasset?oslc.where=siteid=%22$siteid%22&oslc.select=assetnum,siteid,description,parent,status,changedate',
+        'mxasset?lean=1&oslc.where=siteid=%22$siteid%22 and ITEMNUM!="*" and status="OPERATING"&oslc.select=assetnum,siteid,description,parent,status,changedate,priority',
         'get',
         env);
-    if (result['rdfs:member'].length > 0) {
+    if (result['member'].length > 0) {
       List<AssetsCompanion> assetInserts = [];
       // save once without the hierarchy field then loop through again adding hierarchy
       // because the parent assets might not always come before the child assets
-      for (var row in result['rdfs:member'].toList()) {
+      for (var row in result['member'].toList()) {
         assetInserts.add(
           AssetsCompanion.insert(
-            assetnum: row['spi:assetnum'],
+            assetnum: row['assetnum'],
             description:
-                row['spi:description'] ?? 'Asset has NO description in Maximo',
-            parent: Value(row['spi:parent']),
-            siteid: row['spi:siteid'],
-            status: row['spi:status'],
-            changedate: row['spi:changedate'],
+                row['description'] ?? 'Asset has NO description in Maximo',
+            parent: Value(row['parent']),
+            siteid: row['siteid'],
+            status: row['status'],
+            changedate: row['changedate'],
+            priority: row['priority'] ?? 0,
           ),
         );
       }
