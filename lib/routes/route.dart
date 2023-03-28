@@ -5,6 +5,7 @@ import '../admin/contractor.dart';
 import '../admin/pm_check.dart';
 import '../admin/pm_meter_update.dart';
 import '../criticality/asset_criticality.dart';
+import '../criticality/system_criticality.dart';
 import '../main.dart';
 import '../test/test.dart';
 
@@ -16,6 +17,7 @@ import '../test/test.dart';
     // AutoRoute(path: "/readbook", page: EpubPage),
     AutoRoute(path: "/asset", page: AssetPage),
     AutoRoute(path: "/asset/criticality", page: AssetCriticalityPage),
+    AutoRoute(path: "/asset/system-criticality", page: SystemCriticalityPage),
     AutoRoute(path: "/contractor", page: ContractorPage),
     AutoRoute(path: "/pm/check", page: PmCheckPage),
     AutoRoute(path: "/pm/update-meter", page: PmMeterUpdatePage),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
@@ -71,9 +73,34 @@ class Assets extends Table {
   TextColumn get hierarchy => text().nullable()();
   TextColumn? get parent => text().nullable()();
   IntColumn get priority => integer()();
+  IntColumn get id => integer().autoIncrement()();
 
   @override
-  Set<Column> get primaryKey => {siteid, assetnum};
+  List<Set<Column>> get uniqueKeys => [
+        {siteid, assetnum}
+      ];
+}
+
+class SystemCriticalitys extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get description => text()();
+  TextColumn get siteid => text().nullable()();
+  IntColumn get safety => integer().withDefault(const Constant(0))();
+  IntColumn get regulatory => integer().withDefault(const Constant(0))();
+  IntColumn get economic => integer().withDefault(const Constant(0))();
+  IntColumn get throughput => integer().withDefault(const Constant(0))();
+  IntColumn get quality => integer().withDefault(const Constant(0))();
+}
+
+class AssetCriticalitys extends Table {
+  IntColumn get asset => integer().references(Assets, #id)();
+  IntColumn get system => integer().references(SystemCriticalitys, #id)();
+  TextColumn get type => text()(); // production / non-production
+  IntColumn get frequency => integer()();
+  IntColumn get downtime => integer()();
+
+  @override
+  Set<Column> get primaryKey => {asset};
 }
 
 Map<String, Map<String, Asset>> assetCache = {};
@@ -92,12 +119,19 @@ class Workorders extends Table {
   Set<Column> get primaryKey => {siteid, wonum};
 }
 
-@DriftDatabase(tables: [Settings, MeterDBs, Observations, Assets, Workorders])
+@DriftDatabase(tables: [
+  Settings,
+  MeterDBs,
+  Observations,
+  Assets,
+  Workorders,
+  SystemCriticalitys,
+  AssetCriticalitys
+])
 class MyDatabase extends _$MyDatabase {
-  MyDatabase() : super.connect(impl.connect());
+  MyDatabase() : super(impl.connect());
 
-  MyDatabase.forTesting(DatabaseConnection connection)
-      : super.connect(connection);
+  MyDatabase.forTesting(DatabaseConnection connection) : super(connection);
   // you should bump this number whenever you change or add a table definition.
   @override
   int get schemaVersion => 1;
@@ -111,6 +145,34 @@ class MyDatabase extends _$MyDatabase {
     into(settings).insertOnConflictUpdate(Setting(key: key, value: value));
   }
 
+  Future<int> addSystemCriticalitys(String value) async {
+    final row = await into(systemCriticalitys).insertReturning(
+        SystemCriticalitysCompanion.insert(description: value));
+    return row.id;
+  }
+
+  Future<int> updateSystemCriticalitys(
+    int key,
+    String description,
+    int safety,
+    int regulatory,
+    int economic,
+    int throughput,
+    int quality,
+  ) async {
+    final row = await (update(systemCriticalitys)
+          ..where((tbl) => tbl.id.equals(key)))
+        .writeReturning(SystemCriticalitysCompanion(
+      description: Value(description),
+      safety: Value(safety),
+      regulatory: Value(regulatory),
+      economic: Value(economic),
+      throughput: Value(throughput),
+      quality: Value(quality),
+    ));
+    return row.first.id;
+  }
+
   Future<Setting> getSettings(String key) async {
     final result = await (select(settings)..where((tbl) => tbl.key.equals(key)))
         .getSingleOrNull();
@@ -118,6 +180,36 @@ class MyDatabase extends _$MyDatabase {
       return Setting(key: key, value: '');
     }
     return result;
+  }
+
+  Future<void> loadSystems() async {
+    final bytes =
+        File.fromUri(Uri.parse('lib/criticality/CriticalityData.xlsx'))
+            .readAsBytesSync();
+    final decoder = SpreadsheetDecoder.decodeBytes(bytes);
+    final sheet = decoder.tables.values.first;
+    List<SystemCriticalitysCompanion> inserts = [];
+    for (var i = 2; i < sheet.maxRows; i++) {
+      var row = sheet.rows[i];
+      if (row[1] != null) {
+        inserts.add(SystemCriticalitysCompanion.insert(
+          description: row[1],
+          safety: Value(row[2]),
+          regulatory: Value(row[3]),
+          economic: Value(row[4]),
+          throughput: Value(row[5]),
+          quality: Value(row[6]),
+          siteid: Value(row[0]),
+        ));
+      }
+    }
+    try {
+      await batch((batch) {
+        batch.insertAll(systemCriticalitys, inserts);
+      });
+    } catch (e) {
+      print('Error inserting System Criticality\n${e.toString()}');
+    }
   }
 
   Future<void> addMeters() async {
@@ -237,6 +329,16 @@ class MyDatabase extends _$MyDatabase {
         messages.add('Error inserting Meters\n${e.toString()}');
       }
     }
+  }
+
+  Future<List<SystemCriticality>> getSystemCriticalities() async {
+    var systems = await (select(systemCriticalitys)).get();
+    if (systems.isEmpty) {
+      print('getting data from excel');
+      await loadSystems();
+      systems = await (select(systemCriticalitys)).get();
+    }
+    return systems;
   }
 
   Future<List<Workorder>> getAssetWorkorders(String assetnum,

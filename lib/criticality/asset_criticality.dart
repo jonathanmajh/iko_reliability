@@ -233,8 +233,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'priority': PlutoCell(value: child.priority),
             'system': PlutoCell(value: ''),
             'action': PlutoCell(value: ''),
-            'frequency': PlutoCell(value: ''),
-            'downtime': PlutoCell(value: ''),
+            'frequency': PlutoCell(value: 0),
+            'downtime': PlutoCell(value: 0),
             'hierarchy': PlutoCell(value: ''),
           },
           type: PlutoRowType.group(
@@ -283,6 +283,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       body: Container(
           padding: const EdgeInsets.all(30),
           child: PlutoDualGrid(
+            isVertical: true,
             gridPropsA: PlutoDualGridProps(
                 columns: columns,
                 rows: rows,
@@ -311,6 +312,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
                   LogicalKeySet(LogicalKeyboardKey.numpadAdd):
                       CustomAddKeyAction(),
+                  LogicalKeySet(LogicalKeyboardKey.minus):
+                      CustomMinusKeyAction(),
+                  LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                      CustomMinusKeyAction(),
                 }))),
             gridPropsB: PlutoDualGridProps(
               columns: detailColumns,
@@ -330,7 +335,8 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
   }) {
-    if (stateManager.currentColumnField != 'frequency' ||
+    print('Pressed add key.');
+    if (stateManager.currentColumnField != 'frequency' &&
         stateManager.currentColumnField != 'downtime') {
       return;
     }
@@ -339,7 +345,25 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
     }
     stateManager.currentCell!.value = stateManager.currentCell!.value + 1;
     stateManager.notifyListeners();
-    print('Pressed add key.');
+  }
+}
+
+class CustomMinusKeyAction extends PlutoGridShortcutAction {
+  @override
+  void execute({
+    required PlutoKeyManagerEvent keyEvent,
+    required PlutoGridStateManager stateManager,
+  }) {
+    print('Pressed minus key.');
+    if (stateManager.currentColumnField != 'frequency' &&
+        stateManager.currentColumnField != 'downtime') {
+      return;
+    }
+    if (stateManager.currentCell!.value == 0) {
+      return;
+    }
+    stateManager.currentCell!.value = stateManager.currentCell!.value - 1;
+    stateManager.notifyListeners();
   }
 }
 

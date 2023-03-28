@@ -19,7 +19,8 @@ dependencies:
     wakelock_web: ^0.4.0
     html: ^0.15.0
     dropdown_search: ^5.0.1
-    pluto_grid: ^6.0.2
+    pluto_grid:
+        git: https://github.com/jonathanmajh/pluto_grid
     file_picker: ^5.0.0
     spreadsheet_decoder: ^2.0.2
     hive_flutter: ^1.1.0

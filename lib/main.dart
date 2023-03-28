@@ -167,6 +167,15 @@ class _HomePageState extends State<HomePage> {
                     Navigator.pop(context); // close the drawer
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('System Criticality'),
+                  onTap: () {
+                    context.router.pushNamed("/asset/system-criticality");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
               ],
             ),
             ExpansionTile(

@@ -833,6 +833,15 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
   late final GeneratedColumn<int> priority = GeneratedColumn<int>(
       'priority', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
   @override
   List<GeneratedColumn> get $columns => [
         assetnum,
@@ -842,7 +851,8 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         changedate,
         hierarchy,
         parent,
-        priority
+        priority,
+        id
       ];
   @override
   String get aliasedName => _alias ?? 'assets';
@@ -901,11 +911,18 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     } else if (isInserting) {
       context.missing(_priorityMeta);
     }
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {siteid, assetnum};
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {siteid, assetnum},
+      ];
   @override
   Asset map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -926,6 +943,8 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
           .read(DriftSqlType.string, data['${effectivePrefix}parent']),
       priority: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}priority'])!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
     );
   }
 
@@ -944,6 +963,7 @@ class Asset extends DataClass implements Insertable<Asset> {
   final String? hierarchy;
   final String? parent;
   final int priority;
+  final int id;
   const Asset(
       {required this.assetnum,
       required this.description,
@@ -952,7 +972,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       required this.changedate,
       this.hierarchy,
       this.parent,
-      required this.priority});
+      required this.priority,
+      required this.id});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -968,6 +989,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       map['parent'] = Variable<String>(parent);
     }
     map['priority'] = Variable<int>(priority);
+    map['id'] = Variable<int>(id);
     return map;
   }
 
@@ -984,6 +1006,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       parent:
           parent == null && nullToAbsent ? const Value.absent() : Value(parent),
       priority: Value(priority),
+      id: Value(id),
     );
   }
 
@@ -999,6 +1022,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       hierarchy: serializer.fromJson<String?>(json['hierarchy']),
       parent: serializer.fromJson<String?>(json['parent']),
       priority: serializer.fromJson<int>(json['priority']),
+      id: serializer.fromJson<int>(json['id']),
     );
   }
   @override
@@ -1013,6 +1037,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       'hierarchy': serializer.toJson<String?>(hierarchy),
       'parent': serializer.toJson<String?>(parent),
       'priority': serializer.toJson<int>(priority),
+      'id': serializer.toJson<int>(id),
     };
   }
 
@@ -1024,7 +1049,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           String? changedate,
           Value<String?> hierarchy = const Value.absent(),
           Value<String?> parent = const Value.absent(),
-          int? priority}) =>
+          int? priority,
+          int? id}) =>
       Asset(
         assetnum: assetnum ?? this.assetnum,
         description: description ?? this.description,
@@ -1034,6 +1060,7 @@ class Asset extends DataClass implements Insertable<Asset> {
         hierarchy: hierarchy.present ? hierarchy.value : this.hierarchy,
         parent: parent.present ? parent.value : this.parent,
         priority: priority ?? this.priority,
+        id: id ?? this.id,
       );
   @override
   String toString() {
@@ -1045,14 +1072,15 @@ class Asset extends DataClass implements Insertable<Asset> {
           ..write('changedate: $changedate, ')
           ..write('hierarchy: $hierarchy, ')
           ..write('parent: $parent, ')
-          ..write('priority: $priority')
+          ..write('priority: $priority, ')
+          ..write('id: $id')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(assetnum, description, status, siteid,
-      changedate, hierarchy, parent, priority);
+      changedate, hierarchy, parent, priority, id);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1064,7 +1092,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           other.changedate == this.changedate &&
           other.hierarchy == this.hierarchy &&
           other.parent == this.parent &&
-          other.priority == this.priority);
+          other.priority == this.priority &&
+          other.id == this.id);
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
@@ -1076,6 +1105,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String?> hierarchy;
   final Value<String?> parent;
   final Value<int> priority;
+  final Value<int> id;
   const AssetsCompanion({
     this.assetnum = const Value.absent(),
     this.description = const Value.absent(),
@@ -1085,6 +1115,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.hierarchy = const Value.absent(),
     this.parent = const Value.absent(),
     this.priority = const Value.absent(),
+    this.id = const Value.absent(),
   });
   AssetsCompanion.insert({
     required String assetnum,
@@ -1095,6 +1126,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.hierarchy = const Value.absent(),
     this.parent = const Value.absent(),
     required int priority,
+    this.id = const Value.absent(),
   })  : assetnum = Value(assetnum),
         description = Value(description),
         status = Value(status),
@@ -1110,6 +1142,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? hierarchy,
     Expression<String>? parent,
     Expression<int>? priority,
+    Expression<int>? id,
   }) {
     return RawValuesInsertable({
       if (assetnum != null) 'assetnum': assetnum,
@@ -1120,6 +1153,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (hierarchy != null) 'hierarchy': hierarchy,
       if (parent != null) 'parent': parent,
       if (priority != null) 'priority': priority,
+      if (id != null) 'id': id,
     });
   }
 
@@ -1131,7 +1165,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       Value<String>? changedate,
       Value<String?>? hierarchy,
       Value<String?>? parent,
-      Value<int>? priority}) {
+      Value<int>? priority,
+      Value<int>? id}) {
     return AssetsCompanion(
       assetnum: assetnum ?? this.assetnum,
       description: description ?? this.description,
@@ -1141,6 +1176,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       hierarchy: hierarchy ?? this.hierarchy,
       parent: parent ?? this.parent,
       priority: priority ?? this.priority,
+      id: id ?? this.id,
     );
   }
 
@@ -1171,6 +1207,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     if (priority.present) {
       map['priority'] = Variable<int>(priority.value);
     }
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
     return map;
   }
 
@@ -1184,7 +1223,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('changedate: $changedate, ')
           ..write('hierarchy: $hierarchy, ')
           ..write('parent: $parent, ')
-          ..write('priority: $priority')
+          ..write('priority: $priority, ')
+          ..write('id: $id')
           ..write(')'))
         .toString();
   }
@@ -1596,18 +1636,723 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
   }
 }
 
+class $SystemCriticalitysTable extends SystemCriticalitys
+    with TableInfo<$SystemCriticalitysTable, SystemCriticality> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SystemCriticalitysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
+  @override
+  late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
+      'siteid', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _safetyMeta = const VerificationMeta('safety');
+  @override
+  late final GeneratedColumn<int> safety = GeneratedColumn<int>(
+      'safety', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _regulatoryMeta =
+      const VerificationMeta('regulatory');
+  @override
+  late final GeneratedColumn<int> regulatory = GeneratedColumn<int>(
+      'regulatory', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _economicMeta =
+      const VerificationMeta('economic');
+  @override
+  late final GeneratedColumn<int> economic = GeneratedColumn<int>(
+      'economic', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _throughputMeta =
+      const VerificationMeta('throughput');
+  @override
+  late final GeneratedColumn<int> throughput = GeneratedColumn<int>(
+      'throughput', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _qualityMeta =
+      const VerificationMeta('quality');
+  @override
+  late final GeneratedColumn<int> quality = GeneratedColumn<int>(
+      'quality', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        description,
+        siteid,
+        safety,
+        regulatory,
+        economic,
+        throughput,
+        quality
+      ];
+  @override
+  String get aliasedName => _alias ?? 'system_criticalitys';
+  @override
+  String get actualTableName => 'system_criticalitys';
+  @override
+  VerificationContext validateIntegrity(Insertable<SystemCriticality> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('siteid')) {
+      context.handle(_siteidMeta,
+          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+    }
+    if (data.containsKey('safety')) {
+      context.handle(_safetyMeta,
+          safety.isAcceptableOrUnknown(data['safety']!, _safetyMeta));
+    }
+    if (data.containsKey('regulatory')) {
+      context.handle(
+          _regulatoryMeta,
+          regulatory.isAcceptableOrUnknown(
+              data['regulatory']!, _regulatoryMeta));
+    }
+    if (data.containsKey('economic')) {
+      context.handle(_economicMeta,
+          economic.isAcceptableOrUnknown(data['economic']!, _economicMeta));
+    }
+    if (data.containsKey('throughput')) {
+      context.handle(
+          _throughputMeta,
+          throughput.isAcceptableOrUnknown(
+              data['throughput']!, _throughputMeta));
+    }
+    if (data.containsKey('quality')) {
+      context.handle(_qualityMeta,
+          quality.isAcceptableOrUnknown(data['quality']!, _qualityMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SystemCriticality map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SystemCriticality(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      siteid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}siteid']),
+      safety: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}safety'])!,
+      regulatory: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}regulatory'])!,
+      economic: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}economic'])!,
+      throughput: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}throughput'])!,
+      quality: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}quality'])!,
+    );
+  }
+
+  @override
+  $SystemCriticalitysTable createAlias(String alias) {
+    return $SystemCriticalitysTable(attachedDatabase, alias);
+  }
+}
+
+class SystemCriticality extends DataClass
+    implements Insertable<SystemCriticality> {
+  final int id;
+  final String description;
+  final String? siteid;
+  final int safety;
+  final int regulatory;
+  final int economic;
+  final int throughput;
+  final int quality;
+  const SystemCriticality(
+      {required this.id,
+      required this.description,
+      this.siteid,
+      required this.safety,
+      required this.regulatory,
+      required this.economic,
+      required this.throughput,
+      required this.quality});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || siteid != null) {
+      map['siteid'] = Variable<String>(siteid);
+    }
+    map['safety'] = Variable<int>(safety);
+    map['regulatory'] = Variable<int>(regulatory);
+    map['economic'] = Variable<int>(economic);
+    map['throughput'] = Variable<int>(throughput);
+    map['quality'] = Variable<int>(quality);
+    return map;
+  }
+
+  SystemCriticalitysCompanion toCompanion(bool nullToAbsent) {
+    return SystemCriticalitysCompanion(
+      id: Value(id),
+      description: Value(description),
+      siteid:
+          siteid == null && nullToAbsent ? const Value.absent() : Value(siteid),
+      safety: Value(safety),
+      regulatory: Value(regulatory),
+      economic: Value(economic),
+      throughput: Value(throughput),
+      quality: Value(quality),
+    );
+  }
+
+  factory SystemCriticality.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SystemCriticality(
+      id: serializer.fromJson<int>(json['id']),
+      description: serializer.fromJson<String>(json['description']),
+      siteid: serializer.fromJson<String?>(json['siteid']),
+      safety: serializer.fromJson<int>(json['safety']),
+      regulatory: serializer.fromJson<int>(json['regulatory']),
+      economic: serializer.fromJson<int>(json['economic']),
+      throughput: serializer.fromJson<int>(json['throughput']),
+      quality: serializer.fromJson<int>(json['quality']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'description': serializer.toJson<String>(description),
+      'siteid': serializer.toJson<String?>(siteid),
+      'safety': serializer.toJson<int>(safety),
+      'regulatory': serializer.toJson<int>(regulatory),
+      'economic': serializer.toJson<int>(economic),
+      'throughput': serializer.toJson<int>(throughput),
+      'quality': serializer.toJson<int>(quality),
+    };
+  }
+
+  SystemCriticality copyWith(
+          {int? id,
+          String? description,
+          Value<String?> siteid = const Value.absent(),
+          int? safety,
+          int? regulatory,
+          int? economic,
+          int? throughput,
+          int? quality}) =>
+      SystemCriticality(
+        id: id ?? this.id,
+        description: description ?? this.description,
+        siteid: siteid.present ? siteid.value : this.siteid,
+        safety: safety ?? this.safety,
+        regulatory: regulatory ?? this.regulatory,
+        economic: economic ?? this.economic,
+        throughput: throughput ?? this.throughput,
+        quality: quality ?? this.quality,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('SystemCriticality(')
+          ..write('id: $id, ')
+          ..write('description: $description, ')
+          ..write('siteid: $siteid, ')
+          ..write('safety: $safety, ')
+          ..write('regulatory: $regulatory, ')
+          ..write('economic: $economic, ')
+          ..write('throughput: $throughput, ')
+          ..write('quality: $quality')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, description, siteid, safety, regulatory,
+      economic, throughput, quality);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SystemCriticality &&
+          other.id == this.id &&
+          other.description == this.description &&
+          other.siteid == this.siteid &&
+          other.safety == this.safety &&
+          other.regulatory == this.regulatory &&
+          other.economic == this.economic &&
+          other.throughput == this.throughput &&
+          other.quality == this.quality);
+}
+
+class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
+  final Value<int> id;
+  final Value<String> description;
+  final Value<String?> siteid;
+  final Value<int> safety;
+  final Value<int> regulatory;
+  final Value<int> economic;
+  final Value<int> throughput;
+  final Value<int> quality;
+  const SystemCriticalitysCompanion({
+    this.id = const Value.absent(),
+    this.description = const Value.absent(),
+    this.siteid = const Value.absent(),
+    this.safety = const Value.absent(),
+    this.regulatory = const Value.absent(),
+    this.economic = const Value.absent(),
+    this.throughput = const Value.absent(),
+    this.quality = const Value.absent(),
+  });
+  SystemCriticalitysCompanion.insert({
+    this.id = const Value.absent(),
+    required String description,
+    this.siteid = const Value.absent(),
+    this.safety = const Value.absent(),
+    this.regulatory = const Value.absent(),
+    this.economic = const Value.absent(),
+    this.throughput = const Value.absent(),
+    this.quality = const Value.absent(),
+  }) : description = Value(description);
+  static Insertable<SystemCriticality> custom({
+    Expression<int>? id,
+    Expression<String>? description,
+    Expression<String>? siteid,
+    Expression<int>? safety,
+    Expression<int>? regulatory,
+    Expression<int>? economic,
+    Expression<int>? throughput,
+    Expression<int>? quality,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (description != null) 'description': description,
+      if (siteid != null) 'siteid': siteid,
+      if (safety != null) 'safety': safety,
+      if (regulatory != null) 'regulatory': regulatory,
+      if (economic != null) 'economic': economic,
+      if (throughput != null) 'throughput': throughput,
+      if (quality != null) 'quality': quality,
+    });
+  }
+
+  SystemCriticalitysCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? description,
+      Value<String?>? siteid,
+      Value<int>? safety,
+      Value<int>? regulatory,
+      Value<int>? economic,
+      Value<int>? throughput,
+      Value<int>? quality}) {
+    return SystemCriticalitysCompanion(
+      id: id ?? this.id,
+      description: description ?? this.description,
+      siteid: siteid ?? this.siteid,
+      safety: safety ?? this.safety,
+      regulatory: regulatory ?? this.regulatory,
+      economic: economic ?? this.economic,
+      throughput: throughput ?? this.throughput,
+      quality: quality ?? this.quality,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (siteid.present) {
+      map['siteid'] = Variable<String>(siteid.value);
+    }
+    if (safety.present) {
+      map['safety'] = Variable<int>(safety.value);
+    }
+    if (regulatory.present) {
+      map['regulatory'] = Variable<int>(regulatory.value);
+    }
+    if (economic.present) {
+      map['economic'] = Variable<int>(economic.value);
+    }
+    if (throughput.present) {
+      map['throughput'] = Variable<int>(throughput.value);
+    }
+    if (quality.present) {
+      map['quality'] = Variable<int>(quality.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SystemCriticalitysCompanion(')
+          ..write('id: $id, ')
+          ..write('description: $description, ')
+          ..write('siteid: $siteid, ')
+          ..write('safety: $safety, ')
+          ..write('regulatory: $regulatory, ')
+          ..write('economic: $economic, ')
+          ..write('throughput: $throughput, ')
+          ..write('quality: $quality')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AssetCriticalitysTable extends AssetCriticalitys
+    with TableInfo<$AssetCriticalitysTable, AssetCriticality> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssetCriticalitysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _assetMeta = const VerificationMeta('asset');
+  @override
+  late final GeneratedColumn<int> asset = GeneratedColumn<int>(
+      'asset', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES assets (id)'));
+  static const VerificationMeta _systemMeta = const VerificationMeta('system');
+  @override
+  late final GeneratedColumn<int> system = GeneratedColumn<int>(
+      'system', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES system_criticalitys (id)'));
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _frequencyMeta =
+      const VerificationMeta('frequency');
+  @override
+  late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
+      'frequency', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _downtimeMeta =
+      const VerificationMeta('downtime');
+  @override
+  late final GeneratedColumn<int> downtime = GeneratedColumn<int>(
+      'downtime', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [asset, system, type, frequency, downtime];
+  @override
+  String get aliasedName => _alias ?? 'asset_criticalitys';
+  @override
+  String get actualTableName => 'asset_criticalitys';
+  @override
+  VerificationContext validateIntegrity(Insertable<AssetCriticality> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('asset')) {
+      context.handle(
+          _assetMeta, asset.isAcceptableOrUnknown(data['asset']!, _assetMeta));
+    }
+    if (data.containsKey('system')) {
+      context.handle(_systemMeta,
+          system.isAcceptableOrUnknown(data['system']!, _systemMeta));
+    } else if (isInserting) {
+      context.missing(_systemMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('frequency')) {
+      context.handle(_frequencyMeta,
+          frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta));
+    } else if (isInserting) {
+      context.missing(_frequencyMeta);
+    }
+    if (data.containsKey('downtime')) {
+      context.handle(_downtimeMeta,
+          downtime.isAcceptableOrUnknown(data['downtime']!, _downtimeMeta));
+    } else if (isInserting) {
+      context.missing(_downtimeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {asset};
+  @override
+  AssetCriticality map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssetCriticality(
+      asset: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}asset'])!,
+      system: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}system'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      frequency: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}frequency'])!,
+      downtime: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}downtime'])!,
+    );
+  }
+
+  @override
+  $AssetCriticalitysTable createAlias(String alias) {
+    return $AssetCriticalitysTable(attachedDatabase, alias);
+  }
+}
+
+class AssetCriticality extends DataClass
+    implements Insertable<AssetCriticality> {
+  final int asset;
+  final int system;
+  final String type;
+  final int frequency;
+  final int downtime;
+  const AssetCriticality(
+      {required this.asset,
+      required this.system,
+      required this.type,
+      required this.frequency,
+      required this.downtime});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['asset'] = Variable<int>(asset);
+    map['system'] = Variable<int>(system);
+    map['type'] = Variable<String>(type);
+    map['frequency'] = Variable<int>(frequency);
+    map['downtime'] = Variable<int>(downtime);
+    return map;
+  }
+
+  AssetCriticalitysCompanion toCompanion(bool nullToAbsent) {
+    return AssetCriticalitysCompanion(
+      asset: Value(asset),
+      system: Value(system),
+      type: Value(type),
+      frequency: Value(frequency),
+      downtime: Value(downtime),
+    );
+  }
+
+  factory AssetCriticality.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssetCriticality(
+      asset: serializer.fromJson<int>(json['asset']),
+      system: serializer.fromJson<int>(json['system']),
+      type: serializer.fromJson<String>(json['type']),
+      frequency: serializer.fromJson<int>(json['frequency']),
+      downtime: serializer.fromJson<int>(json['downtime']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'asset': serializer.toJson<int>(asset),
+      'system': serializer.toJson<int>(system),
+      'type': serializer.toJson<String>(type),
+      'frequency': serializer.toJson<int>(frequency),
+      'downtime': serializer.toJson<int>(downtime),
+    };
+  }
+
+  AssetCriticality copyWith(
+          {int? asset,
+          int? system,
+          String? type,
+          int? frequency,
+          int? downtime}) =>
+      AssetCriticality(
+        asset: asset ?? this.asset,
+        system: system ?? this.system,
+        type: type ?? this.type,
+        frequency: frequency ?? this.frequency,
+        downtime: downtime ?? this.downtime,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('AssetCriticality(')
+          ..write('asset: $asset, ')
+          ..write('system: $system, ')
+          ..write('type: $type, ')
+          ..write('frequency: $frequency, ')
+          ..write('downtime: $downtime')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(asset, system, type, frequency, downtime);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssetCriticality &&
+          other.asset == this.asset &&
+          other.system == this.system &&
+          other.type == this.type &&
+          other.frequency == this.frequency &&
+          other.downtime == this.downtime);
+}
+
+class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
+  final Value<int> asset;
+  final Value<int> system;
+  final Value<String> type;
+  final Value<int> frequency;
+  final Value<int> downtime;
+  const AssetCriticalitysCompanion({
+    this.asset = const Value.absent(),
+    this.system = const Value.absent(),
+    this.type = const Value.absent(),
+    this.frequency = const Value.absent(),
+    this.downtime = const Value.absent(),
+  });
+  AssetCriticalitysCompanion.insert({
+    this.asset = const Value.absent(),
+    required int system,
+    required String type,
+    required int frequency,
+    required int downtime,
+  })  : system = Value(system),
+        type = Value(type),
+        frequency = Value(frequency),
+        downtime = Value(downtime);
+  static Insertable<AssetCriticality> custom({
+    Expression<int>? asset,
+    Expression<int>? system,
+    Expression<String>? type,
+    Expression<int>? frequency,
+    Expression<int>? downtime,
+  }) {
+    return RawValuesInsertable({
+      if (asset != null) 'asset': asset,
+      if (system != null) 'system': system,
+      if (type != null) 'type': type,
+      if (frequency != null) 'frequency': frequency,
+      if (downtime != null) 'downtime': downtime,
+    });
+  }
+
+  AssetCriticalitysCompanion copyWith(
+      {Value<int>? asset,
+      Value<int>? system,
+      Value<String>? type,
+      Value<int>? frequency,
+      Value<int>? downtime}) {
+    return AssetCriticalitysCompanion(
+      asset: asset ?? this.asset,
+      system: system ?? this.system,
+      type: type ?? this.type,
+      frequency: frequency ?? this.frequency,
+      downtime: downtime ?? this.downtime,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (asset.present) {
+      map['asset'] = Variable<int>(asset.value);
+    }
+    if (system.present) {
+      map['system'] = Variable<int>(system.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (frequency.present) {
+      map['frequency'] = Variable<int>(frequency.value);
+    }
+    if (downtime.present) {
+      map['downtime'] = Variable<int>(downtime.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssetCriticalitysCompanion(')
+          ..write('asset: $asset, ')
+          ..write('system: $system, ')
+          ..write('type: $type, ')
+          ..write('frequency: $frequency, ')
+          ..write('downtime: $downtime')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(e);
-  _$MyDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final $SettingsTable settings = $SettingsTable(this);
   late final $MeterDBsTable meterDBs = $MeterDBsTable(this);
   late final $ObservationsTable observations = $ObservationsTable(this);
   late final $AssetsTable assets = $AssetsTable(this);
   late final $WorkordersTable workorders = $WorkordersTable(this);
+  late final $SystemCriticalitysTable systemCriticalitys =
+      $SystemCriticalitysTable(this);
+  late final $AssetCriticalitysTable assetCriticalitys =
+      $AssetCriticalitysTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [settings, meterDBs, observations, assets, workorders];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        settings,
+        meterDBs,
+        observations,
+        assets,
+        workorders,
+        systemCriticalitys,
+        assetCriticalitys
+      ];
 }

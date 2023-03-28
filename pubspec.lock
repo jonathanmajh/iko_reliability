@@ -643,11 +643,12 @@ packages:
   pluto_grid:
     dependency: "direct main"
     description:
-      name: pluto_grid
-      sha256: "4f34ee8345405c4109d403e2b76505f0b2c306d26de4c0b565c8f094c61ff49a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.2"
+      path: "."
+      ref: HEAD
+      resolved-ref: e7579c976af901480c8aeb2bcea2ba37483c078d
+      url: "https://github.com/jonathanmajh/pluto_grid"
+    source: git
+    version: "6.0.4"
   pointycastle:
     dependency: transitive
     description:
