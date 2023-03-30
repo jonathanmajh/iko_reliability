@@ -401,3 +401,73 @@ Map<int, Map<String, dynamic>> impactRating = {
     'high': 9999999.0,
   },
 };
+
+List<String> systemSafety = [
+  '',
+  'No Injury',
+  'Near Miss',
+  'Unsafe Condition',
+  'First Aid',
+  'Medical Treatment',
+  'Lost Time',
+  'Long-Term Disability',
+  'Fatality',
+  'Multiple Fatalities',
+  'Catastrophic Event'
+];
+
+List<String> systemRegulatory = [
+  '',
+  'No Fine',
+  '10K in Fines',
+  '100K in Fines',
+  '1M in Fines',
+  '5M+ in Fines',
+  'Production Halt',
+  'Plant Shutdown',
+  'Regulatory Investigation',
+  'Criminal Charges',
+  'Legal Action',
+];
+
+List<String> systemEconomic = [
+  '',
+  'No Cost',
+  '1K in Parts',
+  '5K in Parts',
+  '10K in Parts',
+  '50K in Parts',
+  '100K in Parts',
+  '150K in Parts',
+  '250K in Parts',
+  '500K in Parts',
+  '500K+ in Parts',
+];
+
+List<String> systemThroughput = [
+  '',
+  'No Impact',
+  '25% Reduced Production',
+  '50% Reduced Production',
+  '1 Hr downtime',
+  '4 Hrs downtime',
+  '8 Hrs downtime',
+  '24 hrs downtime',
+  '3 Days downtime',
+  '1 Week downtime',
+  '1+ Weeks downtime',
+];
+
+List<String> systemQuality = [
+  '',
+  'No Scrap',
+  '5 pallets of scrap',
+  '10 pallets of scrap',
+  '20 pallets of scrap',
+  '30 pallets of scrap',
+  '40 pallets of scrap',
+  '10K in potential claims',
+  '25K in potential claims',
+  '40K in potential claims',
+  'Potential class action',
+];

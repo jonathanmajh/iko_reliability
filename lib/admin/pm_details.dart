@@ -436,13 +436,14 @@ class _PMDetailsState extends State<PMDetails> {
                         if (routeNumberFieldController.text.isNotEmpty &&
                             routeNameFieldController.text.isNotEmpty) {
                           templateNotifier.setRouteInfo(
-                              routeNumberFieldController.text,
-                              routeNameFieldController.text,
-                              selected.selectedFile!,
-                              selected.selectedTemplate!,
-                              Provider.of<MaximoServerNotifier>(context,
-                                      listen: false)
-                                  .maximoServerSelected);
+                            routeNumberFieldController.text,
+                            routeNameFieldController.text,
+                            selected.selectedFile!,
+                            selected.selectedTemplate!,
+                            Provider.of<MaximoServerNotifier>(context,
+                                    listen: false)
+                                .maximoServerSelected,
+                          );
                         }
                       },
                       icon: const Icon(Icons.sync),

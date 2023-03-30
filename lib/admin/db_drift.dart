@@ -151,6 +151,13 @@ class MyDatabase extends _$MyDatabase {
     return row.id;
   }
 
+  Future<int> deleteSystemCriticalitys(int value) async {
+    final row = await (delete(systemCriticalitys)
+          ..where((t) => t.id.equals(value)))
+        .goAndReturn();
+    return row.first.id;
+  }
+
   Future<int> updateSystemCriticalitys(
     int key,
     String description,

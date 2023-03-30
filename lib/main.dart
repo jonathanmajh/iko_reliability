@@ -9,6 +9,7 @@ import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
+import 'criticality/system_notifier.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => TemplateNotifier()),
         ChangeNotifierProvider(create: (context) => UploadNotifier()),
         ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
+        ChangeNotifierProvider(create: (context) => SystemsNotifier()),
       ],
       child: MaterialApp.router(
         routerDelegate: _appRouter.delegate(),
@@ -113,24 +115,27 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   'IKO Reliability Maximo',
                   style: TextStyle(
                     // color: Colors.white,
                     fontSize: 24,
                   ),
                 ),
-                Text(
+                const Text(
                   'display name...',
                   style: TextStyle(
                     // color: Colors.white,
                     fontSize: 18,
                   ),
                 ),
-                Text('userid'),
-                Text('Status'),
-                Text('environment'),
+                const Text('userid'),
+                const Text('Status'),
+                Consumer<SystemsNotifier>(builder: (context, systems, child) {
+                  systems.updateSystems();
+                  return const Text('environment');
+                }),
               ],
             )),
             const ListTile(

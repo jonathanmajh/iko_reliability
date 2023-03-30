@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
+import 'system_notifier.dart';
 
 class AssetCriticalityPage extends StatefulWidget {
   const AssetCriticalityPage({Key? key}) : super(key: key);
@@ -37,31 +38,44 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
     detailColumns.addAll([
       PlutoColumn(
+        readOnly: true,
+        width: 150,
         title: 'WO Number',
         field: 'wonum',
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
+        readOnly: true,
+        width: 300,
         title: 'Description',
         field: 'description',
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
+        width: 100,
+        readOnly: true,
         title: 'WO Type',
         field: 'type',
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
-        title: 'Status',
-        field: 'status',
-        type: PlutoColumnType.text(),
-      ),
+          width: 100,
+          readOnly: true,
+          title: 'Status',
+          field: 'status',
+          type: PlutoColumnType.text()),
       PlutoColumn(
+        width: 150,
+        readOnly: true,
         title: 'Reported Date',
         field: 'reportdate',
-        type: PlutoColumnType.text(),
+        type: PlutoColumnType.date(
+          format: 'yyyy-MM-dd',
+        ),
       ),
       PlutoColumn(
+        width: 100,
+        readOnly: true,
         title: 'Downtime',
         field: 'downtime',
         type: PlutoColumnType.text(),
@@ -75,11 +89,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
+        width: 100,
         title: 'Asset Number',
         field: 'assetnum',
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
+          width: 100,
           title: 'Action',
           field: 'action',
           type: PlutoColumnType.text(),
@@ -92,11 +108,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   ),
                   onPressed: () {
                     print(rendererContext.rowIdx);
-                    stateManager
-                        .getRowByIdx(rendererContext.rowIdx)!
-                        .cells['system']!
-                        .value = 'asdfasdf';
-                    stateManager.notifyListeners();
                     refreshAsset(
                         rendererContext.row.cells['assetnum']!.value, 'GH');
                   },
@@ -125,15 +136,42 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
+        width: 100,
+        readOnly: true,
         title: 'Criticality',
         field: 'priority',
         type: PlutoColumnType.number(),
       ),
       PlutoColumn(
+        width: 400,
         title: 'System',
         field: 'system',
-        type: PlutoColumnType.select(['Production', 'Non Production']),
+        type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return Consumer<SystemsNotifier>(builder: (context, systems, child) {
+            return DropdownButton(
+              value: rendererContext.cell.value,
+              icon: const Icon(Icons.arrow_downward),
+              elevation: 16,
+              isExpanded: true,
+              onChanged: (newValue) {
+                setState(() {
+                  stateManager.changeCellValue(rendererContext.cell, newValue);
+                });
+              },
+              items:
+                  systems.systems.keys.map<DropdownMenuItem<int>>((int value) {
+                return DropdownMenuItem<int>(
+                  value: value,
+                  child: Text(systems.systems[value]!['description']!),
+                );
+              }).toList(),
+            );
+          });
+        },
       ),
+
       // PlutoColumn(
       //   title: 'Type',
       //   field: 'type',
@@ -153,12 +191,25 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         },
       ),
       PlutoColumn(
+        width: 150,
         title: 'Downtime',
         field: 'downtime',
         type: PlutoColumnType.select([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
         formatter: (dynamic value) {
           return impactRating[value]?['description'] ?? '';
         },
+      ),
+      PlutoColumn(
+        width: 50,
+        title: 'RPN',
+        field: 'rpn',
+        type: PlutoColumnType.number(),
+      ),
+      PlutoColumn(
+        width: 100,
+        title: 'New Priority',
+        field: 'newPriority',
+        type: PlutoColumnType.number(),
       ),
     ]);
     _loadData().then((fetchedRows) {
@@ -231,11 +282,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'parent': PlutoCell(value: child.parent),
             'description': PlutoCell(value: child.description),
             'priority': PlutoCell(value: child.priority),
-            'system': PlutoCell(value: ''),
+            'system': PlutoCell(value: 0),
             'action': PlutoCell(value: ''),
             'frequency': PlutoCell(value: 0),
             'downtime': PlutoCell(value: 0),
             'hierarchy': PlutoCell(value: ''),
+            'newPriority': PlutoCell(value: 0),
+            'rpn': PlutoCell(value: 0),
           },
           type: PlutoRowType.group(
               children: FilteredList<PlutoRow>(
@@ -254,7 +307,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   void refreshAsset(String assetnum, [String? siteid]) async {
     await database!.getWorkOrderMaximo(
-        assetnum, context.read<MaximoServerNotifier>().maximoServerSelected);
+      assetnum,
+      context.read<MaximoServerNotifier>().maximoServerSelected,
+    );
     var wos = await database!.getAssetWorkorders(assetnum, siteid);
     double downtime = 0;
     double dtEvents = wos.length.toDouble();

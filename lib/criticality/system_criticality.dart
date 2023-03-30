@@ -1,9 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../main.dart';
@@ -27,6 +29,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
 
     _updateFab();
 
+// define columns
     columns.addAll([
       PlutoColumn(
         title: '',
@@ -36,36 +39,148 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         hide: true,
       ),
       PlutoColumn(
+        width: 300,
         title: 'System Name',
         field: 'description',
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
+        width: 250,
         title: 'Safety',
         field: 'safety',
         type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text('$value: ${systemSafety[value]}'),
+              );
+            }).toList(),
+          );
+        },
       ),
       PlutoColumn(
+        width: 250,
         title: 'Regulatory',
         field: 'regulatory',
         type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text('$value: ${systemRegulatory[value]}'),
+              );
+            }).toList(),
+          );
+        },
       ),
       PlutoColumn(
+        width: 250,
         title: 'Economic',
         field: 'economic',
         type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text('$value: ${systemEconomic[value]}'),
+              );
+            }).toList(),
+          );
+        },
       ),
       PlutoColumn(
+        width: 250,
         title: 'Throughput',
         field: 'throughput',
         type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text('$value: ${systemThroughput[value]}'),
+              );
+            }).toList(),
+          );
+        },
       ),
       PlutoColumn(
+        width: 250,
         title: 'Quality',
         field: 'quality',
         type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text('$value: ${systemQuality[value]}'),
+              );
+            }).toList(),
+          );
+        },
       ),
       PlutoColumn(
+        width: 100,
         title: 'Score',
         field: 'score',
         type: PlutoColumnType.number(
@@ -110,6 +225,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
   }
 
   void _updateFab([bool show = false]) {
+    // populate floating action button
     List<Widget> temp = [];
     if (show) {
       temp = [
@@ -128,7 +244,10 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
           child: FloatingActionButton.extended(
             heroTag: UniqueKey(),
-            onPressed: () async {},
+            onPressed: () async {
+              deleteRow();
+              _updateFab();
+            },
             label: const Text('Delete Row'),
             icon: const Icon(Icons.playlist_remove),
           ),
@@ -177,6 +296,18 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     stateManager.setKeepFocus(true);
   }
 
+  void deleteRow() async {
+    if (stateManager.currentRow != null) {
+      final id = stateManager.currentRow!.cells['id']!.value;
+      stateManager.removeCurrentRow();
+      final removed = await database!.deleteSystemCriticalitys(id);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Please select a system to remove'),
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,7 +322,18 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
       body: PlutoGrid(
         columns: columns,
         rows: rows,
+        configuration: PlutoGridConfiguration(
+            shortcut: PlutoGridShortcut(actions: {
+          ...PlutoGridShortcut.defaultActions,
+          // + / - keys should increase / decrease values
+          LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
+          LogicalKeySet(LogicalKeyboardKey.numpadAdd): CustomAddKeyAction(),
+          LogicalKeySet(LogicalKeyboardKey.minus): CustomMinusKeyAction(),
+          LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+              CustomMinusKeyAction(),
+        })),
         onChanged: (PlutoGridOnChangedEvent event) {
+          // score should auto calcualte when values change
           event.row.cells['score']!.value = sqrt(
               (event.row.cells['safety']?.value *
                           event.row.cells['safety']?.value +
@@ -240,4 +382,48 @@ Future<int> updateSystem(PlutoRow row) async {
     }
   }
   return id;
+}
+
+class CustomAddKeyAction extends PlutoGridShortcutAction {
+  @override
+  void execute({
+    required PlutoKeyManagerEvent keyEvent,
+    required PlutoGridStateManager stateManager,
+  }) {
+    print('Pressed add key.');
+    if (stateManager.currentColumnField != 'safety' &&
+        stateManager.currentColumnField != 'regulatory' &&
+        stateManager.currentColumnField != 'economic' &&
+        stateManager.currentColumnField != 'throughput' &&
+        stateManager.currentColumnField != 'quality') {
+      return;
+    }
+    if (stateManager.currentCell!.value == 10) {
+      return;
+    }
+    stateManager.changeCellValue(
+        stateManager.currentCell!, stateManager.currentCell!.value + 1);
+  }
+}
+
+class CustomMinusKeyAction extends PlutoGridShortcutAction {
+  @override
+  void execute({
+    required PlutoKeyManagerEvent keyEvent,
+    required PlutoGridStateManager stateManager,
+  }) {
+    print('Pressed minus key.');
+    if (stateManager.currentColumnField != 'safety' &&
+        stateManager.currentColumnField != 'regulatory' &&
+        stateManager.currentColumnField != 'economic' &&
+        stateManager.currentColumnField != 'throughput' &&
+        stateManager.currentColumnField != 'quality') {
+      return;
+    }
+    if (stateManager.currentCell!.value == 0) {
+      return;
+    }
+    stateManager.changeCellValue(
+        stateManager.currentCell!, stateManager.currentCell!.value - 1);
+  }
 }
