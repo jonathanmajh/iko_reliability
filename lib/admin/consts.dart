@@ -385,7 +385,7 @@ Map<int, Map<String, dynamic>> impactRating = {
     'high': 168.0,
   },
   9: {
-    'description': 'Health Safety Environmental (with warning)',
+    'description': 'HSE (with warning)',
     'likelihood': 'Hazardous(with warning)',
     'longdesc':
         'Potential health, safety, or environmental issue. Failure will occur with warning.',
@@ -393,7 +393,7 @@ Map<int, Map<String, dynamic>> impactRating = {
     'high': 720.0,
   },
   10: {
-    'description': 'Health Safety Environment (without warning)',
+    'description': 'HSE (without warning)',
     'likelihood': 'Hazardous(without warning)',
     'longdesc':
         'Potential health, safety, or environmental issue. Failure will occur without warning. ',
@@ -461,13 +461,9 @@ List<String> systemThroughput = [
 List<String> systemQuality = [
   '',
   'No Scrap',
-  '5 pallets of scrap',
   '10 pallets of scrap',
-  '20 pallets of scrap',
   '30 pallets of scrap',
-  '40 pallets of scrap',
   '10K in potential claims',
-  '25K in potential claims',
   '40K in potential claims',
   'Potential class action',
 ];

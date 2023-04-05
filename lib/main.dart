@@ -52,6 +52,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => UploadNotifier()),
         ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
         ChangeNotifierProvider(create: (context) => SystemsNotifier()),
+        ChangeNotifierProvider(create: (context) => WorkOrderNotifier()),
       ],
       child: MaterialApp.router(
         routerDelegate: _appRouter.delegate(),
@@ -132,6 +133,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const Text('userid'),
                 const Text('Status'),
+                // update notifier when the menu is opened
                 Consumer<SystemsNotifier>(builder: (context, systems, child) {
                   systems.updateSystems();
                   return const Text('environment');

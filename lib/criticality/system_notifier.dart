@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 
+import '../admin/db_drift.dart';
 import '../main.dart';
 
 class SystemsNotifier extends ChangeNotifier {
@@ -26,5 +27,19 @@ class SystemsNotifier extends ChangeNotifier {
     }
     // print(systems);
     notifyListeners();
+  }
+}
+
+class WorkOrderNotifier extends ChangeNotifier {
+  Map<String, AssetCriticality> systems = {};
+  //  assetnum:
+
+  Future<int> updateWorkOrders() async {
+    final allWOs = await database!.getAssetCriticalities();
+    for (var asset in allWOs) {
+      systems[asset.asset.assetnum] = asset.assetCriticality;
+    }
+    notifyListeners();
+    return 1;
   }
 }

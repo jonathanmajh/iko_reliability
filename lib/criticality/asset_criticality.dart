@@ -84,6 +84,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
     columns.addAll([
       PlutoColumn(
+        title: '',
+        field: 'id',
+        type: PlutoColumnType.number(),
+        readOnly: true,
+        hide: true,
+      ),
+      PlutoColumn(
         title: 'Hierarchy',
         field: 'hierarchy',
         type: PlutoColumnType.text(),
@@ -185,18 +192,58 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       PlutoColumn(
         title: 'Frequency of Breakdown',
         field: 'frequency',
-        type: PlutoColumnType.select([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
-        formatter: (dynamic value) {
-          return frequencyRating[value]?['description'] ?? '';
+        type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text(
+                    '$value: ${frequencyRating[value]?["description"] ?? ""}'),
+              );
+            }).toList(),
+          );
         },
       ),
       PlutoColumn(
-        width: 150,
+        width: 250,
         title: 'Downtime',
         field: 'downtime',
-        type: PlutoColumnType.select([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
-        formatter: (dynamic value) {
-          return impactRating[value]?['description'] ?? '';
+        type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                  value: value,
+                  child: Tooltip(
+                    message: impactRating[value]?["longdesc"] ?? '',
+                    child: Text(
+                        '$value: ${impactRating[value]?["description"] ?? ""}'),
+                  ));
+            }).toList(),
+          );
         },
       ),
       PlutoColumn(
@@ -220,6 +267,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         stateManager.refRows.addAll(value);
         stateManager.setShowLoading(false);
         stateManager.notifyListeners();
+        // workaround since setting the group as expanded does not expand first row
+        stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
+        stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
       });
     });
   }
@@ -261,6 +311,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   Future<List<PlutoRow>> _loadData() async {
     final dbrows = await database!.getSiteAssets('GH');
+    await context.read<WorkOrderNotifier>().updateWorkOrders();
     for (var row in dbrows) {
       siteAssets[row.assetnum] = row;
       if (parentAssets.containsKey(row.parent)) {
@@ -276,21 +327,24 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     List<PlutoRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
+        final asset = context.read<WorkOrderNotifier>().systems[child.assetnum];
         rows.add(PlutoRow(
           cells: {
             'assetnum': PlutoCell(value: child.assetnum),
             'parent': PlutoCell(value: child.parent),
             'description': PlutoCell(value: child.description),
             'priority': PlutoCell(value: child.priority),
-            'system': PlutoCell(value: 0),
+            'system': PlutoCell(value: asset?.system ?? 0),
             'action': PlutoCell(value: ''),
-            'frequency': PlutoCell(value: 0),
-            'downtime': PlutoCell(value: 0),
+            'frequency': PlutoCell(value: asset?.frequency ?? 0),
+            'downtime': PlutoCell(value: asset?.downtime ?? 0),
             'hierarchy': PlutoCell(value: ''),
             'newPriority': PlutoCell(value: 0),
             'rpn': PlutoCell(value: 0),
+            'id': PlutoCell(value: child.id),
           },
           type: PlutoRowType.group(
+              expanded: true,
               children: FilteredList<PlutoRow>(
                   initialList: getChilds(child.assetnum))),
         ));
@@ -320,10 +374,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     dtEvents = dtEvents / years;
     for (var row in stateManager.iterateRowAndGroup) {
       if (row.cells['assetnum']!.value == assetnum) {
-        row.cells['downtime']!.value = ratingFromValue(downtime, impactRating);
-        // '${downtime.floor()}:${((downtime - downtime.floor()) * 60).toStringAsFixed(0).padLeft(2, "0")}';
-        row.cells['frequency']!.value =
-            ratingFromValue(dtEvents, frequencyRating);
+        stateManager.changeCellValue(
+            row.cells['downtime']!, ratingFromValue(downtime, impactRating));
+        stateManager.changeCellValue(row.cells['frequency']!,
+            ratingFromValue(dtEvents, frequencyRating));
         stateManager.notifyListeners();
       }
     }
@@ -340,38 +394,49 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           child: PlutoDualGrid(
             isVertical: true,
             gridPropsA: PlutoDualGridProps(
-                columns: columns,
-                rows: rows,
-                onLoaded: (PlutoGridOnLoadedEvent event) {
-                  stateManager = event.stateManager;
-                  event.stateManager.addListener(gridAHandler);
-                  stateManager.setShowColumnFilter(true);
-                  stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
-                    resolveColumnDepth: (column) =>
-                        stateManager.columnIndex(column),
-                    showText: (cell) => true,
-                    showFirstExpandableIcon: true,
-                  ));
-                },
-                onRowDoubleTap: (event) {
-                  setState(() {
-                    collapsedAssets[event.cell.value] = event.cell.value;
-                    event.cell.value = 'Non Production';
-                    // print(collapsedAssets);
-                    // collapseRows();
-                  });
-                },
-                configuration: PlutoGridConfiguration(
-                    shortcut: PlutoGridShortcut(actions: {
-                  ...PlutoGridShortcut.defaultActions,
-                  LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                      CustomAddKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.minus):
-                      CustomMinusKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                      CustomMinusKeyAction(),
-                }))),
+              columns: columns,
+              rows: rows,
+              onLoaded: (PlutoGridOnLoadedEvent event) {
+                stateManager = event.stateManager;
+                event.stateManager.addListener(gridAHandler);
+                stateManager.setShowColumnFilter(true);
+                stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
+                  resolveColumnDepth: (column) =>
+                      stateManager.columnIndex(column),
+                  showText: (cell) => true,
+                  showCount: false,
+                  showFirstExpandableIcon: true,
+                ));
+              },
+              onRowDoubleTap: (event) {
+                setState(() {
+                  collapsedAssets[event.cell.value] = event.cell.value;
+                  event.cell.value = 'Non Production';
+                  // print(collapsedAssets);
+                  // collapseRows();
+                });
+              },
+              onChanged: (PlutoGridOnChangedEvent event) {
+                event.row.cells['rpn']!.value = event
+                        .row.cells['frequency']!.value *
+                    event.row.cells['downtime']!.value *
+                    double.parse(context
+                        .read<SystemsNotifier>()
+                        .systems[event.row.cells['system']!.value]!['score']!);
+                updateAsset(event.row);
+                print(event);
+              },
+              configuration: PlutoGridConfiguration(
+                  shortcut: PlutoGridShortcut(actions: {
+                ...PlutoGridShortcut.defaultActions,
+                LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
+                LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                    CustomAddKeyAction(),
+                LogicalKeySet(LogicalKeyboardKey.minus): CustomMinusKeyAction(),
+                LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                    CustomMinusKeyAction(),
+              })),
+            ),
             gridPropsB: PlutoDualGridProps(
               columns: detailColumns,
               rows: detailRows,
@@ -382,6 +447,20 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           )),
     );
   }
+}
+
+Future<void> updateAsset(PlutoRow row) async {
+  if (!row.cells.containsKey('id')) {
+    return;
+    //this shouldnt happen
+  }
+  await database!.updateAssetCriticality(
+    row.cells['id']!.value,
+    row.cells['system']!.value,
+    row.cells['frequency']!.value,
+    row.cells['downtime']!.value,
+    'type', //row.cells['type']!.value,
+  );
 }
 
 class CustomAddKeyAction extends PlutoGridShortcutAction {
@@ -398,8 +477,8 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
     if (stateManager.currentCell!.value == 10) {
       return;
     }
-    stateManager.currentCell!.value = stateManager.currentCell!.value + 1;
-    stateManager.notifyListeners();
+    stateManager.changeCellValue(
+        stateManager.currentCell!, stateManager.currentCell!.value + 1);
   }
 }
 
@@ -417,8 +496,8 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
     if (stateManager.currentCell!.value == 0) {
       return;
     }
-    stateManager.currentCell!.value = stateManager.currentCell!.value - 1;
-    stateManager.notifyListeners();
+    stateManager.changeCellValue(
+        stateManager.currentCell!, stateManager.currentCell!.value - 1);
   }
 }
 

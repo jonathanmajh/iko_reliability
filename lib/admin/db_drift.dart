@@ -119,6 +119,16 @@ class Workorders extends Table {
   Set<Column> get primaryKey => {siteid, wonum};
 }
 
+class AssetCriticalityWithAsset {
+  AssetCriticalityWithAsset(
+    this.asset,
+    this.assetCriticality,
+  );
+
+  final Asset asset;
+  final AssetCriticality assetCriticality;
+}
+
 @DriftDatabase(tables: [
   Settings,
   MeterDBs,
@@ -126,7 +136,7 @@ class Workorders extends Table {
   Assets,
   Workorders,
   SystemCriticalitys,
-  AssetCriticalitys
+  AssetCriticalitys,
 ])
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
@@ -141,8 +151,14 @@ class MyDatabase extends _$MyDatabase {
     delete(observations).go();
   }
 
-  Future<void> addUpdateSettings(String key, String value) async {
-    into(settings).insertOnConflictUpdate(Setting(key: key, value: value));
+  Future<void> addUpdateSettings(
+    String key,
+    String value,
+  ) async {
+    await into(settings).insertOnConflictUpdate(Setting(
+      key: key,
+      value: value,
+    ));
   }
 
   Future<int> addSystemCriticalitys(String value) async {
@@ -178,6 +194,22 @@ class MyDatabase extends _$MyDatabase {
       quality: Value(quality),
     ));
     return row.first.id;
+  }
+
+  Future<void> updateAssetCriticality(
+    int assetid,
+    int system,
+    int frequency,
+    int downtime,
+    String type,
+  ) async {
+    await (into(assetCriticalitys).insertOnConflictUpdate(AssetCriticality(
+      asset: assetid,
+      system: system,
+      type: type,
+      frequency: frequency,
+      downtime: downtime,
+    )));
   }
 
   Future<Setting> getSettings(String key) async {
@@ -336,6 +368,18 @@ class MyDatabase extends _$MyDatabase {
         messages.add('Error inserting Meters\n${e.toString()}');
       }
     }
+  }
+
+  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities() async {
+    var stuff = await (select(assetCriticalitys).join([
+      leftOuterJoin(assets, assets.id.equalsExp(assetCriticalitys.asset))
+    ])).get();
+    return stuff.map((row) {
+      return AssetCriticalityWithAsset(
+        row.readTable(assets),
+        row.readTable(assetCriticalitys),
+      );
+    }).toList();
   }
 
   Future<List<SystemCriticality>> getSystemCriticalities() async {

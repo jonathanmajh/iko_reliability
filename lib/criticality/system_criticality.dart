@@ -169,8 +169,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
             },
-            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                .map<DropdownMenuItem<int>>((int value) {
+            items: [0, 1, 2, 3, 4, 5].map<DropdownMenuItem<int>>((int value) {
               return DropdownMenuItem<int>(
                 value: value,
                 child: Text('$value: ${systemQuality[value]}'),
@@ -312,7 +311,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Asset Criticality'),
+        title: const Text('System Criticality'),
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -399,6 +398,10 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
       return;
     }
     if (stateManager.currentCell!.value == 10) {
+      return;
+    }
+    if (stateManager.currentCell!.value == 5 &&
+        stateManager.currentColumnField == 'quality') {
       return;
     }
     stateManager.changeCellValue(
