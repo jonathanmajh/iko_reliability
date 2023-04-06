@@ -9,7 +9,7 @@ import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
-import 'criticality/system_notifier.dart';
+import 'criticality/criticality_notifier.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
         ChangeNotifierProvider(create: (context) => SystemsNotifier()),
         ChangeNotifierProvider(create: (context) => WorkOrderNotifier()),
+        ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
       ],
       child: MaterialApp.router(
         routerDelegate: _appRouter.delegate(),

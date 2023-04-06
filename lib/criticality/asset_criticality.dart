@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
-import 'system_notifier.dart';
+import 'criticality_notifier.dart';
 
 class AssetCriticalityPage extends StatefulWidget {
   const AssetCriticalityPage({Key? key}) : super(key: key);
@@ -257,6 +257,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         title: 'New Priority',
         field: 'newPriority',
         type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          return Text('asdf');
+          // call notifier and convert to string Very High etc
+        },
       ),
     ]);
     _loadData().then((fetchedRows) {
