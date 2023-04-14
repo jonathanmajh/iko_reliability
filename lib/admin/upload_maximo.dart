@@ -405,12 +405,13 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
   url = '${maximoServerDomains[env]}$url';
   final login = await getLoginMaximo(env);
   header ??= {};
+  if (url.contains('?')) {
+    url = '$url&lean=1';
+  } else {
+    url = '$url?lean=1';
+  }
   if (!apiKeys.containsKey(env)) {
-    if (url.contains('?')) {
-      url = '$url&_lid=${login.login}&_lpwd=${login.password}';
-    } else {
-      url = '$url?_lid=${login.login}&_lpwd=${login.password}';
-    }
+    url = '$url&_lid=${login.login}&_lpwd=${login.password}';
   } else {
     header['apikey'] = login.password;
   }
@@ -427,8 +428,8 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     debugPrint('get response received');
     var parsed = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      if (parsed['rdfs:member'] != null) {
-        if (parsed['rdfs:member'].length == 0) {
+      if (parsed['member'] != null) {
+        if (parsed['member'].length == 0) {
           parsed['status'] = 'empty';
           return parsed;
         }
@@ -437,7 +438,8 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
       return parsed;
     } else {
       parsed['status'] = 'Invalid Response Code from Maximo';
-      return parsed;
+      print(parsed);
+      throw Exception(parsed['Error']['message'].toString());
     }
   } else if (type == 'post') {
     header['preview'] = '1';
@@ -446,8 +448,8 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
       response = await http.post(
         Uri.parse(
           url.contains('?')
-              ? '$url&action=importfile&lean=1'
-              : '$url?action=importfile&lean=1',
+              ? '$url&action=importfile'
+              : '$url?action=importfile',
         ),
         headers: header,
         body: body,
@@ -474,8 +476,8 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
           response = await http.post(
             Uri.parse(
               url.contains('?')
-                  ? '$url&action=importfile&lean=1'
-                  : '$url?action=importfile&lean=1',
+                  ? '$url&action=importfile'
+                  : '$url?action=importfile',
             ),
             headers: header,
             body: body,

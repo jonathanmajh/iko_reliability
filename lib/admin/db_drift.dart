@@ -338,7 +338,7 @@ class MyDatabase extends _$MyDatabase {
     // maybe a return to indicate completion
     List<String> messages = [];
     final result = await maximoRequest(
-        'iko_wo?oslc.select=wonum,siteid,description,status,reportdate,IKO_DOWNTIME,WORKTYPE,assetnum&oslc.where=assetnum="$assetnum" and IKO_DOWNTIME>0&lean=1',
+        'iko_wo?oslc.select=wonum,siteid,description,status,reportdate,IKO_DOWNTIME,WORKTYPE,assetnum&oslc.where=assetnum="$assetnum" and IKO_DOWNTIME>0',
         'get',
         env);
     if (result['member'].length > 0) {
@@ -452,9 +452,15 @@ class MyDatabase extends _$MyDatabase {
     // maybe a return to indicate completion
     List<String> messages = [];
     final result = await maximoRequest(
-        'mxasset?lean=1&oslc.where=siteid=%22$siteid%22 and ITEMNUM!="*" and status="OPERATING"&oslc.select=assetnum,siteid,description,parent,status,changedate,priority',
+        'mxasset?&oslc.where=siteid=%22$siteid%22 and ITEMNUM!="*" and status="OPERATING"&oslc.select=assetnum,siteid,description,parent,status,changedate,priority',
         'get',
         env);
+    if (result['Error'] != null) {
+      if (result['Error']['message'] != null) {
+        throw Exception(result['Error']['message'].toString());
+      }
+      throw Exception('Failed to load assets from Maximo');
+    }
     if (result['member'].length > 0) {
       List<AssetsCompanion> assetInserts = [];
       // save once without the hierarchy field then loop through again adding hierarchy

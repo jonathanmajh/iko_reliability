@@ -89,8 +89,8 @@ class _AssetPageState extends State<AssetPage> {
                   'get',
                   'TEST');
               Map<String, Map<String, String?>> thing = {};
-              if (result['rdfs:member'].length > 0) {
-                for (var asset in result['rdfs:member'].toList()) {
+              if (result['member'].length > 0) {
+                for (var asset in result['member'].toList()) {
                   thing[asset['spi:assetnum']] = {
                     'assetnum': asset['spi:assetnum'],
                     'description': asset['spi:description'],
