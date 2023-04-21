@@ -248,6 +248,7 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       ));
     } else {
       // tasks that have asset number goes in the child job plan for that asset
+      // TODO put generateMeterNumber in try catch so that it can give all errors
       meter = await generateMeterNumber(meters, task.metername,
           task.assetNumber, pmDetails.processCondition!);
       var childTask = JobTaskMaximo(

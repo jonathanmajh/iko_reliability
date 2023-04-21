@@ -100,6 +100,12 @@ class TemplateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearStatusMessage(String file, int template) {
+    allTemplates[file]![template]!.statusMessages.clear();
+    allTemplates[file]![template]!.templateStatus = 'processing-done';
+    notifyListeners();
+  }
+
   String getTemplateNumber(String file, int template) {
     return allTemplates[file]![template]!.nameTemplate?.pmNumber ??
         allTemplates[file]![template]!.parsedTemplate.pmNumber;

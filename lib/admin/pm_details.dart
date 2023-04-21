@@ -5,6 +5,7 @@ import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
+import 'generate_job_plans.dart';
 import 'generate_uploads.dart';
 import 'template_notifier.dart';
 import 'upload_maximo.dart';
@@ -80,46 +81,32 @@ class _PMDetailViewState extends State<PMDetailView>
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
             child: FloatingActionButton.extended(
-              heroTag: UniqueKey(),
-              onPressed: () async {
-                if (processedTemplate != null) {
-                  var upload = await generateUploads(processedTemplate);
-                  if (upload.containsKey('Errors')) {
-                    final errors = upload.remove('Errors');
-                    for (final msg in errors!) {
-                      templateNotifier.addStatusMessage(selected.selectedFile!,
-                          selected.selectedTemplate!, msg[0]);
-                    }
-                  }
-                  uploadNotifier.setUploadDetails(
-                    selected.selectedFile!,
-                    selected.selectedTemplate!,
-                    upload,
-                  );
-                }
-                _updateFab();
-              },
               label: const Text('Preview'),
               icon: const Icon(Icons.visibility),
+              heroTag: UniqueKey(),
+              onPressed: () async {
+                await generateUploadHelper(
+                  processedTemplate,
+                  templateNotifier,
+                  selected,
+                  uploadNotifier,
+                );
+                _updateFab();
+              },
             ),
           ),
           Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
               child: FloatingActionButton.extended(
+                label: const Text('Upload'),
+                icon: const Icon(Icons.cloud_upload),
                 heroTag: UniqueKey(),
                 onPressed: () async {
-                  var upload = await generateUploads(processedTemplate!);
-                  if (upload.containsKey('Errors')) {
-                    final errors = upload.remove('Errors');
-                    for (final msg in errors!) {
-                      templateNotifier.addStatusMessage(selected.selectedFile!,
-                          selected.selectedTemplate!, msg[0]);
-                    }
-                  }
-                  uploadNotifier.setUploadDetails(
-                    selected.selectedFile!,
-                    selected.selectedTemplate!,
-                    upload,
+                  await generateUploadHelper(
+                    processedTemplate,
+                    templateNotifier,
+                    selected,
+                    uploadNotifier,
                   );
                   _updateFab();
                   try {
@@ -137,8 +124,6 @@ class _PMDetailViewState extends State<PMDetailView>
                         .showSnackBar(SnackBar(content: Text('$e')));
                   }
                 },
-                label: const Text('Upload'),
-                icon: const Icon(Icons.cloud_upload),
               )),
           FloatingActionButton(
             heroTag: UniqueKey(),
@@ -550,4 +535,29 @@ ${const ListToCsvConverter().convert(details[tables])}
   Clipboard.setData(ClipboardData(text: allData)).then((_) {
     return;
   });
+}
+
+Future<void> generateUploadHelper(
+  PMMaximo? processedTemplate,
+  TemplateNotifier templateNotifier,
+  SelectedTemplate selected,
+  UploadNotifier uploadNotifier,
+) async {
+  if (processedTemplate != null) {
+    var upload = await generateUploads(processedTemplate);
+    templateNotifier.clearStatusMessage(
+        selected.selectedFile!, selected.selectedTemplate!);
+    if (upload.containsKey('Errors')) {
+      final errors = upload.remove('Errors');
+      for (final msg in errors!) {
+        templateNotifier.addStatusMessage(
+            selected.selectedFile!, selected.selectedTemplate!, msg[0]);
+      }
+    }
+    uploadNotifier.setUploadDetails(
+      selected.selectedFile!,
+      selected.selectedTemplate!,
+      upload,
+    );
+  }
 }

@@ -46,6 +46,11 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
         pmpkg.fmecaPM ? 'Y' : 'N'
       ]
     ];
+    if (pmpkg.description.length > 100) {
+      generated['Errors']!.add([
+        'PM Description is too long: ${pmpkg.description.length}/100 character limit'
+      ]);
+    }
   }
   // job plan
   generated = generateJobplan(

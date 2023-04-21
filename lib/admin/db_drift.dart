@@ -273,12 +273,12 @@ class MyDatabase extends _$MyDatabase {
           row[10] = row[10].toString().trim();
           meterCode = row[0];
           meterInserts.add(MeterDBsCompanion.insert(
-            condition: row[12],
+            condition: row[12].toString().trim(),
             description: row[4],
             freqUnit: row[10].substring(row[10].length - 1, 1),
             frequency: int.parse(row[10].substring(0, row[10].length - 1)),
-            inspect: row[2],
-            meter: row[0],
+            inspect: row[2].toString().trim(),
+            meter: row[0].toString().trim(),
             craft: row[11].substring(0, 1),
           ));
         }
@@ -444,7 +444,7 @@ class MyDatabase extends _$MyDatabase {
           observation);
     } catch (e) {
       throw Exception(
-          'No meter can be found for the following combination: $meterName : $condition : ${e.toString()}');
+          'No meter can be found for the following combination: "$meterName": "$condition": ${e.toString()}');
     }
   }
 
