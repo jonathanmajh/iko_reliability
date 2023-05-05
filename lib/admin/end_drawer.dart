@@ -28,6 +28,11 @@ class _EndDrawerState extends State<EndDrawer> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -60,8 +65,12 @@ class _EndDrawerState extends State<EndDrawer> {
             return FutureBuilder<Credentials>(
                 future: getLoginMaximo(maximo.maximoServerSelected),
                 builder: ((context, snapshot) {
-                  useridController.text = snapshot.data?.login ?? '';
-                  passwordController.text = snapshot.data?.password ?? '';
+                  if(snapshot.data?.login != null && snapshot.data?.login != '') {
+                    useridController.text = snapshot.data?.login ?? '';
+                  }
+                  if(snapshot.data?.login != null && snapshot.data?.login != '') {
+                    passwordController.text = snapshot.data?.password ?? '';
+                  }
                   if (apiKeys.containsKey(maximo.maximoServerSelected)) {
                     return ListTile(
                       title: const Text('Maximo API Key'),
@@ -84,6 +93,7 @@ class _EndDrawerState extends State<EndDrawer> {
                       ),
                     );
                   } else {
+                    
                     return ListTile(
                       title: const Text('Maximo Login'),
                       subtitle: Column(
