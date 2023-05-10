@@ -26,6 +26,7 @@ class PMName {
   });
 }
 
+///Auto-generate name for PM
 Future<PMName> generateName(
     ParsedTemplate pmdetails, String maximoServerSelected) async {
   String number = '';
@@ -109,6 +110,12 @@ Future<PMName> generateName(
       name = '${name}A';
     }
   }
+
+  //if template has suggested PM name, use it instead of auto-generated one
+  if((pmdetails.suggestedPmName ?? "") != "") {
+    name = pmdetails.suggestedPmName!;
+  }
+
   return PMName(
     pmNumber: number,
     pmName: name,

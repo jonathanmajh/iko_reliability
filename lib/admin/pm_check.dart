@@ -236,6 +236,7 @@ Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
   return await Future.wait(futures);
 }
 
+///processes loaded PM template files
 void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
     String maximoServerSelected) async {
   context.setLoading(true);

@@ -163,8 +163,15 @@ class _EndDrawerState extends State<EndDrawer> {
               trailing: Consumer<MaximoServerNotifier>(
                 builder: (context, maximo, child) {
                   return ElevatedButton(
-                    onPressed: () =>
-                        maximoAssetCaller(siteid, maximo.maximoServerSelected),
+                    onPressed: () {
+                      if(siteid != '') {
+                        maximoAssetCaller(siteid, maximo.maximoServerSelected); //TODO: pause user input during load?
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                'Attempting to Load Assets from : $siteid'),
+                          ));
+                      }
+                    },
                     child: const Text('Load'),
                   );
                 },
