@@ -10,7 +10,7 @@ class PMName {
   String pmNumber;
   String pmName;
   String pmNameAuto;
-  String? pmNameSuggested;
+  String pmNameSuggested;
   String jpNumber;
   String? routeNumber;
   String? routeName;
@@ -21,7 +21,7 @@ class PMName {
     required this.pmNumber,
     required this.pmName,
     required this.pmNameAuto,
-    this.pmNameSuggested,
+    required this.pmNameSuggested,
     required this.jpNumber,
     this.routeNumber,
     this.routeName,
@@ -115,14 +115,13 @@ Future<PMName> generateName(
     }
   }
 
-
-  //consider suggested PM names of '' as null
-  String? pmNameSuggested = pmdetails.suggestedPmName == '' ? null:pmdetails.suggestedPmName;
+  //consider suggested PM name of null to be ''
+  String pmNameSuggested = pmdetails.suggestedPmName ?? '';
   return PMName(
     pmNumber: number,
-    pmName: pmNameSuggested ?? name,  //if template has suggested PM name, use it instead of auto-generated one
+    pmName: name, //use auto-generated PM name by default
     pmNameAuto: name,
-    pmNameSuggested:pmNameSuggested,
+    pmNameSuggested: pmNameSuggested,
     jpNumber: '${pmdetails.siteId!}$number',
     replaceable: replaceable,
     commonParent: commonParent,

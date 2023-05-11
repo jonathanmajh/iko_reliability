@@ -1,3 +1,5 @@
+//file contains widgets for the details of PMs on the vaildate PMs page (right side of divider)
+
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

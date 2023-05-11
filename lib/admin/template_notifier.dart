@@ -117,12 +117,12 @@ class TemplateNotifier extends ChangeNotifier {
   }
 
   String getTemplateAutoName(String file, int template) {
-      return allTemplates[file]![template]!.nameTemplate?.pmNameAuto ??
+    return allTemplates[file]![template]!.nameTemplate?.pmNameAuto ??
         allTemplates[file]![template]!.parsedTemplate.pmName;
   }
 
   String? getTemplateSuggestName(String file, int template) {
-      return allTemplates[file]![template]!.nameTemplate?.pmNameSuggested ??
+    return allTemplates[file]![template]!.nameTemplate?.pmNameSuggested ??
         allTemplates[file]![template]!.parsedTemplate.suggestedPmName;
   }
 
