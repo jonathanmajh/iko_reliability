@@ -28,11 +28,6 @@ class _EndDrawerState extends State<EndDrawer> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
