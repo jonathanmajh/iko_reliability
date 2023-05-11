@@ -65,10 +65,12 @@ class _EndDrawerState extends State<EndDrawer> {
             return FutureBuilder<Credentials>(
                 future: getLoginMaximo(maximo.maximoServerSelected),
                 builder: ((context, snapshot) {
-                  if(snapshot.data?.login != null && snapshot.data?.login != '') {
+                  if (snapshot.data?.login != null &&
+                      snapshot.data?.login != '') {
                     useridController.text = snapshot.data?.login ?? '';
                   }
-                  if(snapshot.data?.login != null && snapshot.data?.login != '') {
+                  if (snapshot.data?.login != null &&
+                      snapshot.data?.login != '') {
                     passwordController.text = snapshot.data?.password ?? '';
                   }
                   if (apiKeys.containsKey(maximo.maximoServerSelected)) {
@@ -93,7 +95,6 @@ class _EndDrawerState extends State<EndDrawer> {
                       ),
                     );
                   } else {
-                    
                     return ListTile(
                       title: const Text('Maximo Login'),
                       subtitle: Column(
@@ -164,12 +165,15 @@ class _EndDrawerState extends State<EndDrawer> {
                 builder: (context, maximo, child) {
                   return ElevatedButton(
                     onPressed: () {
-                      if(siteid != '') {
-                        maximoAssetCaller(siteid, maximo.maximoServerSelected); //TODO: pause user input during load?
+                      if (siteid != '') {
+                        maximoAssetCaller(
+                            siteid,
+                            maximo
+                                .maximoServerSelected); //TODO: pause user input during load?
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                'Attempting to Load Assets from : $siteid'),
-                          ));
+                          content:
+                              Text('Attempting to Load Assets from : $siteid'),
+                        ));
                       }
                     },
                     child: const Text('Load'),

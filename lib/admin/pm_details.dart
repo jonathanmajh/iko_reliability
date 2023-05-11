@@ -10,6 +10,8 @@ import 'generate_uploads.dart';
 import 'template_notifier.dart';
 import 'upload_maximo.dart';
 
+//TODO: replace hardcoded color values with theme colors
+
 class PMDetailView extends StatefulWidget {
   const PMDetailView({Key? key}) : super(key: key);
 
@@ -295,6 +297,8 @@ class PMDetails extends StatefulWidget {
 
 class _PMDetailsState extends State<PMDetails> {
   TextEditingController pmNameFieldController = TextEditingController();
+  TextEditingController autoNameFieldController = TextEditingController();
+  TextEditingController suggestNameFieldController = TextEditingController();
   TextEditingController pmNumberFieldController = TextEditingController();
   TextEditingController fmecaPackageController = TextEditingController();
   TextEditingController routeNameFieldController = TextEditingController();
@@ -304,6 +308,8 @@ class _PMDetailsState extends State<PMDetails> {
   void dispose() {
     // Clean up the controller when the widget is removed from the widget tree.
     pmNameFieldController.dispose();
+    autoNameFieldController.dispose();
+    suggestNameFieldController.dispose();
     fmecaPackageController.dispose();
     pmNumberFieldController.dispose();
     routeNameFieldController.dispose();
@@ -322,6 +328,11 @@ class _PMDetailsState extends State<PMDetails> {
       final processedTemplate = templateNotifier.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);
       pmNameFieldController.text = processedTemplate?.description ?? 'TBD...';
+      suggestNameFieldController.text = templateNotifier.getTemplateSuggestName(
+              selected.selectedFile!, selected.selectedTemplate!) ??
+          '';
+      autoNameFieldController.text = templateNotifier.getTemplateAutoName(
+          selected.selectedFile!, selected.selectedTemplate!);
       fmecaPackageController.text =
           processedTemplate?.jobplan.ikoPmpackage ?? '';
       pmNumberFieldController.text = processedTemplate?.pmNumber ?? 'TBD...';
@@ -329,6 +340,7 @@ class _PMDetailsState extends State<PMDetails> {
           processedTemplate?.route?.description ?? '';
       routeNumberFieldController.text =
           processedTemplate?.route?.routeNumber ?? '';
+
       return ListView(
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
           primary: false,
@@ -355,12 +367,12 @@ class _PMDetailsState extends State<PMDetails> {
                             icon: const Icon(Icons.save),
                           ),
                         ))),
-                const VerticalDivider(
+                VerticalDivider(
                   width: 10,
                   thickness: 1,
                   indent: 5,
                   endIndent: 5,
-                  color: Colors.white,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                 ),
                 Expanded(
                     child: TextField(
@@ -381,13 +393,13 @@ class _PMDetailsState extends State<PMDetails> {
                 )),
               ],
             ),
-            const Divider(
+            Divider(
               // spacer
               height: 10,
               thickness: 0,
               indent: 0,
               endIndent: 0,
-              color: Color.fromARGB(255, 255, 255, 255),
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -437,13 +449,13 @@ class _PMDetailsState extends State<PMDetails> {
                 )),
               ],
             ),
-            const Divider(
+            Divider(
               // spacer
               height: 10,
               thickness: 0,
               indent: 0,
               endIndent: 0,
-              color: Color.fromARGB(255, 255, 255, 255),
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             TextField(
                 controller: pmNameFieldController,
@@ -464,6 +476,67 @@ class _PMDetailsState extends State<PMDetails> {
                     icon: const Icon(Icons.save),
                   ),
                 )),
+            Divider(
+              // spacer
+              height: 10,
+              thickness: 0,
+              indent: 0,
+              endIndent: 0,
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                    child: TextFormField(
+                        controller: suggestNameFieldController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Suggested PM Name',
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            tooltip: "Use suggested name",
+                            onPressed: () {
+                              if (suggestNameFieldController.text != '') {
+                                pmNameFieldController.text =
+                                    suggestNameFieldController.text;
+                                templateNotifier.setPMName(
+                                    pmNameFieldController.text,
+                                    selected.selectedFile!,
+                                    selected.selectedTemplate!);
+                              }
+                            },
+                            icon: const Icon(Icons.eject),
+                          ),
+                        ))),
+                VerticalDivider(
+                  width: 10,
+                  thickness: 1,
+                  indent: 5,
+                  endIndent: 5,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+                Expanded(
+                    child: TextFormField(
+                  controller: autoNameFieldController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: 'Auto-Generated PM Name',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      tooltip: "Use auto-generated name",
+                      onPressed: () {
+                        pmNameFieldController.text =
+                            autoNameFieldController.text;
+                        templateNotifier.setPMName(pmNameFieldController.text,
+                            selected.selectedFile!, selected.selectedTemplate!);
+                      },
+                      icon: const Icon(Icons.eject),
+                    ),
+                  ),
+                )),
+              ],
+            ),
           ]);
     });
   }
