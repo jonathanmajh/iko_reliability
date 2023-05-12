@@ -130,7 +130,7 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                   thickness: 0,
                   indent: 0,
                   endIndent: 0,
-                  color: Color.fromARGB(255, 255, 255, 255),
+                  color: Colors.transparent,
                 ),
                 TextField(
                   controller: meterNameController,
@@ -145,7 +145,7 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                   thickness: 0,
                   indent: 0,
                   endIndent: 0,
-                  color: Color.fromARGB(255, 255, 255, 255),
+                  color: Colors.transparent,
                 ),
                 TextField(
                   controller: oldMeterNameController,
@@ -160,12 +160,12 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
               ],
             ),
           ),
-          const VerticalDivider(
+          VerticalDivider(
             width: 20,
             thickness: 1,
             indent: 5,
             endIndent: 5,
-            color: Colors.grey,
+            color: Theme.of(context).dividerTheme.color,
           ),
           Expanded(
             child: ListView.builder(

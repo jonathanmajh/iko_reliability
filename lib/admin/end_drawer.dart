@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
+import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -29,13 +30,29 @@ class _EndDrawerState extends State<EndDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    var themeManager = Provider.of<ThemeManager>(context);
+
     return Drawer(
       child: ListView(
         children: <Widget>[
-          const DrawerHeader(
-              child: Text(
-            'Settings',
-            style: TextStyle(fontSize: 24),
+          DrawerHeader(
+              child: ListTile(
+            title: const Text(
+              'Settings',
+              style: TextStyle(fontSize: 24),
+            ),
+            trailing: Switch(
+                //true => darkmode on
+                value: (themeManager.themeMode == ThemeMode.dark),
+                onChanged: (value) {
+                  themeManager.toggleTheme(value);
+                },
+                thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
+                    (Set<MaterialState> states) {
+                  return (themeManager.themeMode == ThemeMode.dark)
+                      ? const Icon(Icons.dark_mode_rounded)
+                      : const Icon(Icons.light_mode_rounded);
+                })),
           )),
           ListTile(
               title: const Text('Maximo Environment'),

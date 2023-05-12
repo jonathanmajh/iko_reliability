@@ -24,11 +24,13 @@ class JobCraft {
   final String laborType;
   final int quantity;
   final double hours;
+  final String? laborCode;
 
   const JobCraft({
     required this.laborType,
     required this.quantity,
     required this.hours,
+    this.laborCode,
   });
 }
 
@@ -149,12 +151,14 @@ class ParsedTemplate {
       if (sheet != 'Main') {
         continue; //ignore the non template sheets
       }
-      for (var i = 0; i < decoder.tables[sheet]!.maxRows; i++) { //read spreadsheet row by row
+      for (var i = 0; i < decoder.tables[sheet]!.maxRows; i++) {
+        //read spreadsheet row by row
         var row = decoder.tables[sheet]!.rows[i];
         if (row[0] == "DON’T REMOVE THIS LINE") {
           continue;
         }
-        if (row[0] == 'PM Asset/ Parent (Route)*:') { //new PM template header found on spreadsheet, read PM's values and write into new [ParsedTemplate] object 
+        if (row[0] == 'PM Asset/ Parent (Route)*:') {
+          //new PM template header found on spreadsheet, read PM's values and write into new [ParsedTemplate] object
           //flags to read/write data of these category in the next loop iteration(s)
           readTasks = false;
           readCraft = false;
@@ -168,10 +172,11 @@ class ParsedTemplate {
           //read work order type
           String workOrderType = nextRow[6].substring(0, 3);
           if (workOrderType == 'LC1') {
-            workOrderType = 'LIF'; //replace work order types of 'LC1' with 'LIF'
+            workOrderType =
+                'LIF'; //replace work order types of 'LC1' with 'LIF'
           }
           //read next due date for pm
-          var nextDate; 
+          var nextDate;
           if (nextRow[2] != null) {
             if (nextRow[2] is String) {
               nextDate = nextRow[2].substring(0, 10);
@@ -194,8 +199,7 @@ class ParsedTemplate {
             processCondition: nextRow[7].substring(0, 4),
             pmAsset: nextRow[0]?.toString().toUpperCase(),
             pmName: nextRow[8] ?? 'Generating Name...',
-            pmNumber:
-                nextNextRow[8] ?? 'Generating Number...',
+            pmNumber: nextNextRow[8] ?? 'Generating Number...',
             suggestedPmName: nextRow[8],
             suggestedPmNumber: nextNextRow[8],
             routeName:
@@ -205,7 +209,8 @@ class ParsedTemplate {
                 : nextNextRow[9]),
           );
         }
-        if (row[7] != null && readTasks) { //reading job task info of current PM, writing data to [ParsedTemplate] object(s)
+        if (row[7] != null && readTasks) {
+          //reading job task info of current PM, writing data to [ParsedTemplate] object(s)
           pmTemplates[filename][pmNumber].tasks.add(JobTask(
               jptask: row[6], // TODO show error for missing jptask number
               description: row[7],
@@ -216,45 +221,67 @@ class ParsedTemplate {
             pmTemplates[filename][pmNumber].assets.add(row[4]);
           }
         }
-        if (row[3] != null && readRouteAsset) { //reading task rout asset data of current PM and write it to [ParsedTemplate] object
+        if (row[3] != null && readRouteAsset) {
+          //reading task rout asset data of current PM and write it to [ParsedTemplate] object
           pmTemplates[filename][pmNumber].assets.add(row[3]);
         }
-        if (row[0] == 'Materials (Mapics Number)') { //check if current row has materials/mapics # header for PM. If so, read the data next iteration(s)
+        if (row[0] == 'Materials (Mapics Number)') {
+          //check if current row has materials/mapics # header for PM. If so, read the data next iteration(s)
           readCraft = false;
           readMaterials = true;
           continue;
         }
-        if (row[0] == 'Services (Mapics Number)') { //check if current row has services/mapics # header for PM. If so, read the data next iteration(s)
+        if (row[0] == 'Services (Mapics Number)') {
+          //check if current row has services/mapics # header for PM. If so, read the data next iteration(s)
           readCraft = false;
           readService = true;
           continue;
         }
-        if (row[1] != null && readCraft) { //read/write craft data
+        if (row[1] != null && readCraft) {
+          //read/write craft data
+          //parse craft line
+          String str = row[0].substring(row[0].length - 1);
+          String laborType;
+          String? laborCode;
+          int pos = str.lastIndexOf('-');
+          if (pos > 5) {
+            //if labor code exists
+            laborType = str.substring(pos).trim();
+            laborCode = str.substring(pos + 1, str.length - 1).trim();
+          } else {
+            laborType = str;
+          }
+
           pmTemplates[filename][pmNumber].crafts.add(JobCraft(
-              laborType: row[0].substring(row[0].length - 1),
+              laborType: laborType,
               quantity: row[1],
-              hours: parseTime(row[2])));
+              hours: parseTime(row[2]),
+              laborCode: laborCode));
         }
-        if (row[0] != null && readMaterials) { //read/write material data
+        if (row[0] != null && readMaterials) {
+          //read/write material data
           pmTemplates[filename][pmNumber].materials.add(JobMaterial(
               itemNumber: row[0].toString(),
               quantity: row[1] ?? 1,
               cost: row[2]?.toDouble()));
         }
-        if (row[0] != null && readService) { //read/write service data
+        if (row[0] != null && readService) {
+          //read/write service data
           pmTemplates[filename][pmNumber].services.add(JobService(
               itemNumber: row[0].toString(),
               vendorId: row[2],
               cost: row[1].toDouble()));
         }
-        if (row[0] == 'Craft (Labour Code(Optional))') { //check if current row has craft info header for PM. If so, read the data next iteration
+        if (row[0] == 'Craft (Labour Code(Optional))') {
+          //check if current row has craft info header for PM. If so, read the data next iteration
           readTasks = true;
           readCraft = true;
           continue;
         }
 
         if (row[3] == 'Route Assets (one per cell):' ||
-            row[3] == 'Task Route Assets (one per cell):') { //check if current row has task route asset header for PM. If so, read the data next iteration
+            row[3] == 'Task Route Assets (one per cell):') {
+          //check if current row has task route asset header for PM. If so, read the data next iteration
           readRouteAsset = true;
         }
       }

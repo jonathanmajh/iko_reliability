@@ -12,8 +12,6 @@ import 'generate_uploads.dart';
 import 'template_notifier.dart';
 import 'upload_maximo.dart';
 
-//TODO: replace hardcoded color values with theme colors
-
 class PMDetailView extends StatefulWidget {
   const PMDetailView({Key? key}) : super(key: key);
 
@@ -25,23 +23,6 @@ class _PMDetailViewState extends State<PMDetailView>
     with SingleTickerProviderStateMixin {
   Map<String, List<List<String>>> uploadDetails = {};
   List<Widget> fabList = [];
-  static const List<Tab> myTabs = <Tab>[
-    Tab(
-        icon: Icon(
-      Icons.tune,
-      color: Color.fromRGBO(255, 0, 0, 1),
-    )),
-    Tab(
-        icon: Icon(
-      Icons.cloud_upload,
-      color: Color.fromRGBO(255, 0, 0, 1),
-    )),
-    Tab(
-        icon: Icon(
-      Icons.edit_note,
-      color: Color.fromRGBO(255, 0, 0, 1),
-    )),
-  ];
 
   late TabController _tabController;
 
@@ -49,7 +30,8 @@ class _PMDetailViewState extends State<PMDetailView>
   void initState() {
     super.initState();
 
-    _tabController = TabController(vsync: this, length: myTabs.length);
+    _tabController =
+        TabController(vsync: this, length: 3); //hard-coded tab length of 3
     _updateFab();
     _tabController.addListener(() {
       _updateFab();
@@ -201,10 +183,33 @@ class _PMDetailViewState extends State<PMDetailView>
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
+      ThemeData themeData = Theme.of(context);
       return Scaffold(
           appBar: TabBar(
             controller: _tabController,
-            tabs: myTabs,
+            tabs: [
+              Tab(
+                  icon: Icon(
+                Icons.tune,
+                color: (themeData.colorScheme.brightness == Brightness.dark)
+                    ? themeData.indicatorColor
+                    : themeData.primaryColor,
+              )),
+              Tab(
+                  icon: Icon(
+                Icons.cloud_upload,
+                color: (themeData.colorScheme.brightness == Brightness.dark)
+                    ? themeData.indicatorColor
+                    : themeData.primaryColor,
+              )),
+              Tab(
+                  icon: Icon(
+                Icons.edit_note,
+                color: (themeData.colorScheme.brightness == Brightness.dark)
+                    ? themeData.indicatorColor
+                    : themeData.primaryColor,
+              )),
+            ],
           ),
           floatingActionButton: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -232,6 +237,7 @@ class _PMDetailViewState extends State<PMDetailView>
   }
 }
 
+//no need to change upload log colors
 List<Widget> generateUploadDetailsList(
   Map<String, List<List<String>>> uploadDetails,
   bool result, // if highlighting will be applied
