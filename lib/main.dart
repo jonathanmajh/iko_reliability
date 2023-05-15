@@ -56,9 +56,9 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => WorkOrderNotifier()),
           ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
           ChangeNotifierProvider(
-              create: (context) => ThemeManager(ThemeMode.system ==
-                  ThemeMode
-                      .dark)), //set initial brightness according to system settings
+              create: (context) =>
+                  ThemeManager(ThemeMode.system == ThemeMode.dark)),
+          //set initial brightness according to system settings
         ],
         child: Builder(
           builder: (context) => MaterialApp.router(
@@ -66,10 +66,15 @@ class MyApp extends StatelessWidget {
             routeInformationParser: _appRouter.defaultRouteParser(),
             title: 'Flutter Demo',
             theme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed:
-                    const Color(0xFFFF0000)), //sets color for theme
-            darkTheme: ThemeData.dark().copyWith(useMaterial3: true),
+              useMaterial3: true,
+              colorSchemeSeed: const Color(0xFFFF0000),
+            ),
+            //sets color for theme
+            darkTheme: ThemeData(
+              useMaterial3: true,
+              colorSchemeSeed: const Color(0xFFFF0000),
+              brightness: Brightness.dark,
+            ),
             themeMode: Provider.of<ThemeManager>(context).themeMode,
           ),
         ));
