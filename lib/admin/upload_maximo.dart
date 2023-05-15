@@ -438,7 +438,6 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
       return parsed;
     } else {
       parsed['status'] = 'Invalid Response Code from Maximo';
-      print(parsed);
       throw Exception(parsed['Error']['message'].toString());
     }
   } else if (type == 'post') {

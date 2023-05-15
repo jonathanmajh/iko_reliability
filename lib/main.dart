@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -47,24 +48,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => TemplateNotifier()),
-        ChangeNotifierProvider(create: (context) => UploadNotifier()),
-        ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
-        ChangeNotifierProvider(create: (context) => SystemsNotifier()),
-        ChangeNotifierProvider(create: (context) => WorkOrderNotifier()),
-        ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
-      ],
-      child: MaterialApp.router(
-        routerDelegate: _appRouter.delegate(),
-        routeInformationParser: _appRouter.defaultRouteParser(),
-        title: 'Flutter Demo',
-        theme: ThemeData(
-            useMaterial3: true, colorSchemeSeed: const Color(0xFFFF0000)),
-        darkTheme: ThemeData.dark().copyWith(useMaterial3: true),
-        themeMode: ThemeMode.system,
-      ),
-    );
+        providers: [
+          ChangeNotifierProvider(create: (context) => TemplateNotifier()),
+          ChangeNotifierProvider(create: (context) => UploadNotifier()),
+          ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
+          ChangeNotifierProvider(create: (context) => SystemsNotifier()),
+          ChangeNotifierProvider(create: (context) => WorkOrderNotifier()),
+          ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
+          ChangeNotifierProvider(
+              create: (context) => ThemeManager(ThemeMode.system ==
+                  ThemeMode
+                      .dark)), //set initial brightness according to system settings
+        ],
+        child: Builder(
+          builder: (context) => MaterialApp.router(
+            routerDelegate: _appRouter.delegate(),
+            routeInformationParser: _appRouter.defaultRouteParser(),
+            title: 'Flutter Demo',
+            theme: ThemeData(
+                useMaterial3: true,
+                colorSchemeSeed:
+                    const Color(0xFFFF0000)), //sets color for theme
+            darkTheme: ThemeData.dark().copyWith(useMaterial3: true),
+            themeMode: Provider.of<ThemeManager>(context).themeMode,
+          ),
+        ));
   }
 }
 
@@ -286,7 +294,7 @@ showDataAlert(List<String> messages, String title,
                     thickness: 0,
                     indent: 0,
                     endIndent: 0,
-                    color: Color.fromARGB(0, 255, 255, 255),
+                    color: Colors.transparent,
                   ),
                   ...widgets,
                   const Divider(
@@ -295,7 +303,7 @@ showDataAlert(List<String> messages, String title,
                     thickness: 0,
                     indent: 0,
                     endIndent: 0,
-                    color: Color.fromARGB(0, 255, 255, 255),
+                    color: Colors.transparent,
                   ),
                   Center(
                     child: SizedBox(

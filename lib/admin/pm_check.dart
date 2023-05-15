@@ -132,12 +132,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
       ),
       body: Column(
         children: <Widget>[
-          const Divider(
+          Divider(
             height: 10,
             thickness: 1,
             indent: 0,
             endIndent: 0,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.background,
           ),
           Expanded(
               child: Row(
@@ -148,23 +148,23 @@ class _PmCheckPageState extends State<PmCheckPage> {
                     child: Consumer<TemplateNotifier>(
                         builder: (context, value, child) {
                       return ListView(
-                        children: buildPMList(value),
+                        children: buildPMList(value, context),
                       );
                     })),
-                const VerticalDivider(
+                VerticalDivider(
                   width: 20,
                   thickness: 1,
                   indent: 5,
                   endIndent: 5,
-                  color: Colors.grey,
+                  color: Theme.of(context).dividerColor,
                 ),
                 const Expanded(child: PMDetailView()),
-                const VerticalDivider(
+                VerticalDivider(
                   width: 8,
                   thickness: 1,
                   indent: 5,
                   endIndent: 5,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.background,
                 ),
               ]))
         ],
@@ -236,6 +236,7 @@ Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
   return await Future.wait(futures);
 }
 
+///processes loaded PM template files
 void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
     String maximoServerSelected) async {
   context.setLoading(true);

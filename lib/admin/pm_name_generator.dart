@@ -9,6 +9,8 @@ import 'parse_template.dart';
 class PMName {
   String pmNumber;
   String pmName;
+  String pmNameAuto;
+  String pmNameSuggested;
   String jpNumber;
   String? routeNumber;
   String? routeName;
@@ -18,6 +20,8 @@ class PMName {
   PMName({
     required this.pmNumber,
     required this.pmName,
+    required this.pmNameAuto,
+    required this.pmNameSuggested,
     required this.jpNumber,
     this.routeNumber,
     this.routeName,
@@ -26,6 +30,7 @@ class PMName {
   });
 }
 
+///Auto-generate name for PM
 Future<PMName> generateName(
     ParsedTemplate pmdetails, String maximoServerSelected) async {
   String number = '';
@@ -109,9 +114,14 @@ Future<PMName> generateName(
       name = '${name}A';
     }
   }
+
+  //consider suggested PM name of null to be ''
+  String pmNameSuggested = pmdetails.suggestedPmName ?? '';
   return PMName(
     pmNumber: number,
-    pmName: name,
+    pmName: name, //use auto-generated PM name by default
+    pmNameAuto: name,
+    pmNameSuggested: pmNameSuggested,
     jpNumber: '${pmdetails.siteId!}$number',
     replaceable: replaceable,
     commonParent: commonParent,

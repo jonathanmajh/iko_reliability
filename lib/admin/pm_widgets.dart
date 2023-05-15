@@ -5,13 +5,14 @@ import 'template_notifier.dart';
 Widget templateDescription(
   String filename,
   int templateNumber,
-  TemplateNotifier context,
+  TemplateNotifier templateNotifier,
+  BuildContext context,
 ) {
   Color vertCol = Colors.grey;
-  final selected = context.getSelectedTemplate();
+  final selected = templateNotifier.getSelectedTemplate();
   if (selected.selectedFile == filename &&
       selected.selectedTemplate == templateNumber) {
-    vertCol = Colors.red;
+    vertCol = Colors.redAccent;
   }
   return Row(
     mainAxisAlignment: MainAxisAlignment.center,
@@ -21,7 +22,8 @@ Widget templateDescription(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            statusIndicator(context.getStatus(filename, templateNumber))
+            statusIndicator(
+                templateNotifier.getStatus(filename, templateNumber), context)
           ],
         ),
       ),
@@ -38,7 +40,7 @@ Widget templateDescription(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              context.getTemplateNumber(filename, templateNumber),
+              templateNotifier.getTemplateNumber(filename, templateNumber),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -46,7 +48,7 @@ Widget templateDescription(
               ),
             ),
             Text(
-              context.getTemplateName(filename, templateNumber),
+              templateNotifier.getTemplateName(filename, templateNumber),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -58,16 +60,16 @@ Widget templateDescription(
               filename,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12.0,
-                color: Colors.black54,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(
               'Template #$templateNumber',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12.0,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -77,7 +79,7 @@ Widget templateDescription(
   );
 }
 
-Widget statusIndicator(String status) {
+Widget statusIndicator(String status, BuildContext context) {
   Widget icon;
   String text;
   Color textColor;
@@ -120,7 +122,7 @@ Widget statusIndicator(String status) {
       break;
     case 'processing-done':
       text = 'Generated';
-      textColor = const Color.fromARGB(90, 0, 0, 0);
+      textColor = Theme.of(context).colorScheme.onSurface;
       icon = Icon(
         Icons.pause_circle_filled,
         color: textColor,
@@ -168,7 +170,9 @@ Widget statusIndicator(String status) {
   );
 }
 
-List<Widget> buildPMList(TemplateNotifier templateNotify) {
+///Widget for listing PMs uploaded from file
+List<Widget> buildPMList(
+    TemplateNotifier templateNotify, BuildContext context) {
   List<Widget> list = [];
   for (String ws in templateNotify.getFiles()) {
     for (int templateNumber in templateNotify.getTemplates(ws)) {
@@ -176,13 +180,14 @@ List<Widget> buildPMList(TemplateNotifier templateNotify) {
         ws,
         templateNumber,
         templateNotify,
+        context,
       ));
-      list.add(const Divider(
+      list.add(Divider(
         height: 5,
         thickness: 1,
         indent: 20,
         endIndent: 20,
-        color: Colors.grey,
+        color: Theme.of(context).dividerColor,
       ));
     }
   }
@@ -210,14 +215,15 @@ List<Widget> buildPMList(TemplateNotifier templateNotify) {
 Widget templateListItem(
   String filename,
   int templateNumber,
-  TemplateNotifier context,
+  TemplateNotifier templateNotifier,
+  BuildContext context,
 ) {
   return SizedBox(
     height: 100,
     child: GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        context.setSelectedTemplate(filename, templateNumber);
+        templateNotifier.setSelectedTemplate(filename, templateNumber);
       },
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,6 +234,7 @@ Widget templateListItem(
               child: templateDescription(
                 filename,
                 templateNumber,
+                templateNotifier,
                 context,
               ),
             ),

@@ -461,6 +461,7 @@ class MyDatabase extends _$MyDatabase {
       }
       throw Exception('Failed to load assets from Maximo');
     }
+    print(result['member'].length);
     if (result['member'].length > 0) {
       List<AssetsCompanion> assetInserts = [];
       // save once without the hierarchy field then loop through again adding hierarchy
@@ -588,7 +589,7 @@ void maximoAssetCaller(String siteid, String server) async {
     try {
       await database!.getAssetMaximo(siteid, server);
     } catch (e) {
-      messages.add('Fail to update $siteid: ${e.toString()}');
+      messages.add('Failed to update $siteid: ${e.toString()}');
       continue;
     }
     messages.add('Updated $siteid');
