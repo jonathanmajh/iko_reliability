@@ -160,7 +160,6 @@ class _PmCheckPageState extends State<PmCheckPage> {
                 ),
                 const Expanded(child: PMDetailView()),
                 VerticalDivider(
-                  //why do we need a divider here? (Dustin)
                   width: 8,
                   thickness: 1,
                   indent: 5,

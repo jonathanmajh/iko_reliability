@@ -172,8 +172,8 @@ class ParsedTemplate {
           //read work order type
           String workOrderType = nextRow[6].substring(0, 3);
           if (workOrderType == 'LC1') {
-            workOrderType =
-                'LIF'; //replace work order types of 'LC1' with 'LIF'
+            workOrderType = 'LIF';
+            //replace work order types of 'LC1' with 'LIF'
           }
           //read next due date for pm
           var nextDate;
