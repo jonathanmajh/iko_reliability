@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_window_close/flutter_window_close.dart';
 
 import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
@@ -89,9 +90,41 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var _alertShowing = false;
   @override
   void initState() {
     super.initState();
+    FlutterWindowClose.setWindowShouldCloseHandler(() async {
+      if (_alertShowing) return false;
+
+      //TODO: identify when a process is running, only show exit confirmation prompt when a process is continuing
+      bool noProcessRunning = false;
+      if (noProcessRunning) return false;
+
+      _alertShowing = true;
+
+      return await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+                title: const Text('Are you sure you want to quit?'),
+                content: const Text('You may have unsaved changes.'),
+                actions: [
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                        _alertShowing = false;
+                      },
+                      child: const Text('Quit')),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                        _alertShowing = false;
+                      },
+                      child: const Text('Cancel'))
+                ]);
+          });
+    });
   }
 
   @override
