@@ -9,15 +9,19 @@ Widget templateDescription(
   BuildContext context,
 ) {
   Color vertCol = Colors.grey;
-  Color backgroundCol = Theme.of(context).colorScheme.background;
+  BoxDecoration? boxDecoration;
   final selected = templateNotifier.getSelectedTemplate();
   if (selected.selectedFile == filename &&
       selected.selectedTemplate == templateNumber) {
+    Color containerCol = Theme.of(context).colorScheme.secondaryContainer;
     vertCol = Colors.redAccent;
-    backgroundCol = Theme.of(context).colorScheme.secondaryContainer;
+    boxDecoration = BoxDecoration(
+        color: containerCol,
+        border: Border.all(color: containerCol),
+        borderRadius: const BorderRadius.all(Radius.circular(20)));
   }
   return Container(
-    color: backgroundCol,
+    decoration: boxDecoration,
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
