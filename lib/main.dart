@@ -15,6 +15,7 @@ import 'criticality/criticality_notifier.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
+bool hideUpdateWindow = false; //update window too annoying, temporary fix
 
 void main() async {
   await Hive.initFlutter();
@@ -129,26 +130,48 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    Color checkColor = Theme.of(context).colorScheme.surfaceTint;
+
     return Scaffold(
       onDrawerChanged: (isOpened) async {
         final update = await checkUpdate();
-        if (update) {
+        bool isChecked = false;
+        if (!hideUpdateWindow && update) {
           showDataAlert(
               ['Update available'],
               'Update Checker',
               [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        launchUrl(Uri.parse(
-                            'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
-                      },
-                      child: const Text('Download Update'),
-                    ),
-                  ],
-                ),
+                StatefulBuilder(builder: (context, setState) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          launchUrl(Uri.parse(
+                              'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
+                        },
+                        child: const Text('Download Update'),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Checkbox(
+                              value: hideUpdateWindow,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  hideUpdateWindow = value!;
+                                });
+                              }),
+                          const Text(
+                            'Don\'t show again',
+                            textAlign: TextAlign.left,
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }),
               ]);
         }
       },
