@@ -243,7 +243,9 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
   var parsedTmpts = await parseSpreadsheets(files);
   for (var thing in parsedTmpts) {
     for (var template in thing.keys) {
+      //process each selected file
       for (var templateNumber in thing[template].keys) {
+        //process each template in a file
         context.setParsedTemplate(
             template, templateNumber, thing[template][templateNumber]);
       }
@@ -272,5 +274,6 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
       }
     }
   }
+
   context.setLoading(false);
 }

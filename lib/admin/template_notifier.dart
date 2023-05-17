@@ -126,6 +126,15 @@ class TemplateNotifier extends ChangeNotifier {
         allTemplates[file]![template]!.parsedTemplate.suggestedPmName;
   }
 
+  List<String> getLaborCodes(String file, int template) {
+    var craftList = allTemplates[file]![template]!.parsedTemplate.crafts;
+    List<String> codes = [];
+    for (final craft in craftList) {
+      codes.add(craft.laborCode ?? ''); //save null labor codes as empty ''
+    }
+    return codes;
+  }
+
   List<String> getStatusMessages(String file, int template) {
     return allTemplates[file]![template]!.statusMessages;
   }

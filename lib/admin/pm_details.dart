@@ -247,12 +247,17 @@ List<Widget> generateUploadDetailsList(
   int errors = 0;
   int info = 0;
   for (final table in uploadDetails.keys) {
+    String header = tableHeaders[table]!.join(',');
+    if (table == 'JobLabor' &&
+        uploadDetails[table]![0].length > tableHeaders[table]!.length) {
+      //only works for first joblabor entry
+      header += ",LABORCODE";
+    }
     List<Widget> rows = [];
     rows.add(Container(
         width: double.maxFinite,
         color: Colors.black,
-        child: Text((tableHeaders[table]!.join(',')),
-            style: const TextStyle(color: Colors.white))));
+        child: Text((header), style: const TextStyle(color: Colors.white))));
     if (uploadDetails[table]!.isNotEmpty) {
       for (final row in uploadDetails[table]!) {
         if (result) {
@@ -635,6 +640,7 @@ Future<void> generateUploadHelper(
             selected.selectedFile!, selected.selectedTemplate!, msg[0]);
       }
     }
+    print(processedTemplate.jobplan.joblabor);
     uploadNotifier.setUploadDetails(
       selected.selectedFile!,
       selected.selectedTemplate!,
