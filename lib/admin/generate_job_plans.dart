@@ -22,7 +22,7 @@ class JobLaborMaximo {
     required this.laborType,
     required this.quantity,
     required this.hours,
-    this.laborCode = '',
+    required this.laborCode,
   });
 
   @override
@@ -241,7 +241,7 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       laborType: joblabor.laborType,
       quantity: joblabor.quantity,
       hours: joblabor.hours,
-      laborCode: joblabor.laborCode ?? '',
+      laborCode: joblabor.laborCode,
     ));
   }
   for (final task in pmDetails.tasks) {
@@ -267,7 +267,7 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       );
       var childLabor = JobLaborMaximo(
         laborType: pmDetails.crafts[0].laborType,
-        laborCode: pmDetails.crafts[0].laborCode ?? '',
+        laborCode: pmDetails.crafts[0].laborCode,
         quantity: pmDetails.crafts[0].quantity,
         hours: jobhrs / routeTasks.toDouble(),
       );

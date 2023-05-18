@@ -221,7 +221,7 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
     }
   }
   for (final joblabor in jobplan.joblabor) {
-    var jobLaborList = [
+    generated['JobLabor']!.add([
       orgID,
       siteID,
       jobplan.jpnum,
@@ -230,11 +230,8 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
       joblabor.hours.toString(),
       joblabor.quantity.toString(),
       orgID,
-    ];
-    if (joblabor.laborCode != '') {
-      jobLaborList.add(joblabor.laborCode);
-    }
-    generated['JobLabor']!.add(jobLaborList);
+      joblabor.laborCode,
+    ]);
   }
   for (final jobasset in jobplan.jobasset) {
     generated['JPASSETLINK']!.add([

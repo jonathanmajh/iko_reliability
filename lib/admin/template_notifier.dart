@@ -130,7 +130,7 @@ class TemplateNotifier extends ChangeNotifier {
     var craftList = allTemplates[file]![template]!.parsedTemplate.crafts;
     List<String> codes = [];
     for (final craft in craftList) {
-      codes.add(craft.laborCode ?? ''); //save null labor codes as empty ''
+      codes.add(craft.laborCode); //save null labor codes as empty ''
     }
     return codes;
   }

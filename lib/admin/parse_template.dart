@@ -24,13 +24,13 @@ class JobCraft {
   final String laborType;
   final int quantity;
   final double hours;
-  final String? laborCode;
+  final String laborCode;
 
   const JobCraft({
     required this.laborType,
     required this.quantity,
     required this.hours,
-    this.laborCode,
+    required this.laborCode,
   });
 }
 
@@ -242,18 +242,16 @@ class ParsedTemplate {
           //parse craft line
           String str = row[0];
           String laborType;
-          String? laborCode;
+          String laborCode;
           int pos = str.lastIndexOf('@');
           if (pos != -1) {
-            //if labor code exists
+            //if @ symbol exists, might have labor code
             laborType = str.substring(0, pos).trim();
             laborType = laborType.substring(laborType.length - 1);
             laborCode = str.substring(pos + 1).trim();
-            laborCode = (laborCode.isEmpty)
-                ? null
-                : laborCode; //when '@' exists but no labor code
           } else {
             laborType = str.substring(str.length - 1);
+            laborCode = '';
           }
 
           pmTemplates[filename][pmNumber].crafts.add(JobCraft(
