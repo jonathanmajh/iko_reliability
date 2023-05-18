@@ -6,12 +6,14 @@ import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
+import 'dart:io';
 
 import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
 import 'criticality/criticality_notifier.dart';
+import 'admin/process_state_notifier.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -61,6 +63,7 @@ class MyApp extends StatelessWidget {
               create: (context) =>
                   ThemeManager(ThemeMode.system == ThemeMode.dark)),
           //set initial brightness according to system settings
+          ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
         ],
         child: Builder(
           builder: (context) => MaterialApp.router(
@@ -92,19 +95,28 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var _alertShowing = false;
+
   @override
   void initState() {
     super.initState();
+    //closing confirmation window
     FlutterWindowClose.setWindowShouldCloseHandler(() async {
-      if (_alertShowing) return false;
+      if (_alertShowing) {
+        //don't create another prompt if one already exists
+        return false;
+      }
 
-      //TODO: identify when a process is running, only show exit confirmation prompt when a process is continuing
-      bool noProcessRunning = false;
-      if (noProcessRunning) return false;
+      //check if there are any processes running
+      var processNotifier =
+          Provider.of<ProcessStateNotifier>(context, listen: false);
 
+      if (!processNotifier.processRunning()) {
+        exit(0);
+      }
       _alertShowing = true;
 
       return await showDialog(
+          //create confirmation prompt
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -135,7 +147,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       onDrawerChanged: (isOpened) async {
         final update = await checkUpdate();
-        bool isChecked = false;
         if (!hideUpdateWindow && update) {
           showDataAlert(
               ['Update available'],

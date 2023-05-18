@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
@@ -137,15 +138,30 @@ class _EndDrawerState extends State<EndDrawer> {
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.login),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                'Attempting to Login to: ${maximo.maximoServerSelected}'),
-                          ));
-                          getUserMaximo(
-                              useridController.text,
-                              passwordController.text,
-                              maximo.maximoServerSelected);
+                        onPressed: () async {
+                          var processNotifier =
+                              Provider.of<ProcessStateNotifier>(context,
+                                  listen: false);
+                          try {
+                            processNotifier.setProcessState(
+                                ProcessStateNotifier.loginState, true);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              //show login snackbar
+                              duration:
+                                  const Duration(days: 1), //some long duration
+                              content: Text(
+                                  'Attempting to Login to: ${maximo.maximoServerSelected}'),
+                            ));
+                            getUserMaximo(
+                                useridController.text,
+                                passwordController.text,
+                                maximo.maximoServerSelected);
+                          } finally {
+                            ScaffoldMessenger.of(context)
+                                .hideCurrentSnackBar(); //hide snackbar once process is complete
+                            processNotifier.setProcessState(
+                                ProcessStateNotifier.loginState, false);
+                          }
                         },
                       ),
                     );
@@ -176,16 +192,30 @@ class _EndDrawerState extends State<EndDrawer> {
               trailing: Consumer<MaximoServerNotifier>(
                 builder: (context, maximo, child) {
                   return ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (siteid != '') {
-                        maximoAssetCaller(
-                            siteid,
-                            maximo
-                                .maximoServerSelected); //TODO: pause user input during load?
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content:
-                              Text('Attempting to Load Assets from : $siteid'),
-                        ));
+                        var processNotifier = Provider.of<ProcessStateNotifier>(
+                            context,
+                            listen: false);
+                        try {
+                          processNotifier.setProcessState(
+                              ProcessStateNotifier.loadAssetState, true,
+                              notifyListeners: false);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            duration:
+                                const Duration(days: 1), //some long duration
+                            content: Text(
+                                'Attempting to Load Assets from : $siteid'),
+                          ));
+                          await maximoAssetCaller(
+                              siteid, maximo.maximoServerSelected);
+                        } finally {
+                          ScaffoldMessenger.of(context)
+                              .hideCurrentSnackBar(); //hide snackbar once asset load is completed
+                          processNotifier.setProcessState(
+                              ProcessStateNotifier.loadAssetState, false,
+                              notifyListeners: false);
+                        }
                       }
                     },
                     child: const Text('Load'),
