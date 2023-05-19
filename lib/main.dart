@@ -17,7 +17,8 @@ import 'admin/process_state_notifier.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
-bool hideUpdateWindow = false; //update window too annoying, temporary fix
+bool hideUpdateWindow =
+    false; //update window too annoying, temporary fix. Put value in database later
 
 void main() async {
   await Hive.initFlutter();
@@ -36,6 +37,7 @@ void main() async {
   );
 }
 
+///ChangeNotifier for current maximo server/environment
 class MaximoServerNotifier extends ChangeNotifier {
   String maximoServerSelected = 'TEST';
 
@@ -69,7 +71,7 @@ class MyApp extends StatelessWidget {
           builder: (context) => MaterialApp.router(
             routerDelegate: _appRouter.delegate(),
             routeInformationParser: _appRouter.defaultRouteParser(),
-            title: 'Flutter Demo',
+            title: 'IKO Flutter Reliability',
             theme: ThemeData(
               useMaterial3: true,
               colorSchemeSeed: const Color(0xFFFF0000),
@@ -86,6 +88,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+///Homepage widget (Stateful)
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -99,7 +102,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    //closing confirmation window
+    //closing confirmation prompt
     FlutterWindowClose.setWindowShouldCloseHandler(() async {
       if (_alertShowing) {
         //don't create another prompt if one already exists
@@ -111,7 +114,7 @@ class _HomePageState extends State<HomePage> {
           Provider.of<ProcessStateNotifier>(context, listen: false);
 
       if (!processNotifier.processRunning()) {
-        exit(0);
+        return true;
       }
       _alertShowing = true;
 
@@ -145,6 +148,7 @@ class _HomePageState extends State<HomePage> {
     Color checkColor = Theme.of(context).colorScheme.surfaceTint;
 
     return Scaffold(
+      //Update prompt
       onDrawerChanged: (isOpened) async {
         final update = await checkUpdate();
         if (!hideUpdateWindow && update) {
@@ -190,6 +194,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text("IKO Reliability Maximo Tool (beta)"),
       ),
       drawer: Drawer(
+        //navigation drawer
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -310,7 +315,8 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: ListView(children: const <Widget>[
+      body: ListView(// homepage widgets
+          children: const <Widget>[
         ListTile(
           // a spacer
           title: Text(
@@ -327,6 +333,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+///shows an alert dialog with [title] as the title and [messages] as the description rows
 showDataAlert(List<String> messages, String title,
     [List<Widget> widgets = const []]) {
   showDialog(
@@ -401,6 +408,7 @@ showDataAlert(List<String> messages, String title,
   );
 }
 
+///creates a list of text widgets from [messages]
 List<Widget> messageListTile(List<String> messages) {
   List<Widget> list = [];
   for (final msg in messages) {
