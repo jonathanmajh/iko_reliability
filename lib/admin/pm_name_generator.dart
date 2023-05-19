@@ -6,6 +6,7 @@ import 'consts.dart';
 import 'db_drift.dart';
 import 'parse_template.dart';
 
+///Object representing a PM
 class PMName {
   String pmNumber;
   String pmName;
@@ -217,6 +218,7 @@ Future<int> findAvailablePMNumber(
   return counter;
 }
 
+///checks if a PM number is availiable in Maximo
 Future<bool> checkPMNumber(String number, String siteid, String env) async {
   // check to see if PM number is available, true if available
   var result = existPmNumberCache(number, siteid);
@@ -228,6 +230,7 @@ Future<bool> checkPMNumber(String number, String siteid, String env) async {
   return result;
 }
 
+///checks if a PM route number is available in Maximo
 Future<bool> checkRouteNumber(String number, String siteid, String env) async {
   // check to see if PM number is available, true if available
   var result = existRouteNumberCache(number, siteid);
@@ -239,6 +242,7 @@ Future<bool> checkRouteNumber(String number, String siteid, String env) async {
   return result;
 }
 
+///checks if a job plan PM number is available in Maximo
 Future<bool> checkJPNumber(String number, String env) async {
   // check to see if PM number is available, true if available
   var result = existJpNumberCache(number);
@@ -250,6 +254,7 @@ Future<bool> checkJPNumber(String number, String env) async {
   return result;
 }
 
+///Converts an int into letters. Takes the base-10 int and transforms it into base-26, with
 String numberToLetter(int counter) {
   String letters = '';
   while (counter >= 0) {
