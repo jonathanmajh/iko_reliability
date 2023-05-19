@@ -208,11 +208,13 @@ class _EndDrawerState extends State<EndDrawer> {
                         var processNotifier = Provider.of<ProcessStateNotifier>(
                             context,
                             listen: false);
+                        ScaffoldMessengerState scaffoldMes =
+                            ScaffoldMessenger.of(context);
                         try {
                           processNotifier.setProcessState(
                               ProcessStateNotifier.loadAssetState, true,
                               notifyListeners: false);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          scaffoldMes.showSnackBar(SnackBar(
                             duration:
                                 const Duration(days: 1), //some long duration
                             content: Text(
@@ -221,7 +223,7 @@ class _EndDrawerState extends State<EndDrawer> {
                           await maximoAssetCaller(
                               siteid, maximo.maximoServerSelected);
                         } finally {
-                          ScaffoldMessenger.of(context)
+                          scaffoldMes
                               .hideCurrentSnackBar(); //hide snackbar once asset load is completed
                           processNotifier.setProcessState(
                               ProcessStateNotifier.loadAssetState, false,
