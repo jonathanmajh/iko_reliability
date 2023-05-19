@@ -254,7 +254,7 @@ Future<bool> checkJPNumber(String number, String env) async {
   return result;
 }
 
-///Converts an int into letters. Takes the base-10 int and transforms it into base-26, with
+///Converts an int into letters. From right to left, letters are [counter] % 26 (where a-z = 0-25) with [counter] = [counter]/2 - 1 for every iteration
 String numberToLetter(int counter) {
   String letters = '';
   while (counter >= 0) {

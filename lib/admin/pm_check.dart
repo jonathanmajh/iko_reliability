@@ -55,8 +55,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
           child: FloatingActionButton.extended(
             heroTag: UniqueKey(),
             onPressed: () async {
-              var processNotifier = Provider.of<ProcessStateNotifier>(
-                  context); //for recording PM file loading process state
+              var processNotifier = Provider.of<ProcessStateNotifier>(context,
+                  listen: false); //for recording PM file loading process state
               try {
                 processNotifier.setProcessState(
                     ProcessStateNotifier.loadPMFilesState, true);
