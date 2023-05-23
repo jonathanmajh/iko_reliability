@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+///ChangeNotifier for application themes. Used for darkmode and lightmode
 class ThemeManager extends ChangeNotifier {
   ThemeManager(bool isDark) {
     _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
@@ -8,9 +9,9 @@ class ThemeManager extends ChangeNotifier {
 
   get themeMode => _themeMode;
 
+  ///controls darkmode/lightmode for the application. Set [isDark] to [true] for darkmode. Notifies all listeners
   toggleTheme(bool isDark) {
     _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
-    print(_themeMode.toString());
     notifyListeners();
   }
 }

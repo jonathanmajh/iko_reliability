@@ -222,7 +222,7 @@ class _PMDetailViewState extends State<PMDetailView>
                 controller: _tabController,
                 children: [
                   const PMDetails(),
-                  uploadDetailsTab(value, uploadNotifier),
+                  uploadDetailsTab(value, uploadNotifier, context),
                   ElevatedButton(
                     onPressed: () {
                       copyExportDetails(value, uploadNotifier);
@@ -241,22 +241,28 @@ class _PMDetailViewState extends State<PMDetailView>
 List<Widget> generateUploadDetailsList(
   Map<String, List<List<String>>> uploadDetails,
   bool result, // if highlighting will be applied
+  BuildContext context,
 ) {
   List<Widget> cards = [];
   int warnings = 0;
   int errors = 0;
   int info = 0;
+  var themeData = Theme.of(context);
   for (final table in uploadDetails.keys) {
+    //table header
+    String header = tableHeaders[table]!.join(',');
     List<Widget> rows = [];
     rows.add(Container(
         width: double.maxFinite,
-        color: Colors.black,
-        child: Text((tableHeaders[table]!.join(',')),
-            style: const TextStyle(color: Colors.white))));
+        color: themeData.colorScheme.onBackground,
+        child: Text((header),
+            style: TextStyle(color: themeData.colorScheme.background))));
+    //table details
     if (uploadDetails[table]!.isNotEmpty) {
       for (final row in uploadDetails[table]!) {
         if (result) {
-          final textColor = status[row.last] ?? Colors.white;
+          final textColor =
+              status[row.last] ?? themeData.colorScheme.background;
           if (row.last == '!') {
             errors++;
           } else if (row.last == '~') {
@@ -269,12 +275,16 @@ List<Widget> generateUploadDetailsList(
               color: textColor,
               child: Text(
                 row.join(','),
-                style: const TextStyle(fontFamily: 'RobotoMono'),
+                style: TextStyle(
+                    fontFamily: 'RobotoMono',
+                    color: themeData.colorScheme.onBackground),
               )));
         } else {
           rows.add(Text(
             row.join(','),
-            style: const TextStyle(fontFamily: 'RobotoMono'),
+            style: TextStyle(
+                fontFamily: 'RobotoMono',
+                color: themeData.colorScheme.onBackground),
           ));
         }
       }
@@ -550,8 +560,8 @@ class _PMDetailsState extends State<PMDetails> {
   }
 }
 
-Widget uploadDetailsTab(
-    TemplateNotifier templateNotifier, UploadNotifier uploadNotifier) {
+Widget uploadDetailsTab(TemplateNotifier templateNotifier,
+    UploadNotifier uploadNotifier, BuildContext context) {
   final selected = templateNotifier.getSelectedTemplate();
   final details = generateUploadDetailsList(
     uploadNotifier.getUploadDetails(
@@ -560,6 +570,7 @@ Widget uploadDetailsTab(
             selected.selectedFile!, selected.selectedTemplate!)))
         ? true
         : false,
+    context,
   );
   final statusMessages = templateNotifier.getStatusMessages(
       selected.selectedFile!, selected.selectedTemplate!);

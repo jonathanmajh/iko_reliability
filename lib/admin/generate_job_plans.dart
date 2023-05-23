@@ -14,6 +14,7 @@ class JobAssetMaximo {
 
 class JobLaborMaximo {
   final String laborType;
+  final String laborCode;
   final int quantity;
   double hours;
 
@@ -21,7 +22,13 @@ class JobLaborMaximo {
     required this.laborType,
     required this.quantity,
     required this.hours,
+    required this.laborCode,
   });
+
+  @override
+  String toString() {
+    return "[laborType: '$laborType', laborCode: '$laborCode', quantity: $quantity, hours: $hours]";
+  }
 }
 
 class JobMaterialMaximo {
@@ -234,6 +241,7 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       laborType: joblabor.laborType,
       quantity: joblabor.quantity,
       hours: joblabor.hours,
+      laborCode: joblabor.laborCode,
     ));
   }
   for (final task in pmDetails.tasks) {
@@ -259,6 +267,7 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       );
       var childLabor = JobLaborMaximo(
         laborType: pmDetails.crafts[0].laborType,
+        laborCode: pmDetails.crafts[0].laborCode,
         quantity: pmDetails.crafts[0].quantity,
         hours: jobhrs / routeTasks.toDouble(),
       );

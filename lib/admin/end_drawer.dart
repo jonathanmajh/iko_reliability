@@ -1,4 +1,6 @@
+//for widgets in the right-side drawer
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +9,7 @@ import '../main.dart';
 import 'consts.dart';
 import 'db_drift.dart';
 
+///Widget for the right-side drawer of the app
 class EndDrawer extends StatefulWidget {
   const EndDrawer({Key? key}) : super(key: key);
 
@@ -55,6 +58,7 @@ class _EndDrawerState extends State<EndDrawer> {
                 })),
           )),
           ListTile(
+              //environment selection
               title: const Text('Maximo Environment'),
               subtitle: const Text('Select which environment to work with'),
               trailing: Consumer<MaximoServerNotifier>(
@@ -73,7 +77,9 @@ class _EndDrawerState extends State<EndDrawer> {
                   }).toList(),
                 );
               })),
-          Consumer<MaximoServerNotifier>(builder: (context, maximo, child) {
+          Consumer<MaximoServerNotifier>(
+              //login
+              builder: (context, maximo, child) {
             return FutureBuilder<Credentials>(
                 future: getLoginMaximo(maximo.maximoServerSelected),
                 builder: ((context, snapshot) {
@@ -86,6 +92,7 @@ class _EndDrawerState extends State<EndDrawer> {
                     passwordController.text = snapshot.data?.password ?? '';
                   }
                   if (apiKeys.containsKey(maximo.maximoServerSelected)) {
+                    //for username/APIKEY: if APIKEY is used
                     return ListTile(
                       title: const Text('Maximo API Key'),
                       subtitle: TextField(
@@ -107,6 +114,7 @@ class _EndDrawerState extends State<EndDrawer> {
                       ),
                     );
                   } else {
+                    //for username/APIKEY: if username is used
                     return ListTile(
                       title: const Text('Maximo Login'),
                       subtitle: Column(
@@ -118,6 +126,7 @@ class _EndDrawerState extends State<EndDrawer> {
                                 const InputDecoration(labelText: 'Login'),
                           ),
                           TextField(
+                            //password field
                             controller: passwordController,
                             obscureText: _passVisibility,
                             decoration: InputDecoration(
@@ -136,16 +145,32 @@ class _EndDrawerState extends State<EndDrawer> {
                         ],
                       ),
                       trailing: IconButton(
+                        //login button
                         icon: const Icon(Icons.login),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                'Attempting to Login to: ${maximo.maximoServerSelected}'),
-                          ));
-                          getUserMaximo(
-                              useridController.text,
-                              passwordController.text,
-                              maximo.maximoServerSelected);
+                        onPressed: () async {
+                          var processNotifier =
+                              Provider.of<ProcessStateNotifier>(context,
+                                  listen: false);
+                          try {
+                            processNotifier.setProcessState(
+                                ProcessStateNotifier.loginState, true);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              //show login snackbar
+                              duration:
+                                  const Duration(days: 1), //some long duration
+                              content: Text(
+                                  'Attempting to Login to: ${maximo.maximoServerSelected}'),
+                            ));
+                            await getUserMaximo(
+                                useridController.text,
+                                passwordController.text,
+                                maximo.maximoServerSelected);
+                          } finally {
+                            ScaffoldMessenger.of(context)
+                                .hideCurrentSnackBar(); //hide snackbar once process is complete
+                            processNotifier.setProcessState(
+                                ProcessStateNotifier.loginState, false);
+                          }
                         },
                       ),
                     );
@@ -153,6 +178,7 @@ class _EndDrawerState extends State<EndDrawer> {
                 }));
           }),
           ListTile(
+              //asset/site loading
               title: const Text('Load Assets From Maximo'),
               subtitle: DropdownButton(
                 onChanged: (String? newValue) {
@@ -175,17 +201,34 @@ class _EndDrawerState extends State<EndDrawer> {
               ),
               trailing: Consumer<MaximoServerNotifier>(
                 builder: (context, maximo, child) {
+                  //asset load button
                   return ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (siteid != '') {
-                        maximoAssetCaller(
-                            siteid,
-                            maximo
-                                .maximoServerSelected); //TODO: pause user input during load?
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content:
-                              Text('Attempting to Load Assets from : $siteid'),
-                        ));
+                        var processNotifier = Provider.of<ProcessStateNotifier>(
+                            context,
+                            listen: false);
+                        ScaffoldMessengerState scaffoldMes =
+                            ScaffoldMessenger.of(context);
+                        try {
+                          processNotifier.setProcessState(
+                              ProcessStateNotifier.loadAssetState, true,
+                              notifyListeners: false);
+                          scaffoldMes.showSnackBar(SnackBar(
+                            duration:
+                                const Duration(days: 1), //some long duration
+                            content: Text(
+                                'Attempting to Load Assets from : $siteid'),
+                          ));
+                          await maximoAssetCaller(
+                              siteid, maximo.maximoServerSelected);
+                        } finally {
+                          scaffoldMes
+                              .hideCurrentSnackBar(); //hide snackbar once asset load is completed
+                          processNotifier.setProcessState(
+                              ProcessStateNotifier.loadAssetState, false,
+                              notifyListeners: false);
+                        }
                       }
                     },
                     child: const Text('Load'),
@@ -193,10 +236,12 @@ class _EndDrawerState extends State<EndDrawer> {
                 },
               )),
           ListTile(
+            //load observation from spreadsheet/excel
             title: const Text('Load Observation'),
             subtitle:
                 const Text('Clear and Load Observation list from spreadsheet'),
             trailing: ElevatedButton(
+              //load button
               onPressed: () {
                 database!.clearMeters();
                 database!.addMeters();
@@ -209,6 +254,7 @@ class _EndDrawerState extends State<EndDrawer> {
             title: Text(''),
           ),
           Center(
+              //close drawer button
               child: ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Close Drawer'),

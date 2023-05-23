@@ -24,13 +24,13 @@ class JobCraft {
   final String laborType;
   final int quantity;
   final double hours;
-  final String? laborCode;
+  final String laborCode;
 
   const JobCraft({
     required this.laborType,
     required this.quantity,
     required this.hours,
-    this.laborCode,
+    required this.laborCode,
   });
 }
 
@@ -240,16 +240,18 @@ class ParsedTemplate {
         if (row[1] != null && readCraft) {
           //read/write craft data
           //parse craft line
-          String str = row[0].substring(row[0].length - 1);
+          String str = row[0];
           String laborType;
-          String? laborCode;
-          int pos = str.lastIndexOf('-');
-          if (pos > 5) {
-            //if labor code exists
-            laborType = str.substring(pos).trim();
-            laborCode = str.substring(pos + 1, str.length - 1).trim();
+          String laborCode;
+          int pos = str.lastIndexOf('@');
+          if (pos != -1) {
+            //if @ symbol exists, might have labor code
+            laborType = str.substring(0, pos).trim();
+            laborType = laborType.substring(laborType.length - 1);
+            laborCode = str.substring(pos + 1).trim();
           } else {
-            laborType = str;
+            laborType = str.substring(str.length - 1);
+            laborCode = '';
           }
 
           pmTemplates[filename][pmNumber].crafts.add(JobCraft(
@@ -272,7 +274,8 @@ class ParsedTemplate {
               vendorId: row[2],
               cost: row[1].toDouble()));
         }
-        if (row[0] == 'Craft (Labour Code(Optional))') {
+        if (row[0] == 'Craft @ (Optional) Labour Code' ||
+            row[0] == 'Craft (Labour Code(Optional))') {
           //check if current row has craft info header for PM. If so, read the data next iteration
           readTasks = true;
           readCraft = true;
