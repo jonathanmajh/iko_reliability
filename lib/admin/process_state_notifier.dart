@@ -46,4 +46,10 @@ class ProcessStateNotifier extends ChangeNotifier {
     debugPrint("Error: process $process does not exist");
     return true;
   }
+
+  ///checks whether app should ignore user input.
+  bool absorbInput() {
+    //TODO: if certain processes are running, should return [true]
+    return false;
+  }
 }

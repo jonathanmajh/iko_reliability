@@ -68,21 +68,26 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
         ],
         child: Builder(
-          builder: (context) => MaterialApp.router(
-            routerDelegate: _appRouter.delegate(),
-            routeInformationParser: _appRouter.defaultRouteParser(),
-            title: 'IKO Flutter Reliability',
-            theme: ThemeData(
-              useMaterial3: true,
-              colorSchemeSeed: const Color(0xFFFF0000),
+          builder: (context) => AbsorbPointer(
+            //TODO: create cancel process button that can be clicked when widget is absorbing user input.
+            absorbing: Provider.of<ProcessStateNotifier>(context)
+                .absorbInput(), //controls when input is allowed.
+            child: MaterialApp.router(
+              routerDelegate: _appRouter.delegate(),
+              routeInformationParser: _appRouter.defaultRouteParser(),
+              title: 'IKO Flutter Reliability',
+              theme: ThemeData(
+                useMaterial3: true,
+                colorSchemeSeed: const Color(0xFFFF0000),
+              ),
+              //sets color for theme
+              darkTheme: ThemeData(
+                useMaterial3: true,
+                colorSchemeSeed: const Color(0xFFFF0000),
+                brightness: Brightness.dark,
+              ),
+              themeMode: Provider.of<ThemeManager>(context).themeMode,
             ),
-            //sets color for theme
-            darkTheme: ThemeData(
-              useMaterial3: true,
-              colorSchemeSeed: const Color(0xFFFF0000),
-              brightness: Brightness.dark,
-            ),
-            themeMode: Provider.of<ThemeManager>(context).themeMode,
           ),
         ));
   }
