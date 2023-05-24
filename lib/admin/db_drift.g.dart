@@ -8,6 +8,184 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $SettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _darkmodeMeta =
+      const VerificationMeta('darkmode');
+  @override
+  late final GeneratedColumn<bool> darkmode =
+      GeneratedColumn<bool>('darkmode', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: true,
+          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+            SqlDialect.sqlite: 'CHECK ("darkmode" IN (0, 1))',
+            SqlDialect.mysql: '',
+            SqlDialect.postgres: '',
+          }));
+  @override
+  List<GeneratedColumn> get $columns => [id, darkmode];
+  @override
+  String get aliasedName => _alias ?? 'settings';
+  @override
+  String get actualTableName => 'settings';
+  @override
+  VerificationContext validateIntegrity(Insertable<Setting> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('darkmode')) {
+      context.handle(_darkmodeMeta,
+          darkmode.isAcceptableOrUnknown(data['darkmode']!, _darkmodeMeta));
+    } else if (isInserting) {
+      context.missing(_darkmodeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Setting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Setting(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      darkmode: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}darkmode'])!,
+    );
+  }
+
+  @override
+  $SettingsTable createAlias(String alias) {
+    return $SettingsTable(attachedDatabase, alias);
+  }
+}
+
+class Setting extends DataClass implements Insertable<Setting> {
+  final int id;
+  final bool darkmode;
+  const Setting({required this.id, required this.darkmode});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['darkmode'] = Variable<bool>(darkmode);
+    return map;
+  }
+
+  SettingsCompanion toCompanion(bool nullToAbsent) {
+    return SettingsCompanion(
+      id: Value(id),
+      darkmode: Value(darkmode),
+    );
+  }
+
+  factory Setting.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Setting(
+      id: serializer.fromJson<int>(json['id']),
+      darkmode: serializer.fromJson<bool>(json['darkmode']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'darkmode': serializer.toJson<bool>(darkmode),
+    };
+  }
+
+  Setting copyWith({int? id, bool? darkmode}) => Setting(
+        id: id ?? this.id,
+        darkmode: darkmode ?? this.darkmode,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Setting(')
+          ..write('id: $id, ')
+          ..write('darkmode: $darkmode')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, darkmode);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Setting &&
+          other.id == this.id &&
+          other.darkmode == this.darkmode);
+}
+
+class SettingsCompanion extends UpdateCompanion<Setting> {
+  final Value<int> id;
+  final Value<bool> darkmode;
+  const SettingsCompanion({
+    this.id = const Value.absent(),
+    this.darkmode = const Value.absent(),
+  });
+  SettingsCompanion.insert({
+    this.id = const Value.absent(),
+    required bool darkmode,
+  }) : darkmode = Value(darkmode);
+  static Insertable<Setting> custom({
+    Expression<int>? id,
+    Expression<bool>? darkmode,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (darkmode != null) 'darkmode': darkmode,
+    });
+  }
+
+  SettingsCompanion copyWith({Value<int>? id, Value<bool>? darkmode}) {
+    return SettingsCompanion(
+      id: id ?? this.id,
+      darkmode: darkmode ?? this.darkmode,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (darkmode.present) {
+      map['darkmode'] = Variable<bool>(darkmode.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('darkmode: $darkmode')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LoginSettingsTable extends LoginSettings
+    with TableInfo<$LoginSettingsTable, LoginSetting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LoginSettingsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
   late final GeneratedColumn<String> key = GeneratedColumn<String>(
@@ -21,11 +199,11 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   @override
   List<GeneratedColumn> get $columns => [key, value];
   @override
-  String get aliasedName => _alias ?? 'settings';
+  String get aliasedName => _alias ?? 'login_settings';
   @override
-  String get actualTableName => 'settings';
+  String get actualTableName => 'login_settings';
   @override
-  VerificationContext validateIntegrity(Insertable<Setting> instance,
+  VerificationContext validateIntegrity(Insertable<LoginSetting> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -47,9 +225,9 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   @override
   Set<GeneratedColumn> get $primaryKey => {key};
   @override
-  Setting map(Map<String, dynamic> data, {String? tablePrefix}) {
+  LoginSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Setting(
+    return LoginSetting(
       key: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
       value: attachedDatabase.typeMapping
@@ -58,15 +236,15 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   }
 
   @override
-  $SettingsTable createAlias(String alias) {
-    return $SettingsTable(attachedDatabase, alias);
+  $LoginSettingsTable createAlias(String alias) {
+    return $LoginSettingsTable(attachedDatabase, alias);
   }
 }
 
-class Setting extends DataClass implements Insertable<Setting> {
+class LoginSetting extends DataClass implements Insertable<LoginSetting> {
   final String key;
   final String value;
-  const Setting({required this.key, required this.value});
+  const LoginSetting({required this.key, required this.value});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -75,17 +253,17 @@ class Setting extends DataClass implements Insertable<Setting> {
     return map;
   }
 
-  SettingsCompanion toCompanion(bool nullToAbsent) {
-    return SettingsCompanion(
+  LoginSettingsCompanion toCompanion(bool nullToAbsent) {
+    return LoginSettingsCompanion(
       key: Value(key),
       value: Value(value),
     );
   }
 
-  factory Setting.fromJson(Map<String, dynamic> json,
+  factory LoginSetting.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Setting(
+    return LoginSetting(
       key: serializer.fromJson<String>(json['key']),
       value: serializer.fromJson<String>(json['value']),
     );
@@ -99,13 +277,13 @@ class Setting extends DataClass implements Insertable<Setting> {
     };
   }
 
-  Setting copyWith({String? key, String? value}) => Setting(
+  LoginSetting copyWith({String? key, String? value}) => LoginSetting(
         key: key ?? this.key,
         value: value ?? this.value,
       );
   @override
   String toString() {
-    return (StringBuffer('Setting(')
+    return (StringBuffer('LoginSetting(')
           ..write('key: $key, ')
           ..write('value: $value')
           ..write(')'))
@@ -117,22 +295,24 @@ class Setting extends DataClass implements Insertable<Setting> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Setting && other.key == this.key && other.value == this.value);
+      (other is LoginSetting &&
+          other.key == this.key &&
+          other.value == this.value);
 }
 
-class SettingsCompanion extends UpdateCompanion<Setting> {
+class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
   final Value<String> key;
   final Value<String> value;
-  const SettingsCompanion({
+  const LoginSettingsCompanion({
     this.key = const Value.absent(),
     this.value = const Value.absent(),
   });
-  SettingsCompanion.insert({
+  LoginSettingsCompanion.insert({
     required String key,
     required String value,
   })  : key = Value(key),
         value = Value(value);
-  static Insertable<Setting> custom({
+  static Insertable<LoginSetting> custom({
     Expression<String>? key,
     Expression<String>? value,
   }) {
@@ -142,8 +322,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     });
   }
 
-  SettingsCompanion copyWith({Value<String>? key, Value<String>? value}) {
-    return SettingsCompanion(
+  LoginSettingsCompanion copyWith({Value<String>? key, Value<String>? value}) {
+    return LoginSettingsCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
     );
@@ -163,7 +343,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
 
   @override
   String toString() {
-    return (StringBuffer('SettingsCompanion(')
+    return (StringBuffer('LoginSettingsCompanion(')
           ..write('key: $key, ')
           ..write('value: $value')
           ..write(')'))
@@ -2331,9 +2511,196 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
   }
 }
 
+class $AssetCriticalityConfigTable extends AssetCriticalityConfig
+    with TableInfo<$AssetCriticalityConfigTable, AssetCriticalityConfigData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssetCriticalityConfigTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _beforeDateMeta =
+      const VerificationMeta('beforeDate');
+  @override
+  late final GeneratedColumn<DateTime> beforeDate = GeneratedColumn<DateTime>(
+      'before_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _afterDateMeta =
+      const VerificationMeta('afterDate');
+  @override
+  late final GeneratedColumn<DateTime> afterDate = GeneratedColumn<DateTime>(
+      'after_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [beforeDate, afterDate];
+  @override
+  String get aliasedName => _alias ?? 'asset_criticality_config';
+  @override
+  String get actualTableName => 'asset_criticality_config';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<AssetCriticalityConfigData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('before_date')) {
+      context.handle(
+          _beforeDateMeta,
+          beforeDate.isAcceptableOrUnknown(
+              data['before_date']!, _beforeDateMeta));
+    } else if (isInserting) {
+      context.missing(_beforeDateMeta);
+    }
+    if (data.containsKey('after_date')) {
+      context.handle(_afterDateMeta,
+          afterDate.isAcceptableOrUnknown(data['after_date']!, _afterDateMeta));
+    } else if (isInserting) {
+      context.missing(_afterDateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  AssetCriticalityConfigData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssetCriticalityConfigData(
+      beforeDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}before_date'])!,
+      afterDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}after_date'])!,
+    );
+  }
+
+  @override
+  $AssetCriticalityConfigTable createAlias(String alias) {
+    return $AssetCriticalityConfigTable(attachedDatabase, alias);
+  }
+}
+
+class AssetCriticalityConfigData extends DataClass
+    implements Insertable<AssetCriticalityConfigData> {
+  ///upper limit of work order dates
+  final DateTime beforeDate;
+
+  ///lower limit of work order dates
+  final DateTime afterDate;
+  const AssetCriticalityConfigData(
+      {required this.beforeDate, required this.afterDate});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['before_date'] = Variable<DateTime>(beforeDate);
+    map['after_date'] = Variable<DateTime>(afterDate);
+    return map;
+  }
+
+  AssetCriticalityConfigCompanion toCompanion(bool nullToAbsent) {
+    return AssetCriticalityConfigCompanion(
+      beforeDate: Value(beforeDate),
+      afterDate: Value(afterDate),
+    );
+  }
+
+  factory AssetCriticalityConfigData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssetCriticalityConfigData(
+      beforeDate: serializer.fromJson<DateTime>(json['beforeDate']),
+      afterDate: serializer.fromJson<DateTime>(json['afterDate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'beforeDate': serializer.toJson<DateTime>(beforeDate),
+      'afterDate': serializer.toJson<DateTime>(afterDate),
+    };
+  }
+
+  AssetCriticalityConfigData copyWith(
+          {DateTime? beforeDate, DateTime? afterDate}) =>
+      AssetCriticalityConfigData(
+        beforeDate: beforeDate ?? this.beforeDate,
+        afterDate: afterDate ?? this.afterDate,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('AssetCriticalityConfigData(')
+          ..write('beforeDate: $beforeDate, ')
+          ..write('afterDate: $afterDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(beforeDate, afterDate);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssetCriticalityConfigData &&
+          other.beforeDate == this.beforeDate &&
+          other.afterDate == this.afterDate);
+}
+
+class AssetCriticalityConfigCompanion
+    extends UpdateCompanion<AssetCriticalityConfigData> {
+  final Value<DateTime> beforeDate;
+  final Value<DateTime> afterDate;
+  const AssetCriticalityConfigCompanion({
+    this.beforeDate = const Value.absent(),
+    this.afterDate = const Value.absent(),
+  });
+  AssetCriticalityConfigCompanion.insert({
+    required DateTime beforeDate,
+    required DateTime afterDate,
+  })  : beforeDate = Value(beforeDate),
+        afterDate = Value(afterDate);
+  static Insertable<AssetCriticalityConfigData> custom({
+    Expression<DateTime>? beforeDate,
+    Expression<DateTime>? afterDate,
+  }) {
+    return RawValuesInsertable({
+      if (beforeDate != null) 'before_date': beforeDate,
+      if (afterDate != null) 'after_date': afterDate,
+    });
+  }
+
+  AssetCriticalityConfigCompanion copyWith(
+      {Value<DateTime>? beforeDate, Value<DateTime>? afterDate}) {
+    return AssetCriticalityConfigCompanion(
+      beforeDate: beforeDate ?? this.beforeDate,
+      afterDate: afterDate ?? this.afterDate,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (beforeDate.present) {
+      map['before_date'] = Variable<DateTime>(beforeDate.value);
+    }
+    if (afterDate.present) {
+      map['after_date'] = Variable<DateTime>(afterDate.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssetCriticalityConfigCompanion(')
+          ..write('beforeDate: $beforeDate, ')
+          ..write('afterDate: $afterDate')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(e);
   late final $SettingsTable settings = $SettingsTable(this);
+  late final $LoginSettingsTable loginSettings = $LoginSettingsTable(this);
   late final $MeterDBsTable meterDBs = $MeterDBsTable(this);
   late final $ObservationsTable observations = $ObservationsTable(this);
   late final $AssetsTable assets = $AssetsTable(this);
@@ -2342,17 +2709,21 @@ abstract class _$MyDatabase extends GeneratedDatabase {
       $SystemCriticalitysTable(this);
   late final $AssetCriticalitysTable assetCriticalitys =
       $AssetCriticalitysTable(this);
+  late final $AssetCriticalityConfigTable assetCriticalityConfig =
+      $AssetCriticalityConfigTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         settings,
+        loginSettings,
         meterDBs,
         observations,
         assets,
         workorders,
         systemCriticalitys,
-        assetCriticalitys
+        assetCriticalitys,
+        assetCriticalityConfig
       ];
 }
