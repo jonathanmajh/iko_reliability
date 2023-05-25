@@ -29,8 +29,20 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
             SqlDialect.mysql: '',
             SqlDialect.postgres: '',
           }));
+  static const VerificationMeta _updateWindowOffMeta =
+      const VerificationMeta('updateWindowOff');
   @override
-  List<GeneratedColumn> get $columns => [id, darkmode];
+  late final GeneratedColumn<bool> updateWindowOff =
+      GeneratedColumn<bool>('update_window_off', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: true,
+          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+            SqlDialect.sqlite: 'CHECK ("update_window_off" IN (0, 1))',
+            SqlDialect.mysql: '',
+            SqlDialect.postgres: '',
+          }));
+  @override
+  List<GeneratedColumn> get $columns => [id, darkmode, updateWindowOff];
   @override
   String get aliasedName => _alias ?? 'settings';
   @override
@@ -49,6 +61,14 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     } else if (isInserting) {
       context.missing(_darkmodeMeta);
     }
+    if (data.containsKey('update_window_off')) {
+      context.handle(
+          _updateWindowOffMeta,
+          updateWindowOff.isAcceptableOrUnknown(
+              data['update_window_off']!, _updateWindowOffMeta));
+    } else if (isInserting) {
+      context.missing(_updateWindowOffMeta);
+    }
     return context;
   }
 
@@ -62,6 +82,8 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       darkmode: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}darkmode'])!,
+      updateWindowOff: attachedDatabase.typeMapping.read(
+          DriftSqlType.bool, data['${effectivePrefix}update_window_off'])!,
     );
   }
 
@@ -74,12 +96,17 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
 class Setting extends DataClass implements Insertable<Setting> {
   final int id;
   final bool darkmode;
-  const Setting({required this.id, required this.darkmode});
+  final bool updateWindowOff;
+  const Setting(
+      {required this.id,
+      required this.darkmode,
+      required this.updateWindowOff});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['darkmode'] = Variable<bool>(darkmode);
+    map['update_window_off'] = Variable<bool>(updateWindowOff);
     return map;
   }
 
@@ -87,6 +114,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     return SettingsCompanion(
       id: Value(id),
       darkmode: Value(darkmode),
+      updateWindowOff: Value(updateWindowOff),
     );
   }
 
@@ -96,6 +124,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     return Setting(
       id: serializer.fromJson<int>(json['id']),
       darkmode: serializer.fromJson<bool>(json['darkmode']),
+      updateWindowOff: serializer.fromJson<bool>(json['updateWindowOff']),
     );
   }
   @override
@@ -104,57 +133,69 @@ class Setting extends DataClass implements Insertable<Setting> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'darkmode': serializer.toJson<bool>(darkmode),
+      'updateWindowOff': serializer.toJson<bool>(updateWindowOff),
     };
   }
 
-  Setting copyWith({int? id, bool? darkmode}) => Setting(
+  Setting copyWith({int? id, bool? darkmode, bool? updateWindowOff}) => Setting(
         id: id ?? this.id,
         darkmode: darkmode ?? this.darkmode,
+        updateWindowOff: updateWindowOff ?? this.updateWindowOff,
       );
   @override
   String toString() {
     return (StringBuffer('Setting(')
           ..write('id: $id, ')
-          ..write('darkmode: $darkmode')
+          ..write('darkmode: $darkmode, ')
+          ..write('updateWindowOff: $updateWindowOff')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, darkmode);
+  int get hashCode => Object.hash(id, darkmode, updateWindowOff);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Setting &&
           other.id == this.id &&
-          other.darkmode == this.darkmode);
+          other.darkmode == this.darkmode &&
+          other.updateWindowOff == this.updateWindowOff);
 }
 
 class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<int> id;
   final Value<bool> darkmode;
+  final Value<bool> updateWindowOff;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.darkmode = const Value.absent(),
+    this.updateWindowOff = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
     required bool darkmode,
-  }) : darkmode = Value(darkmode);
+    required bool updateWindowOff,
+  })  : darkmode = Value(darkmode),
+        updateWindowOff = Value(updateWindowOff);
   static Insertable<Setting> custom({
     Expression<int>? id,
     Expression<bool>? darkmode,
+    Expression<bool>? updateWindowOff,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (darkmode != null) 'darkmode': darkmode,
+      if (updateWindowOff != null) 'update_window_off': updateWindowOff,
     });
   }
 
-  SettingsCompanion copyWith({Value<int>? id, Value<bool>? darkmode}) {
+  SettingsCompanion copyWith(
+      {Value<int>? id, Value<bool>? darkmode, Value<bool>? updateWindowOff}) {
     return SettingsCompanion(
       id: id ?? this.id,
       darkmode: darkmode ?? this.darkmode,
+      updateWindowOff: updateWindowOff ?? this.updateWindowOff,
     );
   }
 
@@ -167,6 +208,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     if (darkmode.present) {
       map['darkmode'] = Variable<bool>(darkmode.value);
     }
+    if (updateWindowOff.present) {
+      map['update_window_off'] = Variable<bool>(updateWindowOff.value);
+    }
     return map;
   }
 
@@ -174,7 +218,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   String toString() {
     return (StringBuffer('SettingsCompanion(')
           ..write('id: $id, ')
-          ..write('darkmode: $darkmode')
+          ..write('darkmode: $darkmode, ')
+          ..write('updateWindowOff: $updateWindowOff')
           ..write(')'))
         .toString();
   }

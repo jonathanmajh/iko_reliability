@@ -15,6 +15,7 @@ part 'db_drift.g.dart';
 class Settings extends Table {
   IntColumn get id => integer().autoIncrement()();
   BoolColumn get darkmode => boolean()();
+  BoolColumn get updateWindowOff => boolean()();
 }
 
 ///database table for login credentials

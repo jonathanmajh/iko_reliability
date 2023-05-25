@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Color checkColor = Theme.of(context).colorScheme.surfaceTint;
+    hideUpdateWindow = settingsNotifier!.settings.updateWindowOff;
 
     return Scaffold(
       //Update prompt
@@ -185,7 +185,10 @@ class _HomePageState extends State<HomePage> {
                               value: hideUpdateWindow,
                               onChanged: (bool? value) {
                                 setState(() {
-                                  hideUpdateWindow = value!;
+                                  settingsNotifier!.changeSettings(
+                                      updateWindowOff: value!, notify: false);
+                                  hideUpdateWindow = settingsNotifier!
+                                      .settings.updateWindowOff;
                                 });
                               }),
                           const Text(
