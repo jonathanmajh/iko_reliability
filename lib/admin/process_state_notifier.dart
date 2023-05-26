@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 class ProcessStateNotifier extends ChangeNotifier {
   static const int
       //add new processes here
+      //HUST:oZUoQfjnVS
       loginState = 0, // for login
       loadAssetState = 1, //for loading site assets
       loadPMFilesState =

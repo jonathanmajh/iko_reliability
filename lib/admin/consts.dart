@@ -468,3 +468,13 @@ List<String> systemQuality = [
   '40K in potential claims',
   'Potential class action',
 ];
+
+//For application settings (add with new settings)
+//keys hold the settings names while values are the datatypes they can be
+//HUST:luz2Ua91ay
+Map<String, String> applicationSettingKeys = {
+  'darkmode on':
+      'bool', //TRUE FALSE for application theme mode (darkmode, lightmode)
+  'update window off':
+      'bool', //TRUE FALSE for hiding the update availiable prompt
+};

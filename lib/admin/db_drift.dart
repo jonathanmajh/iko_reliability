@@ -13,9 +13,11 @@ import 'upload_maximo.dart';
 part 'db_drift.g.dart';
 
 class Settings extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  BoolColumn get darkmode => boolean()();
-  BoolColumn get updateWindowOff => boolean()();
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
 }
 
 ///database table for login credentials
@@ -170,8 +172,16 @@ class MyDatabase extends _$MyDatabase {
     delete(observations).go();
   }
 
-  Future<void> updateSettings(Setting newSettings) async {
-    await into(settings).insertOnConflictUpdate(newSettings);
+  ///update settings in database. List of settings has priority
+  Future<void> updateSettings(
+      {Setting? newSetting, List<Setting>? newSettings}) async {
+    if (newSettings != null) {
+      for (Setting thing in newSettings) {
+        await into(settings).insertOnConflictUpdate(thing);
+      }
+    } else if (newSetting != null) {
+      await into(settings).insertOnConflictUpdate(newSetting);
+    }
   }
 
   Future<void> addUpdateLoginSettings(
@@ -345,13 +355,8 @@ class MyDatabase extends _$MyDatabase {
     showDataAlert(messages, 'Observation List Loaded');
   }
 
-  Future<Setting?> getSettings() async {
-    return await (select(settings)..where((tbl) => tbl.id.equals(1)))
-        .getSingleOrNull();
-  }
-
-  Stream<Setting> getSettingsStream() {
-    return (select(settings)..where((tbl) => tbl.id.equals(1))).watchSingle();
+  Future<List<Setting>> getSettings() async {
+    return await select(settings).get();
   }
 
   Future<Meter> getMeter(String meterCode) async {
