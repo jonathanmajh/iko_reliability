@@ -11,7 +11,7 @@ class SettingsNotifier extends ChangeNotifier {
   //const fields for setting keys
   //TODO: should find a cleaner way to do this
   //HUST:luz2Ua91ay
-  static const String darkmodeOn = 'dark mode on';
+  static const String darkmodeOn = 'darkmode on';
   static const String updateWindowOff = 'update window off';
 
   //default settings add entries with new settings
@@ -35,6 +35,7 @@ class SettingsNotifier extends ChangeNotifier {
       }
     } catch (e) {
       print(e.toString());
+
       //load default settings
       changeSettings(defaultSettings);
     }
@@ -79,20 +80,20 @@ class SettingsNotifier extends ChangeNotifier {
         //convert saved string value in database to specified data types
         switch (applicationSettingKeys[key]) {
           case 'bool':
-            if (tempSetting.value == 'TRUE') {
+            if (tempSetting.value == 'true') {
               currentSettings[key] = true;
-            } else if (tempSetting.value == 'FALSE') {
-              currentSettings[key] = 'FALSE';
+            } else if (tempSetting.value == 'false') {
+              currentSettings[key] = false;
             } else {
               throw Exception(
                   'Unexpected value for setting $key. Should be of type ${applicationSettingKeys[key]}');
             }
             break;
           case 'bool?':
-            if (tempSetting.value == 'TRUE') {
+            if (tempSetting.value == 'true') {
               currentSettings[key] = true;
-            } else if (tempSetting.value == 'FALSE') {
-              currentSettings[key] = 'FALSE';
+            } else if (tempSetting.value == 'false') {
+              currentSettings[key] = false;
             } else if (tempSetting.value == 'null') {
               currentSettings[key] = null;
             } else {
