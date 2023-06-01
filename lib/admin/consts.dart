@@ -477,4 +477,17 @@ Map<String, String> applicationSettingKeys = {
       'bool', //TRUE FALSE for application theme mode (darkmode, lightmode)
   'update window off':
       'bool', //TRUE FALSE for hiding the update availiable prompt
+  'RPN percent distribution':
+      'List<int>(5)', //List of 5 integers used to store the percent distribution of criticality numbers, from very low (1) to very high (9).
+};
+
+///Possible values for criticality numbers and their meanings.
+///Used to determine the need for PMs for asset and system criticalities
+Map<int?, String> criticalityNumbers = {
+  1: 'Very Low',
+  3: 'Low',
+  5: 'Medium',
+  7: 'High',
+  9: 'Very High',
+  null: 'Not Done',
 };

@@ -616,14 +616,14 @@ Future<Asset> getCommonParent(List<String> assets, String siteID) async {
       .getAsset(siteID, commonHierarchy.substring(commonHierarchy.length - 5));
 }
 
-Future<void> maximoAssetCaller(String siteid, String server) async {
+Future<List<String>> maximoAssetCaller(String siteid, String server) async {
   // some logic to update assets depending on what is selected
   List<String> siteids = [];
   List<String> messages = [];
   if (siteid == 'All') {
     siteids = siteIDAndDescription.keys.toList();
   } else if (siteid == '') {
-    return;
+    return messages;
   } else {
     siteids = [siteid];
   }
@@ -636,5 +636,5 @@ Future<void> maximoAssetCaller(String siteid, String server) async {
     }
     messages.add('Updated $siteid');
   }
-  showDataAlert(messages, 'Site Assets Loaded');
+  return messages;
 }

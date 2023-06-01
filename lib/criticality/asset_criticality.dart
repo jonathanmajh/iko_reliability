@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -15,6 +17,7 @@ class AssetCriticalityPage extends StatefulWidget {
   State<AssetCriticalityPage> createState() => _AssetCriticalityPageState();
 }
 
+///Widget for asset criticality page
 class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   //table objects
   List<PlutoColumn> columns = [];
@@ -320,7 +323,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   Future<List<PlutoRow>> _loadData() async {
-    final dbrows = await database!.getSiteAssets('GH');
+    final dbrows = await database!
+        .getSiteAssets('GH'); //TODO make it able to load other sites
     await context.read<WorkOrderNotifier>().updateWorkOrders();
     for (var row in dbrows) {
       siteAssets[row.assetnum] = row;
@@ -518,4 +522,124 @@ int ratingFromValue(double value, Map<int, Map<String, dynamic>> definition) {
     }
   }
   return 1;
+}
+
+///To calculate the system score for an asset.
+///Uses the root mean squared (RMS) of the asset's ratings of safety, regulatory, economic, throughput, and quality.
+///Economic and quality values are integers from 1-5, while the rest are between 1-10.
+///System score is used to calculate risk priority number (RPN)
+double calculateSystemScore(List<int> ratings) {
+  if (ratings.length != 5) {
+    throw Exception(
+        'Error in parameter [ratings] for function [calculateSystemScore]. Must have a length of 5');
+  }
+  num sum2 = 0;
+  for (int rating in ratings) {
+    sum2 += pow(rating, 2);
+  }
+  return sqrt(sum2 / ratings.length);
+}
+
+///Equation to calculate risk priority number (RPN)
+///Currently just a product between all parameters
+double calculateRPN(double system, int freq, int impact, int earlyDetection) =>
+    system * freq * impact * earlyDetection;
+
+List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
+    {double tolerance = 10}) {
+  ///searches for duplicates of the item at index i a in an ordered list.
+  ///returns a List<int> of length 2 of the indicies of the furthest duplicate of item at index i (first, last)
+  ///recursive function (don't use optional param [searchDown] when calling)
+  dynamic searchForDuplicate(List list, int i, {bool? searchDown}) {
+    if (searchDown == null) {
+      return <int>[
+        searchForDuplicate(list, i - 1, searchDown: true),
+        searchForDuplicate(list, i - 1, searchDown: false)
+      ];
+    } else if (searchDown) {
+      try {
+        if (list[i] == list[i + 1]) {
+          return (searchForDuplicate(list, i - 1, searchDown: true));
+        } else {
+          return i + 1;
+        }
+      } catch (e) {
+        return i + 1;
+      }
+    } else {
+      try {
+        if (list[i] == list[i - 1]) {
+          return (searchForDuplicate(list, i + 1, searchDown: false));
+        } else {
+          return i - 1;
+        }
+      } catch (e) {
+        return i - 1;
+      }
+    }
+  }
+
+  List<double> percentDist = List.from(rpnPercentDist
+      .map((i) => i.toDouble())
+      .toList()
+      .reversed); //order list from highest to lowest priority. Will process from lowest to highest, but Dart only has list.removeLast
+  List<double> list = List<double>.of(rpnList);
+  list.sort((a, b) => a.compareTo(b));
+  List<double> rangeDist = [];
+  double diff = 100000.01; //some large number
+  double targetDist = 0;
+
+  while (percentDist.length > 1) {
+    targetDist += percentDist.removeLast();
+    //get supposed index position of the cutoff RPN in [list]
+    int index = (list.length * targetDist / 100).round() - 1;
+    //check for duplicates of the value at i
+    List<int> duplicates = searchForDuplicate(list, index);
+    if (duplicates[0] == index && duplicates[1] == index) {
+      //no duplicates, list[index] is cutoff RPN for current dist
+      //calculate the difference between ideal percent distribution and actual
+      diff = targetDist - ((list.length - index - 1) / list.length * 100);
+    } else {
+      //duplicates exist, three possible cutoff RPNs: RPN at list[index], the RPN right before it, and the RPN after it. Use whatever results in percent distribution closer to [targetDist]
+      int? indexDwn = (duplicates[0] - 1) >= 0
+          ? searchForDuplicate(list, duplicates[0] - 1)[0]
+          : null; //lower index on list, RPN right above list[index]. Note that list is from greatest to least. Must account for dupes
+      int indexMid = duplicates[0];
+      int? indexUp =
+          (duplicates[1] + 1) < list.length ? (duplicates[1] + 1) : null;
+
+      if (indexDwn != null) {
+        index = indexDwn;
+        diff = targetDist - ((index + 1) / list.length * 100);
+      }
+      if (indexUp != null) {
+        double tempDiff = targetDist - ((indexUp + 1) / list.length * 100);
+        if (tempDiff.abs() < diff.abs()) {
+          diff = tempDiff;
+          index = indexUp;
+        }
+      }
+      double tempDiff = targetDist - ((indexMid + 1) / list.length * 100);
+      if (tempDiff.abs() < diff.abs()) {
+        diff = tempDiff;
+        index = indexMid;
+      }
+    }
+    if (diff.abs() > tolerance) {
+      throw Exception(
+          'Tolerance exceeded. Use different percent distribution. Diff = $diff%, RPN = ${list[index]}, Target = $targetDist%');
+    }
+
+    //add to cutoff RPN to [rangeDist]
+    rangeDist.add(list[index]);
+    //modify the remaining percent distributions with the difference
+    for (int i = 0; i < percentDist.length; i++) {
+      percentDist[i] += diff / (percentDist.length);
+    }
+  }
+
+  //make highest priority cutoff RPN include all RPNs
+  rangeDist.add(list.last);
+
+  return rangeDist;
 }
