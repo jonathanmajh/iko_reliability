@@ -13,12 +13,14 @@ class SettingsNotifier extends ChangeNotifier {
   //HUST:luz2Ua91ay
   static const String darkmodeOn = 'darkmode on';
   static const String updateWindowOff = 'update window off';
+  static const String rpnPercentDist = 'RPN percent distribution';
 
   //default settings add entries with new settings
   //HUST:luz2Ua91ay
   static Map<String, dynamic> defaultSettings = {
     darkmodeOn: ThemeMode.system == Brightness.dark,
-    updateWindowOff: false
+    updateWindowOff: false,
+    rpnPercentDist: [30, 25, 20, 15, 10],
   };
 
   //Map of current settings
@@ -122,6 +124,22 @@ class SettingsNotifier extends ChangeNotifier {
               currentSettings[key] = null;
             } else {
               currentSettings[key] = DateTime.parse(tempSetting.value);
+            }
+            break;
+          case 'List<int>(5)':
+            String str = tempSetting.value.substring(
+                1, tempSetting.value.length - 1); //get rid of brackets
+            List<String> strList = str.split(', ');
+            if (strList.length != 5) {
+              throw Exception(
+                  'Too many elements for type [${applicationSettingKeys[key]}] for setting [$key]');
+            }
+            try {
+              currentSettings[key] =
+                  List<int>.from(strList.map<int>((e) => int.parse(e)));
+            } catch (e2) {
+              throw Exception(
+                  'All elements in type [${applicationSettingKeys[key]}] for setting [$key] must be convertable to type [int]');
             }
             break;
           default:
