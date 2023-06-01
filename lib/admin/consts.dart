@@ -188,6 +188,7 @@ const tableHeaders = {
     'LABORHRS',
     'QUANTITY',
     'ORGID',
+    'LABORCODE'
   ],
   'JPASSETLINK': [
     'JP_ORGID',

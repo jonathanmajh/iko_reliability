@@ -230,6 +230,7 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
       joblabor.hours.toString(),
       joblabor.quantity.toString(),
       orgID,
+      joblabor.laborCode,
     ]);
   }
   for (final jobasset in jobplan.jobasset) {

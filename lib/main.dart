@@ -5,15 +5,20 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_window_close/flutter_window_close.dart';
+import 'dart:io';
 
 import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
 import 'criticality/criticality_notifier.dart';
+import 'admin/process_state_notifier.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
+bool hideUpdateWindow =
+    false; //update window too annoying, temporary fix. Put value in database later
 
 void main() async {
   await Hive.initFlutter();
@@ -32,6 +37,7 @@ void main() async {
   );
 }
 
+///ChangeNotifier for current maximo server/environment
 class MaximoServerNotifier extends ChangeNotifier {
   String maximoServerSelected = 'TEST';
 
@@ -59,12 +65,13 @@ class MyApp extends StatelessWidget {
               create: (context) =>
                   ThemeManager(ThemeMode.system == ThemeMode.dark)),
           //set initial brightness according to system settings
+          ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
         ],
         child: Builder(
           builder: (context) => MaterialApp.router(
             routerDelegate: _appRouter.delegate(),
             routeInformationParser: _appRouter.defaultRouteParser(),
-            title: 'Flutter Demo',
+            title: 'IKO Flutter Reliability',
             theme: ThemeData(
               useMaterial3: true,
               colorSchemeSeed: const Color(0xFFFF0000),
@@ -81,6 +88,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+///Homepage widget (Stateful)
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -89,33 +97,96 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var _alertShowing = false;
+
   @override
   void initState() {
     super.initState();
+    //closing confirmation prompt
+    FlutterWindowClose.setWindowShouldCloseHandler(() async {
+      if (_alertShowing) {
+        //don't create another prompt if one already exists
+        return false;
+      }
+
+      //check if there are any processes running
+      var processNotifier =
+          Provider.of<ProcessStateNotifier>(context, listen: false);
+
+      if (!processNotifier.processRunning()) {
+        return true;
+      }
+      _alertShowing = true;
+
+      return await showDialog(
+          //create confirmation prompt
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+                title: const Text('Are you sure you want to quit?'),
+                content: const Text('You may have unsaved changes.'),
+                actions: [
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                        _alertShowing = false;
+                      },
+                      child: const Text('Quit')),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                        _alertShowing = false;
+                      },
+                      child: const Text('Cancel'))
+                ]);
+          });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    Color checkColor = Theme.of(context).colorScheme.surfaceTint;
+
     return Scaffold(
+      //Update prompt
       onDrawerChanged: (isOpened) async {
         final update = await checkUpdate();
-        if (update) {
+        if (!hideUpdateWindow && update) {
           showDataAlert(
               ['Update available'],
               'Update Checker',
               [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        launchUrl(Uri.parse(
-                            'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
-                      },
-                      child: const Text('Download Update'),
-                    ),
-                  ],
-                ),
+                StatefulBuilder(builder: (context, setState) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          launchUrl(Uri.parse(
+                              'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
+                        },
+                        child: const Text('Download Update'),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Checkbox(
+                              value: hideUpdateWindow,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  hideUpdateWindow = value!;
+                                });
+                              }),
+                          const Text(
+                            'Don\'t show again',
+                            textAlign: TextAlign.left,
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }),
               ]);
         }
       },
@@ -123,6 +194,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text("IKO Reliability Maximo Tool (beta)"),
       ),
       drawer: Drawer(
+        //navigation drawer
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -243,7 +315,8 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: ListView(children: const <Widget>[
+      body: ListView(// homepage widgets
+          children: const <Widget>[
         ListTile(
           // a spacer
           title: Text(
@@ -260,6 +333,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+///shows an alert dialog with [title] as the title and [messages] as the description rows
 showDataAlert(List<String> messages, String title,
     [List<Widget> widgets = const []]) {
   showDialog(
@@ -334,6 +408,7 @@ showDataAlert(List<String> messages, String title,
   );
 }
 
+///creates a list of text widgets from [messages]
 List<Widget> messageListTile(List<String> messages) {
   List<Widget> list = [];
   for (final msg in messages) {

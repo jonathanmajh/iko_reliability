@@ -4,6 +4,7 @@ import '../main.dart';
 import 'consts.dart';
 import 'package:http/http.dart' as http;
 
+///gets a Map of user data information from Maximo using HTTP and saves login data into local database if successful
 Future<Map<String, dynamic>> getUserMaximo(
     String userid, String password, String env) async {
   // check if credentials are valid before saving
@@ -41,9 +42,11 @@ Future<Map<String, dynamic>> getUserMaximo(
   showDataAlert(['Please check credentials', 'Check internet connection'],
       'Failed to Login');
   parsed['status'] = 'fail';
+  print(parsed);
   return parsed;
 }
 
+///save login data from Maximo to local database
 Future<void> saveLoginMaximo(String userid, String password, String env) async {
   if (userid == '[APIKEY]') {
     await database!.addUpdateSettings('$env-APIKEY', password);
@@ -53,6 +56,7 @@ Future<void> saveLoginMaximo(String userid, String password, String env) async {
   }
 }
 
+///Object for Maximo login credentials
 class Credentials {
   final String login;
   final String password;
@@ -63,8 +67,10 @@ class Credentials {
   });
 }
 
+///Gets saved login credentials from local database for the environment specified by [env]
 Future<Credentials> getLoginMaximo(String env) async {
   if (apiKeys.containsKey(env)) {
+    //return APIKEY type credentials if possible
     final pw = await database!.getSettings('$env-APIKEY');
     return Credentials(login: '[APIKEY]', password: pw.value);
   } else {

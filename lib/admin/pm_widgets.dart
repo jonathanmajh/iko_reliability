@@ -9,73 +9,82 @@ Widget templateDescription(
   BuildContext context,
 ) {
   Color vertCol = Colors.grey;
+  BoxDecoration? boxDecoration;
   final selected = templateNotifier.getSelectedTemplate();
   if (selected.selectedFile == filename &&
       selected.selectedTemplate == templateNumber) {
+    Color containerCol = Theme.of(context).colorScheme.secondaryContainer;
     vertCol = Colors.redAccent;
+    boxDecoration = BoxDecoration(
+        color: containerCol,
+        border: Border.all(color: containerCol),
+        borderRadius: const BorderRadius.all(Radius.circular(20)));
   }
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      SizedBox(
-        width: 100,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            statusIndicator(
-                templateNotifier.getStatus(filename, templateNumber), context)
-          ],
+  return Container(
+    decoration: boxDecoration,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        SizedBox(
+          width: 100,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              statusIndicator(
+                  templateNotifier.getStatus(filename, templateNumber), context)
+            ],
+          ),
         ),
-      ),
-      VerticalDivider(
-        width: 20,
-        thickness: 1,
-        indent: 10,
-        endIndent: 10,
-        color: vertCol,
-      ),
-      Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              templateNotifier.getTemplateNumber(filename, templateNumber),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              templateNotifier.getTemplateName(filename, templateNumber),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Padding(padding: EdgeInsets.only(bottom: 2.0)),
-            Text(
-              filename,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12.0,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            Text(
-              'Template #$templateNumber',
-              style: TextStyle(
-                fontSize: 12.0,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ],
+        VerticalDivider(
+          width: 20,
+          thickness: 1,
+          indent: 10,
+          endIndent: 10,
+          color: vertCol,
         ),
-      ),
-    ],
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                templateNotifier.getTemplateNumber(filename, templateNumber),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                templateNotifier.getTemplateName(filename, templateNumber),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Padding(padding: EdgeInsets.only(bottom: 2.0)),
+              Text(
+                filename,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.0,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              Text(
+                'Template #$templateNumber',
+                style: TextStyle(
+                  fontSize: 12.0,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
   );
 }
 

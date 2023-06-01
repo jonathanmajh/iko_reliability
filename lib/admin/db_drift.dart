@@ -1,3 +1,5 @@
+//handling local database (drift)
+
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -574,7 +576,7 @@ Future<Asset> getCommonParent(List<String> assets, String siteID) async {
       .getAsset(siteID, commonHierarchy.substring(commonHierarchy.length - 5));
 }
 
-void maximoAssetCaller(String siteid, String server) async {
+Future<void> maximoAssetCaller(String siteid, String server) async {
   // some logic to update assets depending on what is selected
   List<String> siteids = [];
   List<String> messages = [];

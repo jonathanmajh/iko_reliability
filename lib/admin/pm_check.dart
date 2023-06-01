@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
+import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -53,9 +54,18 @@ class _PmCheckPageState extends State<PmCheckPage> {
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
           child: FloatingActionButton.extended(
             heroTag: UniqueKey(),
-            onPressed: () {
-              pickTemplates(context);
-              _updateFab();
+            onPressed: () async {
+              var processNotifier = Provider.of<ProcessStateNotifier>(context,
+                  listen: false); //for recording PM file loading process state
+              try {
+                processNotifier.setProcessState(
+                    ProcessStateNotifier.loadPMFilesState, true);
+                await pickTemplates(context);
+                _updateFab();
+              } finally {
+                processNotifier.setProcessState(
+                    ProcessStateNotifier.loadPMFilesState, false);
+              }
             },
             tooltip: 'Select files to load PM templates',
             label: const Text('Open'),
@@ -194,7 +204,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
     });
   }
 
-  void pickTemplates(BuildContext context) async {
+  Future<void> pickTemplates(BuildContext context) async {
     Stopwatch stopwatch = Stopwatch()..start();
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
@@ -243,7 +253,9 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
   var parsedTmpts = await parseSpreadsheets(files);
   for (var thing in parsedTmpts) {
     for (var template in thing.keys) {
+      //process each selected file
       for (var templateNumber in thing[template].keys) {
+        //process each template in a file
         context.setParsedTemplate(
             template, templateNumber, thing[template][templateNumber]);
       }
@@ -272,5 +284,6 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
       }
     }
   }
+
   context.setLoading(false);
 }
