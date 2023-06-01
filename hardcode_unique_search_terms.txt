@@ -1,0 +1,9 @@
+Unique comment strings used to search for hardcoded values. Use IDE's search function to search for these strings in the project. When changing the code, may need to change where all of the unique string exists
+
+Format: "HUST:[unique string goes here]"
+e.g. HUST:luz2Ua91ay
+
+List of Unique Strings:
+
+    - luz2Ua91ay: list of application settings used in [SettingsNotifier]
+    - oZUoQfjnVS: list of application processes used in [ProcessStateNotifier] 

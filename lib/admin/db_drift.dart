@@ -13,6 +13,15 @@ import 'upload_maximo.dart';
 part 'db_drift.g.dart';
 
 class Settings extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+///database table for login credentials
+class LoginSettings extends Table {
   // ENV_USERID,ENV_PASS,ENV_APIKEY
   TextColumn get key => text()();
   TextColumn get value => text()();
@@ -131,14 +140,24 @@ class AssetCriticalityWithAsset {
   final AssetCriticality assetCriticality;
 }
 
+class AssetCriticalityConfig extends Table {
+  ///upper limit of work order dates
+  DateTimeColumn get beforeDate => dateTime()();
+
+  ///lower limit of work order dates
+  DateTimeColumn get afterDate => dateTime()();
+}
+
 @DriftDatabase(tables: [
   Settings,
+  LoginSettings,
   MeterDBs,
   Observations,
   Assets,
   Workorders,
   SystemCriticalitys,
   AssetCriticalitys,
+  AssetCriticalityConfig,
 ])
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
@@ -153,11 +172,23 @@ class MyDatabase extends _$MyDatabase {
     delete(observations).go();
   }
 
-  Future<void> addUpdateSettings(
+  ///update settings in database. List of settings has priority
+  Future<void> updateSettings(
+      {Setting? newSetting, List<Setting>? newSettings}) async {
+    if (newSettings != null) {
+      for (Setting thing in newSettings) {
+        await into(settings).insertOnConflictUpdate(thing);
+      }
+    } else if (newSetting != null) {
+      await into(settings).insertOnConflictUpdate(newSetting);
+    }
+  }
+
+  Future<void> addUpdateLoginSettings(
     String key,
     String value,
   ) async {
-    await into(settings).insertOnConflictUpdate(Setting(
+    await into(loginSettings).insertOnConflictUpdate(LoginSetting(
       key: key,
       value: value,
     ));
@@ -214,11 +245,16 @@ class MyDatabase extends _$MyDatabase {
     )));
   }
 
-  Future<Setting> getSettings(String key) async {
-    final result = await (select(settings)..where((tbl) => tbl.key.equals(key)))
+  Future<LoginSetting> getLoginSettings(String key) async {
+    final result = await (select(loginSettings)
+          ..where((tbl) => tbl.key.equals(key)))
         .getSingleOrNull();
+
     if (result == null) {
-      return Setting(key: key, value: '');
+      return LoginSetting(
+        key: key,
+        value: '',
+      );
     }
     return result;
   }
@@ -317,6 +353,10 @@ class MyDatabase extends _$MyDatabase {
     }
     messages.add('Finished Loading');
     showDataAlert(messages, 'Observation List Loaded');
+  }
+
+  Future<List<Setting>> getSettings() async {
+    return await select(settings).get();
   }
 
   Future<Meter> getMeter(String meterCode) async {

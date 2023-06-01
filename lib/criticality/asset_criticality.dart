@@ -16,6 +16,7 @@ class AssetCriticalityPage extends StatefulWidget {
 }
 
 class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
+  //table objects
   List<PlutoColumn> columns = [];
   List<PlutoRow> rows = [];
   Map<String, Asset> siteAssets = {};
@@ -31,6 +32,11 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   late PlutoGridStateManager stateManager;
   late PlutoGridStateManager detailStateManager;
+
+  //settings objects
+  String? startDateRange;
+  String? endDateRange;
+  List<int> priorityDistribution = []; //from lowest to highest priority
 
   @override
   void initState() {
