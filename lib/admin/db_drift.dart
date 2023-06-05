@@ -140,14 +140,6 @@ class AssetCriticalityWithAsset {
   final AssetCriticality assetCriticality;
 }
 
-class AssetCriticalityConfig extends Table {
-  ///upper limit of work order dates
-  DateTimeColumn get beforeDate => dateTime()();
-
-  ///lower limit of work order dates
-  DateTimeColumn get afterDate => dateTime()();
-}
-
 @DriftDatabase(tables: [
   Settings,
   LoginSettings,
@@ -157,7 +149,6 @@ class AssetCriticalityConfig extends Table {
   Workorders,
   SystemCriticalitys,
   AssetCriticalitys,
-  AssetCriticalityConfig,
 ])
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
