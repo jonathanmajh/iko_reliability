@@ -8,21 +8,8 @@ import '../admin/db_drift.dart';
 import '../admin/consts.dart';
 
 class SettingsNotifier extends ChangeNotifier {
-  //const fields for setting keys
-  //TODO: should find a cleaner way to do this
-  //HUST:luz2Ua91ay
-  static const String darkmodeOn = 'darkmode on';
-  static const String updateWindowOff = 'update window off';
-
-  //default settings add entries with new settings
-  //HUST:luz2Ua91ay
-  static Map<String, dynamic> defaultSettings = {
-    darkmodeOn: ThemeMode.system == Brightness.dark,
-    updateWindowOff: false
-  };
-
   //Map of current settings
-  Map<String, dynamic> currentSettings = {};
+  Map<ApplicationSetting, dynamic> currentSettings = {};
 
   SettingsNotifier() {
     currentSettings = {};
@@ -37,12 +24,12 @@ class SettingsNotifier extends ChangeNotifier {
       print(e.toString());
 
       //load default settings
-      changeSettings(defaultSettings);
+      changeSettings(ApplicationSetting.defaultSettings);
     }
   }
 
   void changeSettings(
-    Map<String, dynamic> newSettings, {
+    Map<ApplicationSetting, dynamic> newSettings, {
     bool notify = true,
   }) {
     //update settings obj
@@ -50,7 +37,7 @@ class SettingsNotifier extends ChangeNotifier {
     //for updating settings database
     List<Setting> listSettings = [];
     newSettings.forEach((key, value) {
-      listSettings.add(Setting(key: key, value: value.toString()));
+      listSettings.add(Setting(key: key.toString(), value: value.toString()));
     });
 
     if (notify) notifyListeners();
@@ -68,8 +55,8 @@ class SettingsNotifier extends ChangeNotifier {
         databaseKeys[i] = databaseSettings[i].key;
       }
 
-      for (String key in applicationSettingKeys.keys) {
-        int index = databaseKeys.indexOf(key);
+      for (ApplicationSetting setting in ApplicationSetting.values) {
+        int index = databaseKeys.indexOf(setting.keyString);
 
         if (index == -1) {
           //database is in improper format if does not contain all settings
@@ -78,55 +65,55 @@ class SettingsNotifier extends ChangeNotifier {
 
         Setting tempSetting = databaseSettings[index];
         //convert saved string value in database to specified data types
-        switch (applicationSettingKeys[key]) {
+        switch (setting.dataType) {
           case 'bool':
             if (tempSetting.value == 'true') {
-              currentSettings[key] = true;
+              currentSettings[setting] = true;
             } else if (tempSetting.value == 'false') {
-              currentSettings[key] = false;
+              currentSettings[setting] = false;
             } else {
               throw Exception(
-                  'Unexpected value for setting $key. Should be of type ${applicationSettingKeys[key]}');
+                  'Unexpected value for setting [${setting.keyString}]. Should be of type ${setting.dataType}');
             }
             break;
           case 'bool?':
             if (tempSetting.value == 'true') {
-              currentSettings[key] = true;
+              currentSettings[setting] = true;
             } else if (tempSetting.value == 'false') {
-              currentSettings[key] = false;
+              currentSettings[setting] = false;
             } else if (tempSetting.value == 'null') {
-              currentSettings[key] = null;
+              currentSettings[setting] = null;
             } else {
               throw Exception(
-                  'Unexpected value for setting $key. Should be of type ${applicationSettingKeys[key]}');
+                  'Unexpected value for setting [${setting.keyString}]. Should be of type ${setting.dataType}');
             }
             break;
           case 'String':
-            currentSettings[key] = tempSetting.value;
+            currentSettings[setting] = tempSetting.value;
             break;
           case 'int':
-            currentSettings[key] = int.parse(tempSetting.value);
+            currentSettings[setting] = int.parse(tempSetting.value);
             break;
           case 'int?':
             if (tempSetting.value == '' || tempSetting.value == 'null') {
-              currentSettings[key] = null;
+              currentSettings[setting] = null;
             } else {
-              currentSettings[key] = int.parse(tempSetting.value);
+              currentSettings[setting] = int.parse(tempSetting.value);
             }
             break;
           case 'DateTime':
-            currentSettings[key] = DateTime.parse(tempSetting.value);
+            currentSettings[setting] = DateTime.parse(tempSetting.value);
             break;
           case 'DateTime?':
             if (tempSetting.value == '' || tempSetting.value == 'null') {
-              currentSettings[key] = null;
+              currentSettings[setting] = null;
             } else {
-              currentSettings[key] = DateTime.parse(tempSetting.value);
+              currentSettings[setting] = DateTime.parse(tempSetting.value);
             }
             break;
           default:
             throw Exception(
-                'Unexpected type [${applicationSettingKeys[key]}] for setting [$key]');
+                'Unexpected type [${setting.dataType}] for setting [${setting.keyString}]');
         }
       }
       return true;

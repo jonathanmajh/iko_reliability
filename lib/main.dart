@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
@@ -67,8 +68,8 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => settingsNotifier),
           ChangeNotifierProvider(
-              create: (context) => ThemeManager(
-                  settingsNotifier!.getSetting(SettingsNotifier.darkmodeOn))),
+              create: (context) => ThemeManager(settingsNotifier!
+                  .getSetting(ApplicationSetting.darkmodeOn.toString()))),
           //set initial brightness according to system settings
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
         ],
@@ -155,8 +156,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    hideUpdateWindow =
-        settingsNotifier!.getSetting(SettingsNotifier.updateWindowOff);
+    hideUpdateWindow = settingsNotifier!
+        .getSetting(ApplicationSetting.updateWindowOff.toString());
 
     return Scaffold(
       //Update prompt
@@ -187,11 +188,12 @@ class _HomePageState extends State<HomePage> {
                               onChanged: (bool? value) {
                                 setState(() {
                                   settingsNotifier!.changeSettings({
-                                    SettingsNotifier.updateWindowOff: value!
+                                    ApplicationSetting.updateWindowOff: value!
                                   }, notify: false);
                                   hideUpdateWindow = settingsNotifier!
-                                      .getSetting(
-                                          SettingsNotifier.updateWindowOff);
+                                      .getSetting(ApplicationSetting
+                                          .updateWindowOff
+                                          .toString());
                                 });
                               }),
                           const Text(

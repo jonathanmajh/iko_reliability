@@ -153,7 +153,7 @@ class _EndDrawerState extends State<EndDrawer> {
                                   listen: false);
                           try {
                             processNotifier.setProcessState(
-                                ProcessStateNotifier.loginState, true);
+                                ProcessStates.loginState, true);
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               //show login snackbar
                               duration:
@@ -169,7 +169,7 @@ class _EndDrawerState extends State<EndDrawer> {
                             ScaffoldMessenger.of(context)
                                 .hideCurrentSnackBar(); //hide snackbar once process is complete
                             processNotifier.setProcessState(
-                                ProcessStateNotifier.loginState, false);
+                                ProcessStates.loginState, false);
                           }
                         },
                       ),
@@ -212,7 +212,7 @@ class _EndDrawerState extends State<EndDrawer> {
                             ScaffoldMessenger.of(context);
                         try {
                           processNotifier.setProcessState(
-                              ProcessStateNotifier.loadAssetState, true,
+                              ProcessStates.loadAssetState, true,
                               notifyListeners: false);
                           scaffoldMes.showSnackBar(SnackBar(
                             duration:
@@ -226,7 +226,7 @@ class _EndDrawerState extends State<EndDrawer> {
                           scaffoldMes
                               .hideCurrentSnackBar(); //hide snackbar once asset load is completed
                           processNotifier.setProcessState(
-                              ProcessStateNotifier.loadAssetState, false,
+                              ProcessStates.loadAssetState, false,
                               notifyListeners: false);
                         }
                       }
