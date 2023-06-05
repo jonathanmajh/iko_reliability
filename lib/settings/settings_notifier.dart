@@ -110,7 +110,9 @@ class SettingsNotifier extends ChangeNotifier {
             if (tempSetting.value == '' || tempSetting.value == 'null') {
               currentSettings[setting] = null;
             } else {
-              currentSettings[setting] = DateTime.parse(tempSetting.value);
+              currentSettings[setting] = DateTime.parse(tempSetting.value
+                  .substring(0,
+                      tempSetting.value.indexOf(' '))); //remove time component
             }
             break;
           default:

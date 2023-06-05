@@ -94,8 +94,7 @@ class MyApp extends StatelessWidget {
                   colorSchemeSeed: const Color(0xFFFF0000),
                   brightness: Brightness.dark,
                 ),
-                themeMode:
-                    Provider.of<ThemeManager>(context, listen: false).themeMode,
+                themeMode: Provider.of<ThemeManager>(context).themeMode,
               ),
             );
           },
