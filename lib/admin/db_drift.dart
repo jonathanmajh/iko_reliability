@@ -175,6 +175,7 @@ class MyDatabase extends _$MyDatabase {
   ///update settings in database. List of settings has priority
   Future<void> updateSettings(
       {Setting? newSetting, List<Setting>? newSettings}) async {
+    print('update settings ran');
     if (newSettings != null) {
       for (Setting thing in newSettings) {
         await into(settings).insertOnConflictUpdate(thing);

@@ -25,6 +25,8 @@ class SettingsNotifier extends ChangeNotifier {
 
       //load default settings
       changeSettings(ApplicationSetting.defaultSettings);
+      await Future.delayed(
+          const Duration(seconds: 1)); //to give time for settings to load
     }
   }
 
@@ -123,7 +125,7 @@ class SettingsNotifier extends ChangeNotifier {
     }
   }
 
-  dynamic getSetting(String settingKey) {
+  dynamic getSetting(ApplicationSetting settingKey) {
     return currentSettings[settingKey];
   }
 }

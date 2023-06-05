@@ -68,33 +68,37 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => settingsNotifier),
           ChangeNotifierProvider(
-              create: (context) => ThemeManager(settingsNotifier!
-                  .getSetting(ApplicationSetting.darkmodeOn.toString()))),
+              create: (context) => ThemeManager(
+                  settingsNotifier!.getSetting(ApplicationSetting.darkmodeOn))),
           //set initial brightness according to system settings
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
         ],
         child: Builder(
-          builder: (context) => AbsorbPointer(
-            //TODO: create cancel process button that can be clicked when widget is absorbing user input.
-            absorbing: Provider.of<ProcessStateNotifier>(context, listen: false)
-                .absorbInput(), //controls when input is allowed.
-            child: MaterialApp.router(
-              routerDelegate: _appRouter.delegate(),
-              routeInformationParser: _appRouter.defaultRouteParser(),
-              title: 'IKO Flutter Reliability',
-              theme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
+          builder: (context) {
+            return AbsorbPointer(
+              //TODO: create cancel process button that can be clicked when widget is absorbing user input.
+              absorbing:
+                  Provider.of<ProcessStateNotifier>(context, listen: false)
+                      .absorbInput(), //controls when input is allowed.
+              child: MaterialApp.router(
+                routerDelegate: _appRouter.delegate(),
+                routeInformationParser: _appRouter.defaultRouteParser(),
+                title: 'IKO Flutter Reliability',
+                theme: ThemeData(
+                  useMaterial3: true,
+                  colorSchemeSeed: const Color(0xFFFF0000),
+                ),
+                //sets color for theme
+                darkTheme: ThemeData(
+                  useMaterial3: true,
+                  colorSchemeSeed: const Color(0xFFFF0000),
+                  brightness: Brightness.dark,
+                ),
+                themeMode:
+                    Provider.of<ThemeManager>(context, listen: false).themeMode,
               ),
-              //sets color for theme
-              darkTheme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
-                brightness: Brightness.dark,
-              ),
-              themeMode: Provider.of<ThemeManager>(context).themeMode,
-            ),
-          ),
+            );
+          },
         ));
   }
 }
@@ -156,8 +160,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    hideUpdateWindow = settingsNotifier!
-        .getSetting(ApplicationSetting.updateWindowOff.toString());
+    hideUpdateWindow =
+        settingsNotifier!.getSetting(ApplicationSetting.updateWindowOff);
 
     return Scaffold(
       //Update prompt
@@ -191,9 +195,8 @@ class _HomePageState extends State<HomePage> {
                                     ApplicationSetting.updateWindowOff: value!
                                   }, notify: false);
                                   hideUpdateWindow = settingsNotifier!
-                                      .getSetting(ApplicationSetting
-                                          .updateWindowOff
-                                          .toString());
+                                      .getSetting(
+                                          ApplicationSetting.updateWindowOff);
                                 });
                               }),
                           const Text(
