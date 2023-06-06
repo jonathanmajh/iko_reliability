@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
@@ -68,32 +69,35 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => settingsNotifier),
           ChangeNotifierProvider(
               create: (context) => ThemeManager(
-                  settingsNotifier!.getSetting(SettingsNotifier.darkmodeOn))),
+                  settingsNotifier!.getSetting(ApplicationSetting.darkmodeOn))),
           //set initial brightness according to system settings
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
         ],
         child: Builder(
-          builder: (context) => AbsorbPointer(
-            //TODO: create cancel process button that can be clicked when widget is absorbing user input.
-            absorbing: Provider.of<ProcessStateNotifier>(context, listen: false)
-                .absorbInput(), //controls when input is allowed.
-            child: MaterialApp.router(
-              routerDelegate: _appRouter.delegate(),
-              routeInformationParser: _appRouter.defaultRouteParser(),
-              title: 'IKO Flutter Reliability',
-              theme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
+          builder: (context) {
+            return AbsorbPointer(
+              //TODO: create cancel process button that can be clicked when widget is absorbing user input.
+              absorbing:
+                  Provider.of<ProcessStateNotifier>(context, listen: false)
+                      .absorbInput(), //controls when input is allowed.
+              child: MaterialApp.router(
+                routerDelegate: _appRouter.delegate(),
+                routeInformationParser: _appRouter.defaultRouteParser(),
+                title: 'IKO Flutter Reliability',
+                theme: ThemeData(
+                  useMaterial3: true,
+                  colorSchemeSeed: const Color(0xFFFF0000),
+                ),
+                //sets color for theme
+                darkTheme: ThemeData(
+                  useMaterial3: true,
+                  colorSchemeSeed: const Color(0xFFFF0000),
+                  brightness: Brightness.dark,
+                ),
+                themeMode: Provider.of<ThemeManager>(context).themeMode,
               ),
-              //sets color for theme
-              darkTheme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
-                brightness: Brightness.dark,
-              ),
-              themeMode: Provider.of<ThemeManager>(context).themeMode,
-            ),
-          ),
+            );
+          },
         ));
   }
 }
@@ -156,7 +160,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     hideUpdateWindow =
-        settingsNotifier!.getSetting(SettingsNotifier.updateWindowOff);
+        settingsNotifier!.getSetting(ApplicationSetting.updateWindowOff);
 
     return Scaffold(
       //Update prompt
@@ -187,11 +191,11 @@ class _HomePageState extends State<HomePage> {
                               onChanged: (bool? value) {
                                 setState(() {
                                   settingsNotifier!.changeSettings({
-                                    SettingsNotifier.updateWindowOff: value!
+                                    ApplicationSetting.updateWindowOff: value!
                                   }, notify: false);
                                   hideUpdateWindow = settingsNotifier!
                                       .getSetting(
-                                          SettingsNotifier.updateWindowOff);
+                                          ApplicationSetting.updateWindowOff);
                                 });
                               }),
                           const Text(

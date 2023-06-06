@@ -140,14 +140,6 @@ class AssetCriticalityWithAsset {
   final AssetCriticality assetCriticality;
 }
 
-class AssetCriticalityConfig extends Table {
-  ///upper limit of work order dates
-  DateTimeColumn get beforeDate => dateTime()();
-
-  ///lower limit of work order dates
-  DateTimeColumn get afterDate => dateTime()();
-}
-
 @DriftDatabase(tables: [
   Settings,
   LoginSettings,
@@ -157,7 +149,6 @@ class AssetCriticalityConfig extends Table {
   Workorders,
   SystemCriticalitys,
   AssetCriticalitys,
-  AssetCriticalityConfig,
 ])
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
@@ -175,6 +166,7 @@ class MyDatabase extends _$MyDatabase {
   ///update settings in database. List of settings has priority
   Future<void> updateSettings(
       {Setting? newSetting, List<Setting>? newSettings}) async {
+    print('update settings ran');
     if (newSettings != null) {
       for (Setting thing in newSettings) {
         await into(settings).insertOnConflictUpdate(thing);

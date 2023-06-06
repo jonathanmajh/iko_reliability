@@ -8,6 +8,7 @@ import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:provider/provider.dart';
 
+import 'consts.dart';
 import '../main.dart';
 import 'end_drawer.dart';
 import 'generate_job_plans.dart';
@@ -59,12 +60,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
                   listen: false); //for recording PM file loading process state
               try {
                 processNotifier.setProcessState(
-                    ProcessStateNotifier.loadPMFilesState, true);
+                    ProcessStates.loadPMFilesState, true);
                 await pickTemplates(context);
                 _updateFab();
               } finally {
                 processNotifier.setProcessState(
-                    ProcessStateNotifier.loadPMFilesState, false);
+                    ProcessStates.loadPMFilesState, false);
               }
             },
             tooltip: 'Select files to load PM templates',

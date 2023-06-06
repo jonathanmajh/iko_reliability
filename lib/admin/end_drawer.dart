@@ -153,7 +153,7 @@ class _EndDrawerState extends State<EndDrawer> {
                                   listen: false);
                           try {
                             processNotifier.setProcessState(
-                                ProcessStateNotifier.loginState, true);
+                                ProcessStates.loginState, true);
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               //show login snackbar
                               duration:
@@ -169,7 +169,7 @@ class _EndDrawerState extends State<EndDrawer> {
                             ScaffoldMessenger.of(context)
                                 .hideCurrentSnackBar(); //hide snackbar once process is complete
                             processNotifier.setProcessState(
-                                ProcessStateNotifier.loginState, false);
+                                ProcessStates.loginState, false);
                           }
                         },
                       ),
@@ -212,10 +212,10 @@ class _EndDrawerState extends State<EndDrawer> {
                             ScaffoldMessenger.of(context);
                         try {
                           processNotifier.setProcessState(
-                              ProcessStateNotifier.loadAssetState, true,
-                              notifyListeners: false,
-                              createDialog: true,
-                              context: context);
+
+                              ProcessStates.loadAssetState, true,
+                              notifyListeners: false);
+
                           scaffoldMes.showSnackBar(SnackBar(
                             duration:
                                 const Duration(days: 1), //some long duration
@@ -232,10 +232,9 @@ class _EndDrawerState extends State<EndDrawer> {
                           scaffoldMes
                               .hideCurrentSnackBar(); //hide snackbar once asset load is completed
                           processNotifier.setProcessState(
-                              ProcessStateNotifier.loadAssetState, false,
-                              notifyListeners: false,
-                              closeDialog: true,
-                              context: context);
+                              ProcessStates.loadAssetState, false,
+                              notifyListeners: false);
+
                         }
                       }
                     },

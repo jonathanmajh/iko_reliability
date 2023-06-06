@@ -472,22 +472,100 @@ List<String> systemQuality = [
 //For application settings (add with new settings)
 //keys hold the settings names while values are the datatypes they can be
 //HUST:luz2Ua91ay
-Map<String, String> applicationSettingKeys = {
-  'darkmode on':
-      'bool', //TRUE FALSE for application theme mode (darkmode, lightmode)
-  'update window off':
-      'bool', //TRUE FALSE for hiding the update availiable prompt
-  'RPN percent distribution':
-      'List<int>(5)', //List of 5 integers used to store the percent distribution of criticality numbers, from very low (1) to very high (9).
-};
+enum ApplicationSetting {
+  darkmodeOn(
+      keyString: 'darkmode on',
+      dataType: 'bool',
+      defaultValue:
+          false), //TRUE FALSE for application theme mode (darkmode, lightmode)
+  updateWindowOff(
+      keyString: 'update window off',
+      dataType: 'bool',
+      defaultValue: false), //TRUE FALSE for hiding the update availiable prompt
+  rpnPercentVL(
+      keyString: 'RPN percent very low',
+      dataType: 'int',
+      defaultValue:
+          30), //int for asset criticality RPN risk distribution percentage (very low)
+  rpnPercentL(
+      keyString: 'RPN percent low',
+      dataType: 'int',
+      defaultValue:
+          25), //int for asset criticality RPN distribution percentage (low)
+  rpnPercentM(
+      keyString: 'RPN percent medium',
+      dataType: 'int',
+      defaultValue:
+          20), //int for asset criticality RPN distribution percentage (medium)
+  rpnPercentH(
+      keyString: 'RPN percent high',
+      dataType: 'int',
+      defaultValue:
+          15), //int for asset criticality RPN risk distribution percentage (high)
+  rpnPercentVH(
+      keyString: 'RPN percent very hight',
+      dataType: 'int',
+      defaultValue:
+          10), //int for asset criticality RPN risk distribution percentage (very high)
+  beforeDate(
+      keyString: 'before date',
+      dataType: 'DateTime?',
+      defaultValue:
+          null), //upper bound for work order dates filter in asset criticality (inclusive). null if no filter
+  afterDate(
+    keyString: 'after date',
+    dataType: 'DateTime?',
+    defaultValue: null,
+  ); //lower bound for work order dates filter in asset criticality (inclusive)
 
-///Possible values for criticality numbers and their meanings.
-///Used to determine the need for PMs for asset and system criticalities
-Map<int?, String> criticalityNumbers = {
-  1: 'Very Low',
-  3: 'Low',
-  5: 'Medium',
-  7: 'High',
-  9: 'Very High',
-  null: 'Not Done',
-};
+  const ApplicationSetting(
+      {required this.keyString,
+      required this.dataType,
+      required this.defaultValue});
+
+  final String keyString;
+  final String dataType;
+  final dynamic defaultValue;
+
+  ///map of the default settings
+  static Map<ApplicationSetting, dynamic> get defaultSettings {
+    Map<ApplicationSetting, dynamic> map = {};
+    for (ApplicationSetting setting in ApplicationSetting.values) {
+      map[setting] = setting.defaultValue;
+    }
+    return map;
+  }
+
+  ///gets a list of keyStrings. Listed from the {keyString} of the {ApplicationSetting} with the lowest index to the highest
+  static List<String> get keyStrings {
+    List<String> list = [];
+    for (ApplicationSetting setting in ApplicationSetting.values) {
+      list.add(setting.keyString);
+    }
+    return list;
+  }
+
+  ///gets the {ApplicationSetting} with the same {this.keyString} as {keyString}
+  static ApplicationSetting getSettingFromKeyString(String keyString) {
+    for (ApplicationSetting setting in ApplicationSetting.values) {
+      if (setting.keyString == keyString) return setting;
+    }
+    throw Exception('[$keyString] is not a valid setting.');
+  }
+
+  @override
+  String toString() {
+    return keyString;
+  }
+}
+
+//add new application processes here
+//HUST:oZUoQfjnVS
+///Various time-consuming processes the application goes through. Used for {ProcessStateNotifier}
+enum ProcessStates {
+  loginState(),
+  loadAssetState(),
+  loadPMFilesState(),
+  uploadPMFilesState();
+}
+
