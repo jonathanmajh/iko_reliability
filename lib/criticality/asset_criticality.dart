@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:iko_reliability_flutter/criticality/asset_crit_drawer.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
@@ -402,7 +403,19 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Asset Criticality'),
+        actions: [
+          Builder(
+              builder: (context) => IconButton(
+                    onPressed: () {
+                      Scaffold.of(context).openEndDrawer();
+                      print('boo');
+                    },
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'Settings',
+                  ))
+        ],
       ),
+      endDrawer: const AssetCritSettingsDrawer(),
       body: Container(
           padding: const EdgeInsets.all(30),
           child: PlutoDualGrid(
@@ -540,9 +553,9 @@ double calculateSystemScore(List<int> ratings) {
   return sqrt(sum2 / ratings.length);
 }
 
-///Equation to calculate risk priority number (RPN)
+///Function/Equation to calculate risk priority number (RPN)
 ///Currently just a product between all parameters
-double calculateRPN(double system, int freq, int impact, int earlyDetection) =>
+double rpnFunc(double system, int freq, int impact, int earlyDetection) =>
     system * freq * impact * earlyDetection;
 
 List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
