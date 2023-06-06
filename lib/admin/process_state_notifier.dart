@@ -27,7 +27,7 @@ class ProcessStateNotifier extends ChangeNotifier {
   ///sets the process specified by [process] to [value]. Checks if any processes are running and returns that bool if [checkProcesses] is [true]. Notifies all listeners if [notifyListeners] is [true].
   bool setProcessState(ProcessStates process, bool value,
       {bool checkProcesses = false, bool notifyListeners = true}) {
-    if (processStates.containsKey(process)) {
+    if (processStates.containsKey(process.index)) {
       processStates[process.index] = value;
       if (notifyListeners) {
         super.notifyListeners();
