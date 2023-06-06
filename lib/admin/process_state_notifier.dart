@@ -85,8 +85,14 @@ class ProcessStateNotifier extends ChangeNotifier {
         builder: (context) {
           return AlertDialog(
             title: const Text('Loading...'),
-            content: CircularProgressIndicator(
-              color: Colors.red, //Provider.of<ThemeData>(context).primaryColor,
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ],
             ),
             actions: [
               TextButton(
