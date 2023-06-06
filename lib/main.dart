@@ -242,7 +242,8 @@ class _HomePageState extends State<HomePage> {
                 // update notifier when the menu is opened
                 Consumer<SystemsNotifier>(builder: (context, systems, child) {
                   systems.updateSystems();
-                  return const Text('environment');
+                  return Text(Provider.of<MaximoServerNotifier>(context)
+                      .maximoServerSelected);
                 }),
               ],
             )),

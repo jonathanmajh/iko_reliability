@@ -212,22 +212,29 @@ class _EndDrawerState extends State<EndDrawer> {
                             ScaffoldMessenger.of(context);
                         try {
                           processNotifier.setProcessState(
+
                               ProcessStates.loadAssetState, true,
                               notifyListeners: false);
+
                           scaffoldMes.showSnackBar(SnackBar(
                             duration:
                                 const Duration(days: 1), //some long duration
                             content: Text(
                                 'Attempting to Load Assets from : $siteid'),
                           ));
-                          await maximoAssetCaller(
+                          List<String> messages = await maximoAssetCaller(
                               siteid, maximo.maximoServerSelected);
+                          processNotifier.popProcessingDialog(context);
+                          if (messages.isNotEmpty) {
+                            showDataAlert(messages, 'Site Assets Loaded');
+                          }
                         } finally {
                           scaffoldMes
                               .hideCurrentSnackBar(); //hide snackbar once asset load is completed
                           processNotifier.setProcessState(
                               ProcessStates.loadAssetState, false,
                               notifyListeners: false);
+
                         }
                       }
                     },
