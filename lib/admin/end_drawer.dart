@@ -212,10 +212,9 @@ class _EndDrawerState extends State<EndDrawer> {
                             ScaffoldMessenger.of(context);
                         try {
                           processNotifier.setProcessState(
-
                               ProcessStates.loadAssetState, true,
                               notifyListeners: false);
-
+                          processNotifier.processingDialog(context);
                           scaffoldMes.showSnackBar(SnackBar(
                             duration:
                                 const Duration(days: 1), //some long duration
@@ -234,7 +233,6 @@ class _EndDrawerState extends State<EndDrawer> {
                           processNotifier.setProcessState(
                               ProcessStates.loadAssetState, false,
                               notifyListeners: false);
-
                         }
                       }
                     },

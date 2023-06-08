@@ -408,7 +408,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               builder: (context) => IconButton(
                     onPressed: () {
                       Scaffold.of(context).openEndDrawer();
-                      print('boo');
                     },
                     icon: const Icon(Icons.settings),
                     tooltip: 'Settings',

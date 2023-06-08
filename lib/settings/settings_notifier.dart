@@ -8,8 +8,6 @@ import '../admin/db_drift.dart';
 import '../admin/consts.dart';
 
 class SettingsNotifier extends ChangeNotifier {
-
-  
   //Map of current settings
   Map<ApplicationSetting, dynamic> currentSettings = {};
 
@@ -115,22 +113,6 @@ class SettingsNotifier extends ChangeNotifier {
               currentSettings[setting] = DateTime.parse(tempSetting.value
                   .substring(0,
                       tempSetting.value.indexOf(' '))); //remove time component
-            }
-            break;
-          case 'List<int>(5)':
-            String str = tempSetting.value.substring(
-                1, tempSetting.value.length - 1); //get rid of brackets
-            List<String> strList = str.split(', ');
-            if (strList.length != 5) {
-              throw Exception(
-                  'Too many elements for type [${applicationSettingKeys[key]}] for setting [$key]');
-            }
-            try {
-              currentSettings[key] =
-                  List<int>.from(strList.map<int>((e) => int.parse(e)));
-            } catch (e2) {
-              throw Exception(
-                  'All elements in type [${applicationSettingKeys[key]}] for setting [$key] must be convertable to type [int]');
             }
             break;
           default:

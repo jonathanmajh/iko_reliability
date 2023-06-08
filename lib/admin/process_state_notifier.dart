@@ -8,8 +8,8 @@ import 'package:provider/provider.dart';
 
 ///records the application processing states
 class ProcessStateNotifier extends ChangeNotifier {
-
   Map<int, bool> processStates = <int, bool>{};
+  bool alertDialogShowing = false;
 
   ProcessStateNotifier() {
     //create all process states during initialization
