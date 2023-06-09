@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
 import 'dart:io';
 
+import 'admin/cache_notifier.dart';
 import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
@@ -72,6 +73,7 @@ class MyApp extends StatelessWidget {
                   settingsNotifier!.getSetting(ApplicationSetting.darkmodeOn))),
           //set initial brightness according to system settings
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
+          ChangeNotifierProvider(create: (context) => Cache()),
         ],
         child: Builder(
           builder: (context) {
@@ -159,8 +161,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    hideUpdateWindow =
-        settingsNotifier!.getSetting(ApplicationSetting.updateWindowOff);
+    SettingsNotifier settings = Provider.of<SettingsNotifier>(context);
+    hideUpdateWindow = settings.getSetting(ApplicationSetting.updateWindowOff);
 
     return Scaffold(
       //Update prompt
@@ -190,12 +192,11 @@ class _HomePageState extends State<HomePage> {
                               value: hideUpdateWindow,
                               onChanged: (bool? value) {
                                 setState(() {
-                                  settingsNotifier!.changeSettings({
+                                  settings.changeSettings({
                                     ApplicationSetting.updateWindowOff: value!
                                   }, notify: false);
-                                  hideUpdateWindow = settingsNotifier!
-                                      .getSetting(
-                                          ApplicationSetting.updateWindowOff);
+                                  hideUpdateWindow = settings.getSetting(
+                                      ApplicationSetting.updateWindowOff);
                                 });
                               }),
                           const Text(

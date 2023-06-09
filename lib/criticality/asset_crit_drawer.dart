@@ -26,7 +26,7 @@ class _AssetCritSettingsDrawerState extends State<AssetCritSettingsDrawer> {
                 //true => darkmode on
                 value: (themeManager.themeMode == ThemeMode.dark),
                 onChanged: (value) {
-                  themeManager.toggleTheme(value);
+                  themeManager.toggleTheme(value, context);
                 },
                 thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
                     (Set<MaterialState> states) {

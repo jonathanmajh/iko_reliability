@@ -6,10 +6,12 @@ import 'package:iko_reliability_flutter/criticality/asset_crit_drawer.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
+import '../admin/cache_notifier.dart';
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
 import 'criticality_notifier.dart';
+import 'functions.dart';
 
 class AssetCriticalityPage extends StatefulWidget {
   const AssetCriticalityPage({Key? key}) : super(key: key);
@@ -343,6 +345,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
         final asset = context.read<WorkOrderNotifier>().systems[child.assetnum];
+        final cache = Provider.of<Cache>(context);
         rows.add(PlutoRow(
           cells: {
             'assetnum': PlutoCell(value: child.assetnum),
@@ -551,11 +554,6 @@ double calculateSystemScore(List<int> ratings) {
   }
   return sqrt(sum2 / ratings.length);
 }
-
-///Function/Equation to calculate risk priority number (RPN)
-///Currently just a product between all parameters
-double rpnFunc(double system, int freq, int impact, int earlyDetection) =>
-    system * freq * impact * earlyDetection;
 
 List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
     {double tolerance = 10}) {
