@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
+import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -34,7 +35,15 @@ class _EndDrawerState extends State<EndDrawer> {
   @override
   Widget build(BuildContext context) {
     var themeManager = Provider.of<ThemeManager>(context);
+    if (ModalRoute.of(context)!.settings.name == 'AssetCriticalityRoute') {
+      return assetCriticalityEndDrawer(context, themeManager);
+    } else {
+      return defaultEndDrawer(context, themeManager);
+    }
+  }
 
+  ///Widget for default end drawer. Could not extract widget due to _passVisibility error
+  Widget defaultEndDrawer(BuildContext context, ThemeManager themeManager) {
     return Drawer(
       child: ListView(
         children: <Widget>[
@@ -48,7 +57,7 @@ class _EndDrawerState extends State<EndDrawer> {
                 //true => darkmode on
                 value: (themeManager.themeMode == ThemeMode.dark),
                 onChanged: (value) {
-                  themeManager.toggleTheme(value);
+                  themeManager.toggleTheme(value, context);
                 },
                 thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
                     (Set<MaterialState> states) {
@@ -153,7 +162,7 @@ class _EndDrawerState extends State<EndDrawer> {
                                   listen: false);
                           try {
                             processNotifier.setProcessState(
-                                ProcessStateNotifier.loginState, true);
+                                ProcessStates.loginState, true);
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               //show login snackbar
                               duration:
@@ -169,7 +178,7 @@ class _EndDrawerState extends State<EndDrawer> {
                             ScaffoldMessenger.of(context)
                                 .hideCurrentSnackBar(); //hide snackbar once process is complete
                             processNotifier.setProcessState(
-                                ProcessStateNotifier.loginState, false);
+                                ProcessStates.loginState, false);
                           }
                         },
                       ),
@@ -212,21 +221,26 @@ class _EndDrawerState extends State<EndDrawer> {
                             ScaffoldMessenger.of(context);
                         try {
                           processNotifier.setProcessState(
-                              ProcessStateNotifier.loadAssetState, true,
+                              ProcessStates.loadAssetState, true,
                               notifyListeners: false);
+                          processNotifier.processingDialog(context);
                           scaffoldMes.showSnackBar(SnackBar(
                             duration:
                                 const Duration(days: 1), //some long duration
                             content: Text(
                                 'Attempting to Load Assets from : $siteid'),
                           ));
-                          await maximoAssetCaller(
+                          List<String> messages = await maximoAssetCaller(
                               siteid, maximo.maximoServerSelected);
+                          processNotifier.popProcessingDialog(context);
+                          if (messages.isNotEmpty) {
+                            showDataAlert(messages, 'Site Assets Loaded');
+                          }
                         } finally {
                           scaffoldMes
                               .hideCurrentSnackBar(); //hide snackbar once asset load is completed
                           processNotifier.setProcessState(
-                              ProcessStateNotifier.loadAssetState, false,
+                              ProcessStates.loadAssetState, false,
                               notifyListeners: false);
                         }
                       }
@@ -259,6 +273,43 @@ class _EndDrawerState extends State<EndDrawer> {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Close Drawer'),
           )),
+        ],
+      ),
+    );
+  }
+
+  ///Widget for asset criticality end drawer
+  Widget assetCriticalityEndDrawer(
+      BuildContext context, ThemeManager themeManager) {
+    return Drawer(
+      child: ListView(
+        children: <Widget>[
+          DrawerHeader(
+              child: ListTile(
+            title: const Text(
+              'Asset Criticality Settings',
+              style: TextStyle(fontSize: 24),
+            ),
+            trailing: Switch(
+                //true => darkmode on
+                value: (themeManager.themeMode == ThemeMode.dark),
+                onChanged: (value) {
+                  themeManager.toggleTheme(value, context);
+                },
+                thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
+                    (Set<MaterialState> states) {
+                  return (themeManager.themeMode == ThemeMode.dark)
+                      ? const Icon(Icons.dark_mode_rounded)
+                      : const Icon(Icons.light_mode_rounded);
+                })),
+          )),
+          ListTile(
+            title: const Text('Calculate Risk Priority Numbers (RPN)'),
+            trailing: ElevatedButton(
+              onPressed: () {/*TODO: calculate rpns in table*/},
+              child: const Text('Calculate'),
+            ),
+          )
         ],
       ),
     );

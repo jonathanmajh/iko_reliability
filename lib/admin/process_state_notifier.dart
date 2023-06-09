@@ -1,27 +1,21 @@
 import 'dart:core';
+import 'dart:io';
 
+import 'consts.dart';
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/settings/theme_manager.dart';
+import 'package:provider/provider.dart';
 
 ///records the application processing states
 class ProcessStateNotifier extends ChangeNotifier {
-  static const int
-      //add new processes here
-      loginState = 0, // for login
-      loadAssetState = 1, //for loading site assets
-      loadPMFilesState =
-          2, //for loading PMs from files in 'PM Verify and Upload' page
-      uploadPMFilesState = 3, //for uploading PMs in 'PM Verify and Upload' page
-
-      largestState =
-          3; //the largest state int. Update this when creating new state int consts. (Could use dart:mirrors instead)
-
   Map<int, bool> processStates = <int, bool>{};
+  bool alertDialogShowing = false;
 
   ProcessStateNotifier() {
     //create all process states during initialization
 
-    for (int processNum = 0; processNum <= largestState; processNum++) {
-      processStates[processNum] = false;
+    for (ProcessStates process in ProcessStates.values) {
+      processStates[process.index] = false;
     }
   }
 
@@ -34,10 +28,11 @@ class ProcessStateNotifier extends ChangeNotifier {
   }
 
   ///sets the process specified by [process] to [value]. Checks if any processes are running and returns that bool if [checkProcesses] is [true]. Notifies all listeners if [notifyListeners] is [true].
-  bool setProcessState(int process, bool value,
+
+  bool setProcessState(ProcessStates process, bool value,
       {bool checkProcesses = false, bool notifyListeners = true}) {
-    if (processStates.containsKey(process)) {
-      processStates[process] = value;
+    if (processStates.containsKey(process.index)) {
+      processStates[process.index] = value;
       if (notifyListeners) {
         super.notifyListeners();
       }
@@ -51,5 +46,42 @@ class ProcessStateNotifier extends ChangeNotifier {
   bool absorbInput() {
     //TODO: if certain processes are running, should return [true]
     return false;
+  }
+
+  Future<void> processingDialog(BuildContext context) {
+    alertDialogShowing = true;
+    return showDialog<void>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Loading...'),
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  //TODO: cancel current process
+                  popProcessingDialog(context);
+                },
+              )
+            ],
+          );
+        },
+        barrierDismissible: false);
+  }
+
+  void popProcessingDialog(context) {
+    if (alertDialogShowing) {
+      Navigator.pop(context);
+      alertDialogShowing = false;
+    }
   }
 }

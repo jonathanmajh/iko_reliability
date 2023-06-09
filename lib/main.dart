@@ -1,13 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
 import 'dart:io';
 
+import 'admin/cache_notifier.dart';
 import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
@@ -16,6 +19,7 @@ import 'criticality/criticality_notifier.dart';
 import 'admin/process_state_notifier.dart';
 
 MyDatabase? database;
+SettingsNotifier? settingsNotifier;
 final navigatorKey = GlobalKey<NavigatorState>();
 bool hideUpdateWindow =
     false; //update window too annoying, temporary fix. Put value in database later
@@ -32,6 +36,8 @@ void main() async {
   box = Hive.box('routeNumber');
   box.clear();
   database = MyDatabase();
+  settingsNotifier = SettingsNotifier();
+  await settingsNotifier!.initialize();
   runApp(
     MyApp(),
   );
@@ -61,34 +67,39 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => SystemsNotifier()),
           ChangeNotifierProvider(create: (context) => WorkOrderNotifier()),
           ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
+          ChangeNotifierProvider(create: (context) => settingsNotifier),
           ChangeNotifierProvider(
-              create: (context) =>
-                  ThemeManager(ThemeMode.system == ThemeMode.dark)),
+              create: (context) => ThemeManager(
+                  settingsNotifier!.getSetting(ApplicationSetting.darkmodeOn))),
           //set initial brightness according to system settings
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
+          ChangeNotifierProvider(create: (context) => Cache()),
         ],
         child: Builder(
-          builder: (context) => AbsorbPointer(
-            //TODO: create cancel process button that can be clicked when widget is absorbing user input.
-            absorbing: Provider.of<ProcessStateNotifier>(context)
-                .absorbInput(), //controls when input is allowed.
-            child: MaterialApp.router(
-              routerDelegate: _appRouter.delegate(),
-              routeInformationParser: _appRouter.defaultRouteParser(),
-              title: 'IKO Flutter Reliability',
-              theme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
+          builder: (context) {
+            return AbsorbPointer(
+              //TODO: create cancel process button that can be clicked when widget is absorbing user input.
+              absorbing:
+                  Provider.of<ProcessStateNotifier>(context, listen: false)
+                      .absorbInput(), //controls when input is allowed.
+              child: MaterialApp.router(
+                routerDelegate: _appRouter.delegate(),
+                routeInformationParser: _appRouter.defaultRouteParser(),
+                title: 'IKO Flutter Reliability',
+                theme: ThemeData(
+                  useMaterial3: true,
+                  colorSchemeSeed: const Color(0xFFFF0000),
+                ),
+                //sets color for theme
+                darkTheme: ThemeData(
+                  useMaterial3: true,
+                  colorSchemeSeed: const Color(0xFFFF0000),
+                  brightness: Brightness.dark,
+                ),
+                themeMode: Provider.of<ThemeManager>(context).themeMode,
               ),
-              //sets color for theme
-              darkTheme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
-                brightness: Brightness.dark,
-              ),
-              themeMode: Provider.of<ThemeManager>(context).themeMode,
-            ),
-          ),
+            );
+          },
         ));
   }
 }
@@ -150,7 +161,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Color checkColor = Theme.of(context).colorScheme.surfaceTint;
+    SettingsNotifier settings = Provider.of<SettingsNotifier>(context);
+    hideUpdateWindow = settings.getSetting(ApplicationSetting.updateWindowOff);
 
     return Scaffold(
       //Update prompt
@@ -180,7 +192,11 @@ class _HomePageState extends State<HomePage> {
                               value: hideUpdateWindow,
                               onChanged: (bool? value) {
                                 setState(() {
-                                  hideUpdateWindow = value!;
+                                  settings.changeSettings({
+                                    ApplicationSetting.updateWindowOff: value!
+                                  }, notify: false);
+                                  hideUpdateWindow = settings.getSetting(
+                                      ApplicationSetting.updateWindowOff);
                                 });
                               }),
                           const Text(
@@ -227,7 +243,8 @@ class _HomePageState extends State<HomePage> {
                 // update notifier when the menu is opened
                 Consumer<SystemsNotifier>(builder: (context, systems, child) {
                   systems.updateSystems();
-                  return const Text('environment');
+                  return Text(Provider.of<MaximoServerNotifier>(context)
+                      .maximoServerSelected);
                 }),
               ],
             )),

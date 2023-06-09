@@ -138,7 +138,7 @@ class ParsedTemplate {
   Map<dynamic, dynamic> fromExcel(List<dynamic> stuff) {
     Uint8List bytes = stuff[0];
     String filename = stuff[1];
-    var decoder = SpreadsheetDecoder.decodeBytes(bytes);
+    var decoder = SpreadsheetDecoder.decodeBytes(bytes); //Takes a LONG time
     var pmTemplates = {};
     var pmNumber = 0;
     var readTasks = false;

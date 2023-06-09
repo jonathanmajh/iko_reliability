@@ -42,17 +42,16 @@ Future<Map<String, dynamic>> getUserMaximo(
   showDataAlert(['Please check credentials', 'Check internet connection'],
       'Failed to Login');
   parsed['status'] = 'fail';
-  print(parsed);
   return parsed;
 }
 
 ///save login data from Maximo to local database
 Future<void> saveLoginMaximo(String userid, String password, String env) async {
   if (userid == '[APIKEY]') {
-    await database!.addUpdateSettings('$env-APIKEY', password);
+    await database!.addUpdateLoginSettings('$env-APIKEY', password);
   } else {
-    await database!.addUpdateSettings('$env-USERID', userid);
-    await database!.addUpdateSettings('$env-PASSWORD', password);
+    await database!.addUpdateLoginSettings('$env-USERID', userid);
+    await database!.addUpdateLoginSettings('$env-PASSWORD', password);
   }
 }
 
@@ -71,11 +70,11 @@ class Credentials {
 Future<Credentials> getLoginMaximo(String env) async {
   if (apiKeys.containsKey(env)) {
     //return APIKEY type credentials if possible
-    final pw = await database!.getSettings('$env-APIKEY');
+    final pw = await database!.getLoginSettings('$env-APIKEY');
     return Credentials(login: '[APIKEY]', password: pw.value);
   } else {
-    final id = await database!.getSettings('$env-USERID');
-    final pw = await database!.getSettings('$env-PASSWORD');
+    final id = await database!.getLoginSettings('$env-USERID');
+    final pw = await database!.getLoginSettings('$env-PASSWORD');
     return Credentials(login: id.value, password: pw.value);
   }
 }

@@ -13,6 +13,15 @@ import 'upload_maximo.dart';
 part 'db_drift.g.dart';
 
 class Settings extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+///database table for login credentials
+class LoginSettings extends Table {
   // ENV_USERID,ENV_PASS,ENV_APIKEY
   TextColumn get key => text()();
   TextColumn get value => text()();
@@ -133,6 +142,7 @@ class AssetCriticalityWithAsset {
 
 @DriftDatabase(tables: [
   Settings,
+  LoginSettings,
   MeterDBs,
   Observations,
   Assets,
@@ -153,11 +163,23 @@ class MyDatabase extends _$MyDatabase {
     delete(observations).go();
   }
 
-  Future<void> addUpdateSettings(
+  ///update settings in database. List of settings has priority
+  Future<void> updateSettings(
+      {Setting? newSetting, List<Setting>? newSettings}) async {
+    if (newSettings != null) {
+      for (Setting thing in newSettings) {
+        await into(settings).insertOnConflictUpdate(thing);
+      }
+    } else if (newSetting != null) {
+      await into(settings).insertOnConflictUpdate(newSetting);
+    }
+  }
+
+  Future<void> addUpdateLoginSettings(
     String key,
     String value,
   ) async {
-    await into(settings).insertOnConflictUpdate(Setting(
+    await into(loginSettings).insertOnConflictUpdate(LoginSetting(
       key: key,
       value: value,
     ));
@@ -214,11 +236,16 @@ class MyDatabase extends _$MyDatabase {
     )));
   }
 
-  Future<Setting> getSettings(String key) async {
-    final result = await (select(settings)..where((tbl) => tbl.key.equals(key)))
+  Future<LoginSetting> getLoginSettings(String key) async {
+    final result = await (select(loginSettings)
+          ..where((tbl) => tbl.key.equals(key)))
         .getSingleOrNull();
+
     if (result == null) {
-      return Setting(key: key, value: '');
+      return LoginSetting(
+        key: key,
+        value: '',
+      );
     }
     return result;
   }
@@ -317,6 +344,10 @@ class MyDatabase extends _$MyDatabase {
     }
     messages.add('Finished Loading');
     showDataAlert(messages, 'Observation List Loaded');
+  }
+
+  Future<List<Setting>> getSettings() async {
+    return await select(settings).get();
   }
 
   Future<Meter> getMeter(String meterCode) async {
@@ -576,14 +607,14 @@ Future<Asset> getCommonParent(List<String> assets, String siteID) async {
       .getAsset(siteID, commonHierarchy.substring(commonHierarchy.length - 5));
 }
 
-Future<void> maximoAssetCaller(String siteid, String server) async {
+Future<List<String>> maximoAssetCaller(String siteid, String server) async {
   // some logic to update assets depending on what is selected
   List<String> siteids = [];
   List<String> messages = [];
   if (siteid == 'All') {
     siteids = siteIDAndDescription.keys.toList();
   } else if (siteid == '') {
-    return;
+    return messages;
   } else {
     siteids = [siteid];
   }
@@ -596,5 +627,5 @@ Future<void> maximoAssetCaller(String siteid, String server) async {
     }
     messages.add('Updated $siteid');
   }
-  showDataAlert(messages, 'Site Assets Loaded');
+  return messages;
 }

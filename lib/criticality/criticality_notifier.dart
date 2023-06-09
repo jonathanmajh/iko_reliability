@@ -30,6 +30,7 @@ class SystemsNotifier extends ChangeNotifier {
   }
 }
 
+///Notifier containing assets/systems and their data
 class WorkOrderNotifier extends ChangeNotifier {
   Map<String, AssetCriticality> systems = {};
   //  assetnum:
