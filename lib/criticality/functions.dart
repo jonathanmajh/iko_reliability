@@ -3,9 +3,9 @@ import "dart:math";
 ///Function/Equation to calculate risk priority number (RPN)
 ///Currently just a product between all parameters
 ///returns null if any parameter is null
-double? rpnFunc(double? system, int? freq, int? impact, int? earlyDetection) {
+double? rpnFunc(double? system, int? freq, int? impact) {
   try {
-    return system! * freq! * impact! * earlyDetection!;
+    return system! * freq! * impact!;
   } catch (e) {
     return null;
   }

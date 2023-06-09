@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:iko_reliability_flutter/criticality/asset_crit_drawer.dart';
+import 'package:iko_reliability_flutter/admin/end_drawer.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
@@ -417,7 +417,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   ))
         ],
       ),
-      endDrawer: const AssetCritSettingsDrawer(),
+      endDrawer: const EndDrawer(),
       body: Container(
           padding: const EdgeInsets.all(30),
           child: PlutoDualGrid(
@@ -555,36 +555,57 @@ double calculateSystemScore(List<int> ratings) {
   return sqrt(sum2 / ratings.length);
 }
 
+///returns a list of rpn maximum values (inclusive) for rpn assessments (e.g. very low, medium, high, etc) in order to have the
+///closest percent distribution to that listed in {rpnPercentDist}
+///Params:
+/// - rpnList: list of all the rpns
+/// - rpnPercentDist: desired rpn percent distribution in rpn assessments. Listed from least serious (very low) to most serious (very high)
+/// - tolerance: a percentage. if the difference between the desired and actual percent distribution is greater than the tolerance, use a different distribution
+/// Returns list of rpn maximum values for each distribution range, from very low to very high
 List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
     {double tolerance = 10}) {
-  ///searches for duplicates of the item at index i a in an ordered list.
-  ///returns a List<int> of length 2 of the indicies of the furthest duplicate of item at index i (first, last)
-  ///recursive function (don't use optional param [searchDown] when calling)
-  dynamic searchForDuplicate(List list, int i, {bool? searchDown}) {
-    if (searchDown == null) {
+  /* 
+  duplicates must be found as consider the following example:
+    say the rpns are [1, 2, 3, 3, 3, 4, 5, 6, 7, 8] and we want to get 30% dist for very low.
+    index = rpns.length * 30% - 1 = 2, so the cutoff point should be at rpn = rpns[2] = 3
+    however, since there are duplicates of the cutoff point, the actual cutoff point will be at index = 4
+    hence the distrubution will be 50%.
+    if we set rpn = 2 as the cutoff point, the distrubution will be 20%, which is closer to 30% than 50% is
+  */
+
+  ///searches for duplicates of the item at index a in an ordered list.
+  ///returns a List<int> of length 2 of the indicies of the furthest duplicate of item at index. result = [first, last]
+  ///recursive(?) function (don't use optional param {searchDownwardsThruList} when calling)
+  dynamic searchForDuplicate(List orderedRpnList, int index,
+      {bool? searchDownwardsThruList}) {
+    if (searchDownwardsThruList == null) {
       return <int>[
-        searchForDuplicate(list, i - 1, searchDown: true),
-        searchForDuplicate(list, i - 1, searchDown: false)
+        searchForDuplicate(orderedRpnList, index - 1,
+            searchDownwardsThruList: true),
+        searchForDuplicate(orderedRpnList, index - 1,
+            searchDownwardsThruList: false)
       ];
-    } else if (searchDown) {
+    } else if (searchDownwardsThruList) {
       try {
-        if (list[i] == list[i + 1]) {
-          return (searchForDuplicate(list, i - 1, searchDown: true));
+        if (orderedRpnList[index] == orderedRpnList[index + 1]) {
+          return (searchForDuplicate(orderedRpnList, index - 1,
+              searchDownwardsThruList: true));
         } else {
-          return i + 1;
+          return index + 1;
         }
       } catch (e) {
-        return i + 1;
+        return index + 1;
       }
     } else {
       try {
-        if (list[i] == list[i - 1]) {
-          return (searchForDuplicate(list, i + 1, searchDown: false));
+        if (orderedRpnList[index] == orderedRpnList[index - 1]) {
+          return (searchForDuplicate(orderedRpnList, index + 1,
+              searchDownwardsThruList: false));
         } else {
-          return i - 1;
+          return index - 1;
         }
       } catch (e) {
-        return i - 1;
+        return index - 1;
       }
     }
   }
@@ -636,6 +657,7 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
       }
     }
     if (diff.abs() > tolerance) {
+      //when actual percent distripution becomes way off
       throw Exception(
           'Tolerance exceeded. Use different percent distribution. Diff = $diff%, RPN = ${list[index]}, Target = $targetDist%');
     }
