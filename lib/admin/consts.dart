@@ -225,16 +225,15 @@ const tableHeaders = {
 };
 
 Map<String, String> maximoServerDomains = {
-  'PROD': 'http://nscandacmaxapp1.na.iko/maxrest/oslc/os/',
-  'TEST': 'http://nsmaxim1app1.na.iko/maxrest/oslc/os/',
-  'DEV': 'http://nscandacmaxdev1.na.iko/maxrest/oslc/os/',
   'MASDEV': 'https://dev.manage.dev.iko.max-it-eam.com/maximo/api/os/',
-  'MASTEST': 'https://test.manage.test.iko.max-it-eam.com/maximo/api/os/'
+  'MASTEST': 'https://test.manage.test.iko.max-it-eam.com/maximo/api/os/',
+  'MASPROD': 'https://prod.manage.prod.iko.max-it-eam.com/maximo/api/os/'
 };
 
 Map<String, String> apiKeys = {
   'MASDEV': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
   'MASTEST': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
+  'MASPROD': '',
 };
 
 Map<int, Map<String, dynamic>> frequencyRating = {
@@ -568,4 +567,3 @@ enum ProcessStates {
   loadPMFilesState(),
   uploadPMFilesState();
 }
-
