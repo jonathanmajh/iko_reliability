@@ -45,7 +45,7 @@ void main() async {
 
 ///ChangeNotifier for current maximo server/environment
 class MaximoServerNotifier extends ChangeNotifier {
-  String maximoServerSelected = 'TEST';
+  String maximoServerSelected = 'MASTEST';
 
   void setServer(String server) {
     maximoServerSelected = server;
