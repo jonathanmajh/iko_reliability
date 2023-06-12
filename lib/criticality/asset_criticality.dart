@@ -157,7 +157,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       PlutoColumn(
         width: 100,
         readOnly: true,
-        title: 'Criticality',
+        enableAutoEditing: false,
+        title: 'Old Criticality',
         field: 'priority',
         type: PlutoColumnType.number(),
       ),
@@ -327,7 +328,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   Future<List<PlutoRow>> _loadData() async {
     final dbrows = await database!
-        .getSiteAssets('GH'); //TODO make it able to load other sites
+        .getSiteAssets('GX'); //TODO make it able to load other sites
     await context.read<WorkOrderNotifier>().updateWorkOrders();
     for (var row in dbrows) {
       siteAssets[row.assetnum] = row;
@@ -345,7 +346,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
         final asset = context.read<WorkOrderNotifier>().systems[child.assetnum];
-        final cache = Provider.of<Cache>(context);
+        final cache = Provider.of<Cache>(context, listen: false);
         rows.add(PlutoRow(
           cells: {
             'assetnum': PlutoCell(value: child.assetnum),
@@ -358,7 +359,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'downtime': PlutoCell(value: asset?.downtime ?? 0),
             'hierarchy': PlutoCell(value: ''),
             'newPriority': PlutoCell(value: 0),
-            'rpn': PlutoCell(value: 0),
+            'rpn': PlutoCell(
+                value: rpnFunc(cache.getSystemScore(asset?.system),
+                    asset?.frequency, asset?.downtime)),
             'id': PlutoCell(value: child.id),
           },
           type: PlutoRowType.group(
@@ -446,12 +449,11 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 });
               },
               onChanged: (PlutoGridOnChangedEvent event) {
-                event.row.cells['rpn']!.value = event
-                        .row.cells['frequency']!.value *
-                    event.row.cells['downtime']!.value *
-                    double.parse(context
-                        .read<SystemsNotifier>()
-                        .systems[event.row.cells['system']!.value]!['score']!);
+                Cache cache = context.read<Cache>();
+                event.row.cells['rpn']!.value = rpnFunc(
+                    cache.getSystemScore(event.row.cells['system']!.value),
+                    event.row.cells['frequency']!.value,
+                    event.row.cells['downtime']!.value);
                 updateAsset(event.row);
                 print(event);
               },
@@ -614,8 +616,17 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
       .map((i) => i.toDouble())
       .toList()
       .reversed); //order list from highest to lowest priority. Will process from lowest to highest, but Dart only has list.removeLast
-  List<double> list = List<double>.of(rpnList);
-  list.sort((a, b) => a.compareTo(b));
+  List<double> list = List<double>.of(rpnList); //copy the ordered rpn list.
+  list.sort((a, b) => b.compareTo(
+      a)); //reversed (highest to lowest) for now, to use List.removelast. Since ordered, should be more efficient than removeWhere()
+  while (list.isNotEmpty && list.last <= 0) {
+    //remove all not yet calculated vpns
+    list.removeLast();
+  }
+  if (list.isEmpty) {
+    return [-1, -1, -1, -1, -1];
+  }
+  list = List.from(list.reversed); //reverse the list back to lowest to highest
   List<double> rangeDist = [];
   double diff = 100000.01; //some large number
   double targetDist = 0;

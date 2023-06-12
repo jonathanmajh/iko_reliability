@@ -278,6 +278,14 @@ class _HomePageState extends State<HomePage> {
                   title: const Text('Asset Criticality'),
                   onTap: () {
                     context.router.pushNamed("/asset/criticality");
+                    try {
+                      context
+                          .read<Cache>()
+                          .calculateSystemScores(); //load system score data
+                    } catch (e) {
+                      debugPrint(
+                          'Could not load system scores from cache \n${e}');
+                    }
                     // change app state...
                     Navigator.pop(context); // close the drawer
                   },
