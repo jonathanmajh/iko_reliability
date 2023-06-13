@@ -4,6 +4,7 @@ import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -232,7 +233,7 @@ class _EndDrawerState extends State<EndDrawer> {
                                 'Attempting to Load Assets from : $siteid'),
                           ));
                           List<String> messages = await maximoAssetCaller(
-                              siteid, maximo.maximoServerSelected);
+                              siteid, maximo.maximoServerSelected, context);
                           context
                               .read<Cache>()
                               .calculateSystemScores(); //reload system scores
@@ -313,7 +314,40 @@ class _EndDrawerState extends State<EndDrawer> {
               onPressed: () {/*TODO: calculate rpns in table*/},
               child: const Text('Calculate'),
             ),
-          )
+          ),
+          ListTile(
+            title: const Text('Plant Site'),
+            trailing: DropdownButton(
+              items: () {
+                List<DropdownMenuItem<String>> list = [
+                  const DropdownMenuItem(
+                      value: 'NONE', child: Text('Select a site'))
+                ];
+                List<String> loadedSettings = (context
+                            .read<SettingsNotifier>()
+                            .getSetting(ApplicationSetting.loadedSites)
+                        as Set<String>)
+                    .toList();
+                loadedSettings.sort(
+                    (a, b) => a.compareTo(b)); //put them in alphabetical order
+                list.addAll(loadedSettings.map((e) => DropdownMenuItem(
+                    value: e, child: Text(siteIDAndDescription[e] ?? 'NONE'))));
+                return list;
+              }(),
+              onChanged: (newValue) {
+                //TODO:Set new site
+              },
+            ),
+          ),
+          ListTile(
+            title: const Text('Evaluation Rating Distributions'),
+            trailing: ElevatedButton(
+              child: const Text('Configure'),
+              onPressed: () {
+                //TODO: configure rpn distriputions popup
+              },
+            ),
+          ),
         ],
       ),
     );

@@ -515,7 +515,12 @@ enum ApplicationSetting {
     keyString: 'after date',
     dataType: 'DateTime?',
     defaultValue: null,
-  ); //lower bound for work order dates filter in asset criticality (inclusive)
+  ), //lower bound for work order dates filter in asset criticality (inclusive)
+  loadedSites(
+    keyString: 'loaded sites',
+    dataType: 'Set<String>',
+    defaultValue: <String>{},
+  );
 
   const ApplicationSetting(
       {required this.keyString,
