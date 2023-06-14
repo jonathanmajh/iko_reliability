@@ -115,6 +115,21 @@ class SettingsNotifier extends ChangeNotifier {
                       tempSetting.value.indexOf(' '))); //remove time component
             }
             break;
+          case 'Set<String>':
+            try {
+              Set<String> strSet = {};
+              for (String str in tempSetting.value
+                  .substring(1, tempSetting.value.length - 1)
+                  .split(', ')) {
+                if (str.isNotEmpty) strSet.add(str);
+              }
+              currentSettings[setting] = strSet;
+            } catch (e) {
+              throw Exception(
+                  'String ${tempSetting.value} is not recognized for type [${setting.dataType}] for setting [${setting.keyString}]');
+            }
+            break;
+
           default:
             throw Exception(
                 'Unexpected type [${setting.dataType}] for setting [${setting.keyString}]');
@@ -129,5 +144,13 @@ class SettingsNotifier extends ChangeNotifier {
 
   dynamic getSetting(ApplicationSetting settingKey) {
     return currentSettings[settingKey];
+  }
+
+  void addLoadedSites(List<String> sites, {bool notify = false}) {
+    Set<String> newSet =
+        (currentSettings[ApplicationSetting.loadedSites] as Set<String>)
+            .toSet();
+    newSet.addAll(sites);
+    changeSettings({ApplicationSetting.loadedSites: newSet}, notify: notify);
   }
 }

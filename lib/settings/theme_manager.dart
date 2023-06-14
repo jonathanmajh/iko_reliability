@@ -16,7 +16,7 @@ class ThemeManager extends ChangeNotifier {
   ///controls darkmode/lightmode for the application. Set [isDark] to [true] for darkmode. Notifies all listeners
   toggleTheme(bool isDark, BuildContext context) {
     _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
-    Provider.of<SettingsNotifier>(context)
+    Provider.of<SettingsNotifier>(context, listen: false)
         .changeSettings({ApplicationSetting.darkmodeOn: isDark}, notify: false);
     notifyListeners();
   }

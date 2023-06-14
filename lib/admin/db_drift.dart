@@ -4,6 +4,9 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart' as material;
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
+import 'package:provider/provider.dart' as prov;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import './connections/connection.dart' as impl;
 import '../main.dart';
@@ -607,10 +610,13 @@ Future<Asset> getCommonParent(List<String> assets, String siteID) async {
       .getAsset(siteID, commonHierarchy.substring(commonHierarchy.length - 5));
 }
 
-Future<List<String>> maximoAssetCaller(String siteid, String server) async {
+Future<List<String>> maximoAssetCaller(
+    String siteid, String server, material.BuildContext context) async {
   // some logic to update assets depending on what is selected
+
   List<String> siteids = [];
   List<String> messages = [];
+  List<String> loadedSiteIds = [];
   if (siteid == 'All') {
     siteids = siteIDAndDescription.keys.toList();
   } else if (siteid == '') {
@@ -621,11 +627,14 @@ Future<List<String>> maximoAssetCaller(String siteid, String server) async {
   for (final siteid in siteids) {
     try {
       await database!.getAssetMaximo(siteid, server);
+      loadedSiteIds.add(siteid);
     } catch (e) {
       messages.add('Failed to update $siteid: ${e.toString()}');
       continue;
     }
     messages.add('Updated $siteid');
   }
+  prov.Provider.of<SettingsNotifier>(context, listen: false)
+      .addLoadedSites(loadedSiteIds);
   return messages;
 }
