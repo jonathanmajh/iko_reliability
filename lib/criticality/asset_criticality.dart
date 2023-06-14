@@ -915,6 +915,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                       onPressed: () {
                         //only allow to save changes if total percent is 100%
                         if (calculateTotal() == 100) {
+                          //TODO: calculate rpn range cutoff points
                           Map<ApplicationSetting, dynamic> settingChanges = {};
                           for (int i = 0;
                               i < rpnDistributionGroups.length;

@@ -15,6 +15,7 @@ import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
+import 'criticality/asset_criticality_notifier.dart';
 import 'criticality/criticality_notifier.dart';
 import 'admin/process_state_notifier.dart';
 
@@ -47,40 +48,6 @@ class MaximoServerNotifier extends ChangeNotifier {
   void setServer(String server) {
     maximoServerSelected = server;
     notifyListeners();
-  }
-}
-
-///ChangeNotifier for data in AssetCriticalityPage
-class AssetCriticalityNotifier extends ChangeNotifier {
-  List<double> rpnList = [];
-  String selectedSite = 'NONE';
-
-  ///sets [selectedSite] to [site]. Notifies listeners
-  void setSite(String site) {
-    selectedSite = site;
-    notifyListeners();
-  }
-
-  ///sets [rpnList] to a copy of [newList]. Notifies listeners
-  void setRpnList(List<double> newList) {
-    rpnList = List.of(newList);
-    notifyListeners();
-  }
-
-  ///adds [appendList] to the end of [rpnList]. Notifies Listeners
-  void addToRpnList(List<double> appendList) {
-    rpnList.addAll(appendList);
-    notifyListeners();
-  }
-
-  ///gets the site description from a siteid.
-  ///Necessary b/c additional 'entry' of {'NONE': 'Select a site'} is needed, not just [siteIDAndDescription]
-  static String getSiteDescription(String siteid) {
-    if (siteid == 'NONE') {
-      return 'Select a site';
-    } else {
-      return siteIDAndDescription[siteid]!;
-    }
   }
 }
 
