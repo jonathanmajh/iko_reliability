@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
+import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
@@ -340,11 +341,12 @@ class _EndDrawerState extends State<EndDrawer> {
             ),
           ),
           ListTile(
-            title: const Text('Evaluation Rating Distributions'),
+            title: const Text('Risk Priority Distributions'),
             trailing: ElevatedButton(
               child: const Text('Configure'),
               onPressed: () {
                 //TODO: configure rpn distriputions popup
+                showRpnDistDialog(context);
               },
             ),
           ),
