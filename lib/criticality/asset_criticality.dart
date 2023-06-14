@@ -685,7 +685,9 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
   return rangeDist;
 }
 
+///shows the dialog for changing rpn rating distributions
 void showRpnDistDialog(BuildContext context) {
+  ///Text for the labels
   const List<String> distGroups = [
     'Very Low',
     'Low',
@@ -693,8 +695,6 @@ void showRpnDistDialog(BuildContext context) {
     'High',
     'Very High'
   ];
-  AssetCriticalityNotifier acNotifier =
-      Provider.of<AssetCriticalityNotifier>(context, listen: false);
   SettingsNotifier settingsNotifier =
       Provider.of<SettingsNotifier>(context, listen: false);
   List<TextEditingController> distControllers = [];
@@ -714,6 +714,7 @@ void showRpnDistDialog(BuildContext context) {
       });
 }
 
+///Dialog for changing rpn rating distributions
 class RpnDistDialog extends StatefulWidget {
   const RpnDistDialog({
     super.key,
@@ -721,7 +722,10 @@ class RpnDistDialog extends StatefulWidget {
     required this.distControllers,
   });
 
+  ///Label text for rating groups, from very low to very high
   final List<String> distGroups;
+
+  ///TextEditingControllers for rating groups' input bar
   final List<TextEditingController> distControllers;
 
   @override
@@ -729,9 +733,13 @@ class RpnDistDialog extends StatefulWidget {
 }
 
 class _RpnDistDialogState extends State<RpnDistDialog> {
+  ///The percent distribution for the rating groups, from very low to very high
   List<int>? dists;
+
+  ///total percent distribution. Should be 100
   int? total;
 
+  ///Calculates the points for the [MultiSlider]
   List<double> calculatePoints() {
     List<double> points = [0];
     double sum = 0;
@@ -786,10 +794,12 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
     ];
     return Expanded(
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.8,
+        height: MediaQuery.of(context).size.height *
+            0.8, //dialog is 80% of application window size
         width: MediaQuery.of(context).size.width * 0.8,
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Expanded(
+            //title
             flex: 2,
             child: Padding(
               padding: const EdgeInsets.only(top: 40.0, left: 40.0),
@@ -810,6 +820,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
             ),
           ),
           Expanded(
+            //Multislider/visual representation
             flex: 3,
             child: Builder(builder: (context) {
               List<double> points = calculatePoints();
@@ -850,6 +861,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
             }),
           ),
           Expanded(
+            //input boxes
             flex: 3,
             child: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
@@ -886,8 +898,12 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
               ),
             ),
           ),
-          Expanded(child: Text('Total: ${total ?? calculateTotal()}%')),
           Expanded(
+              //print total percentage
+              flex: 1,
+              child: Text('Total: ${total ?? calculateTotal()}%')),
+          Expanded(
+            //close buttons
             flex: 1,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -895,7 +911,9 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
+                      //save changes button
                       onPressed: () {
+                        //only allow to save changes if total percent is 100%
                         if (calculateTotal() == 100) {
                           Map<ApplicationSetting, dynamic> settingChanges = {};
                           for (int i = 0;
@@ -923,13 +941,13 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                                     ],
                                   ));
                         }
-                        //TODO: check and save distributions
                       },
                       child: const Text('Confirm')),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
+                      //cancel button
                       onPressed: () {
                         Navigator.pop(context);
                       },

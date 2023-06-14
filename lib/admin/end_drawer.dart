@@ -345,7 +345,6 @@ class _EndDrawerState extends State<EndDrawer> {
             trailing: ElevatedButton(
               child: const Text('Configure'),
               onPressed: () {
-                //TODO: configure rpn distriputions popup
                 showRpnDistDialog(context);
               },
             ),

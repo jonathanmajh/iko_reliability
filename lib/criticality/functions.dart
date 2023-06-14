@@ -5,9 +5,7 @@ import "dart:math";
 ///returns null if any parameter is null
 double? rpnFunc(double? system, int? freq, int? impact) {
   try {
-    print('system $system');
-    print('freq $freq');
-    print('impact $impact');
+    print('{system: $system, freq: $freq, impact: $impact}');
     return system! * freq! * impact!;
   } catch (e) {
     print('error: ${e.toString()}');
