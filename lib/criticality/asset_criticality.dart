@@ -138,7 +138,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   ),
                   onPressed: () {
                     refreshAsset(
-                        rendererContext.row.cells['assetnum']!.value, 'GH');
+                        rendererContext.row.cells['assetnum']!.value, 'GX');
                   },
                   iconSize: 18,
                   color: Colors.green,
