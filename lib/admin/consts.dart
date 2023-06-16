@@ -468,6 +468,14 @@ List<String> systemQuality = [
   'Potential class action',
 ];
 
+List<ApplicationSetting> rpnDistributionGroups = [
+  ApplicationSetting.rpnPercentVL,
+  ApplicationSetting.rpnPercentL,
+  ApplicationSetting.rpnPercentM,
+  ApplicationSetting.rpnPercentH,
+  ApplicationSetting.rpnPercentVH
+];
+
 //For application settings (add with new settings)
 //keys hold the settings names while values are the datatypes they can be
 //HUST:luz2Ua91ay
@@ -502,7 +510,7 @@ enum ApplicationSetting {
       defaultValue:
           15), //int for asset criticality RPN risk distribution percentage (high)
   rpnPercentVH(
-      keyString: 'RPN percent very hight',
+      keyString: 'RPN percent very high',
       dataType: 'int',
       defaultValue:
           10), //int for asset criticality RPN risk distribution percentage (very high)
@@ -515,7 +523,12 @@ enum ApplicationSetting {
     keyString: 'after date',
     dataType: 'DateTime?',
     defaultValue: null,
-  ); //lower bound for work order dates filter in asset criticality (inclusive)
+  ), //lower bound for work order dates filter in asset criticality (inclusive)
+  loadedSites(
+    keyString: 'loaded sites',
+    dataType: 'Set<String>',
+    defaultValue: <String>{},
+  );
 
   const ApplicationSetting(
       {required this.keyString,

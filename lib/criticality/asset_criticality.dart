@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_multi_slider/flutter_multi_slider.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
@@ -38,11 +41,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   late PlutoGridStateManager stateManager;
   late PlutoGridStateManager detailStateManager;
-
-  //settings objects
-  String? startDateRange;
-  String? endDateRange;
-  List<int> priorityDistribution = []; //from lowest to highest priority
 
   @override
   void initState() {
@@ -128,7 +126,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   onPressed: () {
                     print(rendererContext.rowIdx);
                     refreshAsset(
-                        rendererContext.row.cells['assetnum']!.value, 'GH');
+                        rendererContext.row.cells['assetnum']!.value, 'GX');
                   },
                   iconSize: 18,
                   color: Colors.green,
@@ -140,7 +138,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   ),
                   onPressed: () {
                     refreshAsset(
-                        rendererContext.row.cells['assetnum']!.value, 'GH');
+                        rendererContext.row.cells['assetnum']!.value, 'GX');
                   },
                   iconSize: 18,
                   color: Colors.green,
@@ -157,7 +155,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       PlutoColumn(
         width: 100,
         readOnly: true,
-        title: 'Criticality',
+        enableAutoEditing: false,
+        title: 'Old Criticality',
         field: 'priority',
         type: PlutoColumnType.number(),
       ),
@@ -327,7 +326,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   Future<List<PlutoRow>> _loadData() async {
     final dbrows = await database!
-        .getSiteAssets('GH'); //TODO make it able to load other sites
+        .getSiteAssets('GX'); //TODO make it able to load other sites
     await context.read<WorkOrderNotifier>().updateWorkOrders();
     for (var row in dbrows) {
       siteAssets[row.assetnum] = row;
@@ -345,7 +344,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
         final asset = context.read<WorkOrderNotifier>().systems[child.assetnum];
-        final cache = Provider.of<Cache>(context);
+        final cache = Provider.of<Cache>(context, listen: false);
         rows.add(PlutoRow(
           cells: {
             'assetnum': PlutoCell(value: child.assetnum),
@@ -358,7 +357,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'downtime': PlutoCell(value: asset?.downtime ?? 0),
             'hierarchy': PlutoCell(value: ''),
             'newPriority': PlutoCell(value: 0),
-            'rpn': PlutoCell(value: 0),
+            'rpn': PlutoCell(
+                value: rpnFunc(cache.getSystemScore(asset?.system),
+                    asset?.frequency, asset?.downtime)),
             'id': PlutoCell(value: child.id),
           },
           type: PlutoRowType.group(
@@ -446,12 +447,11 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 });
               },
               onChanged: (PlutoGridOnChangedEvent event) {
-                event.row.cells['rpn']!.value = event
-                        .row.cells['frequency']!.value *
-                    event.row.cells['downtime']!.value *
-                    double.parse(context
-                        .read<SystemsNotifier>()
-                        .systems[event.row.cells['system']!.value]!['score']!);
+                Cache cache = context.read<Cache>();
+                event.row.cells['rpn']!.value = rpnFunc(
+                    cache.getSystemScore(event.row.cells['system']!.value),
+                    event.row.cells['frequency']!.value,
+                    event.row.cells['downtime']!.value);
                 updateAsset(event.row);
                 print(event);
               },
@@ -614,8 +614,17 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
       .map((i) => i.toDouble())
       .toList()
       .reversed); //order list from highest to lowest priority. Will process from lowest to highest, but Dart only has list.removeLast
-  List<double> list = List<double>.of(rpnList);
-  list.sort((a, b) => a.compareTo(b));
+  List<double> list = List<double>.of(rpnList); //copy the ordered rpn list.
+  list.sort((a, b) => b.compareTo(
+      a)); //reversed (highest to lowest) for now, to use List.removelast. Since ordered, should be more efficient than removeWhere()
+  while (list.isNotEmpty && list.last <= 0) {
+    //remove all not yet calculated vpns
+    list.removeLast();
+  }
+  if (list.isEmpty) {
+    return [-1, -1, -1, -1, -1];
+  }
+  list = List.from(list.reversed); //reverse the list back to lowest to highest
   List<double> rangeDist = [];
   double diff = 100000.01; //some large number
   double targetDist = 0;
@@ -674,4 +683,282 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
   rangeDist.add(list.last);
 
   return rangeDist;
+}
+
+///shows the dialog for changing rpn rating distributions
+void showRpnDistDialog(BuildContext context) {
+  ///Text for the labels
+  const List<String> distGroups = [
+    'Very Low',
+    'Low',
+    'Medium',
+    'High',
+    'Very High'
+  ];
+  SettingsNotifier settingsNotifier =
+      Provider.of<SettingsNotifier>(context, listen: false);
+  List<TextEditingController> distControllers = [];
+  for (ApplicationSetting distSetting in rpnDistributionGroups) {
+    distControllers.add(TextEditingController(
+        text: settingsNotifier.getSetting(distSetting).toString()));
+  }
+
+  showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: RpnDistDialog(
+              distGroups: distGroups, distControllers: distControllers),
+        );
+      });
+}
+
+///Dialog for changing rpn rating distributions
+class RpnDistDialog extends StatefulWidget {
+  const RpnDistDialog({
+    super.key,
+    required this.distGroups,
+    required this.distControllers,
+  });
+
+  ///Label text for rating groups, from very low to very high
+  final List<String> distGroups;
+
+  ///TextEditingControllers for rating groups' input bar
+  final List<TextEditingController> distControllers;
+
+  @override
+  State<RpnDistDialog> createState() => _RpnDistDialogState();
+}
+
+class _RpnDistDialogState extends State<RpnDistDialog> {
+  ///The percent distribution for the rating groups, from very low to very high
+  List<int>? dists;
+
+  ///total percent distribution. Should be 100
+  int? total;
+
+  ///Calculates the points for the [MultiSlider]
+  List<double> calculatePoints() {
+    List<double> points = [0];
+    double sum = 0;
+
+    for (int i = 0; i < dists!.length - 1; i++) {
+      sum += dists![i].toDouble();
+      points.add(sum);
+      points.add(sum);
+    }
+    points.add(100);
+    return points;
+  }
+
+  ///returns the sum of all distributions. Should be equal to 100
+  int calculateTotal() {
+    int sum = 0;
+    for (int dist in dists!) {
+      sum += dist;
+    }
+    return sum;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    dists = List.from(
+        widget.distControllers.map((element) => int.parse(element.text)));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    for (var controller in widget.distControllers) {
+      controller.dispose();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ///Color gradient for [MultiSlider]. The colors for the range bars are every other item on the list, starting from index = 1
+    List<Color> colorGradient = [
+      Colors.red,
+      Colors.red[200]!,
+      Colors.red,
+      Colors.red[300]!,
+      Colors.red,
+      Colors.red[400]!,
+      Colors.red,
+      Colors.red[700]!,
+      Colors.red,
+      Colors.red[900]!
+    ];
+    return Expanded(
+      child: Container(
+        height: MediaQuery.of(context).size.height *
+            0.8, //dialog is 80% of application window size
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Expanded(
+            //title
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 40.0, left: 40.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Rating Distribution',
+                        style: TextStyle(fontSize: 30.0),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            //Multislider/visual representation
+            flex: 3,
+            child: Builder(builder: (context) {
+              List<double> points = calculatePoints();
+              return AbsorbPointer(
+                //to make multislider read only for now since not working
+                absorbing: true,
+                child: MultiSlider(
+                  min: 1,
+                  max: 100,
+                  rangeColors: colorGradient,
+                  values: points,
+                  onChanged: (values) {
+                    values.first = 1;
+                    values.last = 100;
+                    for (int i = 1; i < dists!.length; i++) {
+                      int low = 2 * i - 1;
+                      int high = 2 * i;
+                      if (values[low] != points[low]) {
+                        print(low);
+                        values[high] = values[low];
+                        dists![i - 1] =
+                            ((values[low] - values[low - 1])).round();
+                        dists![i] = ((values[high + 1] - values[high])).round();
+                      } else if (values[high] != points[high]) {
+                        print(high);
+                        values[low] = values[high];
+                        dists![i - 1] =
+                            ((values[low] - values[low - 1])).round();
+                        dists![i] = ((values[high + 1] - values[high])).round();
+                      }
+                    }
+                    setState(() => points = values);
+                    print(dists);
+                  },
+                  divisions: 100,
+                ),
+              );
+            }),
+          ),
+          Expanded(
+            //input boxes
+            flex: 3,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: () {
+                  List<Widget> widgets = [];
+                  for (int i = 0; i < widget.distGroups.length; i++) {
+                    widgets.add(Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            labelText: widget.distGroups[i],
+                          ),
+                          controller: widget.distControllers[i],
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (value) {
+                            print(widget.distControllers[i].text);
+                            int? val = int.tryParse(value);
+                            dists![i] = val ?? 0;
+                            setState((() => total = calculateTotal()));
+                          },
+                        ),
+                      ),
+                    ));
+                  }
+                  return widgets;
+                }(),
+              ),
+            ),
+          ),
+          Expanded(
+              //print total percentage
+              flex: 1,
+              child: Text('Total: ${total ?? calculateTotal()}%')),
+          Expanded(
+            //close buttons
+            flex: 1,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                      //save changes button
+                      onPressed: () {
+                        //only allow to save changes if total percent is 100%
+                        if (calculateTotal() == 100) {
+                          //TODO: calculate rpn range cutoff points
+                          Map<ApplicationSetting, dynamic> settingChanges = {};
+                          for (int i = 0;
+                              i < rpnDistributionGroups.length;
+                              i++) {
+                            settingChanges[rpnDistributionGroups[i]] =
+                                dists![i];
+                          }
+                          context
+                              .read<SettingsNotifier>()
+                              .changeSettings(settingChanges);
+                          Navigator.pop(context);
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                    title: const Text('Improper Distributions'),
+                                    content: const Text(
+                                        'The total percentage must be 100%'),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('OK'))
+                                    ],
+                                  ));
+                        }
+                      },
+                      child: const Text('Confirm')),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                      //cancel button
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel')),
+                )
+              ],
+            ),
+          )
+        ]),
+      ),
+    );
+  }
 }

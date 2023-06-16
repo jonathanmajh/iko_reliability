@@ -15,14 +15,12 @@ import 'admin/db_drift.dart';
 import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
+import 'criticality/asset_criticality_notifier.dart';
 import 'criticality/criticality_notifier.dart';
 import 'admin/process_state_notifier.dart';
 
 MyDatabase? database;
-SettingsNotifier? settingsNotifier;
 final navigatorKey = GlobalKey<NavigatorState>();
-bool hideUpdateWindow =
-    false; //update window too annoying, temporary fix. Put value in database later
 
 void main() async {
   await Hive.initFlutter();
@@ -36,10 +34,10 @@ void main() async {
   box = Hive.box('routeNumber');
   box.clear();
   database = MyDatabase();
-  settingsNotifier = SettingsNotifier();
-  await settingsNotifier!.initialize();
+  SettingsNotifier settingsNotifier = SettingsNotifier();
+  await settingsNotifier.initialize();
   runApp(
-    MyApp(),
+    MyApp(settingsNotifier),
   );
 }
 
@@ -54,8 +52,9 @@ class MaximoServerNotifier extends ChangeNotifier {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({Key? key}) : super(key: key);
+  MyApp(this.settingsNotifier, {Key? key}) : super(key: key);
   final _appRouter = AppRouter(navigatorKey);
+  final SettingsNotifier settingsNotifier;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -70,15 +69,16 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => settingsNotifier),
           ChangeNotifierProvider(
               create: (context) => ThemeManager(
-                  settingsNotifier!.getSetting(ApplicationSetting.darkmodeOn))),
+                  settingsNotifier.getSetting(ApplicationSetting.darkmodeOn))),
           //set initial brightness according to system settings
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
           ChangeNotifierProvider(create: (context) => Cache()),
+          ChangeNotifierProvider(
+              create: (context) => AssetCriticalityNotifier()),
         ],
         child: Builder(
           builder: (context) {
             return AbsorbPointer(
-              //TODO: create cancel process button that can be clicked when widget is absorbing user input.
               absorbing:
                   Provider.of<ProcessStateNotifier>(context, listen: false)
                       .absorbInput(), //controls when input is allowed.
@@ -113,7 +113,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var _alertShowing = false;
+  ///if update window should be hidden
+  bool hideUpdateWindow = false;
+
+  ///if an alert dialog is showing
+  bool _alertShowing = false;
 
   @override
   void initState() {
@@ -278,6 +282,14 @@ class _HomePageState extends State<HomePage> {
                   title: const Text('Asset Criticality'),
                   onTap: () {
                     context.router.pushNamed("/asset/criticality");
+                    try {
+                      context
+                          .read<Cache>()
+                          .calculateSystemScores(); //load system score data
+                    } catch (e) {
+                      debugPrint(
+                          'Could not load system scores from cache \n${e}');
+                    }
                     // change app state...
                     Navigator.pop(context); // close the drawer
                   },
