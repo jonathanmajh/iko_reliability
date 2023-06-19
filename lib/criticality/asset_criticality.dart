@@ -14,6 +14,7 @@ import '../admin/cache_notifier.dart';
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
+import '../settings/theme_manager.dart';
 import 'criticality_notifier.dart';
 import 'functions.dart';
 
@@ -443,6 +444,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeManager themeManager = Provider.of<ThemeManager>(context);
     return Consumer<AssetCriticalityNotifier>(
         builder: (context, assetCriticalityNotifier, child) {
       _loadData();
@@ -498,24 +500,38 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   print(event);
                 },
                 configuration: PlutoGridConfiguration(
+                    //TODO:darkmode
+                    style: themeManager.isDark
+                        ? const PlutoGridStyleConfig.dark()
+                        : const PlutoGridStyleConfig(),
                     shortcut: PlutoGridShortcut(actions: {
-                  ...PlutoGridShortcut.defaultActions,
-                  LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                      CustomAddKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.minus):
-                      CustomMinusKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                      CustomMinusKeyAction(),
-                })),
+                      ...PlutoGridShortcut.defaultActions,
+                      LogicalKeySet(LogicalKeyboardKey.add):
+                          CustomAddKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                          CustomAddKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.minus):
+                          CustomMinusKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                          CustomMinusKeyAction(),
+                    })),
               ),
               gridPropsB: PlutoDualGridProps(
+                configuration: PlutoGridConfiguration(
+                    style: themeManager.isDark
+                        ? const PlutoGridStyleConfig.dark()
+                        : const PlutoGridStyleConfig()),
                 columns: detailColumns,
                 rows: detailRows,
                 onLoaded: (PlutoGridOnLoadedEvent event) {
                   detailStateManager = event.stateManager;
                 },
               ),
+              divider: themeManager.isDark
+                  ? PlutoDualGridDivider.dark(
+                      indicatorColor:
+                          Theme.of(context).colorScheme.onBackground)
+                  : const PlutoDualGridDivider(),
             )),
       );
     });
