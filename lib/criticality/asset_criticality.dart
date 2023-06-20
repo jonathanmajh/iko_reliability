@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_multi_slider/flutter_multi_slider.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
+import 'percent_slider.dart';
 
 import '../admin/cache_notifier.dart';
 import '../admin/consts.dart';
@@ -822,6 +822,12 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
     return sum;
   }
 
+  void reloadTextControllers() {
+    for (int i = 0; i < widget.distControllers.length; i++) {
+      widget.distControllers[i].text = dists![i].toString();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -841,15 +847,10 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
   Widget build(BuildContext context) {
     ///Color gradient for [MultiSlider]. The colors for the range bars are every other item on the list, starting from index = 1
     List<Color> colorGradient = [
-      Colors.red,
       Colors.red[200]!,
-      Colors.red,
       Colors.red[300]!,
-      Colors.red,
       Colors.red[400]!,
-      Colors.red,
       Colors.red[700]!,
-      Colors.red,
       Colors.red[900]!
     ];
     return Expanded(
@@ -882,43 +883,20 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
           Expanded(
             //Multislider/visual representation
             flex: 3,
-            child: Builder(builder: (context) {
-              List<double> points = calculatePoints();
-              return AbsorbPointer(
-                //to make multislider read only for now since not working
-                absorbing: true,
-                child: MultiSlider(
-                  min: 1,
-                  max: 100,
-                  rangeColors: colorGradient,
-                  values: points,
-                  onChanged: (values) {
-                    values.first = 1;
-                    values.last = 100;
-                    for (int i = 1; i < dists!.length; i++) {
-                      int low = 2 * i - 1;
-                      int high = 2 * i;
-                      if (values[low] != points[low]) {
-                        print(low);
-                        values[high] = values[low];
-                        dists![i - 1] =
-                            ((values[low] - values[low - 1])).round();
-                        dists![i] = ((values[high + 1] - values[high])).round();
-                      } else if (values[high] != points[high]) {
-                        print(high);
-                        values[low] = values[high];
-                        dists![i - 1] =
-                            ((values[low] - values[low - 1])).round();
-                        dists![i] = ((values[high + 1] - values[high])).round();
-                      }
-                    }
-                    setState(() => points = values);
-                    print(dists);
-                  },
-                  divisions: 100,
-                ),
-              );
-            }),
+            child: PercentSlider(
+              initialPercentList: dists!,
+              colorList: colorGradient,
+              height: MediaQuery.of(context).size.height * 0.08,
+              width: MediaQuery.of(context).size.width * 0.7,
+              onChanged: (sliderId, newPercentDists) {
+                setState(() {
+                  dists = List.from(newPercentDists);
+                  reloadTextControllers();
+                });
+              },
+              toolTipList: List<String>.from(
+                  rpnDistributionGroups.map((e) => e.toString())),
+            ),
           ),
           Expanded(
             //input boxes
