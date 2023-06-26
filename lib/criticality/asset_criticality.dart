@@ -916,7 +916,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                       }
                       return initValues;
                     }(),
-                    max: total!,
+                    max: total ?? 100,
                     barColors: colorGradient,
                     size: const Size(10, 10),
                     onSliderUpdate: (newPercentDists) {
@@ -952,7 +952,9 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                         controller: widget.distControllers[i],
                         keyboardType: TextInputType.number,
                         inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
+                          //limits characters to digits between 0-999
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(3),
                         ],
                         onChanged: (value) {
                           int? val = int.tryParse(value);
