@@ -358,6 +358,32 @@ class _EndDrawerState extends State<EndDrawer> {
                 },
               ),
             ),
+            ListTile(
+              title: const Text('Calculate Priority Ranges'),
+              trailing: ElevatedButton(
+                child: const Text('Calculate'),
+                onPressed: () {
+                  try {
+                    AssetCriticalityNotifier assetCriticalityNotifier =
+                        context.read<AssetCriticalityNotifier>();
+                    SettingsNotifier settingsNotifier =
+                        context.read<SettingsNotifier>();
+
+                    //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
+                    List<double> rpnList =
+                        List.from(assetCriticalityNotifier.rpnList);
+                    rpnList.removeWhere((rpn) => (rpn <= 0));
+                    print(rpnList);
+                    //set rpn ranges
+                    assetCriticalityNotifier.setRpnCutoffs(rpnDistRange(
+                        rpnList, settingsNotifier.getRpnPercentDists()));
+                    print(assetCriticalityNotifier.rpnCutoffs);
+                  } catch (e) {
+                    print(e.toString());
+                  }
+                },
+              ),
+            )
           ],
         ),
       );

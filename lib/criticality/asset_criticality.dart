@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -47,6 +48,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   @override
   void initState() {
     super.initState();
+    AssetCriticalityNotifier assetCriticalityNotifier =
+        context.read<AssetCriticalityNotifier>();
 
     detailColumns.addAll([
       PlutoColumn(
@@ -270,10 +273,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         title: 'New Priority',
         field: 'newPriority',
         type: PlutoColumnType.number(),
-        renderer: (rendererContext) {
-          return Text('asdf');
-          // call notifier and convert to string Very High etc
-        },
       ),
     ]);
     _loadData();
@@ -334,6 +333,15 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         } catch (e) {
           debugPrint("Could not run 'stateManager.toggleExpandedRowGroup'");
         }
+      }).then((value) {
+        //load rpn numbers from plutogrid into AssetCriticalityNotifier
+        Map<int, double> newRpnMap = {};
+        for (int i = 0; i < stateManager.rows.length; i++) {
+          newRpnMap[i] = (stateManager.rows[i].cells['rpn']?.value ?? -1) + 0.0;
+        }
+        context
+            .read<AssetCriticalityNotifier>()
+            .setRpnMap(newRpnMap, notify: false);
       });
     });
   }
@@ -380,11 +388,15 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   List<PlutoRow> getChilds(String parent) {
+    AssetCriticalityNotifier assetCriticalityNotifier =
+        Provider.of<AssetCriticalityNotifier>(context, listen: false);
     List<PlutoRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
         final asset = context.read<WorkOrderNotifier>().systems[child.assetnum];
         final cache = Provider.of<Cache>(context, listen: false);
+        double? calculatedRPN = rpnFunc(cache.getSystemScore(asset?.system),
+            asset?.frequency, asset?.downtime);
         rows.add(PlutoRow(
           cells: {
             'assetnum': PlutoCell(value: child.assetnum),
@@ -396,10 +408,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'frequency': PlutoCell(value: asset?.frequency ?? 0),
             'downtime': PlutoCell(value: asset?.downtime ?? 0),
             'hierarchy': PlutoCell(value: ''),
-            'newPriority': PlutoCell(value: 0),
-            'rpn': PlutoCell(
-                value: rpnFunc(cache.getSystemScore(asset?.system),
-                    asset?.frequency, asset?.downtime)),
+            'newPriority': PlutoCell(
+                value: assetCriticalityNotifier
+                    .rpnFindDistribution(calculatedRPN ?? -1)),
+            'rpn': PlutoCell(value: calculatedRPN),
             'id': PlutoCell(value: child.id),
           },
           type: PlutoRowType.group(
@@ -492,11 +504,19 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 },
                 onChanged: (PlutoGridOnChangedEvent event) {
                   Cache cache = context.read<Cache>();
-                  event.row.cells['rpn']!.value = rpnFunc(
-                      cache.getSystemScore(event.row.cells['system']!.value),
-                      event.row.cells['frequency']!.value,
-                      event.row.cells['downtime']!.value);
+                  int rowId = stateManager.rows.indexOf(event.row);
+                  double newRpn = rpnFunc(
+                          cache
+                              .getSystemScore(event.row.cells['system']!.value),
+                          event.row.cells['frequency']!.value,
+                          event.row.cells['downtime']!.value) ??
+                      -1;
+                  event.row.cells['rpn']!.value = newRpn;
+                  context.read<AssetCriticalityNotifier>().addToRpnMap({
+                    ((rowId == -1) ? stateManager.rows.length : rowId): newRpn
+                  });
                   updateAsset(event.row);
+
                   print(event);
                 },
                 configuration: PlutoGridConfiguration(
@@ -618,7 +638,7 @@ double calculateSystemScore(List<int> ratings) {
 ///returns a list of rpn maximum values (inclusive) for rpn assessments (e.g. very low, medium, high, etc) in order to have the
 ///closest percent distribution to that listed in {rpnPercentDist}
 ///Params:
-/// - rpnList: list of all the rpns
+/// - rpnList: list of all the rpns (without 0 or -1 values)
 /// - rpnPercentDist: desired rpn percent distribution in rpn assessments. Listed from least serious (very low) to most serious (very high)
 /// - tolerance: a percentage. if the difference between the desired and actual percent distribution is greater than the tolerance, use a different distribution
 /// Returns list of rpn maximum values for each distribution range, from very low to very high
@@ -853,11 +873,10 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
       Colors.red[700]!,
       Colors.red[900]!
     ];
-    return Expanded(
-      child: Container(
-        height: MediaQuery.of(context).size.height *
-            0.8, //dialog is 80% of application window size
-        width: MediaQuery.of(context).size.width * 0.8,
+    return Center(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.9,
+        width: MediaQuery.of(context).size.width * 0.9,
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Expanded(
             //title
@@ -883,19 +902,33 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
           Expanded(
             //Multislider/visual representation
             flex: 3,
-            child: PercentSlider(
-              initialPercentList: dists!,
-              colorList: colorGradient,
-              height: MediaQuery.of(context).size.height * 0.08,
-              width: MediaQuery.of(context).size.width * 0.7,
-              onChanged: (sliderId, newPercentDists) {
-                setState(() {
-                  dists = List.from(newPercentDists);
-                  reloadTextControllers();
-                });
-              },
-              toolTipList: List<String>.from(
-                  rpnDistributionGroups.map((e) => e.toString())),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Builder(builder: (context) {
+                  return PercentSlider(
+                    initialValues: () {
+                      List<int> initValues = [];
+                      int sum = 0;
+                      for (int i = 0; i < dists!.length - 1; i++) {
+                        sum += dists![i];
+                        initValues.add(sum);
+                      }
+                      return initValues;
+                    }(),
+                    max: total!,
+                    barColors: colorGradient,
+                    size: const Size(10, 10),
+                    onSliderUpdate: (newPercentDists) {
+                      setState(() {
+                        dists = List.from(newPercentDists);
+                        reloadTextControllers();
+                      });
+                    },
+                    tooltip: rpnPossibleDistributions,
+                  );
+                }),
+              ),
             ),
           ),
           Expanded(
@@ -909,27 +942,27 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                   List<Widget> widgets = [];
                   for (int i = 0; i < widget.distGroups.length; i++) {
                     widgets.add(Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            labelText: widget.distGroups[i],
-                          ),
-                          controller: widget.distControllers[i],
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          onChanged: (value) {
-                            print(widget.distControllers[i].text);
-                            int? val = int.tryParse(value);
-                            dists![i] = val ?? 0;
-                            setState((() => total = calculateTotal()));
-                          },
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          labelText: widget.distGroups[i],
                         ),
+                        controller: widget.distControllers[i],
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        onChanged: (value) {
+                          int? val = int.tryParse(value);
+                          setState(() {
+                            dists![i] = val ?? 0;
+                            total = calculateTotal();
+                          });
+                        },
                       ),
-                    ));
+                    )));
                   }
                   return widgets;
                 }(),

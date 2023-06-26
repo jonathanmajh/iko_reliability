@@ -1,200 +1,253 @@
 import 'package:flutter/material.dart';
 
+///Multi percent bar slider from left to right
 class PercentSlider extends StatefulWidget {
-  const PercentSlider({
-    super.key,
-    required this.initialPercentList,
-    required this.colorList,
-    required this.height,
-    required this.width,
-    this.toolTipList,
-    required this.onChanged,
-  });
+  const PercentSlider(
+      {super.key,
+      required this.size,
+      this.min = 0,
+      this.max = 100,
+      required this.onSliderUpdate,
+      required this.barColors,
+      this.tooltip,
+      this.sliderColor = Colors.grey,
+      this.sliderPressedColor = Colors.blueGrey,
+      required this.initialValues});
 
-  ///List of initial percents as integers
-  final List<int> initialPercentList;
+  ///Size of the sliders
+  final Size size;
 
-  ///List of colors for ranges from left to right
-  final List<Color> colorList;
+  ///minimum value on slider
+  final int min;
 
-  ///height of slider
-  final double height;
+  ///maximum value on slider
+  final int max;
 
-  ///width of slider
-  final double width;
+  ///color of the sliders normally
+  final Color sliderColor;
 
-  ///List of the names for the ranges, from left to right. No tool tips if this is null
-  final List<String>? toolTipList;
+  ///initial values for the sliders. Percentage position of the slider on the bar from
+  ///left to right. Should have [initialValues.length] = [barColors.length] - 1
+  final List<int> initialValues;
 
-  ///Function to run when sliders are moved
-  final void Function(int sliderId, List<int> newPercentList) onChanged;
+  ///color of the sliders when selected
+  final Color sliderPressedColor;
+
+  ///colors of the range bars from left to right. Should have [barColors.length] = [initialValues.length] + 1
+  final List<Color> barColors;
+
+  ///function to run when slider updates
+  final Function(List<int?> posList) onSliderUpdate;
+
+  ///tool tip messages. Length must match the amount of percent bars
+  final List<String>? tooltip;
+
+  int get range => max - min;
 
   @override
-  State<PercentSlider> createState() => _PercentSliderState();
+  State<StatefulWidget> createState() => _PercentSliderState();
 }
 
 class _PercentSliderState extends State<PercentSlider> {
-  List<int> percentList = [30, 25, 20, 15, 10]; //random 5 values
-  List<String>? toolTipList;
+  //slider values
+  List<int?> percentList = [];
+
+  List<int> initialValuesDuplicateList = [];
+
+  bool isDragging = false;
+
+  ///the active slider
+  int activeSliderNumber = 0;
+
   @override
   void initState() {
     super.initState();
-    percentList = widget.initialPercentList;
-    toolTipList = widget.toolTipList;
+    initialValuesDuplicateList = widget.initialValues;
+    if (widget.initialValues.length != widget.barColors.length - 1) {
+      throw Exception(
+          "Unexpected lengths for [widget.initialValues] and [widget.barColors]. {[initialValues.length] == [barColors.length] - 1} must be true");
+    }
+    if (widget.tooltip != null &&
+        widget.tooltip!.length != widget.barColors.length) {
+      throw Exception(
+          "Mismatch between [widget.tooltip.length] and number of percent bars.");
+    }
+  }
+
+  void _updateSlider(double dx, double maxWidth) {
+    final int tapValue = (dx / maxWidth * widget.range).round();
+    if (tapValue < widget.min || tapValue > widget.max) {
+      return;
+    }
+
+    int lowerLimit = (activeSliderNumber != 0)
+        ? percentList[activeSliderNumber - 1]!
+        : widget.min;
+    int upperLimit = (activeSliderNumber != percentList.length - 1)
+        ? percentList[activeSliderNumber + 1]!
+        : widget.max;
+    if (activeSliderNumber >= 0 && activeSliderNumber < percentList.length) {
+      setState(() {
+        isDragging = true;
+        percentList[activeSliderNumber] =
+            tapValue.clamp(lowerLimit, upperLimit);
+      });
+    }
+
+    //pass value on main widget
+    widget.onSliderUpdate(_calculateDistributions());
+  }
+
+  /// calculate slider layout position
+  double _calculateSliderPosition({
+    required double maxWidth,
+    required int percent,
+  }) {
+    // x is slider original position on width:maxWidth
+
+    return (maxWidth * (percent / (widget.range)) - widget.size.width / 2);
+  }
+
+  /// calculate the percent distributions from slider values
+  List<int> _calculateDistributions() {
+    List<int> distributions = [];
+    //check if [widget.initialValues] has been changed. Kind of a hack,should use better method for handling value update (e.g. Consumer widget) later
+    if (widget.initialValues != initialValuesDuplicateList) {
+      //if changed, update [percentList]
+      initialValuesDuplicateList = widget.initialValues;
+      percentList = List.of(widget.initialValues);
+    }
+    distributions.add(percentList.first! - widget.min);
+    for (int i = 1; i < percentList.length; i++) {
+      distributions.add(percentList[i]! - percentList[i - 1]!);
+    }
+    distributions.add(widget.max - percentList.last!);
+    return distributions;
+  }
+
+  /// select ActiveSlider, fixed overLap issue
+  void _selectSlider({
+    required double maxWidth,
+    required double tapPosition,
+  }) {
+    final maxArea = widget.size.width / 2; //maxWidth * tapSpacesArea;
+
+    for (int i = 0; i < percentList.length; i++) {
+      if ((tapPosition -
+                  _calculateSliderPosition(
+                      maxWidth: maxWidth, percent: percentList[i]!))
+              .abs() <
+          maxArea) {
+        setState(() {
+          isDragging = true;
+          activeSliderNumber = i;
+        });
+        break;
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          SizedBox(
-            height: widget.height,
-            width: widget.width,
-            child: Expanded(
-                child: Stack(
-              children: <Widget>[
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: widget.size.height * 3,
+          child: LayoutBuilder(builder: (context, constraints) {
+            final maxWidth = constraints.maxWidth - 10;
+            if (percentList.length != widget.initialValues.length) {
+              percentList =
+                  List<int?>.filled(widget.initialValues.length, null);
+            }
+            for (int i = 0; i < percentList.length; i++) {
+              percentList[i] = percentList[i] ?? widget.initialValues[i];
+            }
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                //bars
                 Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                  child: Builder(builder: (context) {
-                    return Row(
-                      children: () {
-                        List<Widget> widgetList = [];
-                        for (int i = 0; i < percentList.length; i++) {
-                          widgetList.add(Flexible(
-                            flex: percentList[i],
-                            child: widget.toolTipList == null
-                                ? Container(color: widget.colorList[i])
-                                : Tooltip(
-                                    message:
-                                        '${widget.toolTipList![i]}: ${percentList[i]}%',
-                                    child:
-                                        Container(color: widget.colorList[i]),
-                                  ),
-                          ));
-                        }
-                        return widgetList;
-                      }(),
-                    );
-                  }),
+                  padding: EdgeInsets.only(
+                      top: widget.size.height * 0.2,
+                      bottom: widget.size.height * 0.2,
+                      right: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: () {
+                      List<int> distributions = _calculateDistributions();
+                      List<Widget> widgetList = [];
+                      for (int i = 0; i < distributions.length; i++) {
+                        widgetList.add(Flexible(
+                          flex: distributions[i],
+                          child: Tooltip(
+                              message: (widget.tooltip != null && !isDragging)
+                                  ? '${widget.tooltip![i]}: ${distributions[i]}'
+                                  : '',
+                              child: Container(
+                                color: widget.barColors[i],
+                              )),
+                        ));
+                      }
+                      return widgetList;
+                    }(),
+                  ),
                 ),
+                //sliders
                 ...() {
                   List<Widget> widgetList = [];
-                  for (int i = 0; i < percentList.length - 1; i++) {
-                    widgetList.add(SliderHandle(
-                      value: () {
-                        int sum = 0;
-                        for (int k = 0; k <= i; k++) {
-                          sum += widget.initialPercentList[k];
-                        }
-                        return sum;
-                      }(),
-                      onChanged: ((valueChange) {
-                        int actualChange = valueChange.clamp(
-                            -1 * percentList[i], percentList[i + 1]);
-                        percentList[i] += actualChange;
-                        percentList[i + 1] -= actualChange;
-                        widget.onChanged(percentList[i], percentList);
-                        setState(() {});
-                        return actualChange;
-                      }),
-                      backIndex: i,
-                      forwardIndex: i + 1,
-                      barSize: Size(widget.width, widget.height),
-                      width: 20,
-                      height: 100,
+                  for (int i = 0; i < percentList.length; i++) {
+                    widgetList.add(Positioned(
+                      left: _calculateSliderPosition(
+                          maxWidth: maxWidth, percent: percentList[i]!),
+                      child: Container(
+                        height: activeSliderNumber == i
+                            ? widget.size.height * 5
+                            : widget.size.height * 4,
+                        width: widget.size.width,
+                        color: (activeSliderNumber == i)
+                            ? widget.sliderPressedColor
+                            : widget.sliderColor,
+                      ),
                     ));
                   }
                   return widgetList;
-                }()
+                }(),
+                GestureDetector(
+                  onTapDown: (details) {
+                    _selectSlider(
+                        maxWidth: maxWidth,
+                        tapPosition: details.localPosition.dx);
+                  },
+                  onPanUpdate: (details) {
+                    _updateSlider(details.localPosition.dx, maxWidth);
+                  },
+                  onTapCancel: () {
+                    setState(() {
+                      isDragging = false;
+                    });
+                  },
+                  onTapUp: (details) {
+                    setState(() {
+                      isDragging = false;
+                    });
+                  },
+                  onPanCancel: () {
+                    setState(() {
+                      isDragging = false;
+                    });
+                  },
+                  onPanEnd: (details) {
+                    setState(() {
+                      isDragging = false;
+                    });
+                  },
+                ),
               ],
-            )),
-          ),
-        ]);
-  }
-}
-
-///Slider handles for Percent Slider
-class SliderHandle extends StatefulWidget {
-  SliderHandle(
-      {super.key,
-      required this.backIndex,
-      required this.forwardIndex,
-      required this.value,
-      this.color = Colors.grey,
-      this.pressedColor = Colors.blueGrey,
-      required this.barSize,
-      required this.onChanged,
-      required this.width,
-      required this.height});
-
-  ///The 'percent' from the left where the slider handle is located.
-  int value;
-
-  ///Size of the percent slider bar
-  final Size barSize;
-
-  ///width of the slider handle
-  final double width;
-
-  ///height of the slider handle
-  final double height;
-
-  ///color of the slider handle
-  final Color color;
-
-  ///color of the slider handle when pressed
-  final Color pressedColor;
-
-  ///the range to the left of the slider handle
-  final int backIndex;
-
-  ///the range  to the right of the slider handle
-  final int forwardIndex;
-
-  ///the function to run when slider is moved. Returns the value to change this.value by
-  final int Function(int valueChange) onChanged;
-  @override
-  State<SliderHandle> createState() => _SliderHandleState();
-}
-
-class _SliderHandleState extends State<SliderHandle> {
-  ///initial position of slider when panning
-  double initial = 0.0;
-
-  ///if slider handle is pressed
-  bool pressed = false;
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-        top: (widget.barSize.height - widget.height) / 2,
-        left: (widget.value * (widget.barSize.width / 100) - widget.width / 2),
-        height: widget.height,
-        width: widget.width,
-        child: GestureDetector(
-          child: Container(color: pressed ? widget.pressedColor : widget.color),
-          onPanStart: (DragStartDetails details) {
-            initial = details.globalPosition.dx;
-            setState(() {
-              pressed = true;
-            });
-          },
-          onPanUpdate: (DragUpdateDetails details) {
-            double distance = details.globalPosition.dx - initial;
-            int valueChange = (distance / widget.barSize.width * 100).round();
-            print('valueChange: ${valueChange}');
-            setState(() {
-              widget.value += widget.onChanged(valueChange);
-            });
-            initial = details.globalPosition.dx;
-          },
-          onPanEnd: (DragEndDetails details) {
-            initial = 0;
-            setState(() {
-              pressed = false;
-            });
-          },
-        ));
+            );
+          }),
+        ),
+      ],
+    );
   }
 }
