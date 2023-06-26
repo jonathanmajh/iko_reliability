@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 ///Multi percent bar slider from left to right. A variation of https://gist.github.com/yeasin50/fc597892b500b12e2b2fb0a9d5ba53bb
@@ -80,11 +82,12 @@ class _PercentSliderState extends State<PercentSlider> {
       return;
     }
 
+    //percent ranges must have a value of at least 1
     int lowerLimit = (activeSliderNumber != 0)
-        ? percentList[activeSliderNumber - 1]!
-        : widget.min;
+        ? percentList[activeSliderNumber - 1]! + 1
+        : max(widget.min, 1);
     int upperLimit = (activeSliderNumber != percentList.length - 1)
-        ? percentList[activeSliderNumber + 1]!
+        ? percentList[activeSliderNumber + 1]! - 1
         : widget.max;
     if (activeSliderNumber >= 0 && activeSliderNumber < percentList.length) {
       setState(() {
