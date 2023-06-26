@@ -375,10 +375,12 @@ class _EndDrawerState extends State<EndDrawer> {
                     rpnList.removeWhere((rpn) => (rpn <= 0));
                     print(rpnList);
                     //set rpn ranges
-                    assetCriticalityNotifier.setRpnCutoffs(rpnDistRange(
-                        rpnList, settingsNotifier.getRpnPercentDists()));
+                    List<double> newCutoffs = rpnDistRange(
+                        rpnList, settingsNotifier.getRpnPercentDists());
+                    assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
                     print(assetCriticalityNotifier.rpnCutoffs);
                   } catch (e) {
+                    //TODO: display error dialog
                     print(e.toString());
                   }
                 },

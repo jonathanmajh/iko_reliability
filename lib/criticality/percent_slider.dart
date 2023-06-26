@@ -88,7 +88,7 @@ class _PercentSliderState extends State<PercentSlider> {
         : max(widget.min, 1);
     int upperLimit = (activeSliderNumber != percentList.length - 1)
         ? percentList[activeSliderNumber + 1]! - 1
-        : widget.max;
+        : widget.max - 1;
     if (activeSliderNumber >= 0 && activeSliderNumber < percentList.length) {
       setState(() {
         isDragging = true;

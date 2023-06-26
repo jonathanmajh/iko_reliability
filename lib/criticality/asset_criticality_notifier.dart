@@ -52,14 +52,14 @@ class AssetCriticalityNotifier extends ChangeNotifier {
       if (rpnCutoffs.length != 5) {
         throw Exception('Unexpected format for List [rpnCutoffs]');
       }
-      if (rpn < 0) throw Exception('Negative RPN');
+      if (rpn <= 0) throw Exception('Negative RPN');
       for (int i = 0; i < rpnPossibleDistributions.length; i++) {
         if (rpn <= rpnCutoffs[i]) return rpnPossibleDistributions[i];
       }
       debugPrint('[rpnFindDistribution] overflow');
       return rpnPossibleDistributions[4];
     } catch (e) {
-      return 'asdf';
+      return '---';
     }
   }
 }

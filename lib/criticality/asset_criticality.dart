@@ -266,13 +266,15 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         width: 50,
         title: 'RPN',
         field: 'rpn',
+        readOnly: true,
         type: PlutoColumnType.number(),
       ),
       PlutoColumn(
         width: 100,
         title: 'New Priority',
         field: 'newPriority',
-        type: PlutoColumnType.number(),
+        readOnly: true,
+        type: PlutoColumnType.text(defaultValue: '---'),
       ),
     ]);
     _loadData();
@@ -313,6 +315,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     detailStateManager.setShowLoading(false);
   }
 
+  ///Loading plutogrid data
   void _loadData() {
     _loadSiteData(context.read<AssetCriticalityNotifier>().selectedSite)
         .then((fetchedRows) {
@@ -336,8 +339,11 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       }).then((value) {
         //load rpn numbers from plutogrid into AssetCriticalityNotifier
         Map<int, double> newRpnMap = {};
-        for (int i = 0; i < stateManager.rows.length; i++) {
-          newRpnMap[i] = (stateManager.rows[i].cells['rpn']?.value ?? -1) + 0.0;
+        for (PlutoRow row in stateManager.rows) {
+          if (row.cells['id'] != null) {
+            newRpnMap[row.cells['id']!.value] =
+                (row.cells['rpn']?.value ?? -1) + 0.0;
+          }
         }
         context
             .read<AssetCriticalityNotifier>()
