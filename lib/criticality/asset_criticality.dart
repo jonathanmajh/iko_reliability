@@ -1,18 +1,21 @@
 import 'dart:math';
 
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_multi_slider/flutter_multi_slider.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
+import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
+import 'percent_slider.dart';
 
 import '../admin/cache_notifier.dart';
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
+import '../settings/theme_manager.dart';
 import 'criticality_notifier.dart';
 import 'functions.dart';
 
@@ -45,6 +48,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   @override
   void initState() {
     super.initState();
+    AssetCriticalityNotifier assetCriticalityNotifier =
+        context.read<AssetCriticalityNotifier>();
 
     detailColumns.addAll([
       PlutoColumn(
@@ -125,8 +130,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   ),
                   onPressed: () {
                     print(rendererContext.rowIdx);
-                    refreshAsset(
-                        rendererContext.row.cells['assetnum']!.value, 'GX');
+                    refreshAsset(rendererContext.row.cells['assetnum']!.value,
+                        context.read<AssetCriticalityNotifier>().selectedSite);
                   },
                   iconSize: 18,
                   color: Colors.green,
@@ -137,8 +142,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     Icons.info,
                   ),
                   onPressed: () {
-                    refreshAsset(
-                        rendererContext.row.cells['assetnum']!.value, 'GH');
+                    refreshAsset(rendererContext.row.cells['assetnum']!.value,
+                        context.read<AssetCriticalityNotifier>().selectedSite);
                   },
                   iconSize: 18,
                   color: Colors.green,
@@ -261,32 +266,18 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         width: 50,
         title: 'RPN',
         field: 'rpn',
+        readOnly: true,
         type: PlutoColumnType.number(),
       ),
       PlutoColumn(
         width: 100,
         title: 'New Priority',
         field: 'newPriority',
-        type: PlutoColumnType.number(),
-        renderer: (rendererContext) {
-          return Text('asdf');
-          // call notifier and convert to string Very High etc
-        },
+        readOnly: true,
+        type: PlutoColumnType.text(defaultValue: '---'),
       ),
     ]);
-    _loadData().then((fetchedRows) {
-      PlutoGridStateManager.initializeRowsAsync(
-        columns,
-        fetchedRows,
-      ).then((value) {
-        stateManager.refRows.addAll(value);
-        stateManager.setShowLoading(false);
-        stateManager.notifyListeners();
-        // workaround since setting the group as expanded does not expand first row
-        stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
-        stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
-      });
-    });
+    _loadData();
   }
 
   void gridAHandler() {
@@ -324,27 +315,94 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     detailStateManager.setShowLoading(false);
   }
 
-  Future<List<PlutoRow>> _loadData() async {
-    final dbrows = await database!
-        .getSiteAssets('GX'); //TODO make it able to load other sites
-    await context.read<WorkOrderNotifier>().updateWorkOrders();
-    for (var row in dbrows) {
-      siteAssets[row.assetnum] = row;
-      if (parentAssets.containsKey(row.parent)) {
-        parentAssets[row.parent]!.add(row);
-      } else {
-        parentAssets[row.parent ?? "Top"] = [row];
+  ///Loading plutogrid data
+  void _loadData() {
+    _loadSiteData(context.read<AssetCriticalityNotifier>().selectedSite)
+        .then((fetchedRows) {
+      PlutoGridStateManager.initializeRowsAsync(
+        columns,
+        fetchedRows,
+      ).then((value) {
+        stateManager.refRows.clear();
+        stateManager.refRows.addAll(value);
+        stateManager.setShowLoading(false);
+        stateManager.notifyListeners();
+        // workaround since setting the group as expanded does not expand first row
+        try {
+          stateManager.toggleExpandedRowGroup(
+              rowGroup: stateManager.rows.first);
+          stateManager.toggleExpandedRowGroup(
+              rowGroup: stateManager.rows.first);
+        } catch (e) {
+          debugPrint("Could not run 'stateManager.toggleExpandedRowGroup'");
+        }
+      }).then((value) {
+        //load rpn numbers from plutogrid into AssetCriticalityNotifier
+        Map<int, double> newRpnMap = {};
+        for (PlutoRow row in stateManager.rows) {
+          if (row.cells['id'] != null) {
+            newRpnMap[row.cells['id']!.value] =
+                (row.cells['rpn']?.value ?? -1) + 0.0;
+          }
+        }
+        context
+            .read<AssetCriticalityNotifier>()
+            .setRpnMap(newRpnMap, notify: false);
+      });
+    });
+  }
+
+  ///Creates a list of [PlutoRow]s from the assets of [siteid]
+  Future<List<PlutoRow>> _loadSiteData(String siteid) async {
+    if (siteIDAndDescription.containsKey(siteid)) {
+      try {
+        siteAssets.clear();
+        parentAssets.clear();
+        collapsedAssets.clear();
+        final dbrows = await database!
+            .getSiteAssets(siteid); //TODO make it able to load other sites
+        await context.read<WorkOrderNotifier>().updateWorkOrders();
+        for (var row in dbrows) {
+          siteAssets[row.assetnum] = row;
+          if (parentAssets.containsKey(row.parent)) {
+            parentAssets[row.parent]!.add(row);
+          } else {
+            parentAssets[row.parent ?? "Top"] = [row];
+          }
+        }
+        return getChilds('Top');
+      } catch (e) {
+        if (siteIDAndDescription.containsKey(siteid) &&
+            !(context
+                    .read<SettingsNotifier>()
+                    .getSetting(ApplicationSetting.loadedSites) as Set<String>)
+                .contains(siteid)) {
+          debugPrint('Exception: Site $siteid is not loaded');
+          //TODO: show dialog instead of print to console
+        } else {
+          debugPrint(e.toString());
+        }
+        return <PlutoRow>[];
       }
+    } else {
+      //siteid = 'NONE'
+      siteAssets.clear();
+      parentAssets.clear();
+      collapsedAssets.clear();
+      return <PlutoRow>[];
     }
-    return getChilds('Top');
   }
 
   List<PlutoRow> getChilds(String parent) {
+    AssetCriticalityNotifier assetCriticalityNotifier =
+        Provider.of<AssetCriticalityNotifier>(context, listen: false);
     List<PlutoRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
         final asset = context.read<WorkOrderNotifier>().systems[child.assetnum];
         final cache = Provider.of<Cache>(context, listen: false);
+        double? calculatedRPN = rpnFunc(cache.getSystemScore(asset?.system),
+            asset?.frequency, asset?.downtime);
         rows.add(PlutoRow(
           cells: {
             'assetnum': PlutoCell(value: child.assetnum),
@@ -356,10 +414,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'frequency': PlutoCell(value: asset?.frequency ?? 0),
             'downtime': PlutoCell(value: asset?.downtime ?? 0),
             'hierarchy': PlutoCell(value: ''),
-            'newPriority': PlutoCell(value: 0),
-            'rpn': PlutoCell(
-                value: rpnFunc(cache.getSystemScore(asset?.system),
-                    asset?.frequency, asset?.downtime)),
+            'newPriority': PlutoCell(
+                value: assetCriticalityNotifier
+                    .rpnFindDistribution(calculatedRPN ?? -1)),
+            'rpn': PlutoCell(value: calculatedRPN),
             'id': PlutoCell(value: child.id),
           },
           type: PlutoRowType.group(
@@ -404,77 +462,105 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Asset Criticality'),
-        actions: [
-          Builder(
-              builder: (context) => IconButton(
-                    onPressed: () {
-                      Scaffold.of(context).openEndDrawer();
-                    },
-                    icon: const Icon(Icons.settings),
-                    tooltip: 'Settings',
-                  ))
-        ],
-      ),
-      endDrawer: const EndDrawer(),
-      body: Container(
-          padding: const EdgeInsets.all(30),
-          child: PlutoDualGrid(
-            isVertical: true,
-            gridPropsA: PlutoDualGridProps(
-              columns: columns,
-              rows: rows,
-              onLoaded: (PlutoGridOnLoadedEvent event) {
-                stateManager = event.stateManager;
-                event.stateManager.addListener(gridAHandler);
-                stateManager.setShowColumnFilter(true);
-                stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
-                  resolveColumnDepth: (column) =>
-                      stateManager.columnIndex(column),
-                  showText: (cell) => true,
-                  showCount: false,
-                  showFirstExpandableIcon: true,
-                ));
-              },
-              onRowDoubleTap: (event) {
-                setState(() {
-                  collapsedAssets[event.cell.value] = event.cell.value;
-                  event.cell.value = 'Non Production';
-                  // print(collapsedAssets);
-                  // collapseRows();
-                });
-              },
-              onChanged: (PlutoGridOnChangedEvent event) {
-                Cache cache = context.read<Cache>();
-                event.row.cells['rpn']!.value = rpnFunc(
-                    cache.getSystemScore(event.row.cells['system']!.value),
-                    event.row.cells['frequency']!.value,
-                    event.row.cells['downtime']!.value);
-                updateAsset(event.row);
-                print(event);
-              },
-              configuration: PlutoGridConfiguration(
-                  shortcut: PlutoGridShortcut(actions: {
-                ...PlutoGridShortcut.defaultActions,
-                LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-                LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                    CustomAddKeyAction(),
-                LogicalKeySet(LogicalKeyboardKey.minus): CustomMinusKeyAction(),
-                LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                    CustomMinusKeyAction(),
-              })),
-            ),
-            gridPropsB: PlutoDualGridProps(
-              columns: detailColumns,
-              rows: detailRows,
-              onLoaded: (PlutoGridOnLoadedEvent event) {
-                detailStateManager = event.stateManager;
-              },
-            ),
-          )),
-    );
+    ThemeManager themeManager = Provider.of<ThemeManager>(context);
+    return Consumer<AssetCriticalityNotifier>(
+        builder: (context, assetCriticalityNotifier, child) {
+      _loadData();
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Asset Criticality'),
+          actions: [
+            Builder(
+                builder: (context) => IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openEndDrawer();
+                      },
+                      icon: const Icon(Icons.settings),
+                      tooltip: 'Settings',
+                    ))
+          ],
+        ),
+        endDrawer: const EndDrawer(),
+        body: Container(
+            padding: const EdgeInsets.all(30),
+            child: PlutoDualGrid(
+              isVertical: true,
+              gridPropsA: PlutoDualGridProps(
+                columns: columns,
+                rows: rows,
+                onLoaded: (PlutoGridOnLoadedEvent event) {
+                  stateManager = event.stateManager;
+                  event.stateManager.addListener(gridAHandler);
+                  stateManager.setShowColumnFilter(true);
+                  stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
+                    resolveColumnDepth: (column) =>
+                        stateManager.columnIndex(column),
+                    showText: (cell) => true,
+                    showCount: false,
+                    showFirstExpandableIcon: true,
+                  ));
+                },
+                onRowDoubleTap: (event) {
+                  setState(() {
+                    collapsedAssets[event.cell.value] = event.cell.value;
+                    event.cell.value = 'Non Production';
+                    // print(collapsedAssets);
+                    // collapseRows();
+                  });
+                },
+                onChanged: (PlutoGridOnChangedEvent event) {
+                  Cache cache = context.read<Cache>();
+                  int rowId = stateManager.rows.indexOf(event.row);
+                  double newRpn = rpnFunc(
+                          cache
+                              .getSystemScore(event.row.cells['system']!.value),
+                          event.row.cells['frequency']!.value,
+                          event.row.cells['downtime']!.value) ??
+                      -1;
+                  event.row.cells['rpn']!.value = newRpn;
+                  context.read<AssetCriticalityNotifier>().addToRpnMap({
+                    ((rowId == -1) ? stateManager.rows.length : rowId): newRpn
+                  });
+                  updateAsset(event.row);
+
+                  print(event);
+                },
+                configuration: PlutoGridConfiguration(
+                    //TODO:darkmode
+                    style: themeManager.isDark
+                        ? const PlutoGridStyleConfig.dark()
+                        : const PlutoGridStyleConfig(),
+                    shortcut: PlutoGridShortcut(actions: {
+                      ...PlutoGridShortcut.defaultActions,
+                      LogicalKeySet(LogicalKeyboardKey.add):
+                          CustomAddKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                          CustomAddKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.minus):
+                          CustomMinusKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                          CustomMinusKeyAction(),
+                    })),
+              ),
+              gridPropsB: PlutoDualGridProps(
+                configuration: PlutoGridConfiguration(
+                    style: themeManager.isDark
+                        ? const PlutoGridStyleConfig.dark()
+                        : const PlutoGridStyleConfig()),
+                columns: detailColumns,
+                rows: detailRows,
+                onLoaded: (PlutoGridOnLoadedEvent event) {
+                  detailStateManager = event.stateManager;
+                },
+              ),
+              divider: themeManager.isDark
+                  ? PlutoDualGridDivider.dark(
+                      indicatorColor:
+                          Theme.of(context).colorScheme.onBackground)
+                  : const PlutoDualGridDivider(),
+            )),
+      );
+    });
   }
 }
 
@@ -558,7 +644,7 @@ double calculateSystemScore(List<int> ratings) {
 ///returns a list of rpn maximum values (inclusive) for rpn assessments (e.g. very low, medium, high, etc) in order to have the
 ///closest percent distribution to that listed in {rpnPercentDist}
 ///Params:
-/// - rpnList: list of all the rpns
+/// - rpnList: list of all the rpns (without 0 or -1 values)
 /// - rpnPercentDist: desired rpn percent distribution in rpn assessments. Listed from least serious (very low) to most serious (very high)
 /// - tolerance: a percentage. if the difference between the desired and actual percent distribution is greater than the tolerance, use a different distribution
 /// Returns list of rpn maximum values for each distribution range, from very low to very high
@@ -762,6 +848,12 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
     return sum;
   }
 
+  void reloadTextControllers() {
+    for (int i = 0; i < widget.distControllers.length; i++) {
+      widget.distControllers[i].text = dists![i].toString();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -781,22 +873,16 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
   Widget build(BuildContext context) {
     ///Color gradient for [MultiSlider]. The colors for the range bars are every other item on the list, starting from index = 1
     List<Color> colorGradient = [
-      Colors.red,
       Colors.red[200]!,
-      Colors.red,
       Colors.red[300]!,
-      Colors.red,
       Colors.red[400]!,
-      Colors.red,
       Colors.red[700]!,
-      Colors.red,
       Colors.red[900]!
     ];
-    return Expanded(
-      child: Container(
-        height: MediaQuery.of(context).size.height *
-            0.8, //dialog is 80% of application window size
-        width: MediaQuery.of(context).size.width * 0.8,
+    return Center(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.9,
+        width: MediaQuery.of(context).size.width * 0.9,
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Expanded(
             //title
@@ -822,43 +908,34 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
           Expanded(
             //Multislider/visual representation
             flex: 3,
-            child: Builder(builder: (context) {
-              List<double> points = calculatePoints();
-              return AbsorbPointer(
-                //to make multislider read only for now since not working
-                absorbing: true,
-                child: MultiSlider(
-                  min: 1,
-                  max: 100,
-                  rangeColors: colorGradient,
-                  values: points,
-                  onChanged: (values) {
-                    values.first = 1;
-                    values.last = 100;
-                    for (int i = 1; i < dists!.length; i++) {
-                      int low = 2 * i - 1;
-                      int high = 2 * i;
-                      if (values[low] != points[low]) {
-                        print(low);
-                        values[high] = values[low];
-                        dists![i - 1] =
-                            ((values[low] - values[low - 1])).round();
-                        dists![i] = ((values[high + 1] - values[high])).round();
-                      } else if (values[high] != points[high]) {
-                        print(high);
-                        values[low] = values[high];
-                        dists![i - 1] =
-                            ((values[low] - values[low - 1])).round();
-                        dists![i] = ((values[high + 1] - values[high])).round();
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Builder(builder: (context) {
+                  return PercentSlider(
+                    initialValues: () {
+                      List<int> initValues = [];
+                      int sum = 0;
+                      for (int i = 0; i < dists!.length - 1; i++) {
+                        sum += dists![i];
+                        initValues.add(sum);
                       }
-                    }
-                    setState(() => points = values);
-                    print(dists);
-                  },
-                  divisions: 100,
-                ),
-              );
-            }),
+                      return initValues;
+                    }(),
+                    max: total ?? 100,
+                    barColors: colorGradient,
+                    size: const Size(10, 10),
+                    onSliderUpdate: (newPercentDists) {
+                      setState(() {
+                        dists = List.from(newPercentDists);
+                        reloadTextControllers();
+                      });
+                    },
+                    tooltip: rpnPossibleDistributions,
+                  );
+                }),
+              ),
+            ),
           ),
           Expanded(
             //input boxes
@@ -871,27 +948,29 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                   List<Widget> widgets = [];
                   for (int i = 0; i < widget.distGroups.length; i++) {
                     widgets.add(Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            labelText: widget.distGroups[i],
-                          ),
-                          controller: widget.distControllers[i],
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          onChanged: (value) {
-                            print(widget.distControllers[i].text);
-                            int? val = int.tryParse(value);
-                            dists![i] = val ?? 0;
-                            setState((() => total = calculateTotal()));
-                          },
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          labelText: widget.distGroups[i],
                         ),
+                        controller: widget.distControllers[i],
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          //limits characters to digits between 0-999
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(3),
+                        ],
+                        onChanged: (value) {
+                          int? val = int.tryParse(value);
+                          setState(() {
+                            dists![i] = val ?? 0;
+                            total = calculateTotal();
+                          });
+                        },
                       ),
-                    ));
+                    )));
                   }
                   return widgets;
                 }(),

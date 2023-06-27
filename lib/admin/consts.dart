@@ -468,6 +468,14 @@ List<String> systemQuality = [
   'Potential class action',
 ];
 
+List<String> rpnPossibleDistributions = [
+  'Very Low',
+  'Low',
+  'Medium',
+  'High',
+  'Very High',
+];
+
 List<ApplicationSetting> rpnDistributionGroups = [
   ApplicationSetting.rpnPercentVL,
   ApplicationSetting.rpnPercentL,

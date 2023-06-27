@@ -146,6 +146,11 @@ class SettingsNotifier extends ChangeNotifier {
     return currentSettings[settingKey];
   }
 
+  ///Gets an int list of the rpn percent distributions from very low to very high
+  List<int> getRpnPercentDists() {
+    return List.from(rpnDistributionGroups.map((e) => currentSettings[e]));
+  }
+
   void addLoadedSites(List<String> sites, {bool notify = false}) {
     Set<String> newSet =
         (currentSettings[ApplicationSetting.loadedSites] as Set<String>)

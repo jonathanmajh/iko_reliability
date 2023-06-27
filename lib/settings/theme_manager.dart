@@ -11,7 +11,9 @@ class ThemeManager extends ChangeNotifier {
   }
   ThemeMode _themeMode = ThemeMode.light;
 
-  get themeMode => _themeMode;
+  ThemeMode get themeMode => _themeMode;
+
+  bool get isDark => (_themeMode == ThemeMode.dark);
 
   ///controls darkmode/lightmode for the application. Set [isDark] to [true] for darkmode. Notifies all listeners
   toggleTheme(bool isDark, BuildContext context) {
