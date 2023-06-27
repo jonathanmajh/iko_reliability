@@ -502,6 +502,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 },
                 onRowDoubleTap: (event) {
                   setState(() {
+                    //TODO make it so that program does not crash
                     collapsedAssets[event.cell.value] = event.cell.value;
                     event.cell.value = 'Non Production';
                     // print(collapsedAssets);
@@ -510,7 +511,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 },
                 onChanged: (PlutoGridOnChangedEvent event) {
                   Cache cache = context.read<Cache>();
-                  int rowId = stateManager.rows.indexOf(event.row);
+                  int rowId = event.row.cells['id']?.value ?? -1;
                   double newRpn = rpnFunc(
                           cache
                               .getSystemScore(event.row.cells['system']!.value),
@@ -518,11 +519,12 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                           event.row.cells['downtime']!.value) ??
                       -1;
                   event.row.cells['rpn']!.value = newRpn;
-                  context.read<AssetCriticalityNotifier>().addToRpnMap({
-                    ((rowId == -1) ? stateManager.rows.length : rowId): newRpn
-                  });
+                  if (rowId != -1) {
+                    context
+                        .read<AssetCriticalityNotifier>()
+                        .addToRpnMap({rowId: newRpn});
+                  }
                   updateAsset(event.row);
-
                   print(event);
                 },
                 configuration: PlutoGridConfiguration(
@@ -661,7 +663,7 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
 
   ///searches for duplicates of the item at index a in an ordered list.
   ///returns a List<int> of length 2 of the indicies of the furthest duplicate of item at index. result = [first, last]
-  ///recursive(?) function (don't use optional param {searchDownwardsThruList} when calling)
+  ///recursive(ish) function (don't use optional param {searchDownwardsThruList} when calling)
   dynamic searchForDuplicate(List orderedRpnList, int index,
       {bool? searchDownwardsThruList}) {
     if (searchDownwardsThruList == null) {
@@ -671,6 +673,7 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
         searchForDuplicate(orderedRpnList, index - 1,
             searchDownwardsThruList: false)
       ];
+      //recursive conditions
     } else if (searchDownwardsThruList) {
       try {
         if (orderedRpnList[index] == orderedRpnList[index + 1]) {
@@ -704,11 +707,12 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
   list.sort((a, b) => b.compareTo(
       a)); //reversed (highest to lowest) for now, to use List.removelast. Since ordered, should be more efficient than removeWhere()
   while (list.isNotEmpty && list.last <= 0) {
-    //remove all not yet calculated vpns
+    //remove all not yet calculated rpns
     list.removeLast();
   }
-  if (list.isEmpty) {
-    return [-1, -1, -1, -1, -1];
+  if (Set.from(list).length < 5) {
+    throw Exception(
+        'Need at least 5 distinct RPNs to calculate distributions. Currently have ${Set.from(list).length} distinct RPN values.');
   }
   list = List.from(list.reversed); //reverse the list back to lowest to highest
   List<double> rangeDist = [];
@@ -753,8 +757,10 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
     }
     if (diff.abs() > tolerance) {
       //when actual percent distripution becomes way off
-      throw Exception(
+      print(
           'Tolerance exceeded. Use different percent distribution. Diff = $diff%, RPN = ${list[index]}, Target = $targetDist%');
+      throw Exception(
+          'Calculated distributions are way off the configured distributions.');
     }
 
     //add to cutoff RPN to [rangeDist]
@@ -768,6 +774,11 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
   //make highest priority cutoff RPN include all RPNs
   rangeDist.add(list.last);
 
+  //cannot have duplicates in [rangeDist]
+  if (Set.from(rangeDist).length != rangeDist.length) {
+    print('error: duplicate values in [rangeDist]. rangeDist = \n${rangeDist}');
+    throw Exception('An unexpected error occured.');
+  }
   return rangeDist;
 }
 

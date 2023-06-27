@@ -313,13 +313,6 @@ class _EndDrawerState extends State<EndDrawer> {
                   })),
             )),
             ListTile(
-              title: const Text('Calculate Risk Priority Numbers (RPN)'),
-              trailing: ElevatedButton(
-                onPressed: () {/*TODO: calculate rpns in table*/},
-                child: const Text('Calculate'),
-              ),
-            ),
-            ListTile(
               title: const Text('Plant Site'),
               trailing: DropdownButton(
                 value: context.read<AssetCriticalityNotifier>().selectedSite,
@@ -344,8 +337,6 @@ class _EndDrawerState extends State<EndDrawer> {
                   context
                       .read<AssetCriticalityNotifier>()
                       .setSite(newValue.toString());
-
-                  //TODO: reload page
                 },
               ),
             ),
@@ -374,12 +365,31 @@ class _EndDrawerState extends State<EndDrawer> {
                         List.from(assetCriticalityNotifier.rpnList);
                     rpnList.removeWhere((rpn) => (rpn <= 0));
                     print(rpnList);
+
                     //set rpn ranges
                     List<double> newCutoffs = rpnDistRange(
                         rpnList, settingsNotifier.getRpnPercentDists());
                     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
                     print(assetCriticalityNotifier.rpnCutoffs);
                   } catch (e) {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text(
+                                'Could Not Calculate Priority Ranges'),
+                            content: Text(
+                                //remove the text 'Exception: ' from e.toString()
+                                '${e.toString().substring(e.toString().indexOf(' ') + 1)} Try reconfiguring the risk priority distributions.'),
+                            actions: [
+                              Center(
+                                child: ElevatedButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('OK')),
+                              )
+                            ],
+                          );
+                        });
                     //TODO: display error dialog
                     print(e.toString());
                   }
