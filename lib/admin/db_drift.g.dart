@@ -1013,6 +1013,19 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _newAssetMeta =
+      const VerificationMeta('newAsset');
+  @override
+  late final GeneratedColumn<bool> newAsset =
+      GeneratedColumn<bool>('new_asset', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: false,
+          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+            SqlDialect.sqlite: 'CHECK ("new_asset" IN (0, 1))',
+            SqlDialect.mysql: '',
+            SqlDialect.postgres: '',
+          }),
+          defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         assetnum,
@@ -1023,7 +1036,8 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         hierarchy,
         parent,
         priority,
-        id
+        id,
+        newAsset
       ];
   @override
   String get aliasedName => _alias ?? 'assets';
@@ -1085,6 +1099,10 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
+    if (data.containsKey('new_asset')) {
+      context.handle(_newAssetMeta,
+          newAsset.isAcceptableOrUnknown(data['new_asset']!, _newAssetMeta));
+    }
     return context;
   }
 
@@ -1116,6 +1134,8 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
           .read(DriftSqlType.int, data['${effectivePrefix}priority'])!,
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      newAsset: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}new_asset'])!,
     );
   }
 
@@ -1135,6 +1155,7 @@ class Asset extends DataClass implements Insertable<Asset> {
   final String? parent;
   final int priority;
   final int id;
+  final bool newAsset;
   const Asset(
       {required this.assetnum,
       required this.description,
@@ -1144,7 +1165,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       this.hierarchy,
       this.parent,
       required this.priority,
-      required this.id});
+      required this.id,
+      required this.newAsset});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1161,6 +1183,7 @@ class Asset extends DataClass implements Insertable<Asset> {
     }
     map['priority'] = Variable<int>(priority);
     map['id'] = Variable<int>(id);
+    map['new_asset'] = Variable<bool>(newAsset);
     return map;
   }
 
@@ -1178,6 +1201,7 @@ class Asset extends DataClass implements Insertable<Asset> {
           parent == null && nullToAbsent ? const Value.absent() : Value(parent),
       priority: Value(priority),
       id: Value(id),
+      newAsset: Value(newAsset),
     );
   }
 
@@ -1194,6 +1218,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       parent: serializer.fromJson<String?>(json['parent']),
       priority: serializer.fromJson<int>(json['priority']),
       id: serializer.fromJson<int>(json['id']),
+      newAsset: serializer.fromJson<bool>(json['newAsset']),
     );
   }
   @override
@@ -1209,6 +1234,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       'parent': serializer.toJson<String?>(parent),
       'priority': serializer.toJson<int>(priority),
       'id': serializer.toJson<int>(id),
+      'newAsset': serializer.toJson<bool>(newAsset),
     };
   }
 
@@ -1221,7 +1247,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           Value<String?> hierarchy = const Value.absent(),
           Value<String?> parent = const Value.absent(),
           int? priority,
-          int? id}) =>
+          int? id,
+          bool? newAsset}) =>
       Asset(
         assetnum: assetnum ?? this.assetnum,
         description: description ?? this.description,
@@ -1232,6 +1259,7 @@ class Asset extends DataClass implements Insertable<Asset> {
         parent: parent.present ? parent.value : this.parent,
         priority: priority ?? this.priority,
         id: id ?? this.id,
+        newAsset: newAsset ?? this.newAsset,
       );
   @override
   String toString() {
@@ -1244,14 +1272,15 @@ class Asset extends DataClass implements Insertable<Asset> {
           ..write('hierarchy: $hierarchy, ')
           ..write('parent: $parent, ')
           ..write('priority: $priority, ')
-          ..write('id: $id')
+          ..write('id: $id, ')
+          ..write('newAsset: $newAsset')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(assetnum, description, status, siteid,
-      changedate, hierarchy, parent, priority, id);
+      changedate, hierarchy, parent, priority, id, newAsset);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1264,7 +1293,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           other.hierarchy == this.hierarchy &&
           other.parent == this.parent &&
           other.priority == this.priority &&
-          other.id == this.id);
+          other.id == this.id &&
+          other.newAsset == this.newAsset);
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
@@ -1277,6 +1307,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String?> parent;
   final Value<int> priority;
   final Value<int> id;
+  final Value<bool> newAsset;
   const AssetsCompanion({
     this.assetnum = const Value.absent(),
     this.description = const Value.absent(),
@@ -1287,6 +1318,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.parent = const Value.absent(),
     this.priority = const Value.absent(),
     this.id = const Value.absent(),
+    this.newAsset = const Value.absent(),
   });
   AssetsCompanion.insert({
     required String assetnum,
@@ -1298,6 +1330,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.parent = const Value.absent(),
     required int priority,
     this.id = const Value.absent(),
+    this.newAsset = const Value.absent(),
   })  : assetnum = Value(assetnum),
         description = Value(description),
         status = Value(status),
@@ -1314,6 +1347,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? parent,
     Expression<int>? priority,
     Expression<int>? id,
+    Expression<bool>? newAsset,
   }) {
     return RawValuesInsertable({
       if (assetnum != null) 'assetnum': assetnum,
@@ -1325,6 +1359,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (parent != null) 'parent': parent,
       if (priority != null) 'priority': priority,
       if (id != null) 'id': id,
+      if (newAsset != null) 'new_asset': newAsset,
     });
   }
 
@@ -1337,7 +1372,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       Value<String?>? hierarchy,
       Value<String?>? parent,
       Value<int>? priority,
-      Value<int>? id}) {
+      Value<int>? id,
+      Value<bool>? newAsset}) {
     return AssetsCompanion(
       assetnum: assetnum ?? this.assetnum,
       description: description ?? this.description,
@@ -1348,6 +1384,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       parent: parent ?? this.parent,
       priority: priority ?? this.priority,
       id: id ?? this.id,
+      newAsset: newAsset ?? this.newAsset,
     );
   }
 
@@ -1381,6 +1418,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
+    if (newAsset.present) {
+      map['new_asset'] = Variable<bool>(newAsset.value);
+    }
     return map;
   }
 
@@ -1395,7 +1435,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('hierarchy: $hierarchy, ')
           ..write('parent: $parent, ')
           ..write('priority: $priority, ')
-          ..write('id: $id')
+          ..write('id: $id, ')
+          ..write('newAsset: $newAsset')
           ..write(')'))
         .toString();
   }

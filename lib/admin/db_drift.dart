@@ -88,6 +88,7 @@ class Assets extends Table {
   TextColumn? get parent => text().nullable()();
   IntColumn get priority => integer()();
   IntColumn get id => integer().autoIncrement()();
+  BoolColumn get newAsset => boolean().withDefault(const Constant(false))();
 
   @override
   List<Set<Column>> get uniqueKeys => [
@@ -191,6 +192,24 @@ class MyDatabase extends _$MyDatabase {
   Future<int> addSystemCriticalitys(String value) async {
     final row = await into(systemCriticalitys).insertReturning(
         SystemCriticalitysCompanion.insert(description: value));
+    return row.id;
+  }
+
+  Future<int> addNewAsset(
+    String assetnum,
+    String siteid,
+    String description,
+    String parent,
+  ) async {
+    final row = await into(assets).insertReturning(AssetsCompanion.insert(
+      description: description,
+      assetnum: assetnum,
+      siteid: siteid,
+      parent: Value(parent),
+      priority: 0,
+      status: 'Planning',
+      changedate: 'N/A',
+    ));
     return row.id;
   }
 
@@ -519,7 +538,7 @@ class MyDatabase extends _$MyDatabase {
       try {
         await (delete(assets)..where((tbl) => tbl.siteid.equals(siteid))).go();
         await batch((batch) {
-          batch.insertAll(assets, assetInserts);
+          batch.insertAllOnConflictUpdate(assets, assetInserts);
         });
       } catch (e) {
         messages.add('Error inserting Meters\n${e.toString()}');
