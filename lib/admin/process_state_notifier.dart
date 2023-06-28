@@ -1,14 +1,16 @@
 import 'dart:core';
-import 'dart:io';
 
 import 'consts.dart';
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/settings/theme_manager.dart';
-import 'package:provider/provider.dart';
+
+//dev note: To add more processes, search "HUST:oZUoQfjnVS"
 
 ///records the application processing states
 class ProcessStateNotifier extends ChangeNotifier {
+  ///Map of the currently running processes where the index of the ProcessStates are the keys
   Map<int, bool> processStates = <int, bool>{};
+
+  ///If the processing dialog is currently open
   bool alertDialogShowing = false;
 
   ProcessStateNotifier() {
@@ -28,7 +30,6 @@ class ProcessStateNotifier extends ChangeNotifier {
   }
 
   ///sets the process specified by [process] to [value]. Checks if any processes are running and returns that bool if [checkProcesses] is [true]. Notifies all listeners if [notifyListeners] is [true].
-
   bool setProcessState(ProcessStates process, bool value,
       {bool checkProcesses = false, bool notifyListeners = true}) {
     if (processStates.containsKey(process.index)) {
@@ -42,12 +43,8 @@ class ProcessStateNotifier extends ChangeNotifier {
     return true;
   }
 
-  ///checks whether app should ignore user input.
-  bool absorbInput() {
-    //TODO: if certain processes are running, should return [true]
-    return false;
-  }
-
+  ///Creates a dialog to show that the app is processing. Allows user to cancel processes
+  ///and ignores user attempts to change data during processes
   Future<void> processingDialog(BuildContext context) {
     alertDialogShowing = true;
     return showDialog<void>(
@@ -78,6 +75,7 @@ class ProcessStateNotifier extends ChangeNotifier {
         barrierDismissible: false);
   }
 
+  ///Closes the Processing dialog
   void popProcessingDialog(context) {
     if (alertDialogShowing) {
       Navigator.pop(context);

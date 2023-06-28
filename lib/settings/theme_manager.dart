@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/main.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart';
 import '../admin/consts.dart';

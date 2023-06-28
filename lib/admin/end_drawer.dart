@@ -2,12 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
 import 'package:iko_reliability_flutter/admin/file_export.dart';
-import 'package:iko_reliability_flutter/admin/generate_uploads.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
-import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -394,7 +392,6 @@ class _EndDrawerState extends State<EndDrawer> {
                             ],
                           );
                         });
-                    //TODO: display error dialog
                     print(e.toString());
                   }
                 },
@@ -416,8 +413,8 @@ class _EndDrawerState extends State<EndDrawer> {
                   }
                   PlutoGridStateManager? stateManager =
                       context.read<AssetCriticalityNotifier>().stateManager;
-                  //TODO: export as csv
 
+                  //export as csv
                   if (stateManager != null) {
                     exportAssetCriticalityAsCSV(
                         stateManager: stateManager, context: context);

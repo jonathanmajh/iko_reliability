@@ -8,7 +8,6 @@ import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
-import 'dart:io';
 
 import 'admin/cache_notifier.dart';
 import 'admin/db_drift.dart';
@@ -78,26 +77,21 @@ class MyApp extends StatelessWidget {
         ],
         child: Builder(
           builder: (context) {
-            return AbsorbPointer(
-              absorbing:
-                  Provider.of<ProcessStateNotifier>(context, listen: false)
-                      .absorbInput(), //controls when input is allowed.
-              child: MaterialApp.router(
-                routerDelegate: _appRouter.delegate(),
-                routeInformationParser: _appRouter.defaultRouteParser(),
-                title: 'IKO Flutter Reliability',
-                theme: ThemeData(
-                  useMaterial3: true,
-                  colorSchemeSeed: const Color(0xFFFF0000),
-                ),
-                //sets color for theme
-                darkTheme: ThemeData(
-                  useMaterial3: true,
-                  colorSchemeSeed: const Color(0xFFFF0000),
-                  brightness: Brightness.dark,
-                ),
-                themeMode: Provider.of<ThemeManager>(context).themeMode,
+            return MaterialApp.router(
+              routerDelegate: _appRouter.delegate(),
+              routeInformationParser: _appRouter.defaultRouteParser(),
+              title: 'IKO Flutter Reliability',
+              theme: ThemeData(
+                useMaterial3: true,
+                colorSchemeSeed: const Color(0xFFFF0000),
               ),
+              //sets color for theme
+              darkTheme: ThemeData(
+                useMaterial3: true,
+                colorSchemeSeed: const Color(0xFFFF0000),
+                brightness: Brightness.dark,
+              ),
+              themeMode: Provider.of<ThemeManager>(context).themeMode,
             );
           },
         ));
