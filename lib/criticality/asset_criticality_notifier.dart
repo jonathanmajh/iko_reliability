@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 import '../admin/consts.dart';
 
@@ -9,6 +10,8 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   Map<int, double> rpnMap = {};
   List<double> rpnCutoffs = [];
   String selectedSite = 'NONE';
+  bool priorityRangesUpToDate = true;
+  PlutoGridStateManager? stateManager;
 
   ///list of rpns. Not ordered
   List<double> get rpnList => List<double>.of(rpnMap.values);

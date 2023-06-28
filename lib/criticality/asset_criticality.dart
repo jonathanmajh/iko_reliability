@@ -490,6 +490,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 rows: rows,
                 onLoaded: (PlutoGridOnLoadedEvent event) {
                   stateManager = event.stateManager;
+                  context.read<AssetCriticalityNotifier>().stateManager =
+                      stateManager;
                   event.stateManager.addListener(gridAHandler);
                   stateManager.setShowColumnFilter(true);
                   stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
@@ -511,6 +513,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 },
                 onChanged: (PlutoGridOnChangedEvent event) {
                   Cache cache = context.read<Cache>();
+                  AssetCriticalityNotifier assetCriticalityNotifier =
+                      context.read<AssetCriticalityNotifier>();
+                  assetCriticalityNotifier.priorityRangesUpToDate = false;
                   int rowId = event.row.cells['id']?.value ?? -1;
                   double newRpn = rpnFunc(
                           cache
@@ -520,9 +525,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       -1;
                   event.row.cells['rpn']!.value = newRpn;
                   if (rowId != -1) {
-                    context
-                        .read<AssetCriticalityNotifier>()
-                        .addToRpnMap({rowId: newRpn});
+                    assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
                   }
                   updateAsset(event.row);
                   print(event);
@@ -809,6 +812,27 @@ void showRpnDistDialog(BuildContext context) {
               distGroups: distGroups, distControllers: distControllers),
         );
       });
+}
+
+Future<bool> assetCriticalityCSVExportWarning(BuildContext context) async {
+  return await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Risk Priority Not Calculated'),
+              content: const Text(
+                  'The new risk priorities have not been calculated yet. This can lead to inaccurate data. Do you still wish to continue?'),
+              actions: [
+                ElevatedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('No')),
+                ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Yes'))
+              ],
+            );
+          }) ??
+      false;
 }
 
 ///Dialog for changing rpn rating distributions

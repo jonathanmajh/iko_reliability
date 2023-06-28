@@ -1,6 +1,8 @@
 //for widgets in the right-side drawer
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
+import 'package:iko_reliability_flutter/admin/file_export.dart';
+import 'package:iko_reliability_flutter/admin/generate_uploads.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
@@ -8,6 +10,7 @@ import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.d
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -371,6 +374,7 @@ class _EndDrawerState extends State<EndDrawer> {
                         rpnList, settingsNotifier.getRpnPercentDists());
                     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
                     print(assetCriticalityNotifier.rpnCutoffs);
+                    assetCriticalityNotifier.priorityRangesUpToDate = true;
                   } catch (e) {
                     showDialog(
                         context: context,
@@ -395,7 +399,32 @@ class _EndDrawerState extends State<EndDrawer> {
                   }
                 },
               ),
-            )
+            ),
+            ListTile(
+              title: const Text('Export to CSV'),
+              trailing: ElevatedButton(
+                child: const Text('Export'),
+                onPressed: () {
+                  if (!context
+                      .read<AssetCriticalityNotifier>()
+                      .priorityRangesUpToDate) {
+                    assetCriticalityCSVExportWarning(context).then((value) {
+                      if (!value) {
+                        return;
+                      }
+                    });
+                  }
+                  PlutoGridStateManager? stateManager =
+                      context.read<AssetCriticalityNotifier>().stateManager;
+                  //TODO: export as csv
+
+                  if (stateManager != null) {
+                    exportAssetCriticalityAsCSV(
+                        stateManager: stateManager, context: context);
+                  }
+                },
+              ),
+            ),
           ],
         ),
       );
