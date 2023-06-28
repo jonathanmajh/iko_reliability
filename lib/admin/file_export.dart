@@ -67,9 +67,8 @@ Future<dynamic> saveFileFromString(String contents,
       }
       //repeat filepicker if improper file type given
     } while (fileName != null);
-    print(savePath);
     //add BOM header
-    await File(savePath!)
+    await File(savePath)
         .writeAsBytes([239, 187, 191, ...utf8.encode(contents)]);
     return true;
   } catch (e) {
