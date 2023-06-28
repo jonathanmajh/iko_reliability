@@ -16,22 +16,60 @@ import 'package:csv/csv.dart';
 ///[contents] - String contents of the file
 ///[allowedExtentions] - list of allowed file extensions to save as
 Future<dynamic> saveFileFromString(String contents,
-    {List<String>? allowedExtensions}) async {
+    {List<String>? allowedExtensions, BuildContext? context}) async {
   try {
-    String? savePath = await FilePicker.platform.saveFile(
-      dialogTitle: 'Save As',
-      lockParentWindow: true,
-      type: FileType.custom,
-      allowedExtensions: allowedExtensions,
-      fileName: (allowedExtensions != null && allowedExtensions.isNotEmpty)
-          ? allowedExtensions.first
-          : '',
-    );
-    if (savePath == null) {
-      return false;
-    }
+    String? savePath;
+    String? fileName;
+    do {
+      savePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save As',
+        lockParentWindow: true,
+        type: (allowedExtensions != null) ? FileType.custom : FileType.any,
+        allowedExtensions: allowedExtensions,
+        fileName: fileName ??
+            ((allowedExtensions != null && allowedExtensions.isNotEmpty)
+                ? '.${allowedExtensions.first}'
+                : ''),
+      );
+      if (savePath == null) {
+        return false;
+      }
+      //check file type
+      if (allowedExtensions != null && allowedExtensions.isNotEmpty) {
+        int indexOfLastBackslash = savePath.lastIndexOf('\\');
+        int indexOfLastPeriod = savePath.lastIndexOf(".");
+        if (indexOfLastPeriod > indexOfLastBackslash) {
+          if (!allowedExtensions
+              .contains(savePath.substring(indexOfLastPeriod + 1))) {
+            fileName = savePath.substring(indexOfLastBackslash + 1);
+            debugPrint('File type not supported');
+            if (context != null) {
+              await showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                        title: const Text('Unsupported File Type'),
+                        content: Text(
+                            'File extension must be one of the following:\n\t$allowedExtensions\nTry again.'),
+                        actions: [
+                          ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Ok'))
+                        ],
+                      ));
+            }
+          } else {
+            fileName = null;
+          }
+        } else {
+          savePath += '.${allowedExtensions.first}';
+          fileName = null;
+        }
+      }
+      //repeat filepicker if improper file type given
+    } while (fileName != null);
+    print(savePath);
     //add BOM header
-    await File(savePath)
+    await File(savePath!)
         .writeAsBytes([239, 187, 191, ...utf8.encode(contents)]);
     return true;
   } catch (e) {
@@ -47,7 +85,8 @@ Future<void> exportAssetCriticalityAsCSV(
   String contents = const ListToCsvConverter().convert(generatePlutogrid(
       stateManager,
       excludeFields: const ['hierarchy', 'action']));
-  saveFileFromString(contents, allowedExtensions: ['csv']).then((result) {
+  saveFileFromString(contents, allowedExtensions: ['csv'], context: context)
+      .then((result) {
     if (result.runtimeType == FileSystemException) {
       showDialog(
           context: context,
