@@ -23,7 +23,9 @@ Future<dynamic> saveFileFromString(String contents,
       lockParentWindow: true,
       type: FileType.custom,
       allowedExtensions: allowedExtensions,
-      fileName: '',
+      fileName: (allowedExtensions != null && allowedExtensions.isNotEmpty)
+          ? allowedExtensions.first
+          : '',
     );
     if (savePath == null) {
       return false;
