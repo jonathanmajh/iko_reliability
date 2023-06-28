@@ -15,6 +15,7 @@ import 'generate_job_plans.dart';
 import 'pm_details.dart';
 import 'template_notifier.dart';
 import 'pm_widgets.dart';
+import 'upload_maximo.dart';
 
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
@@ -39,6 +40,46 @@ class _PmCheckPageState extends State<PmCheckPage> {
     if (fabList.length == 1) {
       // populate with 3 options
       temp = [
+        Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: FloatingActionButton.extended(
+              heroTag: UniqueKey(),
+              onPressed: () async {
+                final templateNotifier = context.read<TemplateNotifier>();
+                if (!templateNotifier.loadingFiles) {
+                  final uploadNotifier = context.read<UploadNotifier>();
+                  final maximo = context.read<MaximoServerNotifier>();
+                  for (final filename in templateNotifier.getFiles()) {
+                    for (final template
+                        in templateNotifier.getTemplates(filename)) {
+                      var processedTemplate = templateNotifier
+                          .getProcessedTemplate(filename, template);
+                      await generateUploadHelper(
+                        processedTemplate,
+                        templateNotifier,
+                        filename,
+                        template,
+                        uploadNotifier,
+                      );
+                      uploadToMaximo(
+                        maximo.maximoServerSelected,
+                        filename,
+                        template,
+                        templateNotifier,
+                        uploadNotifier,
+                      );
+                    }
+                  }
+                } else {
+                  _show(
+                      'Please Wait Until Templates have been loaded before uploading');
+                }
+                _updateFab();
+              },
+              label: const Text('Upload All'),
+              tooltip: 'Upload All PMs',
+              icon: const Icon(Icons.cloud_upload),
+            )),
         Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
             child: FloatingActionButton.extended(
