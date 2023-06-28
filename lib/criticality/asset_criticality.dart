@@ -290,11 +290,12 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
       detailStateManager.setShowLoading(true);
 
-      fetchWoHistory(stateManager.currentRow!.cells['assetnum']!.value, 'GH');
+      fetchWoHistory(stateManager.currentRow!.cells['assetnum']!.value,
+          context.read<AssetCriticalityNotifier>().selectedSite);
     }
   }
 
-  void fetchWoHistory(String assetnum, [String? siteid]) async {
+  void fetchWoHistory(String assetnum, String siteid) async {
     var wos = await database!.getAssetWorkorders(assetnum, siteid);
     List<PlutoRow> rows = [];
     for (var wo in wos) {
