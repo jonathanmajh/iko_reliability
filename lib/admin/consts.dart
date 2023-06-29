@@ -75,7 +75,7 @@ final siteIDAndDescription = {
   'CAM': 'CAM: Appley Bridge',
   'GE': 'GE: Ashcroft',
   'GR': 'GR: BramCal',
-  'GP': 'GP:CRC Brampton',
+  'GP': 'GP: CRC Brampton',
   'AA': 'AA: IKO Brampton',
   'GK': 'GK: IG Brampton',
   'BA': 'BA: Calgary',

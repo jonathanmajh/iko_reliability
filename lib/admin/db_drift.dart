@@ -201,16 +201,32 @@ class MyDatabase extends _$MyDatabase {
     String description,
     String parent,
   ) async {
+    final parentAsset = await (select(assets)
+          ..where((t) => t.assetnum.equals(parent))
+          ..where((t) => t.siteid.equals(siteid)))
+        .getSingle();
+    final hierarchy = parentAsset.hierarchy! + "," + assetnum;
+
     final row = await into(assets).insertReturning(AssetsCompanion.insert(
       description: description,
+      hierarchy: Value(hierarchy),
       assetnum: assetnum,
       siteid: siteid,
       parent: Value(parent),
       priority: 0,
       status: 'Planning',
       changedate: 'N/A',
+      newAsset: Value(true),
     ));
     return row.id;
+  }
+
+  Future<int> deleteAsset(String assetNum, String siteId) async {
+    final row = await (delete(assets)
+          ..where((t) => t.assetnum.equals(assetNum))
+          ..where((t) => t.siteid.equals(siteId)))
+        .goAndReturn();
+    return row.first.id;
   }
 
   Future<int> deleteSystemCriticalitys(int value) async {
