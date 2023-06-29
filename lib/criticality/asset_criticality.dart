@@ -500,15 +500,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     showFirstExpandableIcon: true,
                   ));
                 },
-                onRowDoubleTap: (event) {
-                  setState(() {
-                    //TODO make it so that program does not crash
-                    collapsedAssets[event.cell.value] = event.cell.value;
-                    event.cell.value = 'Non Production';
-                    // print(collapsedAssets);
-                    // collapseRows();
-                  });
-                },
                 onChanged: (PlutoGridOnChangedEvent event) {
                   Cache cache = context.read<Cache>();
                   AssetCriticalityNotifier assetCriticalityNotifier =
