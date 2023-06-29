@@ -1,13 +1,14 @@
 //for widgets in the right-side drawer
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
+import 'package:iko_reliability_flutter/admin/file_export.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
-import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -313,13 +314,6 @@ class _EndDrawerState extends State<EndDrawer> {
                   })),
             )),
             ListTile(
-              title: const Text('Calculate Risk Priority Numbers (RPN)'),
-              trailing: ElevatedButton(
-                onPressed: () {/*TODO: calculate rpns in table*/},
-                child: const Text('Calculate'),
-              ),
-            ),
-            ListTile(
               title: const Text('Plant Site'),
               trailing: DropdownButton(
                 value: context.read<AssetCriticalityNotifier>().selectedSite,
@@ -344,8 +338,6 @@ class _EndDrawerState extends State<EndDrawer> {
                   context
                       .read<AssetCriticalityNotifier>()
                       .setSite(newValue.toString());
-
-                  //TODO: reload page
                 },
               ),
             ),
@@ -374,18 +366,62 @@ class _EndDrawerState extends State<EndDrawer> {
                         List.from(assetCriticalityNotifier.rpnList);
                     rpnList.removeWhere((rpn) => (rpn <= 0));
                     print(rpnList);
+
                     //set rpn ranges
                     List<double> newCutoffs = rpnDistRange(
                         rpnList, settingsNotifier.getRpnPercentDists());
                     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
                     print(assetCriticalityNotifier.rpnCutoffs);
+                    assetCriticalityNotifier.priorityRangesUpToDate = true;
                   } catch (e) {
-                    //TODO: display error dialog
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text(
+                                'Could Not Calculate Priority Ranges'),
+                            content: Text(
+                                //remove the text 'Exception: ' from e.toString()
+                                '${e.toString().substring(e.toString().indexOf(' ') + 1)} Try reconfiguring the risk priority distributions.'),
+                            actions: [
+                              Center(
+                                child: ElevatedButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('OK')),
+                              )
+                            ],
+                          );
+                        });
                     print(e.toString());
                   }
                 },
               ),
-            )
+            ),
+            ListTile(
+              title: const Text('Export to CSV'),
+              trailing: ElevatedButton(
+                child: const Text('Export'),
+                onPressed: () {
+                  if (!context
+                      .read<AssetCriticalityNotifier>()
+                      .priorityRangesUpToDate) {
+                    assetCriticalityCSVExportWarning(context).then((value) {
+                      if (!value) {
+                        return;
+                      }
+                    });
+                  }
+                  PlutoGridStateManager? stateManager =
+                      context.read<AssetCriticalityNotifier>().stateManager;
+
+                  //export as csv
+                  if (stateManager != null) {
+                    exportAssetCriticalityAsCSV(
+                        stateManager: stateManager, context: context);
+                  }
+                },
+              ),
+            ),
           ],
         ),
       );
