@@ -126,14 +126,23 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     Icons.refresh,
                   ),
                   onPressed: () {
-                    print(rendererContext.rowIdx);
+                    debugPrint('${rendererContext.rowIdx}');
                     assetCriticalityNotifier
                         .updateCollapsedAssets(stateManager);
+
+                    String assetnum =
+                        rendererContext.row.cells['assetnum']!.value;
                     refreshAsset(
-                        rendererContext.row.cells['assetnum']!.value,
-                        context
-                            .read<AssetCriticalityNotifier>()
-                            .selectedSite); //TODO:refresh children assets
+                        assetnum, assetCriticalityNotifier.selectedSite);
+                    //TODO:refresh children assets
+                    Set<String> childAssetnums = getChildAssetnums(assetnum);
+                    for (PlutoRow row in stateManager.rows) {
+                      String tempAssetnum = row.cells['assetnum']!.value;
+                      if (childAssetnums.contains(tempAssetnum)) {
+                        refreshAsset(tempAssetnum,
+                            assetCriticalityNotifier.selectedSite);
+                      }
+                    }
                   },
                   iconSize: 18,
                   color: Colors.green,
@@ -394,6 +403,23 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     }
   }
 
+  ///Gets a set of assetnums that have [assetnum] as a parent or ancestor.
+  ///Recursive method
+  Set<String> getChildAssetnums(String assetnum) {
+    List<Asset>? directChilds = parentAssets[assetnum];
+    //exit condition
+    if (directChilds == null || directChilds.isEmpty) {
+      return <String>{};
+    }
+
+    Set<String> childSet = {};
+    for (Asset child in directChilds) {
+      childSet.add(child.assetnum);
+      childSet.addAll(getChildAssetnums(child.assetnum));
+    }
+    return childSet;
+  }
+
   List<PlutoRow> getChilds(String parent) {
     AssetCriticalityNotifier assetCriticalityNotifier =
         Provider.of<AssetCriticalityNotifier>(context, listen: false);
@@ -434,7 +460,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   void collapseRows() {
     for (var row in stateManager.iterateAllRow) {
-      print(row.cells.values.first.value);
+      debugPrint(row.cells.values.first.value);
     }
   }
 
@@ -466,8 +492,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   Widget build(BuildContext context) {
     ThemeManager themeManager = Provider.of<ThemeManager>(context);
     return Builder(builder: (context) {
-      AssetCriticalityNotifier assetCriticalityNotifier =
-          context.read<AssetCriticalityNotifier>();
       final selectedSite =
           context.select((AssetCriticalityNotifier acn) => acn.selectedSite);
       _loadData();
@@ -525,7 +549,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
                   }
                   updateAsset(event.row);
-                  print(event);
+                  debugPrint('$event');
                 },
                 configuration: PlutoGridConfiguration(
                     style: themeManager.isDark
@@ -585,7 +609,7 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
   }) {
-    print('Pressed add key.');
+    debugPrint('Pressed add key.');
     if (stateManager.currentColumnField != 'frequency' &&
         stateManager.currentColumnField != 'downtime') {
       return;
@@ -604,7 +628,7 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
   }) {
-    print('Pressed minus key.');
+    debugPrint('Pressed minus key.');
     if (stateManager.currentColumnField != 'frequency' &&
         stateManager.currentColumnField != 'downtime') {
       return;
@@ -756,7 +780,7 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
     }
     if (diff.abs() > tolerance) {
       //when actual percent distripution becomes way off
-      print(
+      debugPrint(
           'Tolerance exceeded. Use different percent distribution. Diff = $diff%, RPN = ${list[index]}, Target = $targetDist%');
       throw Exception(
           'Calculated distributions are way off the configured distributions.');
@@ -775,7 +799,8 @@ List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
 
   //cannot have duplicates in [rangeDist]
   if (Set.from(rangeDist).length != rangeDist.length) {
-    print('error: duplicate values in [rangeDist]. rangeDist = \n${rangeDist}');
+    debugPrint(
+        'error: duplicate values in [rangeDist]. rangeDist = \n$rangeDist');
     throw Exception('An unexpected error occured.');
   }
   return rangeDist;
@@ -1025,7 +1050,6 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                       onPressed: () {
                         //only allow to save changes if total percent is 100%
                         if (calculateTotal() == 100) {
-                          //TODO: calculate rpn range cutoff points
                           Map<ApplicationSetting, dynamic> settingChanges = {};
                           for (int i = 0;
                               i < rpnDistributionGroups.length;

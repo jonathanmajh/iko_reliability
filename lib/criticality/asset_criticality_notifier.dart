@@ -6,12 +6,23 @@ import '../admin/consts.dart';
 ///ChangeNotifier for data in AssetCriticalityPage
 class AssetCriticalityNotifier extends ChangeNotifier {
   //TODO: handle plutogrid hide/close toggle
+
   ///Map where the keys are the plutogrid row and the values are the rpns
   Map<int, double> rpnMap = {};
+
+  ///List of cutoff rpns for priorites from very low to very high
   List<double> rpnCutoffs = [];
+
+  ///The id of the currently viewed site on the plutogrid
   String selectedSite = 'NONE';
+
+  ///flag if the priority ranges are up to date. Used to show warnings when exporting
   bool priorityRangesUpToDate = true;
+
+  ///the stateManager of the main plutogrid
   PlutoGridStateManager? stateManager;
+
+  ///Set of the siteids of the currently collapsed assets
   Set<String> collapsedAssets = {};
 
   ///list of rpns. Not ordered
@@ -46,6 +57,7 @@ class AssetCriticalityNotifier extends ChangeNotifier {
     }
   }
 
+  ///sets the rpnCutoffs to the [newCutoffs] and notifies listeners
   void setRpnCutoffs(List<double> newCutoffs) {
     rpnCutoffs = List.of(newCutoffs);
     notifyListeners();
@@ -79,6 +91,7 @@ class AssetCriticalityNotifier extends ChangeNotifier {
     collapsedAssets = newCollapsedAssets;
   }
 
+  ///check if the PlutoRow of an asset is collapsed
   bool assetIsCollapsed(String assetnum) {
     return !collapsedAssets.contains(assetnum);
   }
