@@ -31,7 +31,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   List<PlutoRow> rows = [];
   Map<String, Asset> siteAssets = {};
   Map<String, List<Asset>> parentAssets = {};
-  Map<String, String> collapsedAssets = {};
 
   List<PlutoColumn> detailColumns = [];
   List<PlutoRow> detailRows = [];
@@ -128,8 +127,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   ),
                   onPressed: () {
                     print(rendererContext.rowIdx);
-                    refreshAsset(rendererContext.row.cells['assetnum']!.value,
-                        context.read<AssetCriticalityNotifier>().selectedSite);
+                    assetCriticalityNotifier
+                        .updateCollapsedAssets(stateManager);
+                    refreshAsset(
+                        rendererContext.row.cells['assetnum']!.value,
+                        context
+                            .read<AssetCriticalityNotifier>()
+                            .selectedSite); //TODO:refresh children assets
                   },
                   iconSize: 18,
                   color: Colors.green,
@@ -357,7 +361,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       try {
         siteAssets.clear();
         parentAssets.clear();
-        collapsedAssets.clear();
         final dbrows = await database!
             .getSiteAssets(siteid); //TODO make it able to load other sites
         await context.read<WorkOrderNotifier>().updateWorkOrders();
@@ -387,7 +390,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       //siteid = 'NONE'
       siteAssets.clear();
       parentAssets.clear();
-      collapsedAssets.clear();
       return <PlutoRow>[];
     }
   }
@@ -420,7 +422,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'id': PlutoCell(value: child.id),
           },
           type: PlutoRowType.group(
-              expanded: true,
+              expanded:
+                  assetCriticalityNotifier.assetIsCollapsed(child.assetnum),
               children: FilteredList<PlutoRow>(
                   initialList: getChilds(child.assetnum))),
         ));
@@ -462,8 +465,11 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   @override
   Widget build(BuildContext context) {
     ThemeManager themeManager = Provider.of<ThemeManager>(context);
-    return Consumer<AssetCriticalityNotifier>(
-        builder: (context, assetCriticalityNotifier, child) {
+    return Builder(builder: (context) {
+      AssetCriticalityNotifier assetCriticalityNotifier =
+          context.read<AssetCriticalityNotifier>();
+      final selectedSite =
+          context.select((AssetCriticalityNotifier acn) => acn.selectedSite);
       _loadData();
       return Scaffold(
         appBar: AppBar(
@@ -506,6 +512,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   AssetCriticalityNotifier assetCriticalityNotifier =
                       context.read<AssetCriticalityNotifier>();
                   assetCriticalityNotifier.priorityRangesUpToDate = false;
+                  assetCriticalityNotifier.updateCollapsedAssets(stateManager);
                   int rowId = event.row.cells['id']?.value ?? -1;
                   double newRpn = rpnFunc(
                           cache
@@ -521,7 +528,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   print(event);
                 },
                 configuration: PlutoGridConfiguration(
-                    //TODO:darkmode
                     style: themeManager.isDark
                         ? const PlutoGridStyleConfig.dark()
                         : const PlutoGridStyleConfig(),

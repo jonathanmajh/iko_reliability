@@ -12,6 +12,7 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   String selectedSite = 'NONE';
   bool priorityRangesUpToDate = true;
   PlutoGridStateManager? stateManager;
+  Set<String> collapsedAssets = {};
 
   ///list of rpns. Not ordered
   List<double> get rpnList => List<double>.of(rpnMap.values);
@@ -19,6 +20,7 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   ///sets [selectedSite] to [site]. Notifies listeners
   void setSite(String site) {
     selectedSite = site;
+    collapsedAssets = {};
     notifyListeners();
   }
 
@@ -64,5 +66,20 @@ class AssetCriticalityNotifier extends ChangeNotifier {
     } catch (e) {
       return '---';
     }
+  }
+
+  ///updates the Set of collapsed assets
+  void updateCollapsedAssets(PlutoGridStateManager stateManager) {
+    Set<String> newCollapsedAssets = {};
+    for (PlutoRow row in stateManager.rows) {
+      if (!stateManager.isExpandedGroupedRow(row)) {
+        newCollapsedAssets.add(row.cells['assetnum']!.value);
+      }
+    }
+    collapsedAssets = newCollapsedAssets;
+  }
+
+  bool assetIsCollapsed(String assetnum) {
+    return !collapsedAssets.contains(assetnum);
   }
 }
