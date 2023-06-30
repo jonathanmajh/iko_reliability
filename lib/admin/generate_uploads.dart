@@ -346,6 +346,7 @@ Future<Map<String, List<List<String>>>> generateMeterJobplan(
         '1',
         '1',
         siteIDAndOrgID[asset.siteid]!,
+        '',
       ]);
       generated['JPASSETLINK']!.add([
         '',
