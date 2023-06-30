@@ -6,20 +6,21 @@ import '../admin/db_drift.dart';
 import '../admin/consts.dart';
 
 class SettingsNotifier extends ChangeNotifier {
-  //Map of current settings
+  ///Map of current settings
   Map<ApplicationSetting, dynamic> currentSettings = {};
 
   SettingsNotifier() {
     currentSettings = {};
   }
 
+  ///Initializes the SettingsNotifier
   Future initialize() async {
     try {
       if (!(await loadSettingsFromDatabase())) {
         throw Exception('Could not load settings from database');
       }
     } catch (e) {
-      print(e.toString());
+      debugPrint(e.toString());
 
       //load default settings
       changeSettings(ApplicationSetting.defaultSettings);
@@ -135,7 +136,7 @@ class SettingsNotifier extends ChangeNotifier {
       }
       return true;
     } catch (e) {
-      print(e.toString());
+      debugPrint(e.toString());
       return false;
     }
   }

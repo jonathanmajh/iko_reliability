@@ -282,7 +282,7 @@ class _HomePageState extends State<HomePage> {
                           .calculateSystemScores(); //load system score data
                     } catch (e) {
                       debugPrint(
-                          'Could not load system scores from cache \n${e}');
+                          'Could not load system scores from cache \n$e');
                     }
                     // change app state...
                     Navigator.pop(context); // close the drawer

@@ -365,13 +365,13 @@ class _EndDrawerState extends State<EndDrawer> {
                     List<double> rpnList =
                         List.from(assetCriticalityNotifier.rpnList);
                     rpnList.removeWhere((rpn) => (rpn <= 0));
-                    print(rpnList);
 
                     //set rpn ranges
                     List<double> newCutoffs = rpnDistRange(
                         rpnList, settingsNotifier.getRpnPercentDists());
                     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
-                    print(assetCriticalityNotifier.rpnCutoffs);
+                    debugPrint(
+                        'new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
                     assetCriticalityNotifier.priorityRangesUpToDate = true;
                   } catch (e) {
                     showDialog(
@@ -392,7 +392,7 @@ class _EndDrawerState extends State<EndDrawer> {
                             ],
                           );
                         });
-                    print(e.toString());
+                    debugPrint(e.toString());
                   }
                 },
               ),

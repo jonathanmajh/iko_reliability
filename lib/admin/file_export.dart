@@ -72,7 +72,6 @@ Future<dynamic> saveFileFromString(String contents,
         .writeAsBytes([239, 187, 191, ...utf8.encode(contents)]);
     return true;
   } catch (e) {
-    print(e.runtimeType);
     return e;
   }
 }

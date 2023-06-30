@@ -344,7 +344,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                   5);
           updateSystem(event.row)
               .then((value) => event.row.cells['id']!.value = value);
-          print(event);
+          debugPrint('$event');
         },
         onLoaded: (PlutoGridOnLoadedEvent event) {
           event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
@@ -386,7 +386,7 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
   }) {
-    print('Pressed add key.');
+    debugPrint('Pressed add key.');
     if (stateManager.currentColumnField != 'safety' &&
         stateManager.currentColumnField != 'regulatory' &&
         stateManager.currentColumnField != 'economic' &&
@@ -412,7 +412,7 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
   }) {
-    print('Pressed minus key.');
+    debugPrint('Pressed minus key.');
     if (stateManager.currentColumnField != 'safety' &&
         stateManager.currentColumnField != 'regulatory' &&
         stateManager.currentColumnField != 'economic' &&
