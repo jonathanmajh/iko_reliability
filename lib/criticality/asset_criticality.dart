@@ -134,7 +134,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                         rendererContext.row.cells['assetnum']!.value;
                     refreshAsset(
                         assetnum, assetCriticalityNotifier.selectedSite);
-                    //TODO:refresh children assets
+                    //refresh children assets
                     Set<String> childAssetnums = getChildAssetnums(assetnum);
                     for (PlutoRow row in stateManager.rows) {
                       String tempAssetnum = row.cells['assetnum']!.value;
@@ -191,6 +191,20 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               isExpanded: true,
               onChanged: (newValue) {
                 setState(() {
+                  //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
+                  Set<String> childs = getChildAssetnums(
+                      rendererContext.row.cells['assetnum']!.value);
+                  for (PlutoRow row in stateManager.rows) {
+                    //TODO: not the most efficient. Could iterate through the List<PlutoRows> after the rendererContext row and check their hierarchy.
+                    // The consecutives assets that contain the rendererContext row's assetnum in their hierarchy would be child assets. This way we
+                    // don't have to search all assets.
+                    if (childs.contains(row.cells['assetnum']!.value)) {
+                      stateManager.changeCellValue(
+                          row.cells['system']!, newValue,
+                          notify: false);
+                    }
+                  }
+                  //change cell value
                   stateManager.changeCellValue(rendererContext.cell, newValue);
                 });
               },
