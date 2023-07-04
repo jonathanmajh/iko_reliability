@@ -110,13 +110,14 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   }
 
   ///function to set the work order settings
-  void setWOSettings(
-      {required DateTime? beforeDate,
-      required DateTime? afterDate,
-      required bool usingBeforeDate,
-      required bool usingAfterDate,
-      required bool showAllSites,
-      bool notify = true}) {
+  void setWOSettings({
+    required DateTime? beforeDate,
+    required DateTime? afterDate,
+    required bool usingBeforeDate,
+    required bool usingAfterDate,
+    required bool showAllSites,
+    bool notify = true,
+  }) {
     this.beforeDate = beforeDate;
     this.afterDate = afterDate;
     this.usingBeforeDate = usingBeforeDate;

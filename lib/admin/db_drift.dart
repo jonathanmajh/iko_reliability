@@ -517,7 +517,7 @@ class MyDatabase extends _$MyDatabase {
       }
       throw Exception('Failed to load assets from Maximo');
     }
-    material.debugPrint(result['member'].length);
+    material.debugPrint(result['member'].length.toString());
     if (result['member'].length > 0) {
       List<AssetsCompanion> assetInserts = [];
       // save once without the hierarchy field then loop through again adding hierarchy

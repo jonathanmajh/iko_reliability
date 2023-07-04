@@ -952,16 +952,16 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
       Colors.red[900]!
     ];
     return SingleChildScrollView(
-      child: Center(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.9,
-          width: MediaQuery.of(context).size.width * 0.9,
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.7,
+        width: MediaQuery.of(context).size.width * 0.7,
+        child: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Expanded(
               //title
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.only(top: 40.0, left: 40.0),
+                padding: const EdgeInsets.only(top: 30.0, left: 30.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1061,7 +1061,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
                     child: ElevatedButton(
                         //save changes button
                         onPressed: () {
@@ -1102,7 +1102,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                         child: const Text('Confirm')),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.only(bottom: 16.0, left: 4.0),
                     child: ElevatedButton(
                         //cancel button
                         onPressed: () {
