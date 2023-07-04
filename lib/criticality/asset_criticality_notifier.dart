@@ -5,8 +5,6 @@ import '../admin/consts.dart';
 
 ///ChangeNotifier for data in AssetCriticalityPage
 class AssetCriticalityNotifier extends ChangeNotifier {
-  //TODO: handle plutogrid hide/close toggle
-
   ///Map where the keys are the plutogrid row and the values are the rpns
   Map<int, double> rpnMap = {};
 
@@ -27,6 +25,21 @@ class AssetCriticalityNotifier extends ChangeNotifier {
 
   ///list of rpns. Not ordered
   List<double> get rpnList => List<double>.of(rpnMap.values);
+
+  ///upper bound for work order dates filter in asset criticality (inclusive). null if no filter
+  DateTime? beforeDate;
+
+  /////lower bound for work order dates filter in asset criticality (inclusive)
+  DateTime? afterDate;
+
+  ///whether to use beforeDate filter
+  bool? usingBeforeDate;
+
+  ///whether to used afterDate filter
+  bool? usingAfterDate;
+
+  ///whether to show all sites' work orders or not
+  bool? showAllSites;
 
   ///sets [selectedSite] to [site]. Notifies listeners
   void setSite(String site) {
@@ -94,5 +107,22 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   ///check if the PlutoRow of an asset is collapsed
   bool assetIsCollapsed(String assetnum) {
     return !collapsedAssets.contains(assetnum);
+  }
+
+  ///function to set the work order settings
+  void setWOSettings(
+      {required DateTime? beforeDate,
+      required DateTime? afterDate,
+      required bool usingBeforeDate,
+      required bool usingAfterDate,
+      required bool showAllSites,
+      bool notify = true}) {
+    this.beforeDate = beforeDate;
+    this.afterDate = afterDate;
+    this.usingBeforeDate = usingBeforeDate;
+    this.usingAfterDate = usingAfterDate;
+    this.showAllSites = showAllSites;
+
+    if (notify) notifyListeners();
   }
 }

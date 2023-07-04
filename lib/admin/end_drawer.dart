@@ -345,9 +345,7 @@ class _EndDrawerState extends State<EndDrawer> {
               title: const Text('Risk Priority Distributions'),
               trailing: ElevatedButton(
                 child: const Text('Configure'),
-                onPressed: () {
-                  showRpnDistDialog(context);
-                },
+                onPressed: () => showRpnDistDialog(context),
               ),
             ),
             ListTile(
@@ -422,6 +420,13 @@ class _EndDrawerState extends State<EndDrawer> {
                 },
               ),
             ),
+            ListTile(
+              title: const Text('Work Order View Settings'),
+              trailing: ElevatedButton(
+                child: const Text('Configure'),
+                onPressed: () => showWOSettingsDialog(context),
+              ),
+            )
           ],
         ),
       );

@@ -321,6 +321,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   void fetchWoHistory(String assetnum, String siteid) async {
+    //TODO: use work order settings
     var wos = await database!.getAssetWorkorders(assetnum, siteid);
     List<PlutoRow> rows = [];
     for (var wo in wos) {
@@ -479,6 +480,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   void refreshAsset(String assetnum, [String? siteid]) async {
+    //TODO: use work order settings
     await database!.getWorkOrderMaximo(
       assetnum,
       context.read<MaximoServerNotifier>().maximoServerSelected,
@@ -1072,6 +1074,9 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                                 dists![i];
                           }
                           context
+                              .read<AssetCriticalityNotifier>()
+                              .priorityRangesUpToDate = false;
+                          context
                               .read<SettingsNotifier>()
                               .changeSettings(settingChanges);
                           Navigator.pop(context);
@@ -1107,6 +1112,238 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
           )
         ]),
       ),
+    );
+  }
+}
+
+///shows the dialog for changing work order settings
+void showWOSettingsDialog(BuildContext context) {
+  showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.7,
+              width: MediaQuery.of(context).size.width * 0.7,
+              child: const WorkOrderSettingsDialog()),
+        );
+      });
+}
+
+class WorkOrderSettingsDialog extends StatefulWidget {
+  const WorkOrderSettingsDialog({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _WorkOrderSettingsDialogState();
+}
+
+class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
+  ///Exculde all work orders after this date
+  DateTime? beforeDate;
+
+  ///Exclude all work orders before this date
+  DateTime? afterDate;
+
+  bool? usingBeforeDate;
+  bool? usingAfterDate;
+
+  ///whether to show all sites' work orders or not
+  bool? showAllSites;
+
+  @override
+  void initState() {
+    super.initState();
+    AssetCriticalityNotifier assetCriticalityNotifier =
+        context.read<AssetCriticalityNotifier>();
+    beforeDate = assetCriticalityNotifier.beforeDate;
+    afterDate = assetCriticalityNotifier.afterDate;
+    usingBeforeDate = (beforeDate != null) &&
+        (assetCriticalityNotifier.usingBeforeDate ?? false);
+    usingAfterDate = (afterDate != null) &&
+        (assetCriticalityNotifier.usingAfterDate ?? false);
+
+    showAllSites = assetCriticalityNotifier.showAllSites ?? false;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //TODO: make it look pretty ✧˖°🌷📎⋆ ˚｡⋆୨୧˚
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0, right: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+                flex: 3,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, bottom: 40),
+                      child: Text(
+                        'Work Order View Settings',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    )
+                  ],
+                )),
+            Expanded(
+                flex: 6,
+                child: ListView(
+                  children: [
+                    buildSettingRow(
+                        checkbox: Checkbox(
+                            value: usingAfterDate,
+                            onChanged: (value) => setState(() {
+                                  usingAfterDate = value;
+                                })),
+                        title: const Text('Hide Work Orders Before'),
+                        valueDisplay: Text(
+                          '${afterDate?.year ?? 'YY'}/${afterDate?.month ?? 'mm'}/${afterDate?.day ?? 'dd'}',
+                          style: usingAfterDate!
+                              ? null
+                              : const TextStyle(
+                                  decoration: TextDecoration.lineThrough),
+                        ),
+                        inputWidget: Builder(
+                            builder: (context) => ElevatedButton(
+                                onPressed: (usingAfterDate!)
+                                    ? () async {
+                                        DateTime? newDate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate:
+                                                    afterDate ?? DateTime.now(),
+                                                firstDate: DateTime(1951),
+                                                lastDate: DateTime.now());
+                                        if (newDate != null) {
+                                          setState(() {
+                                            afterDate = newDate;
+                                          });
+                                        }
+                                      }
+                                    : () {},
+                                child: const Text('Select Date')))),
+                    buildSettingRow(
+                        checkbox: Checkbox(
+                            value: usingBeforeDate,
+                            onChanged: (value) => setState(() {
+                                  usingBeforeDate = value;
+                                })),
+                        title:
+                            const Text('Hide Work Orders After (Inclusive):'),
+                        valueDisplay: Text(
+                          '${beforeDate?.year ?? 'YY'}/${beforeDate?.month ?? 'mm'}/${beforeDate?.day ?? 'dd'}',
+                          style: usingBeforeDate!
+                              ? null
+                              : const TextStyle(
+                                  decoration: TextDecoration.lineThrough),
+                        ),
+                        inputWidget: Builder(
+                            builder: (context) => ElevatedButton(
+                                onPressed: (usingBeforeDate!)
+                                    ? () async {
+                                        DateTime? newDate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: beforeDate ??
+                                                    DateTime.now(),
+                                                firstDate: DateTime(1951),
+                                                lastDate: DateTime.now());
+                                        if (newDate != null) {
+                                          setState(() {
+                                            beforeDate = newDate;
+                                          });
+                                        }
+                                      }
+                                    : () {},
+                                child: const Text('Select Date')))),
+                    //TODO add a setting for toggling show/hide workorders from all sites not just selected site
+                    buildSettingRow(
+                        checkbox: Checkbox(
+                            value: showAllSites,
+                            onChanged: (value) => setState(() {
+                                  showAllSites = value;
+                                })),
+                        title: const Text('Show work orders from all sites'),
+                        valueDisplay: Container(),
+                        inputWidget: Container()),
+                  ],
+                )),
+            Expanded(
+              flex: 1,
+              child: Row(
+                children: [
+                  ElevatedButton(
+                      onPressed: () {
+                        //TODO: check if settings are valid (e.g. afterdate is not after beforedate). if so, use new settings
+                        if (usingAfterDate! && afterDate == null) {
+                          //if using after date, afterDate must not be null
+                          //TODO: show dialog
+                        } else if (usingBeforeDate! && beforeDate == null) {
+                          //if using before date, beforeDate must not be null
+                          //TODO: show dialog
+                        } else if (usingAfterDate! &&
+                            usingBeforeDate! &&
+                            afterDate!.compareTo(beforeDate!) >= 0) {
+                          //invalid format, afterDate must be before beforeDate
+                          ///TODO: show dialog
+                        } else {
+                          context
+                              .read<AssetCriticalityNotifier>()
+                              .setWOSettings(
+                                  beforeDate: beforeDate,
+                                  afterDate: afterDate,
+                                  usingBeforeDate: usingBeforeDate!,
+                                  usingAfterDate: usingAfterDate!,
+                                  showAllSites: showAllSites!);
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text('Confirm')),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel'))
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildSettingRow(
+      {Widget? checkbox,
+      required Widget title,
+      required Widget valueDisplay,
+      required Widget inputWidget}) {
+    return Row(
+      children: [
+        Expanded(flex: 1, child: checkbox ?? Container()),
+        Expanded(
+          flex: 4,
+          child: title,
+        ),
+        Expanded(
+          flex: 3,
+          child: valueDisplay,
+        ),
+        Expanded(
+          flex: 2,
+          child: inputWidget,
+        )
+      ],
     );
   }
 }
