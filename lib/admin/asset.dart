@@ -13,6 +13,7 @@ import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import '../settings/theme_manager.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../main.dart';
 
@@ -27,7 +28,8 @@ class _AssetPageState extends State<AssetPage> {
   List<PlutoColumn> columns = [];
   List<PlutoRow> rows = [];
   Map<String, Asset> siteAssets = {};
-  Map<String, Asset> pendingAssets = {}; //assets that need to be uploaded
+  Map<String, Asset> pendingAssets = {};
+  Set<String> uploadingAssets = {}; //assets that need to be uploaded
   Map<String, List<Asset>> parentAssets = {};
 
   late PlutoGridStateManager stateManager;
@@ -92,6 +94,52 @@ class _AssetPageState extends State<AssetPage> {
         readOnly: true,
         //hide: true,
       ),
+      PlutoColumn(
+          title: 'Actions',
+          field: 'actions',
+          type: PlutoColumnType.text(),
+          readOnly: true,
+          renderer: (rendererContext) {
+            if (uploadingAssets
+                .contains(rendererContext.row.cells['assetnum']!.value)) {
+              return LoadingAnimationWidget.inkDrop(
+                  color: Colors.green, size: 18);
+            }
+
+            //if asset is new, display a publish button
+            if (rendererContext.cell.value == "new") {
+              return IconButton(
+                icon: const Icon(
+                  Icons.publish,
+                ),
+                onPressed: () {
+                  uploadingAssets
+                    .add(rendererContext.row.cells['assetnum']!.value);
+                  setState(() {}); //TODO make the button refresh without refreshing the parent
+
+                  //placeholder code for when upload fucntion is made
+                  /*var asset = pendingAssets[rendererContext.row.cells['assetnum']!.value];
+                  var status = await uploadAsset(asset!); //TODO make an upload function
+                  if (status == 200) {
+                    setState(() {
+                      
+                    });
+                  } */
+                },
+                iconSize: 18,
+                color: Colors.blue,
+                padding: const EdgeInsets.all(0),
+              );
+            }
+            //if asset is uploading, display a loading animation
+
+            //If not new asset, then just display a checkmark
+            return const Icon(
+              Icons.done,
+              color: Colors.grey,
+              size: 18,
+            );
+          }),
     ]);
     changeSite('NONE');
   }
@@ -101,6 +149,7 @@ class _AssetPageState extends State<AssetPage> {
   /// 'NONE' function will not change the site, and table will
   /// retain its current state.
   Future<void> changeSite(String site) async {
+    print('site changed');
     if (site == 'NONE') {
       return;
     }
@@ -123,6 +172,7 @@ class _AssetPageState extends State<AssetPage> {
     siteAssets.clear();
     parentAssets.clear();
     pendingAssets.clear();
+    //uploadingAssets.clear();
     final dbrows = await database!
         .getSiteAssets(site); //todo make it able to load other sites
     for (var row in dbrows) {
@@ -155,8 +205,8 @@ class _AssetPageState extends State<AssetPage> {
             'id': PlutoCell(value: child.id),
             'site': PlutoCell(value: child.siteid),
             'status': PlutoCell(
-                value:
-                    child.newAsset == false ? child.status : 'PENDING UPLOAD'),
+                value: child.newAsset ? 'PENDING UPLOAD' : child.status),
+            'actions': PlutoCell(value: child.newAsset ? 'new' : ''),
           },
           type: PlutoRowType.group(
               expanded: true,
@@ -187,6 +237,14 @@ class _AssetPageState extends State<AssetPage> {
         endDrawer: const EndDrawer(),
         body: Column(
           children: <Widget>[
+            ElevatedButton(
+              child: const Text('print pending'),
+              onPressed: () {
+                for (var asset in pendingAssets.values.toList()) {
+                  print(asset.toString() + "\n \n");
+                }
+              },
+            ),
             ElevatedButton(
               child: const Text('print assets'),
               onPressed: () async {
@@ -372,8 +430,9 @@ class _AssetPageState extends State<AssetPage> {
                                   break;
                                 }
                               }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Created Asset ${assetNumTextController.text.toUpperCase()}, id: $id')));
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text(
+                                      'Created Asset ${assetNumTextController.text.toUpperCase()}, id: $id')));
                               Navigator.pop(context, 'OK');
                             }
                           },
@@ -382,17 +441,19 @@ class _AssetPageState extends State<AssetPage> {
                         TextButton(
                           onPressed: () async {
                             try {
-                              if (!siteAssets
-                                  .containsKey(assetNumTextController.text.toUpperCase())) {
+                              if (!siteAssets.containsKey(
+                                  assetNumTextController.text.toUpperCase())) {
                                 throw 'Asset ${assetNumTextController.text} does not exist';
                               }
-                              if(parentAssets.containsKey(assetNumTextController.text.toUpperCase())){
+                              if (parentAssets.containsKey(
+                                  assetNumTextController.text.toUpperCase())) {
                                 throw 'Asset ${assetNumTextController.text} has children';
                               }
-                              if(!siteAssets[assetNumTextController.text.toUpperCase()]!.newAsset){
+                              if (!siteAssets[assetNumTextController.text
+                                      .toUpperCase()]!
+                                  .newAsset) {
                                 throw 'Asset already exists in Maximo, cannot delete';
                               }
-
 
                               var id = await database!.deleteAsset(
                                   assetNumTextController.text.toUpperCase(),
