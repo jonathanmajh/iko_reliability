@@ -951,166 +951,170 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
       Colors.red[700]!,
       Colors.red[900]!
     ];
-    return Center(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.9,
-        width: MediaQuery.of(context).size.width * 0.9,
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Expanded(
-            //title
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 40.0, left: 40.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Rating Distribution',
-                        style: TextStyle(fontSize: 30.0),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            //Multislider/visual representation
-            flex: 3,
-            child: Center(
+    return SingleChildScrollView(
+      child: Center(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.9,
+          width: MediaQuery.of(context).size.width * 0.9,
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Expanded(
+              //title
+              flex: 2,
               child: Padding(
-                padding: const EdgeInsets.only(left: 10.0),
-                child: Builder(builder: (context) {
-                  return PercentSlider(
-                    initialValues: () {
-                      List<int> initValues = [];
-                      int sum = 0;
-                      for (int i = 0; i < dists!.length - 1; i++) {
-                        sum += dists![i];
-                        initValues.add(sum);
-                      }
-                      return initValues;
-                    }(),
-                    max: total ?? 100,
-                    barColors: colorGradient,
-                    size: const Size(10, 10),
-                    onSliderUpdate: (newPercentDists) {
-                      setState(() {
-                        dists = List.from(newPercentDists);
-                        reloadTextControllers();
-                      });
-                    },
-                    tooltip: rpnPossibleDistributions,
-                  );
-                }),
+                padding: const EdgeInsets.only(top: 40.0, left: 40.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Rating Distribution',
+                          style: TextStyle(fontSize: 30.0),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            //input boxes
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+            Expanded(
+              //Multislider/visual representation
+              flex: 3,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Builder(builder: (context) {
+                    return PercentSlider(
+                      initialValues: () {
+                        List<int> initValues = [];
+                        int sum = 0;
+                        for (int i = 0; i < dists!.length - 1; i++) {
+                          sum += dists![i];
+                          initValues.add(sum);
+                        }
+                        return initValues;
+                      }(),
+                      max: total ?? 100,
+                      barColors: colorGradient,
+                      size: const Size(10, 10),
+                      onSliderUpdate: (newPercentDists) {
+                        setState(() {
+                          dists = List.from(newPercentDists);
+                          reloadTextControllers();
+                        });
+                      },
+                      tooltip: rpnPossibleDistributions,
+                    );
+                  }),
+                ),
+              ),
+            ),
+            Expanded(
+              //input boxes
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: () {
+                    List<Widget> widgets = [];
+                    for (int i = 0; i < widget.distGroups.length; i++) {
+                      widgets.add(Expanded(
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            labelText: widget.distGroups[i],
+                          ),
+                          controller: widget.distControllers[i],
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            //limits characters to digits between 0-999
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(3),
+                          ],
+                          onChanged: (value) {
+                            int? val = int.tryParse(value);
+                            setState(() {
+                              dists![i] = val ?? 0;
+                              total = calculateTotal();
+                            });
+                          },
+                        ),
+                      )));
+                    }
+                    return widgets;
+                  }(),
+                ),
+              ),
+            ),
+            Expanded(
+                //print total percentage
+                flex: 1,
+                child: Text('Total: ${total ?? calculateTotal()}%')),
+            Expanded(
+              //close buttons
+              flex: 1,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: () {
-                  List<Widget> widgets = [];
-                  for (int i = 0; i < widget.distGroups.length; i++) {
-                    widgets.add(Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          labelText: widget.distGroups[i],
-                        ),
-                        controller: widget.distControllers[i],
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          //limits characters to digits between 0-999
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(3),
-                        ],
-                        onChanged: (value) {
-                          int? val = int.tryParse(value);
-                          setState(() {
-                            dists![i] = val ?? 0;
-                            total = calculateTotal();
-                          });
-                        },
-                      ),
-                    )));
-                  }
-                  return widgets;
-                }(),
-              ),
-            ),
-          ),
-          Expanded(
-              //print total percentage
-              flex: 1,
-              child: Text('Total: ${total ?? calculateTotal()}%')),
-          Expanded(
-            //close buttons
-            flex: 1,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                      //save changes button
-                      onPressed: () {
-                        //only allow to save changes if total percent is 100%
-                        if (calculateTotal() == 100) {
-                          Map<ApplicationSetting, dynamic> settingChanges = {};
-                          for (int i = 0;
-                              i < rpnDistributionGroups.length;
-                              i++) {
-                            settingChanges[rpnDistributionGroups[i]] =
-                                dists![i];
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        //save changes button
+                        onPressed: () {
+                          //only allow to save changes if total percent is 100%
+                          if (calculateTotal() == 100) {
+                            Map<ApplicationSetting, dynamic> settingChanges =
+                                {};
+                            for (int i = 0;
+                                i < rpnDistributionGroups.length;
+                                i++) {
+                              settingChanges[rpnDistributionGroups[i]] =
+                                  dists![i];
+                            }
+                            context
+                                .read<AssetCriticalityNotifier>()
+                                .priorityRangesUpToDate = false;
+                            context
+                                .read<SettingsNotifier>()
+                                .changeSettings(settingChanges);
+                            Navigator.pop(context);
+                          } else {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                      title:
+                                          const Text('Improper Distributions'),
+                                      content: const Text(
+                                          'The total percentage must be 100%'),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text('OK'))
+                                      ],
+                                    ));
                           }
-                          context
-                              .read<AssetCriticalityNotifier>()
-                              .priorityRangesUpToDate = false;
-                          context
-                              .read<SettingsNotifier>()
-                              .changeSettings(settingChanges);
+                        },
+                        child: const Text('Confirm')),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        //cancel button
+                        onPressed: () {
                           Navigator.pop(context);
-                        } else {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                    title: const Text('Improper Distributions'),
-                                    content: const Text(
-                                        'The total percentage must be 100%'),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text('OK'))
-                                    ],
-                                  ));
-                        }
-                      },
-                      child: const Text('Confirm')),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                      //cancel button
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancel')),
-                )
-              ],
-            ),
-          )
-        ]),
+                        },
+                        child: const Text('Cancel')),
+                  )
+                ],
+              ),
+            )
+          ]),
+        ),
       ),
     );
   }
