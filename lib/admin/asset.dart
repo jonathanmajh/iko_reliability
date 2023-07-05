@@ -29,7 +29,6 @@ class _AssetPageState extends State<AssetPage> {
   List<PlutoRow> rows = [];
   Map<String, Asset> siteAssets = {};
   Map<String, Asset> pendingAssets = {};
-  Set<String> uploadingAssets = {}; //assets that need to be uploaded
   Map<String, List<Asset>> parentAssets = {};
 
   late PlutoGridStateManager stateManager;
@@ -43,7 +42,8 @@ class _AssetPageState extends State<AssetPage> {
   @override
   void initState() {
     super.initState();
-
+    final assetCreationNotifier =
+        Provider.of<AssetCreationNotifier>(context, listen: false);
     columns.addAll([
       PlutoColumn(
         width: 300,
@@ -100,7 +100,8 @@ class _AssetPageState extends State<AssetPage> {
           type: PlutoColumnType.text(),
           readOnly: true,
           renderer: (rendererContext) {
-            if (uploadingAssets
+            //if asset is uploading, display a loading animation            
+            if (assetCreationNotifier.loading
                 .contains(rendererContext.row.cells['assetnum']!.value)) {
               return LoadingAnimationWidget.inkDrop(
                   color: Colors.green, size: 18);
@@ -113,9 +114,10 @@ class _AssetPageState extends State<AssetPage> {
                   Icons.publish,
                 ),
                 onPressed: () {
-                  uploadingAssets
-                    .add(rendererContext.row.cells['assetnum']!.value);
-                  setState(() {}); //TODO make the button refresh without refreshing the parent
+                  assetCreationNotifier
+                      .addLoading(rendererContext.row.cells['assetnum']!.value);
+                  setState(
+                      () {}); //TODO make the button refresh without refreshing the parent
 
                   //placeholder code for when upload fucntion is made
                   /*var asset = pendingAssets[rendererContext.row.cells['assetnum']!.value];
@@ -131,7 +133,7 @@ class _AssetPageState extends State<AssetPage> {
                 padding: const EdgeInsets.all(0),
               );
             }
-            //if asset is uploading, display a loading animation
+
 
             //If not new asset, then just display a checkmark
             return const Icon(
@@ -218,12 +220,6 @@ class _AssetPageState extends State<AssetPage> {
     return rows;
   }
 
-  void gridHandler() {
-    if (stateManager.currentRow == null) {
-      return;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     ThemeManager themeManager = Provider.of<ThemeManager>(context);
@@ -257,6 +253,12 @@ class _AssetPageState extends State<AssetPage> {
                 //print(assetCreationNotifier.selectedSite);
               },
             ),
+            ElevatedButton(
+              child: const Text('Clear assets'),
+              onPressed: () {
+                assetCreationNotifier.clearLoading();
+              },
+            ),
             Expanded(
               //color: const Color.fromARGB(55, 0, 0, 0),
               //height: 800,
@@ -267,8 +269,8 @@ class _AssetPageState extends State<AssetPage> {
                     if (rowColorContext.row.cells['status']!.value ==
                         'PENDING UPLOAD') {
                       return (themeManager.isDark
-                          ? Color.fromARGB(255, 18, 92, 3)
-                          : Color.fromARGB(255, 133, 252, 133));
+                          ? const Color.fromARGB(255, 18, 92, 3)
+                          : const Color.fromARGB(255, 133, 252, 133));
                     } else {
                       return (themeManager.isDark
                           ? const Color.fromARGB(255, 17, 17, 17)
@@ -279,7 +281,11 @@ class _AssetPageState extends State<AssetPage> {
                   rows: rows,
                   onLoaded: (PlutoGridOnLoadedEvent event) {
                     stateManager = event.stateManager;
-                    event.stateManager.addListener(gridHandler);
+                    event.stateManager.addListener(() {
+                      if (stateManager.currentRow == null) {
+                        return;
+                      }
+                    });
                     stateManager.setShowColumnFilter(true);
                     stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
                       resolveColumnDepth: (column) =>

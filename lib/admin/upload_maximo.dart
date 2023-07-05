@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:flutter/widgets.dart';
+import 'package:iko_reliability_flutter/admin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
+import 'package:iko_reliability_flutter/main.dart';
 import 'consts.dart';
 import 'package:http/http.dart' as http;
 
@@ -502,4 +504,49 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     // not post or get
     return {'status': 'TODO'};
   }
+}
+
+Future<bool> uploadAsset(
+  String parentAssetNum,
+  String assetNum,
+  String siteId,
+  String url,
+  String env,
+) async {
+  Asset asset;
+
+  try {
+    asset = await database!.getAsset(siteId, assetNum);
+  } catch (e) {
+    print(e);
+    return false;
+  }
+
+  final table = const ListToCsvConverter().convert([
+    [
+      "assetnum",
+      "description",
+      "siteid",
+      "location",
+      "parent",
+    ],
+    [
+      (asset.parent ?? ''),
+      asset.assetnum,
+      asset.description,
+      asset.siteid,
+      ('L-${asset.assetnum}')
+    ]
+  ]);
+
+  final result = await maximoRequest(
+    url,
+    'post',
+    env,
+    table,
+  );
+
+  print(result.toString());
+
+  return true;
 }
