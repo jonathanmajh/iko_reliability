@@ -1,6 +1,40 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+
+class WorkingDay {
+  final String checkin;
+  final String checkout;
+  final String siteid;
+  final String laborcode;
+  final double hours;
+  final String weekday;
+
+  const WorkingDay({
+    required this.checkin,
+    required this.checkout,
+    required this.siteid,
+    required this.laborcode,
+    required this.hours,
+    required this.weekday,
+  });
+}
+
+class LaborRecord {
+  final String siteid;
+  final String laborid;
+  final String laborCode;
+  final String name;
+
+  const LaborRecord({
+    required this.siteid,
+    required this.laborid,
+    required this.laborCode,
+    required this.name,
+  });
+}
 
 class TimesheetEntry {
   final int year;
@@ -32,6 +66,7 @@ class _TimesheetViewState extends State<TimesheetView>
   int selectedYear = DateTime.now().year;
   Map<UniqueKey, TimesheetEntry> timesheets = {};
   List<WorkingDay> workingDays = [];
+  List<LaborRecord> labors = [];
   late TabController _tabController;
 
   @override
@@ -125,7 +160,7 @@ class _TimesheetViewState extends State<TimesheetView>
               value: selectedMonth == 0 ? 12 : selectedMonth,
             ),
             DropdownButton(
-              items: ['ANT', 'COM', 'GR']
+              items: ['ANT', 'COM', 'GR', 'GP', 'CAM']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                     value: value, child: Text(value));
@@ -139,6 +174,7 @@ class _TimesheetViewState extends State<TimesheetView>
             ),
           ],
         ),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: []),
         ElevatedButton(
           onPressed: () {
             addTimesheet(context);
@@ -164,12 +200,21 @@ class _TimesheetViewState extends State<TimesheetView>
           },
           child: const Text('Copy to Clipboard'),
         ),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              labors = laborFromClipboard();
+            });
+          },
+          child: const Text('Read from Clipboard'),
+        ),
       ],
     );
   }
 
   void addTimesheet(BuildContext context) {
     TextEditingController laborCodeController = TextEditingController();
+    String laborCode = '';
     TextEditingController hourController = TextEditingController();
     showDialog(
         context: context,
@@ -188,6 +233,19 @@ class _TimesheetViewState extends State<TimesheetView>
                     border: OutlineInputBorder(),
                   ),
                 ),
+                DropdownButton(
+                  items:
+                      labors.map<DropdownMenuItem<String>>((LaborRecord value) {
+                    return DropdownMenuItem<String>(
+                        value: value.laborCode, child: Text(value.name));
+                  }).toList(),
+                  onChanged: (String? value) {
+                    setState(() {
+                      laborCode = value!;
+                    });
+                  },
+                  value: laborCode,
+                ),
                 TextField(
                   controller: hourController,
                   decoration: const InputDecoration(
@@ -202,7 +260,7 @@ class _TimesheetViewState extends State<TimesheetView>
                         year: selectedYear,
                         month: selectedMonth,
                         siteid: selectedSite,
-                        laborcode: laborCodeController.text,
+                        laborcode: laborCode,
                         hours: double.tryParse(hourController.text) ?? 0,
                       );
                     });
@@ -322,24 +380,6 @@ List<WorkingDay> generateWorkDays(TimesheetEntry worker) {
   return entries;
 }
 
-class WorkingDay {
-  final String checkin;
-  final String checkout;
-  final String siteid;
-  final String laborcode;
-  final double hours;
-  final String weekday;
-
-  const WorkingDay({
-    required this.checkin,
-    required this.checkout,
-    required this.siteid,
-    required this.laborcode,
-    required this.hours,
-    required this.weekday,
-  });
-}
-
 void copyExportDetails(List<WorkingDay> workingDays) {
   String allData = '''<html><head><style>
 <!--table .xl65	{mso-number-format:"yyyy\\-mm\\-dd\\ hh\:mm";} -->
@@ -353,4 +393,23 @@ void copyExportDetails(List<WorkingDay> workingDays) {
   Clipboard.setData(ClipboardData(text: allData)).then((_) {
     return;
   });
+}
+
+List<LaborRecord> laborFromClipboard() {
+  List<LaborRecord> labors = [];
+  LineSplitter ls = const LineSplitter();
+  Clipboard.getData(Clipboard.kTextPlain).then((value) {
+    for (final line in ls.convert(value!.text!)) {
+      final words = line.split('\t');
+      labors.add(
+        LaborRecord(
+          siteid: words[3],
+          laborid: words[0],
+          laborCode: words[2],
+          name: words[1],
+        ),
+      );
+    }
+  });
+  return labors;
 }

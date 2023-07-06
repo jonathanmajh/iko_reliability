@@ -35,6 +35,7 @@ dependencies:
     package_info_plus: ^3.0.3
     url_launcher: ^6.1.10
     flutter_window_close: ^0.2.2
+    intl: ^0.18.1
 
 dev_dependencies:
     flutter_test:
