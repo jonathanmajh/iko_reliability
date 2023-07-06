@@ -338,6 +338,15 @@ class _HomePageState extends State<HomePage> {
                     Navigator.pop(context); // close the drawer
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Generate Timesheets'),
+                  onTap: () {
+                    context.router.pushNamed("/timesheet");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
               ],
             )
           ],
