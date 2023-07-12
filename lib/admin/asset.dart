@@ -52,12 +52,6 @@ class _AssetPageState extends State<AssetPage> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
-        width: 100,
-        title: 'Asset Number',
-        field: 'assetnum',
-        type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
         title: 'Description',
         field: 'description',
         type: PlutoColumnType.text(),
@@ -80,6 +74,7 @@ class _AssetPageState extends State<AssetPage> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
+        hide: true,
         width: 200,
         readOnly: true,
         enableAutoEditing: false,
@@ -100,11 +95,13 @@ class _AssetPageState extends State<AssetPage> {
           type: PlutoColumnType.text(),
           readOnly: true,
           renderer: (rendererContext) {
-            //if asset is uploading, display a loading animation            
+            //if asset is uploading, display a loading animation
             if (assetCreationNotifier.loading
-                .contains(rendererContext.row.cells['assetnum']!.value)) {
-              return LoadingAnimationWidget.inkDrop(
-                  color: Colors.green, size: 18);
+                .contains(rendererContext.row.cells['hierarchy']!.value)) {
+              return Center(
+                child: LoadingAnimationWidget.twoRotatingArc(
+                    color: Colors.green, size: 18),
+              );
             }
 
             //if asset is new, display a publish button
@@ -114,11 +111,9 @@ class _AssetPageState extends State<AssetPage> {
                   Icons.publish,
                 ),
                 onPressed: () {
-                  assetCreationNotifier
-                      .addLoading(rendererContext.row.cells['assetnum']!.value);
-                  setState(
-                      () {}); //TODO make the button refresh without refreshing the parent
-
+                  assetCreationNotifier.addLoading(
+                      rendererContext.row.cells['hierarchy']!.value);
+                  stateManager.notifyListeners();
                   //placeholder code for when upload fucntion is made
                   /*var asset = pendingAssets[rendererContext.row.cells['assetnum']!.value];
                   var status = await uploadAsset(asset!); //TODO make an upload function
@@ -133,7 +128,6 @@ class _AssetPageState extends State<AssetPage> {
                 padding: const EdgeInsets.all(0),
               );
             }
-
 
             //If not new asset, then just display a checkmark
             return const Icon(
@@ -199,11 +193,9 @@ class _AssetPageState extends State<AssetPage> {
       for (var child in parentAssets[parent]!) {
         rows.add(PlutoRow(
           cells: {
-            'assetnum': PlutoCell(value: child.assetnum),
             'description': PlutoCell(value: child.description),
             'priority': PlutoCell(value: child.priority),
-            'hierarchy': PlutoCell(
-                value: child.hierarchy!.substring(child.hierarchy!.length - 5)),
+            'hierarchy': PlutoCell(value: child.assetnum),
             'id': PlutoCell(value: child.id),
             'site': PlutoCell(value: child.siteid),
             'status': PlutoCell(
@@ -218,6 +210,14 @@ class _AssetPageState extends State<AssetPage> {
       }
     }
     return rows;
+  }
+
+  void toast(context, msg, [int? time]) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg),
+      duration: Duration(seconds: (time ?? 2)),
+    ));
   }
 
   @override
@@ -307,6 +307,7 @@ class _AssetPageState extends State<AssetPage> {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             if (assetCreationNotifier.selectedSite == 'NONE') {
+              toast(context, 'Please select a site');
               return;
             }
             showDialog<String>(
@@ -406,9 +407,8 @@ class _AssetPageState extends State<AssetPage> {
                               if (stateManager.refRows.any((element) =>
                                   element.cells['assetnum']!.value ==
                                   assetNumTextController.text.toUpperCase())) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text(
-                                        'Asset ${assetNumTextController.text.toUpperCase()} already exists')));
+                                toast(context,
+                                    'Asset ${assetNumTextController.text.toUpperCase()} already exists');
                                 return;
                               }
 
@@ -436,9 +436,8 @@ class _AssetPageState extends State<AssetPage> {
                                   break;
                                 }
                               }
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Created Asset ${assetNumTextController.text.toUpperCase()}, id: $id')));
+                              toast(context,
+                                  'Created Asset ${assetNumTextController.text.toUpperCase()}, id: $id');
                               Navigator.pop(context, 'OK');
                             }
                           },
@@ -464,13 +463,11 @@ class _AssetPageState extends State<AssetPage> {
                               var id = await database!.deleteAsset(
                                   assetNumTextController.text.toUpperCase(),
                                   assetCreationNotifier.selectedSite);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Deleted Asset ${assetNumTextController.text.toUpperCase()}')));
+                              toast(context,
+                                  'Deleted Asset ${assetNumTextController.text.toUpperCase()}');
                               changeSite(assetCreationNotifier.selectedSite);
                             } catch (err) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('$err')));
+                              toast(context, '$err');
                             }
                           },
                           child: const Text('Delete'),

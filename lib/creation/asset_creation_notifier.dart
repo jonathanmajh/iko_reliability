@@ -12,17 +12,19 @@ class AssetCreationNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addLoading(String string){
+  void addLoading(String string) {
     loading.add(string);
-    notifyListeners();
+    print("addLoading");
+    //notifyListeners();
   }
 
-  void removingLoading(String string){
+  void removingLoading(String string) {
+    print("removingLoading");
     loading.remove(string);
-    notifyListeners();
+    //notifyListeners();
   }
 
-  void clearLoading(){
+  void clearLoading() {
     loading.clear();
     notifyListeners();
   }
