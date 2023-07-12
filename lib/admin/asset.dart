@@ -23,7 +23,8 @@ class AssetPage extends StatefulWidget {
   State<AssetPage> createState() => _AssetPageState();
 }
 
-class _AssetPageState extends State<AssetPage> {
+class _AssetPageState extends State<AssetPage>
+    with SingleTickerProviderStateMixin {
   Key? currentRowKey;
   List<PlutoColumn> columns = [];
   List<PlutoRow> rows = [];
@@ -31,7 +32,10 @@ class _AssetPageState extends State<AssetPage> {
   Map<String, Asset> pendingAssets = {};
   Map<String, List<Asset>> parentAssets = {};
 
-  late PlutoGridStateManager stateManager;
+  late PlutoGridStateManager assetStateManager;
+  late PlutoGridStateManager uploadStateManager;
+  late TabController _tabController;
+
   final assetParentTextController = TextEditingController();
   final descriptionTextController = TextEditingController();
   final assetNumTextController = TextEditingController();
@@ -41,6 +45,7 @@ class _AssetPageState extends State<AssetPage> {
 
   @override
   void initState() {
+    _tabController = TabController(vsync: this, length: 2);
     super.initState();
     final assetCreationNotifier =
         Provider.of<AssetCreationNotifier>(context, listen: false);
@@ -48,11 +53,13 @@ class _AssetPageState extends State<AssetPage> {
       PlutoColumn(
         width: 300,
         title: 'Hierarchy',
+        readOnly: true,
         field: 'hierarchy',
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
         title: 'Description',
+        readOnly: true,
         field: 'description',
         type: PlutoColumnType.text(),
         width: 500,
@@ -108,23 +115,37 @@ class _AssetPageState extends State<AssetPage> {
             if (rendererContext.cell.value == "new") {
               return IconButton(
                 icon: const Icon(
-                  Icons.publish,
+                  Icons.delete,
                 ),
-                onPressed: () {
-                  assetCreationNotifier.addLoading(
-                      rendererContext.row.cells['hierarchy']!.value);
-                  stateManager.notifyListeners();
-                  //placeholder code for when upload fucntion is made
-                  /*var asset = pendingAssets[rendererContext.row.cells['assetnum']!.value];
-                  var status = await uploadAsset(asset!); //TODO make an upload function
-                  if (status == 200) {
-                    setState(() {
-                      
-                    });
-                  } */
+                onPressed: () async {
+                  var assetNum = rendererContext.row.cells['hierarchy']!.value;
+                  try {
+                    if (!siteAssets.containsKey(
+                        assetNum)) {
+                      throw 'Asset ${assetNumTextController.text} does not exist';
+                    }
+                    if (parentAssets.containsKey(
+                        assetNum)) {
+                      throw 'Asset ${assetNumTextController.text} has children';
+                    }
+                    if (!siteAssets[assetNum]!
+                        .newAsset) {
+                      throw 'Asset already exists in Maximo, cannot delete';
+                    }
+
+                    var id = await database!.deleteAsset(
+                        assetNum,
+                        assetCreationNotifier.selectedSite);
+                    assetStateManager
+                        .removeRows([rendererContext.row], notify: true);
+                    toast(context,
+                        'Deleted Asset ${assetNum}');
+                  } catch (err) {
+                    toast(context, '$err');
+                  }
                 },
                 iconSize: 18,
-                color: Colors.blue,
+                color: Colors.red,
                 padding: const EdgeInsets.all(0),
               );
             }
@@ -140,6 +161,12 @@ class _AssetPageState extends State<AssetPage> {
     changeSite('NONE');
   }
 
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   /// Changes the site displayed on the plutogrid
   /// based on site id. If the site id is
   /// 'NONE' function will not change the site, and table will
@@ -153,13 +180,15 @@ class _AssetPageState extends State<AssetPage> {
     var fetchedRows = await _loadData(site);
     var value =
         await PlutoGridStateManager.initializeRowsAsync(columns, fetchedRows);
-    stateManager.refRows.clear();
-    stateManager.refRows.addAll(value);
-    stateManager.setShowLoading(false);
-    stateManager.notifyListeners();
+    assetStateManager.refRows.clear();
+    assetStateManager.refRows.addAll(value);
+    assetStateManager.setShowLoading(false);
+    assetStateManager.notifyListeners();
     //workaround since setting the group as expanded does not expand first row
-    stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
-    stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
+    assetStateManager.toggleExpandedRowGroup(
+        rowGroup: assetStateManager.rows.first);
+    assetStateManager.toggleExpandedRowGroup(
+        rowGroup: assetStateManager.rows.first);
     return;
   }
 
@@ -220,6 +249,15 @@ class _AssetPageState extends State<AssetPage> {
     ));
   }
 
+  int getAssetIdx(String assetNum) {
+    for (PlutoRow plutoRow in assetStateManager.refRows) {
+      if (plutoRow.cells['hierarchy']!.value == assetNum) {
+        return assetStateManager.refRows.indexOf(plutoRow);
+      }
+    }
+    return -1;
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeManager themeManager = Provider.of<ThemeManager>(context);
@@ -228,79 +266,99 @@ class _AssetPageState extends State<AssetPage> {
       changeSite(assetCreationNotifier.selectedSite);
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Maximo Asset Creator"),
+          centerTitle: true,
+          title: Text(
+              'Maximo Asset Creator: ${assetCreationNotifier.selectedSite}'),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const <Widget>[
+              Icon(Icons.home),
+              Icon(Icons.cloud_upload),
+            ],
+            //title: const Text("Maximo Asset Creator"),
+          ),
         ),
         endDrawer: const EndDrawer(),
-        body: Column(
-          children: <Widget>[
-            ElevatedButton(
-              child: const Text('print pending'),
-              onPressed: () {
-                for (var asset in pendingAssets.values.toList()) {
-                  print(asset.toString() + "\n \n");
-                }
-              },
-            ),
-            ElevatedButton(
-              child: const Text('print assets'),
-              onPressed: () async {
-                final assets = await database!
-                    .getSiteAssets(assetCreationNotifier.selectedSite);
-                for (var asset in assets) {
-                  print(asset.toString() + "\n \n");
-                }
-                //print(stateManager.refRows);
-                //print(assetCreationNotifier.selectedSite);
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Clear assets'),
-              onPressed: () {
-                assetCreationNotifier.clearLoading();
-              },
-            ),
-            Expanded(
-              //color: const Color.fromARGB(55, 0, 0, 0),
-              //height: 800,
-              child: Padding(
-                padding: const EdgeInsets.all(30),
-                child: PlutoGrid(
-                  rowColorCallback: (rowColorContext) {
-                    if (rowColorContext.row.cells['status']!.value ==
-                        'PENDING UPLOAD') {
-                      return (themeManager.isDark
-                          ? const Color.fromARGB(255, 18, 92, 3)
-                          : const Color.fromARGB(255, 133, 252, 133));
-                    } else {
-                      return (themeManager.isDark
-                          ? const Color.fromARGB(255, 17, 17, 17)
-                          : Colors.white);
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            Column(
+              children: <Widget>[
+                ElevatedButton(
+                  child: const Text('print pending'),
+                  onPressed: () {
+                    for (var asset in pendingAssets.values.toList()) {
+                      print(asset.toString() + "\n \n");
                     }
                   },
-                  columns: columns,
-                  rows: rows,
-                  onLoaded: (PlutoGridOnLoadedEvent event) {
-                    stateManager = event.stateManager;
-                    event.stateManager.addListener(() {
-                      if (stateManager.currentRow == null) {
-                        return;
-                      }
-                    });
-                    stateManager.setShowColumnFilter(true);
-                    stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
-                      resolveColumnDepth: (column) =>
-                          stateManager.columnIndex(column),
-                      showText: (cell) => true,
-                      showCount: false,
-                      showFirstExpandableIcon: true,
-                    ));
-                  },
-                  configuration: PlutoGridConfiguration(
-                      style: themeManager.isDark
-                          ? const PlutoGridStyleConfig.dark()
-                          : const PlutoGridStyleConfig()),
                 ),
-              ),
+                ElevatedButton(
+                  child: const Text('print assets'),
+                  onPressed: () async {
+                    final assets = await database!
+                        .getSiteAssets(assetCreationNotifier.selectedSite);
+                    for (var asset in assets) {
+                      print(asset.toString() + "\n \n");
+                    }
+                    //print(stateManager.refRows);
+                    //print(assetCreationNotifier.selectedSite);
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('Clear assets'),
+                  onPressed: () {
+                    assetCreationNotifier.clearLoading();
+                  },
+                ),
+                Expanded(
+                  //color: const Color.fromARGB(55, 0, 0, 0),
+                  //height: 800,
+                  child: Padding(
+                    padding: const EdgeInsets.all(30),
+                    child: PlutoGrid(
+                      rowColorCallback: (rowColorContext) {
+                        if (rowColorContext.row.cells['status']!.value ==
+                            'PENDING UPLOAD') {
+                          return (themeManager.isDark
+                              ? const Color.fromARGB(255, 18, 92, 3)
+                              : const Color.fromARGB(255, 133, 252, 133));
+                        } else {
+                          return (themeManager.isDark
+                              ? const Color.fromARGB(255, 17, 17, 17)
+                              : Colors.white);
+                        }
+                      },
+                      columns: columns,
+                      rows: rows,
+                      onLoaded: (PlutoGridOnLoadedEvent event) {
+                        assetStateManager = event.stateManager;
+                        event.stateManager.addListener(() {
+                          if (assetStateManager.currentRow == null) {
+                            return;
+                          }
+                        });
+                        assetStateManager.setShowColumnFilter(true);
+                        assetStateManager.setRowGroup(PlutoRowGroupTreeDelegate(
+                          resolveColumnDepth: (column) =>
+                              assetStateManager.columnIndex(column),
+                          showText: (cell) => true,
+                          showCount: false,
+                          showFirstExpandableIcon: true,
+                        ));
+                      },
+                      configuration: PlutoGridConfiguration(
+                          style: themeManager.isDark
+                              ? const PlutoGridStyleConfig.dark()
+                              : const PlutoGridStyleConfig()),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Column(
+              children: [
+                //PlutoGrid(columns: columns, rows: rows)
+              ],
             ),
           ],
         ),
@@ -404,8 +462,8 @@ class _AssetPageState extends State<AssetPage> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               //check if asset already exists
-                              if (stateManager.refRows.any((element) =>
-                                  element.cells['assetnum']!.value ==
+                              if (assetStateManager.refRows.any((element) =>
+                                  element.cells['hierarchy']!.value ==
                                   assetNumTextController.text.toUpperCase())) {
                                 toast(context,
                                     'Asset ${assetNumTextController.text.toUpperCase()} already exists');
@@ -422,16 +480,16 @@ class _AssetPageState extends State<AssetPage> {
                               await changeSite(
                                   assetCreationNotifier.selectedSite);
                               //scroll all the way up
-                              stateManager.moveScrollByRow(
+                              assetStateManager.moveScrollByRow(
                                   PlutoMoveDirection.up, 0);
                               for (int i = 0;
-                                  i < stateManager.refRows.length;
+                                  i < assetStateManager.refRows.length;
                                   i++) {
-                                if (stateManager
-                                        .refRows[i].cells['assetnum']!.value ==
+                                if (assetStateManager
+                                        .refRows[i].cells['hierarchy']!.value ==
                                     assetNumTextController.text.toUpperCase()) {
                                   //scroll down to new asset
-                                  stateManager.moveScrollByRow(
+                                  assetStateManager.moveScrollByRow(
                                       PlutoMoveDirection.down, i);
                                   break;
                                 }
