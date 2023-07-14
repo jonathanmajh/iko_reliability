@@ -134,9 +134,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                         rendererContext.row.cells['assetnum']!.value;
                     refreshAsset(
                         assetnum, assetCriticalityNotifier.selectedSite);
+                    print(stateManager.iterateAllRowAndGroup.length);
                     //refresh children assets
                     Set<String> childAssetnums = getChildAssetnums(assetnum);
-                    for (PlutoRow row in stateManager.rows) {
+                    for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
                       String tempAssetnum = row.cells['assetnum']!.value;
                       if (childAssetnums.contains(tempAssetnum)) {
                         refreshAsset(tempAssetnum,
@@ -1219,22 +1220,19 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                         ),
                         inputWidget: Builder(
                             builder: (context) => ElevatedButton(
-                                onPressed: (usingAfterDate!)
-                                    ? () async {
-                                        DateTime? newDate =
-                                            await showDatePicker(
-                                                context: context,
-                                                initialDate:
-                                                    afterDate ?? DateTime.now(),
-                                                firstDate: DateTime(1951),
-                                                lastDate: DateTime.now());
-                                        if (newDate != null) {
-                                          setState(() {
-                                            afterDate = newDate;
-                                          });
-                                        }
-                                      }
-                                    : () {},
+                                onPressed: () async {
+                                  DateTime? newDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: afterDate ?? DateTime.now(),
+                                      firstDate: DateTime(1951),
+                                      lastDate: DateTime.now());
+                                  if (newDate != null) {
+                                    setState(() {
+                                      usingAfterDate = true;
+                                      afterDate = newDate;
+                                    });
+                                  }
+                                },
                                 child: const Text('Select Date')))),
                     buildSettingRow(
                         checkbox: Checkbox(
@@ -1253,22 +1251,19 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                         ),
                         inputWidget: Builder(
                             builder: (context) => ElevatedButton(
-                                onPressed: (usingBeforeDate!)
-                                    ? () async {
-                                        DateTime? newDate =
-                                            await showDatePicker(
-                                                context: context,
-                                                initialDate: beforeDate ??
-                                                    DateTime.now(),
-                                                firstDate: DateTime(1951),
-                                                lastDate: DateTime.now());
-                                        if (newDate != null) {
-                                          setState(() {
-                                            beforeDate = newDate;
-                                          });
-                                        }
-                                      }
-                                    : () {},
+                                onPressed: () async {
+                                  DateTime? newDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: beforeDate ?? DateTime.now(),
+                                      firstDate: DateTime(1951),
+                                      lastDate: DateTime.now());
+                                  if (newDate != null) {
+                                    setState(() {
+                                      usingBeforeDate = true;
+                                      beforeDate = newDate;
+                                    });
+                                  }
+                                },
                                 child: const Text('Select Date')))),
                     //TODO add a setting for toggling show/hide workorders from all sites not just selected site
                     buildSettingRow(
