@@ -59,8 +59,8 @@ class JobService {
 }
 
 class JobTask {
-  final int jptask;
-  final String description;
+  final int? jptask;
+  final String? description;
   final String? assetNumber;
   final String? metername;
   final String? longdescription;
