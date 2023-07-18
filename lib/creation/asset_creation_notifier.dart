@@ -7,8 +7,6 @@ import '../main.dart';
 class AssetCreationNotifier extends ChangeNotifier {
   String selectedSite = 'NONE';
 
-  Set<String> loading = {};
-
   Map<String, Asset> siteAssets = {};
   Map<String, Asset> pendingAssets = {};
   Map<String, List<Asset>> parentAssets = {};
@@ -53,7 +51,7 @@ class AssetCreationNotifier extends ChangeNotifier {
 
     var id = await database!
         .addNewAsset(assetNum, (site ?? selectedSite), description, parent);
-
+    notifyListeners();
     return id;
   }
 
