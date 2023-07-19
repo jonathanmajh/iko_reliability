@@ -399,15 +399,15 @@ class _EndDrawerState extends State<EndDrawer> {
               title: const Text('Export to CSV'),
               trailing: ElevatedButton(
                 child: const Text('Export'),
-                onPressed: () {
+                onPressed: () async {
                   if (!context
                       .read<AssetCriticalityNotifier>()
                       .priorityRangesUpToDate) {
-                    assetCriticalityCSVExportWarning(context).then((value) {
-                      if (!value) {
-                        return;
-                      }
-                    });
+                    bool value =
+                        await assetCriticalityCSVExportWarning(context);
+                    if (value != true) {
+                      return;
+                    }
                   }
                   PlutoGridStateManager? stateManager =
                       context.read<AssetCriticalityNotifier>().stateManager;

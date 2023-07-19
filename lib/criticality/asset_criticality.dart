@@ -852,7 +852,10 @@ void showRpnDistDialog(BuildContext context) {
       });
 }
 
+///Shows a dialog alerting users that they haven't updated the 'new priority'calculations yet.
+///Returns [true] if user decides to continue export, returns [false] or [null] otherwise
 Future<bool> assetCriticalityCSVExportWarning(BuildContext context) async {
+  //TODO: make the dialog look nicer
   return await showDialog(
           context: context,
           builder: (context) {
