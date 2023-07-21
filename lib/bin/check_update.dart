@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -13,7 +14,7 @@ Future<bool> checkUpdate() async {
   try {
     response = await http.get(Uri.parse(updateUrl));
   } catch (err) {
-    print('update check fail 1');
+    debugPrint('update check fail 1');
     return false;
   }
   var parsed = jsonDecode(response.body);
@@ -21,13 +22,13 @@ Future<bool> checkUpdate() async {
     // print(parsed);
     if (parsed['tag_name'] != null) {
       if (parsed['tag_name'] != 'v$curVersion') {
-        print('update check true');
+        debugPrint('update check true');
         return true;
       }
     }
-    print('update check fail 2');
+    debugPrint('update check fail 2');
     return false;
   }
-  print('update check fail 3');
+  debugPrint('update check fail 3');
   return false;
 }

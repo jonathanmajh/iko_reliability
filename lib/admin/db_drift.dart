@@ -298,7 +298,8 @@ class MyDatabase extends _$MyDatabase {
         batch.insertAll(systemCriticalitys, inserts);
       });
     } catch (e) {
-      print('Error inserting System Criticality\n${e.toString()}');
+      material
+          .debugPrint('Error inserting System Criticality\n${e.toString()}');
     }
   }
 
@@ -440,7 +441,7 @@ class MyDatabase extends _$MyDatabase {
   Future<List<SystemCriticality>> getSystemCriticalities() async {
     var systems = await (select(systemCriticalitys)).get();
     if (systems.isEmpty) {
-      print('getting data from excel');
+      material.debugPrint('getting data from excel');
       await loadSystems();
       systems = await (select(systemCriticalitys)).get();
     }
@@ -516,7 +517,7 @@ class MyDatabase extends _$MyDatabase {
       }
       throw Exception('Failed to load assets from Maximo');
     }
-    print(result['member'].length);
+    material.debugPrint(result['member'].length.toString());
     if (result['member'].length > 0) {
       List<AssetsCompanion> assetInserts = [];
       // save once without the hierarchy field then loop through again adding hierarchy

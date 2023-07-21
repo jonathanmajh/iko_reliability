@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
@@ -8,6 +10,7 @@ import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
+import 'package:window_size/window_size.dart';
 
 import 'admin/cache_notifier.dart';
 import 'admin/db_drift.dart';
@@ -33,7 +36,12 @@ void main() async {
   box = Hive.box('routeNumber');
   box.clear();
   database = MyDatabase();
+  WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows) {
+    setWindowMinSize(const Size(640, 360));
+  }
   SettingsNotifier settingsNotifier = SettingsNotifier();
+
   await settingsNotifier.initialize();
   runApp(
     MyApp(settingsNotifier),
@@ -282,7 +290,7 @@ class _HomePageState extends State<HomePage> {
                           .calculateSystemScores(); //load system score data
                     } catch (e) {
                       debugPrint(
-                          'Could not load system scores from cache \n${e}');
+                          'Could not load system scores from cache \n$e');
                     }
                     // change app state...
                     Navigator.pop(context); // close the drawer

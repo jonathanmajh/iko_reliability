@@ -345,9 +345,7 @@ class _EndDrawerState extends State<EndDrawer> {
               title: const Text('Risk Priority Distributions'),
               trailing: ElevatedButton(
                 child: const Text('Configure'),
-                onPressed: () {
-                  showRpnDistDialog(context);
-                },
+                onPressed: () => showRpnDistDialog(context),
               ),
             ),
             ListTile(
@@ -365,13 +363,13 @@ class _EndDrawerState extends State<EndDrawer> {
                     List<double> rpnList =
                         List.from(assetCriticalityNotifier.rpnList);
                     rpnList.removeWhere((rpn) => (rpn <= 0));
-                    print(rpnList);
 
                     //set rpn ranges
                     List<double> newCutoffs = rpnDistRange(
                         rpnList, settingsNotifier.getRpnPercentDists());
                     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
-                    print(assetCriticalityNotifier.rpnCutoffs);
+                    debugPrint(
+                        'new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
                     assetCriticalityNotifier.priorityRangesUpToDate = true;
                   } catch (e) {
                     showDialog(
@@ -392,7 +390,7 @@ class _EndDrawerState extends State<EndDrawer> {
                             ],
                           );
                         });
-                    print(e.toString());
+                    debugPrint(e.toString());
                   }
                 },
               ),
@@ -401,15 +399,15 @@ class _EndDrawerState extends State<EndDrawer> {
               title: const Text('Export to CSV'),
               trailing: ElevatedButton(
                 child: const Text('Export'),
-                onPressed: () {
+                onPressed: () async {
                   if (!context
                       .read<AssetCriticalityNotifier>()
                       .priorityRangesUpToDate) {
-                    assetCriticalityCSVExportWarning(context).then((value) {
-                      if (!value) {
-                        return;
-                      }
-                    });
+                    bool value =
+                        await assetCriticalityCSVExportWarning(context);
+                    if (value != true) {
+                      return;
+                    }
                   }
                   PlutoGridStateManager? stateManager =
                       context.read<AssetCriticalityNotifier>().stateManager;
@@ -422,6 +420,13 @@ class _EndDrawerState extends State<EndDrawer> {
                 },
               ),
             ),
+            ListTile(
+              title: const Text('Work Order View Settings'),
+              trailing: ElevatedButton(
+                child: const Text('Configure'),
+                onPressed: () => showWOSettingsDialog(context),
+              ),
+            )
           ],
         ),
       );

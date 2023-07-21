@@ -7,7 +7,6 @@ double? rpnFunc(double? system, int? freq, int? impact) {
   try {
     return system! * freq! * impact!;
   } catch (e) {
-    print('error: ${e.toString()}');
     return -1;
   }
 }
