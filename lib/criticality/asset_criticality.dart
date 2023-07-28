@@ -1152,13 +1152,13 @@ class WorkOrderSettingsDialog extends StatefulWidget {
 
 class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   ///Exculde all work orders after this date
-  DateTime? beforeDate;
+  DateTime? hideAfterDate;
 
   ///Exclude all work orders before this date
-  DateTime? afterDate;
+  DateTime? hideBeforeDate;
 
-  bool? usingBeforeDate;
   bool? usingAfterDate;
+  bool? usingBeforeDate;
 
   ///whether to show all sites' work orders or not
   bool? showAllSites;
@@ -1168,12 +1168,12 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
     super.initState();
     AssetCriticalityNotifier assetCriticalityNotifier =
         context.read<AssetCriticalityNotifier>();
-    beforeDate = assetCriticalityNotifier.beforeDate;
-    afterDate = assetCriticalityNotifier.afterDate;
-    usingBeforeDate = (beforeDate != null) &&
-        (assetCriticalityNotifier.usingBeforeDate ?? false);
-    usingAfterDate = (afterDate != null) &&
+    hideAfterDate = assetCriticalityNotifier.HideAfterDate;
+    hideBeforeDate = assetCriticalityNotifier.HideBeforeDate;
+    usingAfterDate = (hideAfterDate != null) &&
         (assetCriticalityNotifier.usingAfterDate ?? false);
+    usingBeforeDate = (hideBeforeDate != null) &&
+        (assetCriticalityNotifier.usingBeforeDate ?? false);
 
     showAllSites = assetCriticalityNotifier.showAllSites ?? false;
   }
@@ -1213,65 +1213,77 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                   children: [
                     buildSettingRow(
                         checkbox: Checkbox(
-                            value: usingAfterDate,
-                            onChanged: (value) => setState(() {
-                                  usingAfterDate = value;
-                                })),
-                        title: const Text('Hide Work Orders Before'),
-                        valueDisplay: Text(
-                          '${afterDate?.year ?? 'YY'}/${afterDate?.month ?? 'mm'}/${afterDate?.day ?? 'dd'}',
-                          style: usingAfterDate!
-                              ? null
-                              : const TextStyle(
-                                  decoration: TextDecoration.lineThrough),
-                        ),
-                        inputWidget: Builder(
-                            builder: (context) => ElevatedButton(
-                                onPressed: () async {
-                                  DateTime? newDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: afterDate ?? DateTime.now(),
-                                      firstDate: DateTime(1951),
-                                      lastDate: DateTime.now());
-                                  if (newDate != null) {
-                                    setState(() {
-                                      usingAfterDate = true;
-                                      afterDate = newDate;
-                                    });
-                                  }
-                                },
-                                child: const Text('Select Date')))),
-                    buildSettingRow(
-                        checkbox: Checkbox(
                             value: usingBeforeDate,
                             onChanged: (value) => setState(() {
                                   usingBeforeDate = value;
                                 })),
-                        title:
-                            const Text('Hide Work Orders After (Inclusive):'),
+                        title: const Text('Hide Work Orders Before'),
                         valueDisplay: Text(
-                          '${beforeDate?.year ?? 'YY'}/${beforeDate?.month ?? 'mm'}/${beforeDate?.day ?? 'dd'}',
+                          '${hideBeforeDate?.year ?? 'YY'}/${hideBeforeDate?.month ?? 'mm'}/${hideBeforeDate?.day ?? 'dd'}',
                           style: usingBeforeDate!
                               ? null
                               : const TextStyle(
                                   decoration: TextDecoration.lineThrough),
                         ),
                         inputWidget: Builder(
-                            builder: (context) => ElevatedButton(
-                                onPressed: () async {
-                                  DateTime? newDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: beforeDate ?? DateTime.now(),
-                                      firstDate: DateTime(1951),
-                                      lastDate: DateTime.now());
-                                  if (newDate != null) {
-                                    setState(() {
-                                      usingBeforeDate = true;
-                                      beforeDate = newDate;
-                                    });
-                                  }
-                                },
-                                child: const Text('Select Date')))),
+                            builder: (context) => Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 5.0, bottom: 5.0),
+                                  child: ElevatedButton(
+                                      onPressed: () async {
+                                        DateTime? newDate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: hideBeforeDate ??
+                                                    DateTime.now(),
+                                                firstDate: DateTime(1951),
+                                                lastDate: DateTime.now());
+                                        if (newDate != null) {
+                                          setState(() {
+                                            usingBeforeDate = true;
+                                            hideBeforeDate = newDate;
+                                          });
+                                        }
+                                      },
+                                      child: const Text('Select Date')),
+                                ))),
+                    buildSettingRow(
+                        checkbox: Checkbox(
+                            value: usingAfterDate,
+                            onChanged: (value) => setState(() {
+                                  usingAfterDate = value;
+                                })),
+                        title:
+                            const Text('Hide Work Orders After (Inclusive):'),
+                        valueDisplay: Text(
+                          '${hideAfterDate?.year ?? 'YY'}/${hideAfterDate?.month ?? 'mm'}/${hideAfterDate?.day ?? 'dd'}',
+                          style: usingAfterDate!
+                              ? null
+                              : const TextStyle(
+                                  decoration: TextDecoration.lineThrough),
+                        ),
+                        inputWidget: Builder(
+                            builder: (context) => Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 5.0, bottom: 5.0),
+                                  child: ElevatedButton(
+                                      onPressed: () async {
+                                        DateTime? newDate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: hideAfterDate ??
+                                                    DateTime.now(),
+                                                firstDate: DateTime(1951),
+                                                lastDate: DateTime.now());
+                                        if (newDate != null) {
+                                          setState(() {
+                                            usingAfterDate = true;
+                                            hideAfterDate = newDate;
+                                          });
+                                        }
+                                      },
+                                      child: const Text('Select Date')),
+                                ))),
                     //TODO add a setting for toggling show/hide workorders from all sites not just selected site
                     buildSettingRow(
                         checkbox: Checkbox(
@@ -1287,29 +1299,69 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
             Expanded(
               flex: 1,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
                       onPressed: () {
                         //TODO: check if settings are valid (e.g. afterdate is not after beforedate). if so, use new settings
-                        if (usingAfterDate! && afterDate == null) {
+                        if (usingAfterDate! && hideAfterDate == null) {
                           //if using after date, afterDate must not be null
                           //TODO: show dialog
-                        } else if (usingBeforeDate! && beforeDate == null) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                    title: const Text('Missing Date'),
+                                    content: const Text(
+                                        'Must input a date to see Work Orders After'),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('OK'))
+                                    ],
+                                  ));
+                        } else if (usingBeforeDate! && hideBeforeDate == null) {
                           //if using before date, beforeDate must not be null
                           //TODO: show dialog
-                        } else if (usingAfterDate! &&
-                            usingBeforeDate! &&
-                            afterDate!.compareTo(beforeDate!) >= 0) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                    title: const Text('Missing Date'),
+                                    content: const Text(
+                                        'Must input a date to see  Work Orders Before'),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('OK'))
+                                    ],
+                                  ));
+                        } else if (usingBeforeDate! &&
+                            usingAfterDate! &&
+                            hideBeforeDate!.compareTo(hideAfterDate!) >= 0) {
                           //invalid format, afterDate must be before beforeDate
                           ///TODO: show dialog
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                    title: const Text('Invalid Dates'),
+                                    content: const Text(
+                                        'The Date inputted to "Hide Work Orders After" must come after the date inputted "Hide Work Orders After"'),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('OK'))
+                                    ],
+                                  ));
                         } else {
                           context
                               .read<AssetCriticalityNotifier>()
                               .setWOSettings(
-                                  beforeDate: beforeDate,
-                                  afterDate: afterDate,
-                                  usingBeforeDate: usingBeforeDate!,
+                                  HideAfterDate: hideAfterDate,
+                                  HideBeforeDate: hideBeforeDate,
                                   usingAfterDate: usingAfterDate!,
+                                  usingBeforeDate: usingBeforeDate!,
                                   showAllSites: showAllSites!);
                           Navigator.pop(context);
                         }

@@ -515,12 +515,12 @@ enum ApplicationSetting {
 
   ///upper bound for work order dates filter in asset criticality (inclusive). null if no filter
   //TODO: remove this if not used
-  beforeDate(
+  hideAfterDate(
       keyString: 'before date', dataType: 'DateTime?', defaultValue: null),
 
   ///lower bound for work order dates filter in asset criticality (inclusive)
   //TODO: remove this if not used
-  afterDate(
+  hideBeforeDate(
     keyString: 'after date',
     dataType: 'DateTime?',
     defaultValue: null,

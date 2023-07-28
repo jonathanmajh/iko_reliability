@@ -26,17 +26,17 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   ///list of rpns. Not ordered
   List<double> get rpnList => List<double>.of(rpnMap.values);
 
-  ///upper bound for work order dates filter in asset criticality (inclusive). null if no filter
-  DateTime? beforeDate;
+  ///lower bound for work order dates filter in asset criticality (inclusive). null if no filter
+  DateTime? HideAfterDate;
 
-  /////lower bound for work order dates filter in asset criticality (inclusive)
-  DateTime? afterDate;
+  ///upper bound for work order dates filter in asset criticality (inclusive)
+  DateTime? HideBeforeDate;
 
-  ///whether to use beforeDate filter
-  bool? usingBeforeDate;
-
-  ///whether to used afterDate filter
+  ///whether to use HideAfterDate filter
   bool? usingAfterDate;
+
+  ///whether to use HideBeforeDate filter
+  bool? usingBeforeDate;
 
   ///whether to show all sites' work orders or not
   bool? showAllSites;
@@ -111,17 +111,17 @@ class AssetCriticalityNotifier extends ChangeNotifier {
 
   ///function to set the work order settings
   void setWOSettings({
-    required DateTime? beforeDate,
-    required DateTime? afterDate,
-    required bool usingBeforeDate,
+    required DateTime? HideAfterDate,
+    required DateTime? HideBeforeDate,
     required bool usingAfterDate,
+    required bool usingBeforeDate,
     required bool showAllSites,
     bool notify = true,
   }) {
-    this.beforeDate = beforeDate;
-    this.afterDate = afterDate;
-    this.usingBeforeDate = usingBeforeDate;
+    this.HideAfterDate = HideAfterDate;
+    this.HideBeforeDate = HideBeforeDate;
     this.usingAfterDate = usingAfterDate;
+    this.usingBeforeDate = usingBeforeDate;
     this.showAllSites = showAllSites;
 
     if (notify) notifyListeners();
