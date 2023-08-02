@@ -27,13 +27,14 @@ class LaborRecord {
   final String laborid;
   final String laborCode;
   final String name;
+  final double hours;
 
-  const LaborRecord({
-    required this.siteid,
-    required this.laborid,
-    required this.laborCode,
-    required this.name,
-  });
+  const LaborRecord(
+      {required this.siteid,
+      required this.laborid,
+      required this.laborCode,
+      required this.name,
+      required this.hours});
 }
 
 class TimesheetEntry {
@@ -177,7 +178,18 @@ class _TimesheetViewState extends State<TimesheetView>
         Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: []),
         ElevatedButton(
           onPressed: () {
-            addTimesheet(context);
+            setState(() {
+              for (LaborRecord labor in labors) {
+                timesheets[UniqueKey()] = TimesheetEntry(
+                  year: selectedYear,
+                  month: selectedMonth,
+                  siteid: labor.siteid,
+                  laborcode: labor.laborCode,
+                  hours: labor.hours,
+                );
+              }
+            });
+            // addTimesheet(context);
           },
           child: const Text('Add Timesheet Entry'),
         ),
@@ -403,10 +415,11 @@ List<LaborRecord> laborFromClipboard() {
       final words = line.split('\t');
       labors.add(
         LaborRecord(
-          siteid: words[3],
+          siteid: words[1],
           laborid: words[0],
           laborCode: words[2],
-          name: words[1],
+          name: words[3],
+          hours: double.tryParse(words[4])!,
         ),
       );
     }
