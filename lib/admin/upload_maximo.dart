@@ -5,10 +5,11 @@ import 'package:iko_reliability_flutter/admin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
 import 'package:iko_reliability_flutter/main.dart';
+import '../creation/asset_creation_notifier.dart';
 import 'consts.dart';
 import 'package:http/http.dart' as http;
 
-Future<Map<String, List<List<String>>>> uploadToMaximo(
+Future<Map<String, List<List<String>>>> uploadPMToMaximo(
   String env,
   String file,
   int template,
@@ -26,6 +27,7 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   templates.setStatus(file, template, 'uploading');
   uploadNotifier.setUploadDetails(file, template, uploadData);
   var stop = false;
+  if (uploadData.containsKey('Asset')) {}
   if (uploadData.containsKey('Meter')) {
     for (int i = 0; i < uploadData['Meter']!.length; i++) {
       if (await isNewMeter(uploadData['Meter']![i][0], env)) {
@@ -304,6 +306,44 @@ Future<Map<String, List<List<String>>>> uploadToMaximo(
   return uploadData;
 }
 
+Future<Map<String, bool>> UploadAssetsToMaximo(
+  String env,
+  AssetCreationNotifier assetCreationNotifier,
+) async {
+  const url = 'mxasset?action=importfile';
+  const headers = {
+    "preview": "1",
+  };
+
+  var pendingAssets = assetCreationNotifier.pendingAssets.values;
+  var site = assetCreationNotifier.selectedSite;
+
+  Map<String, bool> uploadStatus = {};
+
+  for (var asset in pendingAssets) {
+    // check if asset already exists
+    if (!(await isNewAsset(asset.assetnum, assetCreationNotifier.selectedSite, env))) {
+      continue;
+    }
+
+    //attempt upload
+    var result = await maximoRequest(
+        url,
+        'post',
+        env,
+        const ListToCsvConverter().convert([
+          ['SITEID', 'ASSETNUM', 'DESCRIPTION', 'LOCATION', 'PARENT', 'STATUS'],
+          [assetCreationNotifier.selectedSite, asset.assetnum, asset.description, asset.parent, 'OPERATING']
+        ]),
+        headers
+        );
+
+    uploadStatus[asset.assetnum] = result['status'] == 'failed' ? false : true;
+  }
+
+  return uploadStatus;
+}
+
 Future<bool> isNewJobLabor(String jpNumber, String orgid, String craft,
     String hours, String maximoEnvironment) async {
   // do for all in case of retries
@@ -383,6 +423,22 @@ Future<bool> isNewMeter(String meterName, String maximoEnvironment) async {
       'iko_meter?oslc.select=metername&oslc.where=metername="$meterName"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
   if (result['status']! == 'empty') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+Future<bool> isNewAsset(
+    String assetNum, String siteId, String maximoEnvironment) async {
+  final url =
+      'mxasset?oslc.where=siteid="$siteId" and assetnum="$assetNum"&oslc.select=assetnum,siteid';
+  final result = await maximoRequest(url, 'get', maximoEnvironment);
+  if (result["rdfs:member"] == null) {
+    throw Exception('Invalid Response from Maximo');
+  }
+
+  if (result['rdfs:member']! == 'empty') {
     return true;
   } else {
     return false;
@@ -504,49 +560,4 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     // not post or get
     return {'status': 'TODO'};
   }
-}
-
-Future<bool> uploadAsset(
-  String parentAssetNum,
-  String assetNum,
-  String siteId,
-  String url,
-  String env,
-) async {
-  Asset asset;
-
-  try {
-    asset = await database!.getAsset(siteId, assetNum);
-  } catch (e) {
-    print(e);
-    return false;
-  }
-
-  final table = const ListToCsvConverter().convert([
-    [
-      "assetnum",
-      "description",
-      "siteid",
-      "location",
-      "parent",
-    ],
-    [
-      (asset.parent ?? ''),
-      asset.assetnum,
-      asset.description,
-      asset.siteid,
-      ('L-${asset.assetnum}')
-    ]
-  ]);
-
-  final result = await maximoRequest(
-    url,
-    'post',
-    env,
-    table,
-  );
-
-  print(result.toString());
-
-  return true;
 }

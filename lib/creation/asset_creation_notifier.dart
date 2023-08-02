@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import '../admin/upload_maximo.dart';
 
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
 
+import '../admin/upload_maximo.dart';
+
 class AssetCreationNotifier extends ChangeNotifier {
+
+  
+
   String selectedSite = 'NONE';
 
   Map<String, Asset> siteAssets = {};
@@ -49,8 +55,21 @@ class AssetCreationNotifier extends ChangeNotifier {
       throw ('Upload Fail! Asset $assetNum already exists');
     }
 
+    print('adding asset');
     var id = await database!
         .addNewAsset(assetNum, (site ?? selectedSite), description, parent);
+
+    var newAsset = await database!.getAsset(site ?? selectedSite, assetNum);
+
+    siteAssets[assetNum] = newAsset;
+
+    if (!parentAssets.containsKey(parent)) {
+      parentAssets[parent] = [];
+    }
+
+    parentAssets[parent]!.add(newAsset);
+
+    print('done adding asset');
     notifyListeners();
     return id;
   }
