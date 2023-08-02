@@ -62,7 +62,6 @@ class TimesheetView extends StatefulWidget {
 
 class _TimesheetViewState extends State<TimesheetView>
     with SingleTickerProviderStateMixin {
-  String selectedSite = 'ANT';
   int selectedMonth = DateTime.now().month - 1;
   int selectedYear = DateTime.now().year;
   Map<UniqueKey, TimesheetEntry> timesheets = {};
@@ -160,24 +159,14 @@ class _TimesheetViewState extends State<TimesheetView>
               },
               value: selectedMonth == 0 ? 12 : selectedMonth,
             ),
-            DropdownButton(
-              items: ['ANT', 'COM', 'GR', 'GP', 'CAM']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                    value: value, child: Text(value));
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedSite = value.toString();
-                });
-              },
-              value: selectedSite,
-            ),
           ],
         ),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: []),
+        Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const []),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
+            labors = await laborFromClipboard();
             setState(() {
               for (LaborRecord labor in labors) {
                 timesheets[UniqueKey()] = TimesheetEntry(
@@ -191,7 +180,7 @@ class _TimesheetViewState extends State<TimesheetView>
             });
             // addTimesheet(context);
           },
-          child: const Text('Add Timesheet Entry'),
+          child: const Text('Add Timesheet Entry From Clipboard'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -214,78 +203,13 @@ class _TimesheetViewState extends State<TimesheetView>
         ),
         ElevatedButton(
           onPressed: () {
-            setState(() {
-              labors = laborFromClipboard();
-            });
+            // Clipboard.setData(ClipboardData(text: allData)).then((_) {return;});
+            // TODO IKO ID	SiteID	Labor Code	Name	Hours Worked
           },
-          child: const Text('Read from Clipboard'),
+          child: const Text('Copy Header for Timesheet Format'),
         ),
       ],
     );
-  }
-
-  void addTimesheet(BuildContext context) {
-    TextEditingController laborCodeController = TextEditingController();
-    String laborCode = '';
-    TextEditingController hourController = TextEditingController();
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Dialog(
-              child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            width: MediaQuery.of(context).size.width * 0.7,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextField(
-                  controller: laborCodeController,
-                  decoration: const InputDecoration(
-                    labelText: 'Labor Code',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                DropdownButton(
-                  items:
-                      labors.map<DropdownMenuItem<String>>((LaborRecord value) {
-                    return DropdownMenuItem<String>(
-                        value: value.laborCode, child: Text(value.name));
-                  }).toList(),
-                  onChanged: (String? value) {
-                    setState(() {
-                      laborCode = value!;
-                    });
-                  },
-                  value: laborCode,
-                ),
-                TextField(
-                  controller: hourController,
-                  decoration: const InputDecoration(
-                    labelText: 'Monthly Hours',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      timesheets[UniqueKey()] = TimesheetEntry(
-                        year: selectedYear,
-                        month: selectedMonth,
-                        siteid: selectedSite,
-                        laborcode: laborCode,
-                        hours: double.tryParse(hourController.text) ?? 0,
-                      );
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    "OK",
-                  ),
-                ),
-              ],
-            ),
-          ));
-        });
   }
 
   Widget uploadDetails() {
@@ -394,7 +318,7 @@ List<WorkingDay> generateWorkDays(TimesheetEntry worker) {
 
 void copyExportDetails(List<WorkingDay> workingDays) {
   String allData = '''<html><head><style>
-<!--table .xl65	{mso-number-format:"yyyy\\-mm\\-dd\\ hh\:mm";} -->
+<!--table .xl65	{mso-number-format:"yyyy\\-mm\\-dd\\ hh:mm";} -->
 </style></head>
 <body><table><!--StartFragment--><tr><td>Employee#</td><td>LABORCODE</td><td>DAY</td><td>TIMEIN</td><td>TIMEOUT</td><td>HOURS</td></tr>''';
   for (final days in workingDays) {
@@ -407,22 +331,21 @@ void copyExportDetails(List<WorkingDay> workingDays) {
   });
 }
 
-List<LaborRecord> laborFromClipboard() {
+Future<List<LaborRecord>> laborFromClipboard() async {
   List<LaborRecord> labors = [];
   LineSplitter ls = const LineSplitter();
-  Clipboard.getData(Clipboard.kTextPlain).then((value) {
-    for (final line in ls.convert(value!.text!)) {
-      final words = line.split('\t');
-      labors.add(
-        LaborRecord(
-          siteid: words[1],
-          laborid: words[0],
-          laborCode: words[2],
-          name: words[3],
-          hours: double.tryParse(words[4])!,
-        ),
-      );
-    }
-  });
+  ClipboardData? value = await Clipboard.getData(Clipboard.kTextPlain);
+  for (final line in ls.convert(value!.text!)) {
+    final words = line.split('\t');
+    labors.add(
+      LaborRecord(
+        siteid: words[1],
+        laborid: words[0],
+        laborCode: words[2],
+        name: words[3],
+        hours: double.tryParse(words[4])!,
+      ),
+    );
+  }
   return labors;
 }
