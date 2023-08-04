@@ -97,8 +97,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                           });
                         }
                       },
-                      child: Row(
-                        children: const [
+                      child: const Row(
+                        children: [
                           Icon(Icons.visibility),
                           Text(' Preview Changes'),
                         ],
@@ -115,8 +115,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         ),
                       ))),
                       onPressed: (() {}),
-                      child: Row(
-                        children: const [
+                      child: const Row(
+                        children: [
                           Icon(Icons.publish),
                           Text(' Upload Changes'),
                         ],

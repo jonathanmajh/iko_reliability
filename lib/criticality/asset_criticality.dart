@@ -965,17 +965,17 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
         width: MediaQuery.of(context).size.width * 0.7,
         child: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Expanded(
+            const Expanded(
               //title
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.only(top: 30.0, left: 30.0),
+                padding: EdgeInsets.only(top: 30.0, left: 30.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Rating Distribution',
                           style: TextStyle(fontSize: 30.0),
