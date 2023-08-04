@@ -17,6 +17,12 @@
 ///   int x = pair.second; //5
 ///   pair.second = 10;
 ///```
+///OR
+///```dart
+///   String y = pair.key; //Hello
+///   int x = pair.entry; //5
+///   pair.key = 10;
+///```
 class Pair<T1, T2> {
   T1 _a;
   T2 _b;
@@ -36,6 +42,22 @@ class Pair<T1, T2> {
 
   ///Sets the second object in the pair
   set second(b) {
+    _b = b;
+  }
+
+  ///Gets the first object in the pair
+  get key => _a;
+
+  ///Gets the second object in the pair
+  get value => _b;
+
+  ///Sets the first object in the pair
+  set key(a) {
+    _a = a;
+  }
+
+  ///Sets the second object in the pair
+  set value(b) {
     _b = b;
   }
 

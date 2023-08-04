@@ -222,6 +222,7 @@ const tableHeaders = {
   ],
   'Meter': ['METERNAME', 'DESCRIPTION', 'METERTYPE', 'DOMAINID'],
   'MeasurePoint2': ['SITEID', 'POINTNUM', 'VALUE', 'JPNUM'],
+  'Location': ['DESCRIPTION', 'EXPECTEDLIFE', 'LOCATION', 'PARENT','REPLACECOST', 'SITEID', 'STATUS', 'SYSTEMID', 'TYPE'],
 };
 
 Map<String, String> maximoServerDomains = {

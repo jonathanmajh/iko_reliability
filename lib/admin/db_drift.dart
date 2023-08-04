@@ -229,6 +229,30 @@ class MyDatabase extends _$MyDatabase {
     return row.first.id;
   }
 
+  Future<int> setAssetNew(
+      String assetNum, String siteId, bool isNewAsset) async {
+    var existingAsset = await getAsset(siteId, assetNum);
+    var newAsset = Asset(
+        assetnum: existingAsset.assetnum,
+        changedate: existingAsset.changedate,
+        description: existingAsset.description,
+        hierarchy: existingAsset.hierarchy,
+        id: existingAsset.id,
+        parent: existingAsset.parent,
+        priority: existingAsset.priority,
+        siteid: existingAsset.siteid,
+        status: existingAsset.status,
+        newAsset: isNewAsset);
+    var res = await (update(assets)
+          ..where((t) => t.siteid.equals(siteId) & t.assetnum.equals(assetNum)))
+        .writeReturning(newAsset);
+    if (res.length > 1) {
+      throw Exception('More than one asset was updated, database is most likely corrupt');
+    }
+
+    return res[0].id;
+  }
+
   Future<int> deleteSystemCriticalitys(int value) async {
     final row = await (delete(systemCriticalitys)
           ..where((t) => t.id.equals(value)))

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../admin/upload_maximo.dart';
 
 import '../admin/consts.dart';
@@ -8,13 +9,10 @@ import '../main.dart';
 import '../admin/upload_maximo.dart';
 
 class AssetCreationNotifier extends ChangeNotifier {
-
-  
-
   String selectedSite = 'NONE';
 
   Map<String, Asset> siteAssets = {};
-  Map<String, Asset> pendingAssets = {};
+  Map<String, String> pendingAssets = {};
   Map<String, List<Asset>> parentAssets = {};
 
   Future<void> setSite(String site, [bool notify = true]) async {
@@ -30,7 +28,7 @@ class AssetCreationNotifier extends ChangeNotifier {
         .getSiteAssets(site); //todo make it able to load other sites
     for (var row in dbrows) {
       if (row.newAsset) {
-        pendingAssets[row.assetnum] = row;
+        pendingAssets[row.assetnum] = 'new';
       }
       siteAssets[row.assetnum] = row;
       if (parentAssets.containsKey(row.parent)) {
@@ -62,6 +60,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     var newAsset = await database!.getAsset(site ?? selectedSite, assetNum);
 
     siteAssets[assetNum] = newAsset;
+    pendingAssets[assetNum] = 'new';
 
     if (!parentAssets.containsKey(parent)) {
       parentAssets[parent] = [];
@@ -84,6 +83,8 @@ class AssetCreationNotifier extends ChangeNotifier {
     if (!siteAssets[assetNum]!.newAsset) {
       throw 'Asset already exists in Maximo, cannot delete';
     }
+
+    pendingAssets.remove(assetNum);
 
     var parent = siteAssets[assetNum]!.parent;
     parentAssets[parent]!.remove(siteAssets[assetNum]!);
@@ -124,7 +125,46 @@ class AssetCreationNotifier extends ChangeNotifier {
     }
   }
 
-  void doNotify() {
-    notifyListeners();
+  Future<void> uploadAssets() async {
+    if (pendingAssets.isEmpty) {
+      return;
+    }
+    for (var entry in pendingAssets.entries) {
+      var assetNum = entry.key;
+
+      if (entry.value != 'new') {
+        continue;
+      }
+
+      try {
+        pendingAssets[assetNum] = 'pending';
+        notifyListeners();
+        var result =
+            await uploadAssetToMaximo(siteAssets[assetNum]!, 'MASTEST', this);
+        if (result.first) {
+          pendingAssets[assetNum] = 'success';
+          database!.setAssetNew(assetNum, selectedSite, false);
+        } else if (result.second == 'duplicate') {
+          pendingAssets[assetNum] = 'duplicate';
+          database!.setAssetNew(assetNum, selectedSite, false);
+        } else {
+          pendingAssets[assetNum] = 'fail';
+        }
+        notifyListeners();
+        continue;
+      } catch (e) {
+        print(e);
+        pendingAssets[assetNum] = 'fail';
+        notifyListeners();
+        continue;
+      }
+    }
+    //notifyListeners();
   }
+
+  //@override
+  /*void notifyListeners() {
+    print('notifying listeners');
+    super.notifyListeners();
+  }*/
 }

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:iko_reliability_flutter/admin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
+import 'package:iko_reliability_flutter/creation/pair.dart';
 import 'package:iko_reliability_flutter/main.dart';
 import '../creation/asset_creation_notifier.dart';
 import 'consts.dart';
@@ -306,42 +307,93 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
   return uploadData;
 }
 
-Future<Map<String, bool>> UploadAssetsToMaximo(
+Future<Pair<bool, String>> uploadAssetToMaximo(
+  Asset asset,
   String env,
   AssetCreationNotifier assetCreationNotifier,
 ) async {
-  const url = 'mxasset?action=importfile';
-  const headers = {
+  const assetUrl = 'iko_asset?action=importfile';
+  const locationUrl = 'iko_location?action=importfile';
+  var headers = {
     "preview": "1",
   };
 
-  var pendingAssets = assetCreationNotifier.pendingAssets.values;
-  var site = assetCreationNotifier.selectedSite;
-
-  Map<String, bool> uploadStatus = {};
-
-  for (var asset in pendingAssets) {
-    // check if asset already exists
-    if (!(await isNewAsset(asset.assetnum, assetCreationNotifier.selectedSite, env))) {
-      continue;
-    }
-
-    //attempt upload
-    var result = await maximoRequest(
-        url,
+  var locationResult = {};
+  print('checking if location exists');
+  if (!(await isNewLocation(
+      'L-${asset.assetnum}', assetCreationNotifier.selectedSite, env))) {
+    print('location already exists');
+    //return Pair(false, 'Location already exists');
+  } else {
+    //upload location
+    locationResult = await maximoRequest(
+        locationUrl,
         'post',
         env,
-        const ListToCsvConverter().convert([
-          ['SITEID', 'ASSETNUM', 'DESCRIPTION', 'LOCATION', 'PARENT', 'STATUS'],
-          [assetCreationNotifier.selectedSite, asset.assetnum, asset.description, asset.parent, 'OPERATING']
-        ]),
-        headers
-        );
+        const ListToCsvConverter().convert(
+          [
+            tableHeaders['Location']!,
+            [
+              asset.description,
+              0,
+              'L-${asset.assetnum}',
+              'L-${asset.parent}',
+              0,
+              assetCreationNotifier.selectedSite,
+              'OPERATING',
+              'GENERAL',
+              'OPERATING'
+            ]
+          ],
+        ),
+        headers,
+        false,
+        false);
 
-    uploadStatus[asset.assetnum] = result['status'] == 'failed' ? false : true;
+    print(locationResult);
+    if (locationResult['status'] == "failed") {
+      print('location upload failed');
+      //return Pair(false, 'Failed to upload location');
+    } else {
+      print('location upload finished');
+    }
   }
 
-  return uploadStatus;
+  print('checking if asset exists');
+  // check if asset already exists
+  if (!(await isNewAsset(
+      asset.assetnum, assetCreationNotifier.selectedSite, env))) {
+    print('Asset already exists');
+    return Pair(false, 'duplicate');
+  }
+
+  print('asset does not exist, uploading');
+  //test upload
+  var result = await maximoRequest(
+      assetUrl,
+      'post',
+      env,
+      const ListToCsvConverter().convert([
+        ['SITEID', 'ASSETNUM', 'DESCRIPTION', 'LOCATION', 'PARENT', 'STATUS'],
+        [
+          assetCreationNotifier.selectedSite,
+          asset.assetnum,
+          asset.description,
+          'L-${asset.assetnum}',
+          asset.parent,
+          'OPERATING'
+        ]
+      ]),
+      headers,
+      false,
+      false);
+  print('upload finished');
+
+  var uploadStatus = result['status'] == 'failed' ? false : true;
+
+  print(result);
+
+  return Pair(uploadStatus, result['status']);
 }
 
 Future<bool> isNewJobLabor(String jpNumber, String orgid, String craft,
@@ -429,16 +481,40 @@ Future<bool> isNewMeter(String meterName, String maximoEnvironment) async {
   }
 }
 
-Future<bool> isNewAsset(
-    String assetNum, String siteId, String maximoEnvironment) async {
+Future<bool> isNewLocation(
+    String location, String siteId, String maximoEnvironment) async {
   final url =
-      'mxasset?oslc.where=siteid="$siteId" and assetnum="$assetNum"&oslc.select=assetnum,siteid';
+      'iko_location?oslc.where=siteid="$siteId" and location="$location"&oslc.select=location,siteid';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
-  if (result["rdfs:member"] == null) {
+
+  print(result);
+
+  if (result["member"] == null) {
     throw Exception('Invalid Response from Maximo');
   }
 
-  if (result['rdfs:member']! == 'empty') {
+  if (result['status']! == 'empty') {
+    print('not new location');
+    return true;
+  } else {
+    return false;
+  }
+}
+
+Future<bool> isNewAsset(
+    String assetNum, String siteId, String maximoEnvironment) async {
+  final url =
+      'iko_asset?oslc.where=siteid="$siteId" and assetnum="$assetNum"&oslc.select=assetnum,siteid';
+  final result = await maximoRequest(url, 'get', maximoEnvironment);
+
+  print(result);
+
+  if (result["member"] == null) {
+    throw Exception('Invalid Response from Maximo');
+  }
+
+  if (result['status']! == 'empty') {
+    print('not new asset');
     return true;
   } else {
     return false;
@@ -459,7 +535,10 @@ Future<bool> uploadGeneric(List<String> data, String maximoEnvironment,
 }
 
 Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
-    [String? body, Map<String, String>? header]) async {
+    [String? body,
+    Map<String, String>? header,
+    bool addQuery = true,
+    bool preview = false]) async {
   url = '${maximoServerDomains[env]}$url';
   final login = await getLoginMaximo(env);
   header ??= {};
@@ -504,9 +583,11 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     try {
       response = await http.post(
         Uri.parse(
-          url.contains('?')
-              ? '$url&action=importfile'
-              : '$url?action=importfile',
+          addQuery
+              ? (url.contains('?')
+                  ? '$url&action=importfile'
+                  : '$url?action=importfile')
+              : url,
         ),
         headers: header,
         body: body,
@@ -527,6 +608,9 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     }
     if (parsed['totaldoc'] != null && parsed['validdoc'] != null) {
       if (parsed['totaldoc'] == parsed['validdoc']) {
+        if (preview == true) {
+          return {'status': 'preview'};
+        }
         // preview passed
         header.remove('preview');
         try {

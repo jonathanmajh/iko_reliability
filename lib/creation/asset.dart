@@ -36,7 +36,8 @@ class _AssetPageState extends State<AssetPage>
   List<PlutoRow> rows = [];
 
   int fabIndex = 0;
-  List<Pair<Icon, Widget>> fabList = [ //pairs of icons and alert dialogs
+  List<Pair<Icon, Widget>> fabList = [
+    //pairs of icons and alert dialogs
     Pair(const Icon(Icons.add), const AssetCreationDialog()),
     Pair(const Icon(Icons.upload), const AssetUploadDialog()),
   ];
@@ -104,25 +105,21 @@ class _AssetPageState extends State<AssetPage>
               ElevatedButton(
                 child: Text('print pending'),
                 onPressed: () {
-                  for (var asset in context
+                  //context.read<AssetCreationNotifier>().notifyListeners();
+                  for (var entry in context
                       .read<AssetCreationNotifier>()
-                      .pendingAssets
-                      .values
+                      .pendingAssets.entries
                       .toList()) {
-                    print("${asset.toString()}\n\n");
+                    print("${entry}\n\n");
                   }
                 },
               ),
-              /*ElevatedButton(
+              ElevatedButton(
                 child: const Text('print assets'),
                 onPressed: () async {
-                  final assets = await database!.getSiteAssets(
-                      context.read<AssetCreationNotifier>().selectedSite);
-                  for (var asset in assets) {
-                    print(asset.toString() + "\n \n");
-                  }
+                  context.read<AssetCreationNotifier>().setSite(context.read<AssetCreationNotifier>().selectedSite);
                 },
-              ),*/
+              ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(30),
@@ -245,7 +242,10 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
           readOnly: true,
           renderer: (rendererContext) {
             //if asset is new, display a delete button
-            if (rendererContext.cell.value == "new") {
+            var assetStatus = context
+                .read<AssetCreationNotifier>()
+                .pendingAssets[rendererContext.row.cells['hierarchy']!.value];
+            if (assetStatus == "new") {
               return IconButton(
                 icon: const Icon(
                   Icons.delete,
@@ -346,7 +346,10 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
       _loadGrid(assetCreationNotifier.selectedSite);
       return PlutoGrid(
         rowColorCallback: (rowColorContext) {
-          if (rowColorContext.row.cells['status']!.value == 'PENDING UPLOAD') {
+          var assetStatus = context
+                .read<AssetCreationNotifier>()
+                .pendingAssets[rowColorContext.row.cells['hierarchy']!.value];
+          if (assetStatus == 'new') {
             return (themeManager.isDark
                 ? const Color.fromARGB(255, 18, 92, 3)
                 : const Color.fromARGB(255, 133, 252, 133));
@@ -596,8 +599,11 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
           type: PlutoColumnType.text(),
           readOnly: true,
           renderer: (rendererContext) {
+            var assetStatus = context
+                .read<AssetCreationNotifier>()
+                .pendingAssets[rendererContext.row.cells['hierarchy']!.value];
             //if asset is new, display a delete button
-            if (rendererContext.cell.value == "new") {
+            if (assetStatus == "new") {
               return IconButton(
                 icon: const Icon(
                   Icons.delete,
@@ -620,6 +626,39 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
                 color: Colors.red,
                 padding: const EdgeInsets.all(0),
               );
+            }
+
+            if (assetStatus == "pending") {
+              return LoadingAnimationWidget.fourRotatingDots(
+                size: 18,
+                color: Colors.blue,
+              );
+            }
+
+            if (assetStatus == "success") {
+              return const Icon(
+                Icons.done,
+                color: Colors.green,
+                size: 18,
+              );
+            }
+
+            if (assetStatus == "fail") {
+              return const Icon(
+                Icons.close,
+                color: Colors.red,
+                size: 18,
+              );
+            }
+
+            if (assetStatus == "duplicate") {
+              return const Tooltip(
+                  message: "Asset already exists",
+                  child: Icon(
+                    Icons.error,
+                    color: Colors.grey,
+                    size: 18,
+                  ));
             }
 
             //If not new asset, then just display a checkmark
@@ -712,27 +751,25 @@ class _AssetUploadDialogState extends State<AssetUploadDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AssetCreationNotifier>(
-        builder: (context, assetCreationNotifier, child) {
-      return AlertDialog(
-          title: const Text('Upload Assets'),
-          content: Container(
-            child: Text('Are you sure you want to upload these assets?'),
+    return AlertDialog(
+        title: const Text('Upload Assets'),
+        content: Container(
+          child: Text('Are you sure you want to upload these assets?'),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.pop(context, 'Cancel');
+            },
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.pop(context, 'Cancel');
-              },
-            ),
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.pop(context, 'OK');
-              },
-            )
-          ]);
-    });
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              context.read<AssetCreationNotifier>().uploadAssets();
+              Navigator.pop(context, 'OK');
+            },
+          )
+        ]);
   }
 }
