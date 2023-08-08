@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,6 +7,7 @@ import 'db_drift.dart';
 import 'end_drawer.dart';
 import 'pm_meter_update_functions.dart';
 
+@RoutePage()
 class PmMeterUpdatePage extends StatefulWidget {
   const PmMeterUpdatePage({Key? key}) : super(key: key);
 

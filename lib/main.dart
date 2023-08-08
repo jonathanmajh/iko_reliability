@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
-import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
@@ -20,6 +19,7 @@ import 'bin/check_update.dart';
 import 'criticality/asset_criticality_notifier.dart';
 import 'criticality/criticality_notifier.dart';
 import 'admin/process_state_notifier.dart';
+import 'routes/route.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -60,7 +60,7 @@ class MaximoServerNotifier extends ChangeNotifier {
 
 class MyApp extends StatelessWidget {
   MyApp(this.settingsNotifier, {Key? key}) : super(key: key);
-  final _appRouter = AppRouter(navigatorKey);
+  final _appRouter = AppRouter(navigatorKey: navigatorKey);
   final SettingsNotifier settingsNotifier;
   // This widget is the root of your application.
   @override
@@ -86,8 +86,7 @@ class MyApp extends StatelessWidget {
         child: Builder(
           builder: (context) {
             return MaterialApp.router(
-              routerDelegate: _appRouter.delegate(),
-              routeInformationParser: _appRouter.defaultRouteParser(),
+              routerConfig: _appRouter.config(),
               title: 'IKO Flutter Reliability',
               theme: ThemeData(
                 useMaterial3: true,
@@ -107,6 +106,7 @@ class MyApp extends StatelessWidget {
 }
 
 ///Homepage widget (Stateful)
+@RoutePage()
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 

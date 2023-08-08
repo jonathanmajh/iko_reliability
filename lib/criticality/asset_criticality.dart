@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
@@ -17,6 +18,7 @@ import '../settings/theme_manager.dart';
 import 'criticality_notifier.dart';
 import 'functions.dart';
 
+@RoutePage()
 class AssetCriticalityPage extends StatefulWidget {
   const AssetCriticalityPage({Key? key}) : super(key: key);
 

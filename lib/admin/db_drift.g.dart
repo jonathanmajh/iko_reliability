@@ -123,29 +123,36 @@ class Setting extends DataClass implements Insertable<Setting> {
 class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<String> key;
   final Value<String> value;
+  final Value<int> rowid;
   const SettingsCompanion({
     this.key = const Value.absent(),
     this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   SettingsCompanion.insert({
     required String key,
     required String value,
+    this.rowid = const Value.absent(),
   })  : key = Value(key),
         value = Value(value);
   static Insertable<Setting> custom({
     Expression<String>? key,
     Expression<String>? value,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (key != null) 'key': key,
       if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  SettingsCompanion copyWith({Value<String>? key, Value<String>? value}) {
+  SettingsCompanion copyWith(
+      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
     return SettingsCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -158,6 +165,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     if (value.present) {
       map['value'] = Variable<String>(value.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -165,7 +175,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   String toString() {
     return (StringBuffer('SettingsCompanion(')
           ..write('key: $key, ')
-          ..write('value: $value')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -294,29 +305,36 @@ class LoginSetting extends DataClass implements Insertable<LoginSetting> {
 class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
   final Value<String> key;
   final Value<String> value;
+  final Value<int> rowid;
   const LoginSettingsCompanion({
     this.key = const Value.absent(),
     this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   LoginSettingsCompanion.insert({
     required String key,
     required String value,
+    this.rowid = const Value.absent(),
   })  : key = Value(key),
         value = Value(value);
   static Insertable<LoginSetting> custom({
     Expression<String>? key,
     Expression<String>? value,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (key != null) 'key': key,
       if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  LoginSettingsCompanion copyWith({Value<String>? key, Value<String>? value}) {
+  LoginSettingsCompanion copyWith(
+      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
     return LoginSettingsCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -329,6 +347,9 @@ class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
     if (value.present) {
       map['value'] = Variable<String>(value.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -336,7 +357,8 @@ class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
   String toString() {
     return (StringBuffer('LoginSettingsCompanion(')
           ..write('key: $key, ')
-          ..write('value: $value')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -598,6 +620,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
   final Value<String> freqUnit;
   final Value<String> condition;
   final Value<String> craft;
+  final Value<int> rowid;
   const MeterDBsCompanion({
     this.meter = const Value.absent(),
     this.inspect = const Value.absent(),
@@ -606,6 +629,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     this.freqUnit = const Value.absent(),
     this.condition = const Value.absent(),
     this.craft = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   MeterDBsCompanion.insert({
     required String meter,
@@ -615,6 +639,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     required String freqUnit,
     required String condition,
     required String craft,
+    this.rowid = const Value.absent(),
   })  : meter = Value(meter),
         inspect = Value(inspect),
         description = Value(description),
@@ -630,6 +655,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     Expression<String>? freqUnit,
     Expression<String>? condition,
     Expression<String>? craft,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (meter != null) 'meter': meter,
@@ -639,6 +665,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
       if (freqUnit != null) 'freq_unit': freqUnit,
       if (condition != null) 'condition': condition,
       if (craft != null) 'craft': craft,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -649,7 +676,8 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
       Value<int>? frequency,
       Value<String>? freqUnit,
       Value<String>? condition,
-      Value<String>? craft}) {
+      Value<String>? craft,
+      Value<int>? rowid}) {
     return MeterDBsCompanion(
       meter: meter ?? this.meter,
       inspect: inspect ?? this.inspect,
@@ -658,6 +686,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
       freqUnit: freqUnit ?? this.freqUnit,
       condition: condition ?? this.condition,
       craft: craft ?? this.craft,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -685,6 +714,9 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     if (craft.present) {
       map['craft'] = Variable<String>(craft.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -697,7 +729,8 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
           ..write('frequency: $frequency, ')
           ..write('freqUnit: $freqUnit, ')
           ..write('condition: $condition, ')
-          ..write('craft: $craft')
+          ..write('craft: $craft, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -883,17 +916,20 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
   final Value<String> code;
   final Value<String> description;
   final Value<String?> action;
+  final Value<int> rowid;
   const ObservationsCompanion({
     this.meter = const Value.absent(),
     this.code = const Value.absent(),
     this.description = const Value.absent(),
     this.action = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   ObservationsCompanion.insert({
     required String meter,
     required String code,
     required String description,
     this.action = const Value.absent(),
+    this.rowid = const Value.absent(),
   })  : meter = Value(meter),
         code = Value(code),
         description = Value(description);
@@ -902,12 +938,14 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
     Expression<String>? code,
     Expression<String>? description,
     Expression<String>? action,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (meter != null) 'meter': meter,
       if (code != null) 'code': code,
       if (description != null) 'description': description,
       if (action != null) 'action': action,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -915,12 +953,14 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
       {Value<String>? meter,
       Value<String>? code,
       Value<String>? description,
-      Value<String?>? action}) {
+      Value<String?>? action,
+      Value<int>? rowid}) {
     return ObservationsCompanion(
       meter: meter ?? this.meter,
       code: code ?? this.code,
       description: description ?? this.description,
       action: action ?? this.action,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -939,6 +979,9 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
     if (action.present) {
       map['action'] = Variable<String>(action.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -948,7 +991,8 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
           ..write('meter: $meter, ')
           ..write('code: $code, ')
           ..write('description: $description, ')
-          ..write('action: $action')
+          ..write('action: $action, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1732,6 +1776,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
   final Value<double> downtime;
   final Value<String> type;
   final Value<String> assetnum;
+  final Value<int> rowid;
   const WorkordersCompanion({
     this.wonum = const Value.absent(),
     this.description = const Value.absent(),
@@ -1741,6 +1786,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     this.downtime = const Value.absent(),
     this.type = const Value.absent(),
     this.assetnum = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   WorkordersCompanion.insert({
     required String wonum,
@@ -1751,6 +1797,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     required double downtime,
     required String type,
     required String assetnum,
+    this.rowid = const Value.absent(),
   })  : wonum = Value(wonum),
         description = Value(description),
         status = Value(status),
@@ -1768,6 +1815,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     Expression<double>? downtime,
     Expression<String>? type,
     Expression<String>? assetnum,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (wonum != null) 'wonum': wonum,
@@ -1778,6 +1826,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       if (downtime != null) 'downtime': downtime,
       if (type != null) 'type': type,
       if (assetnum != null) 'assetnum': assetnum,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -1789,7 +1838,8 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       Value<String>? reportdate,
       Value<double>? downtime,
       Value<String>? type,
-      Value<String>? assetnum}) {
+      Value<String>? assetnum,
+      Value<int>? rowid}) {
     return WorkordersCompanion(
       wonum: wonum ?? this.wonum,
       description: description ?? this.description,
@@ -1799,6 +1849,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       downtime: downtime ?? this.downtime,
       type: type ?? this.type,
       assetnum: assetnum ?? this.assetnum,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1829,6 +1880,9 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     if (assetnum.present) {
       map['assetnum'] = Variable<String>(assetnum.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1842,7 +1896,8 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
           ..write('reportdate: $reportdate, ')
           ..write('downtime: $downtime, ')
           ..write('type: $type, ')
-          ..write('assetnum: $assetnum')
+          ..write('assetnum: $assetnum, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:iko_reliability_flutter/admin/upload_maximo.dart';
 
 // import '../main.dart';
-
+@RoutePage()
 class AssetPage extends StatefulWidget {
   const AssetPage({Key? key}) : super(key: key);
   @override

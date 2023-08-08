@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'template_notifier.dart';
 import 'pm_widgets.dart';
 import 'upload_maximo.dart';
 
+@RoutePage()
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
 
