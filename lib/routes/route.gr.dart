@@ -1,213 +1,159 @@
-// **************************************************************************
-// AutoRouteGenerator
-// **************************************************************************
-
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 // **************************************************************************
-// AutoRouteGenerator
+// AutoRouterGenerator
 // **************************************************************************
-//
+
 // ignore_for_file: type=lint
+// coverage:ignore-file
 
-// ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i9;
-import 'package:flutter/material.dart' as _i10;
+part of 'route.dart';
 
-import '../admin/asset.dart' as _i3;
-import '../admin/contractor.dart' as _i6;
-import '../admin/pm_check.dart' as _i7;
-import '../admin/pm_meter_update.dart' as _i8;
-import '../criticality/asset_criticality.dart' as _i4;
-import '../criticality/system_criticality.dart' as _i5;
-import '../main.dart' as _i1;
-import '../test/test.dart' as _i2;
-
-class AppRouter extends _i9.RootStackRouter {
-  AppRouter([_i10.GlobalKey<_i10.NavigatorState>? navigatorKey])
-      : super(navigatorKey);
+abstract class _$AppRouter extends RootStackRouter {
+  // ignore: unused_element
+  _$AppRouter({super.navigatorKey});
 
   @override
-  final Map<String, _i9.PageFactory> pagesMap = {
-    HomeRoute.name: (routeData) {
-      return _i9.MaterialPageX<dynamic>(
+  final Map<String, PageFactory> pagesMap = {
+    AssetCriticalityRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i1.HomePage(),
-      );
-    },
-    MyTestRoute.name: (routeData) {
-      return _i9.MaterialPageX<dynamic>(
-        routeData: routeData,
-        child: const _i2.MyTestPage(),
+        child: const AssetCriticalityPage(),
       );
     },
     AssetRoute.name: (routeData) {
-      return _i9.MaterialPageX<dynamic>(
+      return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i3.AssetPage(),
-      );
-    },
-    AssetCriticalityRoute.name: (routeData) {
-      return _i9.MaterialPageX<dynamic>(
-        routeData: routeData,
-        child: const _i4.AssetCriticalityPage(),
-      );
-    },
-    SystemCriticalityRoute.name: (routeData) {
-      return _i9.MaterialPageX<dynamic>(
-        routeData: routeData,
-        child: const _i5.SystemCriticalityPage(),
+        child: const AssetPage(),
       );
     },
     ContractorRoute.name: (routeData) {
-      return _i9.MaterialPageX<dynamic>(
+      return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i6.ContractorPage(),
+        child: const ContractorPage(),
+      );
+    },
+    HomeRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const HomePage(),
       );
     },
     PmCheckRoute.name: (routeData) {
-      return _i9.MaterialPageX<dynamic>(
+      return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i7.PmCheckPage(),
+        child: const PmCheckPage(),
       );
     },
     PmMeterUpdateRoute.name: (routeData) {
-      return _i9.MaterialPageX<dynamic>(
+      return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i8.PmMeterUpdatePage(),
+        child: const PmMeterUpdatePage(),
+      );
+    },
+    SystemCriticalityRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SystemCriticalityPage(),
       );
     },
   };
-
-  @override
-  List<_i9.RouteConfig> get routes => [
-        _i9.RouteConfig(
-          HomeRoute.name,
-          path: '/',
-        ),
-        _i9.RouteConfig(
-          MyTestRoute.name,
-          path: '/test',
-        ),
-        _i9.RouteConfig(
-          AssetRoute.name,
-          path: '/asset',
-        ),
-        _i9.RouteConfig(
-          AssetCriticalityRoute.name,
-          path: '/asset/criticality',
-        ),
-        _i9.RouteConfig(
-          SystemCriticalityRoute.name,
-          path: '/asset/system-criticality',
-        ),
-        _i9.RouteConfig(
-          ContractorRoute.name,
-          path: '/contractor',
-        ),
-        _i9.RouteConfig(
-          PmCheckRoute.name,
-          path: '/pm/check',
-        ),
-        _i9.RouteConfig(
-          PmMeterUpdateRoute.name,
-          path: '/pm/update-meter',
-        ),
-      ];
 }
 
 /// generated route for
-/// [_i1.HomePage]
-class HomeRoute extends _i9.PageRouteInfo<void> {
-  const HomeRoute()
-      : super(
-          HomeRoute.name,
-          path: '/',
-        );
-
-  static const String name = 'HomeRoute';
-}
-
-/// generated route for
-/// [_i2.MyTestPage]
-class MyTestRoute extends _i9.PageRouteInfo<void> {
-  const MyTestRoute()
-      : super(
-          MyTestRoute.name,
-          path: '/test',
-        );
-
-  static const String name = 'MyTestRoute';
-}
-
-/// generated route for
-/// [_i3.AssetPage]
-class AssetRoute extends _i9.PageRouteInfo<void> {
-  const AssetRoute()
-      : super(
-          AssetRoute.name,
-          path: '/asset',
-        );
-
-  static const String name = 'AssetRoute';
-}
-
-/// generated route for
-/// [_i4.AssetCriticalityPage]
-class AssetCriticalityRoute extends _i9.PageRouteInfo<void> {
-  const AssetCriticalityRoute()
+/// [AssetCriticalityPage]
+class AssetCriticalityRoute extends PageRouteInfo<void> {
+  const AssetCriticalityRoute({List<PageRouteInfo>? children})
       : super(
           AssetCriticalityRoute.name,
-          path: '/asset/criticality',
+          initialChildren: children,
         );
 
   static const String name = 'AssetCriticalityRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i5.SystemCriticalityPage]
-class SystemCriticalityRoute extends _i9.PageRouteInfo<void> {
-  const SystemCriticalityRoute()
+/// [AssetPage]
+class AssetRoute extends PageRouteInfo<void> {
+  const AssetRoute({List<PageRouteInfo>? children})
       : super(
-          SystemCriticalityRoute.name,
-          path: '/asset/system-criticality',
+          AssetRoute.name,
+          initialChildren: children,
         );
 
-  static const String name = 'SystemCriticalityRoute';
+  static const String name = 'AssetRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i6.ContractorPage]
-class ContractorRoute extends _i9.PageRouteInfo<void> {
-  const ContractorRoute()
+/// [ContractorPage]
+class ContractorRoute extends PageRouteInfo<void> {
+  const ContractorRoute({List<PageRouteInfo>? children})
       : super(
           ContractorRoute.name,
-          path: '/contractor',
+          initialChildren: children,
         );
 
   static const String name = 'ContractorRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i7.PmCheckPage]
-class PmCheckRoute extends _i9.PageRouteInfo<void> {
-  const PmCheckRoute()
+/// [HomePage]
+class HomeRoute extends PageRouteInfo<void> {
+  const HomeRoute({List<PageRouteInfo>? children})
+      : super(
+          HomeRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'HomeRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [PmCheckPage]
+class PmCheckRoute extends PageRouteInfo<void> {
+  const PmCheckRoute({List<PageRouteInfo>? children})
       : super(
           PmCheckRoute.name,
-          path: '/pm/check',
+          initialChildren: children,
         );
 
   static const String name = 'PmCheckRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i8.PmMeterUpdatePage]
-class PmMeterUpdateRoute extends _i9.PageRouteInfo<void> {
-  const PmMeterUpdateRoute()
+/// [PmMeterUpdatePage]
+class PmMeterUpdateRoute extends PageRouteInfo<void> {
+  const PmMeterUpdateRoute({List<PageRouteInfo>? children})
       : super(
           PmMeterUpdateRoute.name,
-          path: '/pm/update-meter',
+          initialChildren: children,
         );
 
   static const String name = 'PmMeterUpdateRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SystemCriticalityPage]
+class SystemCriticalityRoute extends PageRouteInfo<void> {
+  const SystemCriticalityRoute({List<PageRouteInfo>? children})
+      : super(
+          SystemCriticalityRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SystemCriticalityRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }

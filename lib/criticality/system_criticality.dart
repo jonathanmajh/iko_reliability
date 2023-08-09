@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
@@ -7,6 +8,7 @@ import 'package:pluto_grid/pluto_grid.dart';
 
 import '../main.dart';
 
+@RoutePage()
 class SystemCriticalityPage extends StatefulWidget {
   const SystemCriticalityPage({Key? key}) : super(key: key);
 

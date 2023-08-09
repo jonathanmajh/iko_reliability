@@ -140,7 +140,7 @@ class AssetCriticalityWithAsset {
     this.assetCriticality,
   );
 
-  final Asset asset;
+  final Asset? asset;
   final AssetCriticality assetCriticality;
 }
 
@@ -430,9 +430,10 @@ class MyDatabase extends _$MyDatabase {
     var stuff = await (select(assetCriticalitys).join([
       leftOuterJoin(assets, assets.id.equalsExp(assetCriticalitys.asset))
     ])).get();
+
     return stuff.map((row) {
       return AssetCriticalityWithAsset(
-        row.readTable(assets),
+        row.readTableOrNull(assets),
         row.readTable(assetCriticalitys),
       );
     }).toList();
