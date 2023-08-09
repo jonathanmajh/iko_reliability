@@ -108,7 +108,7 @@ class _PMDetailViewState extends State<PMDetailView>
                   } catch (e) {
                     templateNotifier.addStatusMessage(selected.selectedFile!,
                         selected.selectedTemplate!, '$e');
-                    ScaffoldMessenger.of(context)
+                    ScaffoldMessenger.of(navigatorKey.currentContext!)
                         .showSnackBar(SnackBar(content: Text('$e')));
                   }
                 },

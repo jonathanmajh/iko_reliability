@@ -655,7 +655,8 @@ Future<List<String>> maximoAssetCaller(
     }
     messages.add('Updated $siteid');
   }
-  prov.Provider.of<SettingsNotifier>(context, listen: false)
+  prov.Provider.of<SettingsNotifier>(navigatorKey.currentContext!,
+          listen: false)
       .addLoadedSites(loadedSiteIds);
   return messages;
 }

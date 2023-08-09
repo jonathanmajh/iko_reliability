@@ -81,7 +81,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         if (oldMeterNameController.text.isNotEmpty) {
                           final temp = await getJobtasks(
                               oldMeterNameController.text,
-                              Provider.of<MaximoServerNotifier>(context,
+                              Provider.of<MaximoServerNotifier>(
+                                      navigatorKey.currentContext!,
                                       listen: false)
                                   .maximoServerSelected);
                           setState(() {
@@ -91,7 +92,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         if (meterNameController.text.isNotEmpty) {
                           final temp = await getJobtasks(
                               meterNameController.text,
-                              Provider.of<MaximoServerNotifier>(context,
+                              Provider.of<MaximoServerNotifier>(
+                                      navigatorKey.currentContext!,
                                       listen: false)
                                   .maximoServerSelected);
                           setState(() {

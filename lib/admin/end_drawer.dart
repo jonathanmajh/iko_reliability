@@ -415,7 +415,8 @@ class _EndDrawerState extends State<EndDrawer> {
                   //export as csv
                   if (stateManager != null) {
                     exportAssetCriticalityAsCSV(
-                        stateManager: stateManager, context: context);
+                        stateManager: stateManager,
+                        context: navigatorKey.currentContext!);
                   }
                 },
               ),
