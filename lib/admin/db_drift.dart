@@ -88,7 +88,10 @@ class Assets extends Table {
   TextColumn? get parent => text().nullable()();
   IntColumn get priority => integer()();
   IntColumn get id => integer().autoIncrement()();
-  BoolColumn get newAsset => boolean().withDefault(const Constant(false))();
+  IntColumn get newAsset => integer().withDefault(const Constant(0))();
+  // 0 = existing asset
+  //1 = new asset
+  //-1 = asset that failed upload (e.g. location and asset were uploaded, but job plan failed)
 
   @override
   List<Set<Column>> get uniqueKeys => [
@@ -216,7 +219,7 @@ class MyDatabase extends _$MyDatabase {
       priority: 0,
       status: 'Planning',
       changedate: 'N/A',
-      newAsset: Value(true),
+      newAsset: Value(1),
     ));
     return row.id;
   }
@@ -229,8 +232,14 @@ class MyDatabase extends _$MyDatabase {
     return row.first.id;
   }
 
-  Future<int> setAssetNew(
-      String assetNum, String siteId, bool isNewAsset) async {
+
+  ///0 = existing asset
+  ///
+  ///1 = new asset
+  ///
+  ///-1 = asset that failed upload (e.g. location and asset were uploaded, but job plan failed)
+  Future<int> setAssetStatus(
+      String assetNum, String siteId, int assetStatus) async {
     var existingAsset = await getAsset(siteId, assetNum);
     var newAsset = Asset(
         assetnum: existingAsset.assetnum,
@@ -242,12 +251,13 @@ class MyDatabase extends _$MyDatabase {
         priority: existingAsset.priority,
         siteid: existingAsset.siteid,
         status: existingAsset.status,
-        newAsset: isNewAsset);
+        newAsset: assetStatus);
     var res = await (update(assets)
           ..where((t) => t.siteid.equals(siteId) & t.assetnum.equals(assetNum)))
         .writeReturning(newAsset);
     if (res.length > 1) {
-      throw Exception('More than one asset was updated, database is most likely corrupt');
+      throw Exception(
+          'More than one asset was updated, database is most likely corrupt');
     }
 
     return res[0].id;

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/db_drift.dart';
@@ -108,7 +109,8 @@ class _AssetPageState extends State<AssetPage>
                   //context.read<AssetCreationNotifier>().notifyListeners();
                   for (var entry in context
                       .read<AssetCreationNotifier>()
-                      .pendingAssets.entries
+                      .pendingAssets
+                      .entries
                       .toList()) {
                     print("${entry}\n\n");
                   }
@@ -117,7 +119,8 @@ class _AssetPageState extends State<AssetPage>
               ElevatedButton(
                 child: const Text('print assets'),
                 onPressed: () async {
-                  context.read<AssetCreationNotifier>().setSite(context.read<AssetCreationNotifier>().selectedSite);
+                  context.read<AssetCreationNotifier>().setSite(
+                      context.read<AssetCreationNotifier>().selectedSite);
                 },
               ),
               Expanded(
@@ -207,33 +210,9 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
         width: 100,
         readOnly: true,
         enableAutoEditing: false,
-        title: 'Priority',
-        field: 'priority',
-        type: PlutoColumnType.number(),
-      ),
-      PlutoColumn(
-        width: 100,
-        readOnly: true,
-        enableAutoEditing: false,
         title: 'Site',
         field: 'site',
         type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
-        hide: true,
-        width: 200,
-        readOnly: true,
-        enableAutoEditing: false,
-        title: 'Status',
-        field: 'status',
-        type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
-        title: 'ID',
-        field: 'id',
-        type: PlutoColumnType.number(),
-        readOnly: true,
-        //hide: true,
       ),
       PlutoColumn(
           title: 'Actions',
@@ -267,6 +246,32 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
                 iconSize: 18,
                 color: Colors.red,
                 padding: const EdgeInsets.all(0),
+              );
+            }
+
+            if (assetStatus == "warning") {
+              return IconButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AssetErrorMessageDialog(
+                              assetNum: rendererContext
+                                  .row.cells['hierarchy']!.value);
+                        });
+                  },
+                  icon: const Icon(
+                    Icons.warning,
+                    color: Colors.yellow,
+                    size: 18,
+                  ));
+            }
+
+            if (assetStatus == 'fail'){
+              return const Icon(
+                Icons.close,
+                color: Colors.red,
+                size: 18,
               );
             }
 
@@ -308,13 +313,9 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
         rows.add(PlutoRow(
           cells: {
             'description': PlutoCell(value: child.description),
-            'priority': PlutoCell(value: child.priority),
             'hierarchy': PlutoCell(value: child.assetnum),
-            'id': PlutoCell(value: child.id),
             'site': PlutoCell(value: child.siteid),
-            'status': PlutoCell(
-                value: child.newAsset ? 'PENDING UPLOAD' : child.status),
-            'actions': PlutoCell(value: child.newAsset ? 'new' : ''),
+            'actions': PlutoCell(value: ''),
           },
           type: PlutoRowType.group(
               expanded: true,
@@ -347,12 +348,16 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
       return PlutoGrid(
         rowColorCallback: (rowColorContext) {
           var assetStatus = context
-                .read<AssetCreationNotifier>()
-                .pendingAssets[rowColorContext.row.cells['hierarchy']!.value];
+              .read<AssetCreationNotifier>()
+              .pendingAssets[rowColorContext.row.cells['hierarchy']!.value];
           if (assetStatus == 'new') {
             return (themeManager.isDark
                 ? const Color.fromARGB(255, 18, 92, 3)
                 : const Color.fromARGB(255, 133, 252, 133));
+          } else if (assetStatus == 'warning' || assetStatus == 'fail') {
+            return (themeManager.isDark
+                ? Color.fromARGB(255, 94, 15, 15)
+                : Color.fromARGB(255, 221, 93, 93));
           } else {
             return (themeManager.isDark
                 ? const Color.fromARGB(255, 17, 17, 17)
@@ -487,6 +492,9 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                 }
                 return null;
               },
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(100),
+              ],
             ),
           ]),
         ),
@@ -565,33 +573,9 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
         width: 100,
         readOnly: true,
         enableAutoEditing: false,
-        title: 'Priority',
-        field: 'priority',
-        type: PlutoColumnType.number(),
-      ),
-      PlutoColumn(
-        width: 100,
-        readOnly: true,
-        enableAutoEditing: false,
         title: 'Site',
         field: 'site',
         type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
-        hide: true,
-        width: 200,
-        readOnly: true,
-        enableAutoEditing: false,
-        title: 'Status',
-        field: 'status',
-        type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
-        title: 'ID',
-        field: 'id',
-        type: PlutoColumnType.number(),
-        readOnly: true,
-        //hide: true,
       ),
       PlutoColumn(
           title: 'Actions',
@@ -653,10 +637,28 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
 
             if (assetStatus == "duplicate") {
               return const Tooltip(
-                  message: "Asset already exists",
+                  message: "Asset has already been uploaded.",
                   child: Icon(
                     Icons.error,
                     color: Colors.grey,
+                    size: 18,
+                  ));
+            }
+
+            if (assetStatus == "warning") {
+              return IconButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AssetErrorMessageDialog(
+                              assetNum: rendererContext
+                                  .row.cells['hierarchy']!.value);
+                        });
+                  },
+                  icon: const Icon(
+                    Icons.warning,
+                    color: Colors.yellow,
                     size: 18,
                   ));
             }
@@ -689,16 +691,13 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
     List<PlutoRow> rows = [];
 
     for (Asset asset in siteAssets) {
-      if (asset.newAsset) {
+      if (asset.newAsset != 0) {
         rows.add(PlutoRow(
           cells: {
             'description': PlutoCell(value: asset.description),
-            'priority': PlutoCell(value: asset.priority),
             'hierarchy': PlutoCell(value: asset.assetnum),
-            'id': PlutoCell(value: asset.id),
             'site': PlutoCell(value: asset.siteid),
-            'status': PlutoCell(value: 'PENDING UPLOAD'),
-            'actions': PlutoCell(value: 'new'),
+            'actions': PlutoCell(value: ''),
           },
         ));
       }
@@ -771,5 +770,49 @@ class _AssetUploadDialogState extends State<AssetUploadDialog> {
             },
           )
         ]);
+  }
+}
+
+class AssetErrorMessageDialog extends StatefulWidget {
+  const AssetErrorMessageDialog({Key? key, required this.assetNum})
+      : super(key: key);
+
+  final String assetNum;
+
+  @override
+  State<AssetErrorMessageDialog> createState() =>
+      _AssetErrorMessageDialogState();
+}
+
+class _AssetErrorMessageDialogState extends State<AssetErrorMessageDialog> {
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Widget build(BuildContext context) {
+    return Consumer<AssetCreationNotifier>(
+        builder: (context, assetCreationNotifier, child) {
+      return AlertDialog(
+          insetPadding: const EdgeInsets.fromLTRB(400, 0, 400, 0),
+          title: const Text('Asset Upload Failed!'),
+          content: Container(
+            child: Text(assetCreationNotifier.failedAssets[widget.assetNum]! +
+                '\n\nPlease use maximo to fix this error, or try uploading again.'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.pop(context, 'Ok');
+              },
+            ),
+          ]);
+    });
   }
 }

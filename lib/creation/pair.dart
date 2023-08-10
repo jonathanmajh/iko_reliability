@@ -101,4 +101,8 @@ class Pair<T1, T2> {
   List<dynamic> toList() {
     return [_a, _b];
   }
+
+  Map<T1, T2> toMap() {
+    return {_a: _b};
+  }
 }

@@ -25,6 +25,27 @@ const workType = {
   'SAF': 'Safety',
 };
 
+const assetWorkType = {
+  "BDE": {"Description" : "Breakdown - Electrical", "Priority" : "4"},
+  "BDM": {"Description" : "Breakdown - Mechanical", "Priority" : "4"},
+  "BDO": {"Description" : "Breakdown - Operational", "Priority" : "4"},
+  "CORE": {"Description" : "Corrective - Post-Repair - Electrical", "Priority" : "3"},
+  "CORM": {"Description" : "Corrective - Post-Repair - Mechanical", "Priority" : "3"},
+  "EPIE": {"Description" : "Equipment/Process Improvement - Electrical", "Priority" : "1"},
+  "EPIM": {"Description" : "Equipment/Process Improvement - Mechanical", "Priority" : "1"},
+  "HKGM": {"Description" : "Housekeeping", "Priority" : "1"},
+  "INAE": {"Description" : "Inspection - Ad Hoc - Electrical", "Priority" : "3"},
+  "INAM": {"Description" : "Inspection - Ad Hoc - Mechanical", "Priority" : "3"},
+  "PEME": {"Description" : "Pre-emptive Maintenance - Electrical", "Priority" : "3"},
+  "PEMM": {"Description" : "Pre-emptive Maintenance - Mechanical", "Priority" : "3"},
+  "RECE": {"Description" : "Recondition - Electrical", "Priority" : "3"},
+  "RECM": {"Description" : "Recondition - Mechanical", "Priority" : "3"},
+  "SAFE": {"Description" : "Safety - Electrical", "Priority" : "3"},
+  "SAFM": {"Description" : "Safety - Mechanical", "Priority" : "3"},
+  "TSHE": {"Description" : "Troubleshooting - Electrical", "Priority" : "3"},
+  "TSHM": {"Description" : "Troubleshooting - Mechanical", "Priority" : "3"}
+};
+
 const crafts = {
   'E': 'Electrical',
   'M': 'Mechanical',
@@ -222,7 +243,15 @@ const tableHeaders = {
   ],
   'Meter': ['METERNAME', 'DESCRIPTION', 'METERTYPE', 'DOMAINID'],
   'MeasurePoint2': ['SITEID', 'POINTNUM', 'VALUE', 'JPNUM'],
-  'Location': ['DESCRIPTION', 'EXPECTEDLIFE', 'LOCATION', 'PARENT','REPLACECOST', 'SITEID', 'STATUS', 'SYSTEMID', 'TYPE'],
+  'Location': [
+    'SITEID',
+    'LOCATION',
+    'DESCRIPTION',
+    'STATUS',
+    'SYSTEMID',
+    'TYPE',
+    'PARENT'
+  ],
 };
 
 Map<String, String> maximoServerDomains = {

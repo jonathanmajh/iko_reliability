@@ -13,6 +13,7 @@ class AssetCreationNotifier extends ChangeNotifier {
 
   Map<String, Asset> siteAssets = {};
   Map<String, String> pendingAssets = {};
+  Map<String, String> failedAssets = {};
   Map<String, List<Asset>> parentAssets = {};
 
   Future<void> setSite(String site, [bool notify = true]) async {
@@ -27,8 +28,10 @@ class AssetCreationNotifier extends ChangeNotifier {
     final dbrows = await database!
         .getSiteAssets(site); //todo make it able to load other sites
     for (var row in dbrows) {
-      if (row.newAsset) {
+      if (row.newAsset == 1) {
         pendingAssets[row.assetnum] = 'new';
+      } else if(row.newAsset == -1) {
+        pendingAssets[row.assetnum] = 'fail';
       }
       siteAssets[row.assetnum] = row;
       if (parentAssets.containsKey(row.parent)) {
@@ -80,7 +83,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     if (parentAssets.containsKey(assetNum)) {
       throw 'Asset $assetNum has children';
     }
-    if (!siteAssets[assetNum]!.newAsset) {
+    if (siteAssets[assetNum]!.newAsset == 0) {//TODO: != 1?
       throw 'Asset already exists in Maximo, cannot delete';
     }
 
@@ -132,24 +135,39 @@ class AssetCreationNotifier extends ChangeNotifier {
     for (var entry in pendingAssets.entries) {
       var assetNum = entry.key;
 
-      if (entry.value != 'new') {
+      if (entry.value == 'success' || entry.value == 'duplicate') {
         continue;
       }
 
       try {
         pendingAssets[assetNum] = 'pending';
         notifyListeners();
+        print('something');
         var result =
             await uploadAssetToMaximo(siteAssets[assetNum]!, 'MASTEST', this);
-        if (result.first) {
+        if (result['result'] == 'success') {
           pendingAssets[assetNum] = 'success';
-          database!.setAssetNew(assetNum, selectedSite, false);
-        } else if (result.second == 'duplicate') {
+          await database!.setAssetStatus(assetNum, selectedSite, 0);
+        } else if (result['result'] == 'duplicate') {
           pendingAssets[assetNum] = 'duplicate';
-          database!.setAssetNew(assetNum, selectedSite, false);
-        } else {
-          pendingAssets[assetNum] = 'fail';
+          await database!.setAssetStatus(assetNum, selectedSite, 0);
         }
+        failedAssets.remove(assetNum);
+        notifyListeners();
+        continue;
+      } on List catch (e) {
+        //e[0] is the error message (e.g. invalid request) while e[1] is a map which allows you to see exactly which part of the upload failed
+        print(e[0]); //Print warning msg
+
+        var result = e[1];
+        var error = result['postResponse'] == 'null'
+            ? 'Preview mode on'
+            : '${result['failReason']}: ${result['postResponse']['warningmsg'].replaceAll('\n', '')}';
+        failedAssets[assetNum] = error;
+        pendingAssets[assetNum] = 'warning';
+        await database!.setAssetStatus(assetNum, selectedSite, -1);
+        print(error);
+
         notifyListeners();
         continue;
       } catch (e) {
@@ -161,10 +179,4 @@ class AssetCreationNotifier extends ChangeNotifier {
     }
     //notifyListeners();
   }
-
-  //@override
-  /*void notifyListeners() {
-    print('notifying listeners');
-    super.notifyListeners();
-  }*/
 }
