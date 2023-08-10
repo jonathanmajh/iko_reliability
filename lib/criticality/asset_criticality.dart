@@ -309,7 +309,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         type: PlutoColumnType.text(defaultValue: '---'),
       ),
     ]);
-    _loadData();
+    // _loadData();
   }
 
   void gridAHandler() {
@@ -351,22 +351,20 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   ///Loading plutogrid data
   void _loadData() {
+    stateManager.refRows.clear();
     _loadSiteData(context.read<AssetCriticalityNotifier>().selectedSite)
         .then((fetchedRows) {
       PlutoGridStateManager.initializeRowsAsync(
         columns,
         fetchedRows,
       ).then((value) {
-        stateManager.refRows.clear();
         stateManager.refRows.addAll(value);
         stateManager.setShowLoading(false);
         stateManager.notifyListeners();
         // workaround since setting the group as expanded does not expand first row
         try {
-          stateManager.toggleExpandedRowGroup(
-              rowGroup: stateManager.rows.first);
-          stateManager.toggleExpandedRowGroup(
-              rowGroup: stateManager.rows.first);
+          // stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
+          // stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
         } catch (e) {
           debugPrint("Could not run 'stateManager.toggleExpandedRowGroup'");
         }
@@ -392,8 +390,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       try {
         siteAssets.clear();
         parentAssets.clear();
-        final dbrows = await database!
-            .getSiteAssets(siteid); //TODO make it able to load other sites
+        final dbrows = await database!.getSiteAssets(siteid);
         await context.read<WorkOrderNotifier>().updateWorkOrders();
         for (var row in dbrows) {
           siteAssets[row.assetnum] = row;
@@ -410,8 +407,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     .read<SettingsNotifier>()
                     .getSetting(ApplicationSetting.loadedSites) as Set<String>)
                 .contains(siteid)) {
-          debugPrint('Exception: Site $siteid is not loaded');
-          //TODO: show dialog instead of print to console
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Exception: Site $siteid is not loaded'),
+          ));
         } else {
           debugPrint(e.toString());
         }
