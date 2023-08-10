@@ -100,7 +100,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       PlutoColumn(
         title: '',
         field: 'id',
-        type: PlutoColumnType.number(),
+        type: PlutoColumnType.text(),
         readOnly: true,
         hide: true,
       ),
@@ -372,7 +372,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         }
       }).then((value) {
         //load rpn numbers from plutogrid into AssetCriticalityNotifier
-        Map<int, double> newRpnMap = {};
+        Map<String, double> newRpnMap = {};
         for (PlutoRow row in stateManager.rows) {
           if (row.cells['id'] != null) {
             newRpnMap[row.cells['id']!.value] =
@@ -560,7 +560,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       context.read<AssetCriticalityNotifier>();
                   assetCriticalityNotifier.priorityRangesUpToDate = false;
                   assetCriticalityNotifier.updateCollapsedAssets(stateManager);
-                  int rowId = event.row.cells['id']?.value ?? -1;
+                  String rowId = event.row.cells['id']?.value ?? 'N/A';
                   double newRpn = rpnFunc(
                           cache
                               .getSystemScore(event.row.cells['system']!.value),
@@ -568,7 +568,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                           event.row.cells['downtime']!.value) ??
                       -1;
                   event.row.cells['rpn']!.value = newRpn;
-                  if (rowId != -1) {
+                  if (rowId != 'N/A') {
                     assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
                   }
                   updateAsset(event.row);

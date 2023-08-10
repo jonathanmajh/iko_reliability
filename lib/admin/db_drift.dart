@@ -87,13 +87,16 @@ class Assets extends Table {
   TextColumn get hierarchy => text().nullable()();
   TextColumn? get parent => text().nullable()();
   IntColumn get priority => integer()();
-  IntColumn get id => integer().autoIncrement()();
+  TextColumn get id => text()();
   BoolColumn get newAsset => boolean().withDefault(const Constant(false))();
 
   @override
   List<Set<Column>> get uniqueKeys => [
         {siteid, assetnum}
       ];
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 class SystemCriticalitys extends Table {
@@ -108,7 +111,7 @@ class SystemCriticalitys extends Table {
 }
 
 class AssetCriticalitys extends Table {
-  IntColumn get asset => integer().references(Assets, #id)();
+  TextColumn get asset => text().references(Assets, #id)();
   IntColumn get system => integer().references(SystemCriticalitys, #id)();
   TextColumn get type => text()(); // production / non-production
   IntColumn get frequency => integer()();
@@ -195,7 +198,7 @@ class MyDatabase extends _$MyDatabase {
     return row.id;
   }
 
-  Future<int> addNewAsset(
+  Future<String> addNewAsset(
     String assetnum,
     String siteid,
     String description,
@@ -209,6 +212,7 @@ class MyDatabase extends _$MyDatabase {
       priority: 0,
       status: 'Planning',
       changedate: 'N/A',
+      id: '$siteid$assetnum',
     ));
     return row.id;
   }
@@ -243,7 +247,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<void> updateAssetCriticality(
-    int assetid,
+    String assetid,
     int system,
     int frequency,
     int downtime,
@@ -526,15 +530,15 @@ class MyDatabase extends _$MyDatabase {
       for (var row in result['member'].toList()) {
         assetInserts.add(
           AssetsCompanion.insert(
-            assetnum: row['assetnum'],
-            description:
-                row['description'] ?? 'Asset has NO description in Maximo',
-            parent: Value(row['parent']),
-            siteid: row['siteid'],
-            status: row['status'],
-            changedate: row['changedate'],
-            priority: row['priority'] ?? 0,
-          ),
+              assetnum: row['assetnum'],
+              description:
+                  row['description'] ?? 'Asset has NO description in Maximo',
+              parent: Value(row['parent']),
+              siteid: row['siteid'],
+              status: row['status'],
+              changedate: row['changedate'],
+              priority: row['priority'] ?? 0,
+              id: '${row['siteid']}${row['assetnum']}'),
         );
       }
       try {
