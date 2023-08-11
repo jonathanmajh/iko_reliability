@@ -200,6 +200,22 @@ class MyDatabase extends _$MyDatabase {
     return row.id;
   }
 
+  void importCriticality(
+    List<Setting> setting,
+    List<AssetCriticality> criticality,
+    List<SystemCriticality> system,
+  ) async {
+    batch((batch) {
+      batch.insertAllOnConflictUpdate(settings, setting);
+    });
+    batch((batch) {
+      batch.insertAll(assetCriticalitys, criticality);
+    });
+    batch((batch) {
+      batch.insertAll(systemCriticalitys, system);
+    });
+  }
+
   Future<String> addNewAsset(
     String assetnum,
     String siteid,
@@ -460,6 +476,11 @@ class MyDatabase extends _$MyDatabase {
       systems = await (select(systemCriticalitys)).get();
     }
     return systems;
+  }
+
+  Future<List<AssetCriticality>> getAllAssetCriticalities() async {
+    var criticalities = await (select(assetCriticalitys)).get();
+    return criticalities;
   }
 
   Future<List<SystemCriticality>> getSystemCriticality(int id) async {

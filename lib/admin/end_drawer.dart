@@ -11,6 +11,7 @@ import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
+import '../criticality/criticality_db_export_import.dart';
 import '../main.dart';
 import 'consts.dart';
 import 'db_drift.dart';
@@ -428,7 +429,21 @@ class _EndDrawerState extends State<EndDrawer> {
                 child: const Text('Configure'),
                 onPressed: () => showWOSettingsDialog(context),
               ),
-            )
+            ),
+            ListTile(
+              title: const Text('Export Settings'),
+              trailing: ElevatedButton(
+                child: const Text('Export'),
+                onPressed: () => exportCriticalityDB(database!),
+              ),
+            ),
+            ListTile(
+              title: const Text('Import Settings'),
+              trailing: ElevatedButton(
+                child: const Text('Import'),
+                onPressed: () => importCriticalityDB(database!),
+              ),
+            ),
           ],
         ),
       );
