@@ -298,7 +298,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     if (stateManager.currentRow != null) {
       final id = stateManager.currentRow!.cells['id']!.value;
       stateManager.removeCurrentRow();
-      final removed = await database!.deleteSystemCriticalitys(id);
+      await database!.deleteSystemCriticalitys(id);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Please select a system to remove'),

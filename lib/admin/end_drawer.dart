@@ -371,6 +371,7 @@ class _EndDrawerState extends State<EndDrawer> {
                     debugPrint(
                         'new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
                     assetCriticalityNotifier.priorityRangesUpToDate = true;
+                    assetCriticalityNotifier.updateGrid = true;
                   } catch (e) {
                     showDialog(
                         context: context,

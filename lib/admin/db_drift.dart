@@ -141,10 +141,12 @@ class AssetCriticalityWithAsset {
   AssetCriticalityWithAsset(
     this.asset,
     this.assetCriticality,
+    this.systemCriticality,
   );
 
-  final Asset? asset;
-  final AssetCriticality assetCriticality;
+  final Asset asset;
+  final AssetCriticality? assetCriticality;
+  final SystemCriticality? systemCriticality;
 }
 
 @DriftDatabase(tables: [
@@ -430,15 +432,22 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
-  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities() async {
-    var stuff = await (select(assetCriticalitys).join([
-      leftOuterJoin(assets, assets.id.equalsExp(assetCriticalitys.asset))
-    ])).get();
+  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities(
+      String siteid) async {
+    var stuff = await (select(assets).join([
+      leftOuterJoin(
+          assetCriticalitys, assetCriticalitys.asset.equalsExp(assets.id)),
+      leftOuterJoin(systemCriticalitys,
+          systemCriticalitys.id.equalsExp(assetCriticalitys.system))
+    ])
+          ..where(assets.siteid.equals(siteid)))
+        .get();
 
     return stuff.map((row) {
       return AssetCriticalityWithAsset(
-        row.readTableOrNull(assets),
-        row.readTable(assetCriticalitys),
+        row.readTable(assets),
+        row.readTableOrNull(assetCriticalitys),
+        row.readTableOrNull(systemCriticalitys),
       );
     }).toList();
   }
@@ -450,6 +459,12 @@ class MyDatabase extends _$MyDatabase {
       await loadSystems();
       systems = await (select(systemCriticalitys)).get();
     }
+    return systems;
+  }
+
+  Future<List<SystemCriticality>> getSystemCriticality(int id) async {
+    var systems =
+        await (select(systemCriticalitys)..where((t) => t.id.equals(id))).get();
     return systems;
   }
 

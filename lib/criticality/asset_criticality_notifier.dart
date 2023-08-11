@@ -41,6 +41,9 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   ///whether to show all sites' work orders or not
   bool? showAllSites;
 
+  ///whether to reload the grid
+  bool updateGrid = false;
+
   ///sets [selectedSite] to [site]. Notifies listeners
   void setSite(String site) {
     selectedSite = site;
