@@ -488,7 +488,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       rows.add(PlutoRow(
                         cells: {
                           'assetnum': PlutoCell(value: 'Error!'),
-                          'parent': PlutoCell(value: 'Error'),
+                          'parent': PlutoCell(value: ''),
                           'description': PlutoCell(value: snapshot.error),
                           'priority': PlutoCell(value: 0),
                           'system': PlutoCell(value: 0),
@@ -504,9 +504,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     } else {
                       rows.add(PlutoRow(
                         cells: {
-                          'assetnum': PlutoCell(value: 'No'),
-                          'parent': PlutoCell(value: 'Site'),
-                          'description': PlutoCell(value: 'Selected'),
+                          'assetnum': PlutoCell(value: ''),
+                          'parent': PlutoCell(value: ''),
+                          'description': PlutoCell(value: 'No Site Selected'),
                           'priority': PlutoCell(value: 0),
                           'system': PlutoCell(value: 0),
                           'action': PlutoCell(value: ''),
@@ -521,6 +521,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     }
                     return PlutoDualGrid(
                       isVertical: true,
+                      display: PlutoDualGridDisplayRatio(ratio: 0.75),
                       gridPropsA: PlutoDualGridProps(
                         columns: columns,
                         rows: rows,
