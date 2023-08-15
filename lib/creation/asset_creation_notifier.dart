@@ -128,7 +128,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> uploadAssets() async {
+  Future<void> uploadAssets(String env) async {
     if (pendingAssets.isEmpty) {
       return;
     }
@@ -144,7 +144,7 @@ class AssetCreationNotifier extends ChangeNotifier {
         notifyListeners();
         print('something');
         var result =
-            await uploadAssetToMaximo(siteAssets[assetNum]!, 'MASTEST', this);
+            await uploadAssetToMaximo(siteAssets[assetNum]!, env, this);
         if (result['result'] == 'success') {
           pendingAssets[assetNum] = 'success';
           await database!.setAssetStatus(assetNum, selectedSite, 0);

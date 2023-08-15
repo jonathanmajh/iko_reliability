@@ -493,7 +493,7 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                 return null;
               },
               inputFormatters: [
-                LengthLimitingTextInputFormatter(100),
+                LengthLimitingTextInputFormatter(40), // to limit total description to 100 characters
               ],
             ),
           ]),
@@ -765,7 +765,7 @@ class _AssetUploadDialogState extends State<AssetUploadDialog> {
           TextButton(
             child: const Text('OK'),
             onPressed: () {
-              context.read<AssetCreationNotifier>().uploadAssets();
+              context.read<AssetCreationNotifier>().uploadAssets(context.read<MaximoServerNotifier>().maximoServerSelected);
               Navigator.pop(context, 'OK');
             },
           )
