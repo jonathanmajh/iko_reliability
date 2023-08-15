@@ -493,7 +493,7 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                 return null;
               },
               inputFormatters: [
-                LengthLimitingTextInputFormatter(40), // to limit total description to 100 characters
+                LengthLimitingTextInputFormatter(50), // to limit total description to 100 characters
               ],
             ),
           ]),
