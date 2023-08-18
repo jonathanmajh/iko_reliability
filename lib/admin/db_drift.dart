@@ -240,21 +240,13 @@ class MyDatabase extends _$MyDatabase {
   ///-1 = asset that failed upload (e.g. location and asset were uploaded, but job plan failed)
   Future<int> setAssetStatus(
       String assetNum, String siteId, int assetStatus) async {
-    var existingAsset = await getAsset(siteId, assetNum);
-    var newAsset = Asset(
-        assetnum: existingAsset.assetnum,
-        changedate: existingAsset.changedate,
-        description: existingAsset.description,
-        hierarchy: existingAsset.hierarchy,
-        id: existingAsset.id,
-        parent: existingAsset.parent,
-        priority: existingAsset.priority,
-        siteid: existingAsset.siteid,
-        status: existingAsset.status,
-        newAsset: assetStatus);
+
     var res = await (update(assets)
           ..where((t) => t.siteid.equals(siteId) & t.assetnum.equals(assetNum)))
-        .writeReturning(newAsset);
+        .writeReturning(AssetsCompanion(
+          newAsset: Value(assetStatus)
+        ));
+    
     if (res.length > 1) {
       throw Exception(
           'More than one asset was updated, database is most likely corrupt');

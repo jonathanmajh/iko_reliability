@@ -30,7 +30,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     for (var row in dbrows) {
       if (row.newAsset == 1) {
         pendingAssets[row.assetnum] = 'new';
-      } else if(row.newAsset == -1) {
+      } else if (row.newAsset == -1) {
         pendingAssets[row.assetnum] = 'fail';
       }
       siteAssets[row.assetnum] = row;
@@ -83,7 +83,8 @@ class AssetCreationNotifier extends ChangeNotifier {
     if (parentAssets.containsKey(assetNum)) {
       throw 'Asset $assetNum has children';
     }
-    if (siteAssets[assetNum]!.newAsset == 0) {//TODO: != 1?
+    if (siteAssets[assetNum]!.newAsset == 0) {
+      //TODO: != 1?
       throw 'Asset already exists in Maximo, cannot delete';
     }
 
@@ -145,6 +146,8 @@ class AssetCreationNotifier extends ChangeNotifier {
         print('something');
         var result =
             await uploadAssetToMaximo(siteAssets[assetNum]!, env, this);
+        var assetcheck = await database!.getAsset(selectedSite, assetNum);
+        print(assetcheck.toString());
         if (result['result'] == 'success') {
           pendingAssets[assetNum] = 'success';
           await database!.setAssetStatus(assetNum, selectedSite, 0);
@@ -152,6 +155,8 @@ class AssetCreationNotifier extends ChangeNotifier {
           pendingAssets[assetNum] = 'duplicate';
           await database!.setAssetStatus(assetNum, selectedSite, 0);
         }
+        assetcheck = await database!.getAsset(selectedSite, assetNum);
+        print(assetcheck.toString());
         failedAssets.remove(assetNum);
         notifyListeners();
         continue;

@@ -482,12 +482,12 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     jobPlanBody = [
       '${asset.assetnum}${entry.key}',
       '0',
-      '${asset.description} - ${entry.value['Description']}',
+      '${asset.description} - ${entry.value.description}',
       '',
       'ACTIVE',
       personGroups[entry.key[entry.key.length - 1]]!,
       '',
-      entry.value['Priority']!,
+      entry.value.priority.toString(),
       entry.key.substring(0, 3),
       'STANDARD',
       '1',
@@ -737,7 +737,6 @@ Future<bool> isNewAsset(
   }
 
   if (result['status']! == 'empty') {
-    print('not new asset');
     return true;
   } else {
     return false;

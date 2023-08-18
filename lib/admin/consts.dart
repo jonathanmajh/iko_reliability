@@ -26,24 +26,24 @@ const workType = {
 };
 
 const assetWorkType = {
-  "BDE": {"Description" : "Breakdown - Electrical", "Priority" : "4"},
-  "BDM": {"Description" : "Breakdown - Mechanical", "Priority" : "4"},
-  "BDO": {"Description" : "Breakdown - Operational", "Priority" : "4"},
-  "CORE": {"Description" : "Corrective - Post-Repair - Electrical", "Priority" : "3"},
-  "CORM": {"Description" : "Corrective - Post-Repair - Mechanical", "Priority" : "3"},
-  "EPIE": {"Description" : "Equipment/Process Improvement - Electrical", "Priority" : "1"},
-  "EPIM": {"Description" : "Equipment/Process Improvement - Mechanical", "Priority" : "1"},
-  "HKGM": {"Description" : "Housekeeping", "Priority" : "1"},
-  "INAE": {"Description" : "Inspection - Ad Hoc - Electrical", "Priority" : "3"},
-  "INAM": {"Description" : "Inspection - Ad Hoc - Mechanical", "Priority" : "3"},
-  "PEME": {"Description" : "Pre-emptive Maintenance - Electrical", "Priority" : "3"},
-  "PEMM": {"Description" : "Pre-emptive Maintenance - Mechanical", "Priority" : "3"},
-  "RECE": {"Description" : "Recondition - Electrical", "Priority" : "3"},
-  "RECM": {"Description" : "Recondition - Mechanical", "Priority" : "3"},
-  "SAFE": {"Description" : "Safety - Electrical", "Priority" : "3"},
-  "SAFM": {"Description" : "Safety - Mechanical", "Priority" : "3"},
-  "TSHE": {"Description" : "Troubleshooting - Electrical", "Priority" : "3"},
-  "TSHM": {"Description" : "Troubleshooting - Mechanical", "Priority" : "3"}
+  "BDE" : AssetWorkType("BDE", "Breakdown - Electrical", 4),
+  "BDM" : AssetWorkType("BDM", "Breakdown - Mechanical", 4),
+  "BDO" : AssetWorkType("BDO", "Breakdown - Operational", 4),
+  "CORE" : AssetWorkType("CORE", "Corrective - Post-Repair - Electrical", 3),
+  "CORM" : AssetWorkType("CORM", "Corrective - Post-Repair - Mechanical", 3),
+  "EPIE" : AssetWorkType("EPIE", "Equipment/Process Improvement - Electrical", 1),
+  "EPIM" : AssetWorkType("EPIM", "Equipment/Process Improvement - Mechanical", 1),
+  "HKGM" : AssetWorkType("HKGM", "Housekeeping", 1),
+  "INAE" : AssetWorkType("INAE", "Inspection - Ad Hoc - Electrical", 3),
+  "INAM" : AssetWorkType("INAM", "Inspection - Ad Hoc - Mechanical", 3),
+  "PEME" : AssetWorkType("PEME", "Pre-emptive Maintenance - Electrical", 3),
+  "PEMM" : AssetWorkType("PEMM", "Pre-emptive Maintenance - Mechanical", 3),
+  "RECE" : AssetWorkType("RECE", "Recondition - Electrical", 3),
+  "RECM" : AssetWorkType("RECM", "Recondition - Mechanical", 3),
+  "SAFE" : AssetWorkType("SAFE", "Safety - Electrical", 3),
+  "SAFM" : AssetWorkType("SAFM", "Safety - Mechanical", 3),
+  "TSHE" : AssetWorkType("TSHE", "Troubleshooting - Electrical", 3),
+  "TSHM" : AssetWorkType("TSHM", "Troubleshooting - Mechanical", 3),
 };
 
 const crafts = {
@@ -617,4 +617,17 @@ enum ProcessStates {
   loadAssetState(),
   loadPMFilesState(),
   uploadPMFilesState();
+}
+
+class AssetWorkType {
+  const AssetWorkType(this._title, this._description, this._priority);
+
+  final String _title, _description;
+  final int _priority;
+
+  get title => _title;
+
+  get priority => _priority;
+
+  get description => _description;
 }

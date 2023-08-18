@@ -103,26 +103,6 @@ class _AssetPageState extends State<AssetPage>
         children: [
           Column(
             children: <Widget>[
-              ElevatedButton(
-                child: Text('print pending'),
-                onPressed: () {
-                  //context.read<AssetCreationNotifier>().notifyListeners();
-                  for (var entry in context
-                      .read<AssetCreationNotifier>()
-                      .pendingAssets
-                      .entries
-                      .toList()) {
-                    print("${entry}\n\n");
-                  }
-                },
-              ),
-              ElevatedButton(
-                child: const Text('print assets'),
-                onPressed: () async {
-                  context.read<AssetCreationNotifier>().setSite(
-                      context.read<AssetCreationNotifier>().selectedSite);
-                },
-              ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(30),
