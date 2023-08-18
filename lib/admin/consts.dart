@@ -486,7 +486,6 @@ List<ApplicationSetting> rpnDistributionGroups = [
 
 //For application settings (add with new settings)
 //keys hold the settings names while values are the datatypes they can be
-//HUST:luz2Ua91ay
 enum ApplicationSetting {
   ///TRUE FALSE for application theme mode (darkmode, lightmode)
   darkmodeOn(keyString: 'darkmode on', dataType: 'bool', defaultValue: false),
@@ -575,7 +574,6 @@ enum ApplicationSetting {
 }
 
 //add new application processes here
-//HUST:oZUoQfjnVS
 ///Various time-consuming processes the application goes through. Used for {ProcessStateNotifier}
 enum ProcessStates {
   loginState(),

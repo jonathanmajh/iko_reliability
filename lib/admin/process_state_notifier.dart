@@ -3,8 +3,6 @@ import 'dart:core';
 import 'consts.dart';
 import 'package:flutter/material.dart';
 
-//dev note: To add more processes, search "HUST:oZUoQfjnVS"
-
 //TODO: listen to more processes and set it so that application shows a warning when user tries to close
 // app while processes are still running. Also to show undismissible dialog windows to prevent user
 // input from messing with the processes.
