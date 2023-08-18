@@ -12,7 +12,6 @@ import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import '../settings/theme_manager.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'pair.dart';
 
 import '../main.dart';
 
@@ -37,10 +36,10 @@ class _AssetPageState extends State<AssetPage>
   List<PlutoRow> rows = [];
 
   int fabIndex = 0;
-  List<Pair<Icon, Widget>> fabList = [
+  List fabList = [
     //pairs of icons and alert dialogs
-    Pair(const Icon(Icons.add), const AssetCreationDialog()),
-    Pair(const Icon(Icons.upload), const AssetUploadDialog()),
+    [const Icon(Icons.add), const AssetCreationDialog()],
+    [const Icon(Icons.upload), const AssetUploadDialog()],
   ];
 
   late TabController _tabController;
