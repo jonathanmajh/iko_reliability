@@ -1,11 +1,26 @@
 import "dart:math";
 
+import "../admin/db_drift.dart";
+
 ///Function/Equation to calculate risk priority number (RPN)
 ///Currently just a product between all parameters
 ///returns null if any parameter is null
-double? rpnFunc(double? system, int? freq, int? impact) {
+double? rpnFunc(AssetCriticalityWithAsset asset) {
   try {
-    return system! * freq! * impact!;
+    double system = sqrt(
+        (asset.systemCriticality!.safety * asset.systemCriticality!.safety +
+                asset.systemCriticality!.regulatory *
+                    asset.systemCriticality!.regulatory +
+                asset.systemCriticality!.economic *
+                    asset.systemCriticality!.economic +
+                asset.systemCriticality!.throughput *
+                    asset.systemCriticality!.throughput +
+                asset.systemCriticality!.quality *
+                    asset.systemCriticality!.quality) /
+            5);
+    return system *
+        asset.assetCriticality!.frequency *
+        asset.assetCriticality!.downtime;
   } catch (e) {
     return -1;
   }

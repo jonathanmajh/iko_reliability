@@ -87,13 +87,16 @@ class Assets extends Table {
   TextColumn get hierarchy => text().nullable()();
   TextColumn? get parent => text().nullable()();
   IntColumn get priority => integer()();
-  IntColumn get id => integer().autoIncrement()();
+  TextColumn get id => text()();
   BoolColumn get newAsset => boolean().withDefault(const Constant(false))();
 
   @override
   List<Set<Column>> get uniqueKeys => [
         {siteid, assetnum}
       ];
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 class SystemCriticalitys extends Table {
@@ -108,7 +111,7 @@ class SystemCriticalitys extends Table {
 }
 
 class AssetCriticalitys extends Table {
-  IntColumn get asset => integer().references(Assets, #id)();
+  TextColumn get asset => text().references(Assets, #id)();
   IntColumn get system => integer().references(SystemCriticalitys, #id)();
   TextColumn get type => text()(); // production / non-production
   IntColumn get frequency => integer()();
@@ -138,10 +141,12 @@ class AssetCriticalityWithAsset {
   AssetCriticalityWithAsset(
     this.asset,
     this.assetCriticality,
+    this.systemCriticality,
   );
 
-  final Asset? asset;
-  final AssetCriticality assetCriticality;
+  final Asset asset;
+  final AssetCriticality? assetCriticality;
+  final SystemCriticality? systemCriticality;
 }
 
 @DriftDatabase(tables: [
@@ -195,7 +200,23 @@ class MyDatabase extends _$MyDatabase {
     return row.id;
   }
 
-  Future<int> addNewAsset(
+  void importCriticality(
+    List<Setting> setting,
+    List<AssetCriticality> criticality,
+    List<SystemCriticality> system,
+  ) async {
+    batch((batch) {
+      batch.insertAllOnConflictUpdate(settings, setting);
+    });
+    batch((batch) {
+      batch.insertAll(assetCriticalitys, criticality);
+    });
+    batch((batch) {
+      batch.insertAll(systemCriticalitys, system);
+    });
+  }
+
+  Future<String> addNewAsset(
     String assetnum,
     String siteid,
     String description,
@@ -209,6 +230,7 @@ class MyDatabase extends _$MyDatabase {
       priority: 0,
       status: 'Planning',
       changedate: 'N/A',
+      id: '$siteid$assetnum',
     ));
     return row.id;
   }
@@ -243,7 +265,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<void> updateAssetCriticality(
-    int assetid,
+    String assetid,
     int system,
     int frequency,
     int downtime,
@@ -426,15 +448,22 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
-  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities() async {
-    var stuff = await (select(assetCriticalitys).join([
-      leftOuterJoin(assets, assets.id.equalsExp(assetCriticalitys.asset))
-    ])).get();
+  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities(
+      String siteid) async {
+    var stuff = await (select(assets).join([
+      leftOuterJoin(
+          assetCriticalitys, assetCriticalitys.asset.equalsExp(assets.id)),
+      leftOuterJoin(systemCriticalitys,
+          systemCriticalitys.id.equalsExp(assetCriticalitys.system))
+    ])
+          ..where(assets.siteid.equals(siteid)))
+        .get();
 
     return stuff.map((row) {
       return AssetCriticalityWithAsset(
-        row.readTableOrNull(assets),
-        row.readTable(assetCriticalitys),
+        row.readTable(assets),
+        row.readTableOrNull(assetCriticalitys),
+        row.readTableOrNull(systemCriticalitys),
       );
     }).toList();
   }
@@ -446,6 +475,17 @@ class MyDatabase extends _$MyDatabase {
       await loadSystems();
       systems = await (select(systemCriticalitys)).get();
     }
+    return systems;
+  }
+
+  Future<List<AssetCriticality>> getAllAssetCriticalities() async {
+    var criticalities = await (select(assetCriticalitys)).get();
+    return criticalities;
+  }
+
+  Future<List<SystemCriticality>> getSystemCriticality(int id) async {
+    var systems =
+        await (select(systemCriticalitys)..where((t) => t.id.equals(id))).get();
     return systems;
   }
 
@@ -526,15 +566,15 @@ class MyDatabase extends _$MyDatabase {
       for (var row in result['member'].toList()) {
         assetInserts.add(
           AssetsCompanion.insert(
-            assetnum: row['assetnum'],
-            description:
-                row['description'] ?? 'Asset has NO description in Maximo',
-            parent: Value(row['parent']),
-            siteid: row['siteid'],
-            status: row['status'],
-            changedate: row['changedate'],
-            priority: row['priority'] ?? 0,
-          ),
+              assetnum: row['assetnum'],
+              description:
+                  row['description'] ?? 'Asset has NO description in Maximo',
+              parent: Value(row['parent']),
+              siteid: row['siteid'],
+              status: row['status'],
+              changedate: row['changedate'],
+              priority: row['priority'] ?? 0,
+              id: '${row['siteid']}${row['assetnum']}'),
         );
       }
       try {

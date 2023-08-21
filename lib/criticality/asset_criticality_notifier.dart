@@ -6,7 +6,7 @@ import '../admin/consts.dart';
 ///ChangeNotifier for data in AssetCriticalityPage
 class AssetCriticalityNotifier extends ChangeNotifier {
   ///Map where the keys are the plutogrid row and the values are the rpns
-  Map<int, double> rpnMap = {};
+  Map<String, double> rpnMap = {};
 
   ///List of cutoff rpns for priorites from very low to very high
   List<double> rpnCutoffs = [];
@@ -41,6 +41,9 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   ///whether to show all sites' work orders or not
   bool? showAllSites;
 
+  ///whether to reload the grid
+  bool updateGrid = false;
+
   ///sets [selectedSite] to [site]. Notifies listeners
   void setSite(String site) {
     selectedSite = site;
@@ -49,13 +52,13 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   }
 
   ///sets [rpnMap] to a copy of [newMap]. Notifies listeners
-  void setRpnMap(Map<int, double> newMap, {bool notify = true}) {
-    rpnMap = Map<int, double>.of(newMap);
+  void setRpnMap(Map<String, double> newMap, {bool notify = true}) {
+    rpnMap = Map<String, double>.of(newMap);
     if (notify) notifyListeners();
   }
 
   ///adds [appendMap] to [rpnMap]. Notifies Listeners
-  void addToRpnMap(Map<int, double> appendMap, {bool notify = true}) {
+  void addToRpnMap(Map<String, double> appendMap, {bool notify = true}) {
     rpnMap.addAll(appendMap);
     if (notify) notifyListeners();
   }
