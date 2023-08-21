@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import '../admin/upload_maximo.dart';
 
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
-
-import '../admin/upload_maximo.dart';
 
 class AssetCreationNotifier extends ChangeNotifier {
   String selectedSite = 'NONE';
@@ -50,7 +47,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     return;
   }
 
-  Future<int> addAsset(String assetNum, String description, String parent,
+  Future<String> addAsset(String assetNum, String description, String parent,
       [String? site]) async {
     if (siteAssets.containsKey(assetNum)) {
       throw ('Upload Fail! Asset $assetNum already exists');
@@ -76,7 +73,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     return id;
   }
 
-  Future<int> deleteAsset(String assetNum, String site) async {
+  Future<String> deleteAsset(String assetNum, String site) async {
     if (!siteAssets.containsKey(assetNum)) {
       throw 'Asset $assetNum does not exist';
     }

@@ -46,7 +46,7 @@ Future<PMName> generateName(
     asset = await getCommonParent(pmdetails.assets, pmdetails.siteId!);
   }
   commonParent = asset.assetnum;
-  if (pmdetails.routeCode != null) {
+  if (pmdetails.routeCode != null && pmdetails.routeCode != "null") {
     // use route naming scheme if route code is specified
     number = await findAvailableRouteCode(
       pmdetails.routeCode!,

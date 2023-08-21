@@ -76,6 +76,7 @@ class _PercentSliderState extends State<PercentSlider> {
     }
   }
 
+  ///updates the currently active slider according to touch position [dx]
   void _updateSlider(double dx, double maxWidth) {
     final int tapValue = (dx / maxWidth * widget.range).round();
     if (tapValue < widget.min || tapValue > widget.max) {

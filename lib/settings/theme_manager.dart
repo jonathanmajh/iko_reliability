@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/main.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart';
 import '../admin/consts.dart';
@@ -11,8 +10,10 @@ class ThemeManager extends ChangeNotifier {
   }
   ThemeMode _themeMode = ThemeMode.light;
 
+  ///the current [ThemeMode]
   ThemeMode get themeMode => _themeMode;
 
+  ///If darkmode is currently used
   bool get isDark => (_themeMode == ThemeMode.dark);
 
   ///controls darkmode/lightmode for the application. Set [isDark] to [true] for darkmode. Notifies all listeners

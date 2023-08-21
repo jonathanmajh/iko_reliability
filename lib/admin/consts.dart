@@ -516,52 +516,46 @@ List<ApplicationSetting> rpnDistributionGroups = [
 
 //For application settings (add with new settings)
 //keys hold the settings names while values are the datatypes they can be
-//HUST:luz2Ua91ay
 enum ApplicationSetting {
-  darkmodeOn(
-      keyString: 'darkmode on',
-      dataType: 'bool',
-      defaultValue:
-          false), //TRUE FALSE for application theme mode (darkmode, lightmode)
+  ///TRUE FALSE for application theme mode (darkmode, lightmode)
+  darkmodeOn(keyString: 'darkmode on', dataType: 'bool', defaultValue: false),
+
+  ///TRUE FALSE for hiding the update availiable prompt
   updateWindowOff(
-      keyString: 'update window off',
-      dataType: 'bool',
-      defaultValue: false), //TRUE FALSE for hiding the update availiable prompt
+      keyString: 'update window off', dataType: 'bool', defaultValue: false),
+
+  ///int for asset criticality RPN risk distribution percentage (very low)
   rpnPercentVL(
-      keyString: 'RPN percent very low',
-      dataType: 'int',
-      defaultValue:
-          30), //int for asset criticality RPN risk distribution percentage (very low)
-  rpnPercentL(
-      keyString: 'RPN percent low',
-      dataType: 'int',
-      defaultValue:
-          25), //int for asset criticality RPN distribution percentage (low)
+      keyString: 'RPN percent very low', dataType: 'int', defaultValue: 30),
+
+  ///int for asset criticality RPN distribution percentage (low)
+  rpnPercentL(keyString: 'RPN percent low', dataType: 'int', defaultValue: 25),
+
+  ///int for asset criticality RPN distribution percentage (medium)
   rpnPercentM(
-      keyString: 'RPN percent medium',
-      dataType: 'int',
-      defaultValue:
-          20), //int for asset criticality RPN distribution percentage (medium)
-  rpnPercentH(
-      keyString: 'RPN percent high',
-      dataType: 'int',
-      defaultValue:
-          15), //int for asset criticality RPN risk distribution percentage (high)
+      keyString: 'RPN percent medium', dataType: 'int', defaultValue: 20),
+
+  ///int for asset criticality RPN risk distribution percentage (high)
+  rpnPercentH(keyString: 'RPN percent high', dataType: 'int', defaultValue: 15),
+
+  ///int for asset criticality RPN risk distribution percentage (very high)
   rpnPercentVH(
-      keyString: 'RPN percent very high',
-      dataType: 'int',
-      defaultValue:
-          10), //int for asset criticality RPN risk distribution percentage (very high)
+      keyString: 'RPN percent very high', dataType: 'int', defaultValue: 10),
+
+  ///upper bound for work order dates filter in asset criticality (inclusive). null if no filter
+  //TODO: remove this if not used
   beforeDate(
-      keyString: 'before date',
-      dataType: 'DateTime?',
-      defaultValue:
-          null), //upper bound for work order dates filter in asset criticality (inclusive). null if no filter
+      keyString: 'before date', dataType: 'DateTime?', defaultValue: null),
+
+  ///lower bound for work order dates filter in asset criticality (inclusive)
+  //TODO: remove this if not used
   afterDate(
     keyString: 'after date',
     dataType: 'DateTime?',
     defaultValue: null,
-  ), //lower bound for work order dates filter in asset criticality (inclusive)
+  ),
+
+  ///set of the ids of the loaded IKO sites
   loadedSites(
     keyString: 'loaded sites',
     dataType: 'Set<String>',
@@ -610,7 +604,6 @@ enum ApplicationSetting {
 }
 
 //add new application processes here
-//HUST:oZUoQfjnVS
 ///Various time-consuming processes the application goes through. Used for {ProcessStateNotifier}
 enum ProcessStates {
   loginState(),

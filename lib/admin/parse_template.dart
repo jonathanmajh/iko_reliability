@@ -59,8 +59,8 @@ class JobService {
 }
 
 class JobTask {
-  final int jptask;
-  final String description;
+  final int? jptask;
+  final String? description;
   final String? assetNumber;
   final String? metername;
   final String? longdescription;
@@ -206,7 +206,7 @@ class ParsedTemplate {
                 (nextRow[9] == 'Select Route (Optional)' ? null : nextRow[9]),
             routeCode: (nextRow[9] == 'Select Route (Optional)'
                 ? null
-                : nextNextRow[9]),
+                : nextNextRow[9].toString()),
           );
         }
         if (row[7] != null && readTasks) {

@@ -87,7 +87,7 @@ class Assets extends Table {
   TextColumn get hierarchy => text().nullable()();
   TextColumn? get parent => text().nullable()();
   IntColumn get priority => integer()();
-  IntColumn get id => integer().autoIncrement()();
+  TextColumn get id => text()();
   IntColumn get newAsset => integer().withDefault(const Constant(0))();
   // 0 = existing asset
   //1 = new asset
@@ -97,6 +97,9 @@ class Assets extends Table {
   List<Set<Column>> get uniqueKeys => [
         {siteid, assetnum}
       ];
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 class SystemCriticalitys extends Table {
@@ -111,7 +114,7 @@ class SystemCriticalitys extends Table {
 }
 
 class AssetCriticalitys extends Table {
-  IntColumn get asset => integer().references(Assets, #id)();
+  TextColumn get asset => text().references(Assets, #id)();
   IntColumn get system => integer().references(SystemCriticalitys, #id)();
   TextColumn get type => text()(); // production / non-production
   IntColumn get frequency => integer()();
@@ -141,10 +144,12 @@ class AssetCriticalityWithAsset {
   AssetCriticalityWithAsset(
     this.asset,
     this.assetCriticality,
+    this.systemCriticality,
   );
 
   final Asset asset;
-  final AssetCriticality assetCriticality;
+  final AssetCriticality? assetCriticality;
+  final SystemCriticality? systemCriticality;
 }
 
 @DriftDatabase(tables: [
@@ -198,7 +203,23 @@ class MyDatabase extends _$MyDatabase {
     return row.id;
   }
 
-  Future<int> addNewAsset(
+  void importCriticality(
+    List<Setting> setting,
+    List<AssetCriticality> criticality,
+    List<SystemCriticality> system,
+  ) async {
+    batch((batch) {
+      batch.insertAllOnConflictUpdate(settings, setting);
+    });
+    batch((batch) {
+      batch.insertAll(assetCriticalitys, criticality);
+    });
+    batch((batch) {
+      batch.insertAll(systemCriticalitys, system);
+    });
+  }
+
+  Future<String> addNewAsset(
     String assetnum,
     String siteid,
     String description,
@@ -208,7 +229,7 @@ class MyDatabase extends _$MyDatabase {
           ..where((t) => t.assetnum.equals(parent))
           ..where((t) => t.siteid.equals(siteid)))
         .getSingle();
-    final hierarchy = parentAsset.hierarchy! + "," + assetnum;
+    final hierarchy = '${parentAsset.hierarchy},$assetnum';
 
     final row = await into(assets).insertReturning(AssetsCompanion.insert(
       description: description,
@@ -219,12 +240,13 @@ class MyDatabase extends _$MyDatabase {
       priority: 0,
       status: 'Planning',
       changedate: 'N/A',
-      newAsset: Value(1),
+      newAsset: const Value(1),
+      id: '$siteid$assetnum',
     ));
     return row.id;
   }
 
-  Future<int> deleteAsset(String assetNum, String siteId) async {
+  Future<String> deleteAsset(String assetNum, String siteId) async {
     final row = await (delete(assets)
           ..where((t) => t.assetnum.equals(assetNum))
           ..where((t) => t.siteid.equals(siteId)))
@@ -232,21 +254,17 @@ class MyDatabase extends _$MyDatabase {
     return row.first.id;
   }
 
-
   ///0 = existing asset
   ///
   ///1 = new asset
   ///
   ///-1 = asset that failed upload (e.g. location and asset were uploaded, but job plan failed)
-  Future<int> setAssetStatus(
+  Future<String> setAssetStatus(
       String assetNum, String siteId, int assetStatus) async {
-
     var res = await (update(assets)
           ..where((t) => t.siteid.equals(siteId) & t.assetnum.equals(assetNum)))
-        .writeReturning(AssetsCompanion(
-          newAsset: Value(assetStatus)
-        ));
-    
+        .writeReturning(AssetsCompanion(newAsset: Value(assetStatus)));
+
     if (res.length > 1) {
       throw Exception(
           'More than one asset was updated, database is most likely corrupt');
@@ -285,7 +303,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<void> updateAssetCriticality(
-    int assetid,
+    String assetid,
     int system,
     int frequency,
     int downtime,
@@ -340,7 +358,8 @@ class MyDatabase extends _$MyDatabase {
         batch.insertAll(systemCriticalitys, inserts);
       });
     } catch (e) {
-      print('Error inserting System Criticality\n${e.toString()}');
+      material
+          .debugPrint('Error inserting System Criticality\n${e.toString()}');
     }
   }
 
@@ -467,14 +486,22 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
-  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities() async {
-    var stuff = await (select(assetCriticalitys).join([
-      leftOuterJoin(assets, assets.id.equalsExp(assetCriticalitys.asset))
-    ])).get();
+  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities(
+      String siteid) async {
+    var stuff = await (select(assets).join([
+      leftOuterJoin(
+          assetCriticalitys, assetCriticalitys.asset.equalsExp(assets.id)),
+      leftOuterJoin(systemCriticalitys,
+          systemCriticalitys.id.equalsExp(assetCriticalitys.system))
+    ])
+          ..where(assets.siteid.equals(siteid)))
+        .get();
+
     return stuff.map((row) {
       return AssetCriticalityWithAsset(
         row.readTable(assets),
-        row.readTable(assetCriticalitys),
+        row.readTableOrNull(assetCriticalitys),
+        row.readTableOrNull(systemCriticalitys),
       );
     }).toList();
   }
@@ -482,10 +509,21 @@ class MyDatabase extends _$MyDatabase {
   Future<List<SystemCriticality>> getSystemCriticalities() async {
     var systems = await (select(systemCriticalitys)).get();
     if (systems.isEmpty) {
-      print('getting data from excel');
+      material.debugPrint('getting data from excel');
       await loadSystems();
       systems = await (select(systemCriticalitys)).get();
     }
+    return systems;
+  }
+
+  Future<List<AssetCriticality>> getAllAssetCriticalities() async {
+    var criticalities = await (select(assetCriticalitys)).get();
+    return criticalities;
+  }
+
+  Future<List<SystemCriticality>> getSystemCriticality(int id) async {
+    var systems =
+        await (select(systemCriticalitys)..where((t) => t.id.equals(id))).get();
     return systems;
   }
 
@@ -558,7 +596,7 @@ class MyDatabase extends _$MyDatabase {
       }
       throw Exception('Failed to load assets from Maximo');
     }
-    print(result['member'].length);
+    material.debugPrint(result['member'].length.toString());
     if (result['member'].length > 0) {
       List<AssetsCompanion> assetInserts = [];
       // save once without the hierarchy field then loop through again adding hierarchy
@@ -566,15 +604,15 @@ class MyDatabase extends _$MyDatabase {
       for (var row in result['member'].toList()) {
         assetInserts.add(
           AssetsCompanion.insert(
-            assetnum: row['assetnum'],
-            description:
-                row['description'] ?? 'Asset has NO description in Maximo',
-            parent: Value(row['parent']),
-            siteid: row['siteid'],
-            status: row['status'],
-            changedate: row['changedate'],
-            priority: row['priority'] ?? 0,
-          ),
+              assetnum: row['assetnum'],
+              description:
+                  row['description'] ?? 'Asset has NO description in Maximo',
+              parent: Value(row['parent']),
+              siteid: row['siteid'],
+              status: row['status'],
+              changedate: row['changedate'],
+              priority: row['priority'] ?? 0,
+              id: '${row['siteid']}${row['assetnum']}'),
         );
       }
       try {
@@ -695,7 +733,8 @@ Future<List<String>> maximoAssetCaller(
     }
     messages.add('Updated $siteid');
   }
-  prov.Provider.of<SettingsNotifier>(context, listen: false)
+  prov.Provider.of<SettingsNotifier>(navigatorKey.currentContext!,
+          listen: false)
       .addLoadedSites(loadedSiteIds);
   return messages;
 }

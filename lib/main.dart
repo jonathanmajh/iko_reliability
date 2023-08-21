@@ -1,14 +1,15 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
-import 'package:iko_reliability_flutter/routes/route.gr.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
-import 'dart:io';
+import 'package:window_size/window_size.dart';
 
 import 'admin/cache_notifier.dart';
 import 'admin/db_drift.dart';
@@ -20,6 +21,7 @@ import 'criticality/criticality_notifier.dart';
 import 'creation/asset_creation_notifier.dart';
 import 'creation/site_change_notifier.dart';
 import 'admin/process_state_notifier.dart';
+import 'routes/route.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -36,7 +38,12 @@ void main() async {
   box = Hive.box('routeNumber');
   box.clear();
   database = MyDatabase();
+  WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows) {
+    setWindowMinSize(const Size(640, 360));
+  }
   SettingsNotifier settingsNotifier = SettingsNotifier();
+
   await settingsNotifier.initialize();
   runApp(
     MyApp(settingsNotifier),
@@ -55,7 +62,7 @@ class MaximoServerNotifier extends ChangeNotifier {
 
 class MyApp extends StatelessWidget {
   MyApp(this.settingsNotifier, {Key? key}) : super(key: key);
-  final _appRouter = AppRouter(navigatorKey);
+  final _appRouter = AppRouter(navigatorKey: navigatorKey);
   final SettingsNotifier settingsNotifier;
   // This widget is the root of your application.
   @override
@@ -82,26 +89,20 @@ class MyApp extends StatelessWidget {
         ],
         child: Builder(
           builder: (context) {
-            return AbsorbPointer(
-              absorbing:
-                  Provider.of<ProcessStateNotifier>(context, listen: false)
-                      .absorbInput(), //controls when input is allowed.
-              child: MaterialApp.router(
-                routerDelegate: _appRouter.delegate(),
-                routeInformationParser: _appRouter.defaultRouteParser(),
-                title: 'IKO Flutter Reliability',
-                theme: ThemeData(
-                  useMaterial3: true,
-                  colorSchemeSeed: const Color(0xFFFF0000),
-                ),
-                //sets color for theme
-                darkTheme: ThemeData(
-                  useMaterial3: true,
-                  colorSchemeSeed: const Color(0xFFFF0000),
-                  brightness: Brightness.dark,
-                ),
-                themeMode: Provider.of<ThemeManager>(context).themeMode,
+            return MaterialApp.router(
+              routerConfig: _appRouter.config(),
+              title: 'IKO Flutter Reliability',
+              theme: ThemeData(
+                useMaterial3: true,
+                colorSchemeSeed: const Color(0xFFFF0000),
               ),
+              //sets color for theme
+              darkTheme: ThemeData(
+                useMaterial3: true,
+                colorSchemeSeed: const Color(0xFFFF0000),
+                brightness: Brightness.dark,
+              ),
+              themeMode: Provider.of<ThemeManager>(context).themeMode,
             );
           },
         ));
@@ -109,6 +110,7 @@ class MyApp extends StatelessWidget {
 }
 
 ///Homepage widget (Stateful)
+@RoutePage()
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -292,7 +294,7 @@ class _HomePageState extends State<HomePage> {
                           .calculateSystemScores(); //load system score data
                     } catch (e) {
                       debugPrint(
-                          'Could not load system scores from cache \n${e}');
+                          'Could not load system scores from cache \n$e');
                     }
                     // change app state...
                     Navigator.pop(context); // close the drawer

@@ -1,15 +1,14 @@
 import 'dart:math';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../main.dart';
 
+@RoutePage()
 class SystemCriticalityPage extends StatefulWidget {
   const SystemCriticalityPage({Key? key}) : super(key: key);
 
@@ -299,7 +298,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     if (stateManager.currentRow != null) {
       final id = stateManager.currentRow!.cells['id']!.value;
       stateManager.removeCurrentRow();
-      final removed = await database!.deleteSystemCriticalitys(id);
+      await database!.deleteSystemCriticalitys(id);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Please select a system to remove'),
@@ -347,7 +346,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                   5);
           updateSystem(event.row)
               .then((value) => event.row.cells['id']!.value = value);
-          print(event);
+          debugPrint('$event');
         },
         onLoaded: (PlutoGridOnLoadedEvent event) {
           event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
@@ -389,7 +388,7 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
   }) {
-    print('Pressed add key.');
+    debugPrint('Pressed add key.');
     if (stateManager.currentColumnField != 'safety' &&
         stateManager.currentColumnField != 'regulatory' &&
         stateManager.currentColumnField != 'economic' &&
@@ -415,7 +414,7 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
   }) {
-    print('Pressed minus key.');
+    debugPrint('Pressed minus key.');
     if (stateManager.currentColumnField != 'safety' &&
         stateManager.currentColumnField != 'regulatory' &&
         stateManager.currentColumnField != 'economic' &&

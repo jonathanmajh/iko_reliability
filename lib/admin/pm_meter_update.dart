@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,6 +7,7 @@ import 'db_drift.dart';
 import 'end_drawer.dart';
 import 'pm_meter_update_functions.dart';
 
+@RoutePage()
 class PmMeterUpdatePage extends StatefulWidget {
   const PmMeterUpdatePage({Key? key}) : super(key: key);
 
@@ -79,7 +81,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         if (oldMeterNameController.text.isNotEmpty) {
                           final temp = await getJobtasks(
                               oldMeterNameController.text,
-                              Provider.of<MaximoServerNotifier>(context,
+                              Provider.of<MaximoServerNotifier>(
+                                      navigatorKey.currentContext!,
                                       listen: false)
                                   .maximoServerSelected);
                           setState(() {
@@ -89,7 +92,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         if (meterNameController.text.isNotEmpty) {
                           final temp = await getJobtasks(
                               meterNameController.text,
-                              Provider.of<MaximoServerNotifier>(context,
+                              Provider.of<MaximoServerNotifier>(
+                                      navigatorKey.currentContext!,
                                       listen: false)
                                   .maximoServerSelected);
                           setState(() {
@@ -97,8 +101,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                           });
                         }
                       },
-                      child: Row(
-                        children: const [
+                      child: const Row(
+                        children: [
                           Icon(Icons.visibility),
                           Text(' Preview Changes'),
                         ],
@@ -115,8 +119,8 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         ),
                       ))),
                       onPressed: (() {}),
-                      child: Row(
-                        children: const [
+                      child: const Row(
+                        children: [
                           Icon(Icons.publish),
                           Text(' Upload Changes'),
                         ],

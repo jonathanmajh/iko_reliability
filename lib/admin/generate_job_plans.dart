@@ -248,8 +248,8 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
     if (task.assetNumber == null || task.assetNumber == '') {
       // everything that does not have an asset number falls under the main job plan
       mainJobTasks.add(JobTaskMaximo(
-        jptask: task.jptask,
-        description: task.description,
+        jptask: task.jptask!,
+        description: task.description!,
         longdescription: task.longdescription,
         metername: await generateMeterNumber(meters, task.metername,
             pmDetails.pmAsset, pmDetails.processCondition!),
@@ -260,8 +260,8 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       meter = await generateMeterNumber(meters, task.metername,
           task.assetNumber, pmDetails.processCondition!);
       var childTask = JobTaskMaximo(
-        jptask: task.jptask,
-        description: task.description,
+        jptask: task.jptask!,
+        description: task.description!,
         longdescription: task.longdescription,
         metername: meter,
       );

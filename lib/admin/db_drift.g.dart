@@ -123,29 +123,36 @@ class Setting extends DataClass implements Insertable<Setting> {
 class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<String> key;
   final Value<String> value;
+  final Value<int> rowid;
   const SettingsCompanion({
     this.key = const Value.absent(),
     this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   SettingsCompanion.insert({
     required String key,
     required String value,
+    this.rowid = const Value.absent(),
   })  : key = Value(key),
         value = Value(value);
   static Insertable<Setting> custom({
     Expression<String>? key,
     Expression<String>? value,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (key != null) 'key': key,
       if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  SettingsCompanion copyWith({Value<String>? key, Value<String>? value}) {
+  SettingsCompanion copyWith(
+      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
     return SettingsCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -158,6 +165,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     if (value.present) {
       map['value'] = Variable<String>(value.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -165,7 +175,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   String toString() {
     return (StringBuffer('SettingsCompanion(')
           ..write('key: $key, ')
-          ..write('value: $value')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -294,29 +305,36 @@ class LoginSetting extends DataClass implements Insertable<LoginSetting> {
 class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
   final Value<String> key;
   final Value<String> value;
+  final Value<int> rowid;
   const LoginSettingsCompanion({
     this.key = const Value.absent(),
     this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   LoginSettingsCompanion.insert({
     required String key,
     required String value,
+    this.rowid = const Value.absent(),
   })  : key = Value(key),
         value = Value(value);
   static Insertable<LoginSetting> custom({
     Expression<String>? key,
     Expression<String>? value,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (key != null) 'key': key,
       if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  LoginSettingsCompanion copyWith({Value<String>? key, Value<String>? value}) {
+  LoginSettingsCompanion copyWith(
+      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
     return LoginSettingsCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -329,6 +347,9 @@ class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
     if (value.present) {
       map['value'] = Variable<String>(value.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -336,7 +357,8 @@ class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
   String toString() {
     return (StringBuffer('LoginSettingsCompanion(')
           ..write('key: $key, ')
-          ..write('value: $value')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -598,6 +620,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
   final Value<String> freqUnit;
   final Value<String> condition;
   final Value<String> craft;
+  final Value<int> rowid;
   const MeterDBsCompanion({
     this.meter = const Value.absent(),
     this.inspect = const Value.absent(),
@@ -606,6 +629,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     this.freqUnit = const Value.absent(),
     this.condition = const Value.absent(),
     this.craft = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   MeterDBsCompanion.insert({
     required String meter,
@@ -615,6 +639,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     required String freqUnit,
     required String condition,
     required String craft,
+    this.rowid = const Value.absent(),
   })  : meter = Value(meter),
         inspect = Value(inspect),
         description = Value(description),
@@ -630,6 +655,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     Expression<String>? freqUnit,
     Expression<String>? condition,
     Expression<String>? craft,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (meter != null) 'meter': meter,
@@ -639,6 +665,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
       if (freqUnit != null) 'freq_unit': freqUnit,
       if (condition != null) 'condition': condition,
       if (craft != null) 'craft': craft,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -649,7 +676,8 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
       Value<int>? frequency,
       Value<String>? freqUnit,
       Value<String>? condition,
-      Value<String>? craft}) {
+      Value<String>? craft,
+      Value<int>? rowid}) {
     return MeterDBsCompanion(
       meter: meter ?? this.meter,
       inspect: inspect ?? this.inspect,
@@ -658,6 +686,7 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
       freqUnit: freqUnit ?? this.freqUnit,
       condition: condition ?? this.condition,
       craft: craft ?? this.craft,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -685,6 +714,9 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     if (craft.present) {
       map['craft'] = Variable<String>(craft.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -697,7 +729,8 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
           ..write('frequency: $frequency, ')
           ..write('freqUnit: $freqUnit, ')
           ..write('condition: $condition, ')
-          ..write('craft: $craft')
+          ..write('craft: $craft, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -883,17 +916,20 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
   final Value<String> code;
   final Value<String> description;
   final Value<String?> action;
+  final Value<int> rowid;
   const ObservationsCompanion({
     this.meter = const Value.absent(),
     this.code = const Value.absent(),
     this.description = const Value.absent(),
     this.action = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   ObservationsCompanion.insert({
     required String meter,
     required String code,
     required String description,
     this.action = const Value.absent(),
+    this.rowid = const Value.absent(),
   })  : meter = Value(meter),
         code = Value(code),
         description = Value(description);
@@ -902,12 +938,14 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
     Expression<String>? code,
     Expression<String>? description,
     Expression<String>? action,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (meter != null) 'meter': meter,
       if (code != null) 'code': code,
       if (description != null) 'description': description,
       if (action != null) 'action': action,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -915,12 +953,14 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
       {Value<String>? meter,
       Value<String>? code,
       Value<String>? description,
-      Value<String?>? action}) {
+      Value<String?>? action,
+      Value<int>? rowid}) {
     return ObservationsCompanion(
       meter: meter ?? this.meter,
       code: code ?? this.code,
       description: description ?? this.description,
       action: action ?? this.action,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -939,6 +979,9 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
     if (action.present) {
       map['action'] = Variable<String>(action.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -948,7 +991,8 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
           ..write('meter: $meter, ')
           ..write('code: $code, ')
           ..write('description: $description, ')
-          ..write('action: $action')
+          ..write('action: $action, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1006,13 +1050,9 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
       type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _newAssetMeta =
       const VerificationMeta('newAsset');
   @override
@@ -1093,6 +1133,8 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     }
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('new_asset')) {
       context.handle(_newAssetMeta,
@@ -1128,7 +1170,7 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
       priority: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}priority'])!,
       id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       newAsset: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}new_asset'])!,
     );
@@ -1149,7 +1191,7 @@ class Asset extends DataClass implements Insertable<Asset> {
   final String? hierarchy;
   final String? parent;
   final int priority;
-  final int id;
+  final String id;
   final int newAsset;
   const Asset(
       {required this.assetnum,
@@ -1177,7 +1219,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       map['parent'] = Variable<String>(parent);
     }
     map['priority'] = Variable<int>(priority);
-    map['id'] = Variable<int>(id);
+    map['id'] = Variable<String>(id);
     map['new_asset'] = Variable<int>(newAsset);
     return map;
   }
@@ -1212,7 +1254,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       hierarchy: serializer.fromJson<String?>(json['hierarchy']),
       parent: serializer.fromJson<String?>(json['parent']),
       priority: serializer.fromJson<int>(json['priority']),
-      id: serializer.fromJson<int>(json['id']),
+      id: serializer.fromJson<String>(json['id']),
       newAsset: serializer.fromJson<int>(json['newAsset']),
     );
   }
@@ -1228,7 +1270,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       'hierarchy': serializer.toJson<String?>(hierarchy),
       'parent': serializer.toJson<String?>(parent),
       'priority': serializer.toJson<int>(priority),
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<String>(id),
       'newAsset': serializer.toJson<int>(newAsset),
     };
   }
@@ -1242,7 +1284,7 @@ class Asset extends DataClass implements Insertable<Asset> {
           Value<String?> hierarchy = const Value.absent(),
           Value<String?> parent = const Value.absent(),
           int? priority,
-          int? id,
+          String? id,
           int? newAsset}) =>
       Asset(
         assetnum: assetnum ?? this.assetnum,
@@ -1301,8 +1343,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String?> hierarchy;
   final Value<String?> parent;
   final Value<int> priority;
-  final Value<int> id;
+  final Value<String> id;
   final Value<int> newAsset;
+  final Value<int> rowid;
   const AssetsCompanion({
     this.assetnum = const Value.absent(),
     this.description = const Value.absent(),
@@ -1314,6 +1357,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.priority = const Value.absent(),
     this.id = const Value.absent(),
     this.newAsset = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   AssetsCompanion.insert({
     required String assetnum,
@@ -1324,14 +1368,16 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.hierarchy = const Value.absent(),
     this.parent = const Value.absent(),
     required int priority,
-    this.id = const Value.absent(),
+    required String id,
     this.newAsset = const Value.absent(),
+    this.rowid = const Value.absent(),
   })  : assetnum = Value(assetnum),
         description = Value(description),
         status = Value(status),
         siteid = Value(siteid),
         changedate = Value(changedate),
-        priority = Value(priority);
+        priority = Value(priority),
+        id = Value(id);
   static Insertable<Asset> custom({
     Expression<String>? assetnum,
     Expression<String>? description,
@@ -1341,8 +1387,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? hierarchy,
     Expression<String>? parent,
     Expression<int>? priority,
-    Expression<int>? id,
+    Expression<String>? id,
     Expression<int>? newAsset,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (assetnum != null) 'assetnum': assetnum,
@@ -1355,6 +1402,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (priority != null) 'priority': priority,
       if (id != null) 'id': id,
       if (newAsset != null) 'new_asset': newAsset,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -1367,8 +1415,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       Value<String?>? hierarchy,
       Value<String?>? parent,
       Value<int>? priority,
-      Value<int>? id,
-      Value<int>? newAsset}) {
+      Value<String>? id,
+      Value<int>? newAsset,
+      Value<int>? rowid}) {
     return AssetsCompanion(
       assetnum: assetnum ?? this.assetnum,
       description: description ?? this.description,
@@ -1380,6 +1429,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       priority: priority ?? this.priority,
       id: id ?? this.id,
       newAsset: newAsset ?? this.newAsset,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1411,7 +1461,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       map['priority'] = Variable<int>(priority.value);
     }
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (newAsset.present) {
       map['new_asset'] = Variable<int>(newAsset.value);
@@ -1431,7 +1481,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('parent: $parent, ')
           ..write('priority: $priority, ')
           ..write('id: $id, ')
-          ..write('newAsset: $newAsset')
+          ..write('newAsset: $newAsset, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1727,6 +1778,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
   final Value<double> downtime;
   final Value<String> type;
   final Value<String> assetnum;
+  final Value<int> rowid;
   const WorkordersCompanion({
     this.wonum = const Value.absent(),
     this.description = const Value.absent(),
@@ -1736,6 +1788,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     this.downtime = const Value.absent(),
     this.type = const Value.absent(),
     this.assetnum = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   WorkordersCompanion.insert({
     required String wonum,
@@ -1746,6 +1799,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     required double downtime,
     required String type,
     required String assetnum,
+    this.rowid = const Value.absent(),
   })  : wonum = Value(wonum),
         description = Value(description),
         status = Value(status),
@@ -1763,6 +1817,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     Expression<double>? downtime,
     Expression<String>? type,
     Expression<String>? assetnum,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (wonum != null) 'wonum': wonum,
@@ -1773,6 +1828,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       if (downtime != null) 'downtime': downtime,
       if (type != null) 'type': type,
       if (assetnum != null) 'assetnum': assetnum,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -1784,7 +1840,8 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       Value<String>? reportdate,
       Value<double>? downtime,
       Value<String>? type,
-      Value<String>? assetnum}) {
+      Value<String>? assetnum,
+      Value<int>? rowid}) {
     return WorkordersCompanion(
       wonum: wonum ?? this.wonum,
       description: description ?? this.description,
@@ -1794,6 +1851,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       downtime: downtime ?? this.downtime,
       type: type ?? this.type,
       assetnum: assetnum ?? this.assetnum,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1824,6 +1882,9 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     if (assetnum.present) {
       map['assetnum'] = Variable<String>(assetnum.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1837,7 +1898,8 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
           ..write('reportdate: $reportdate, ')
           ..write('downtime: $downtime, ')
           ..write('type: $type, ')
-          ..write('assetnum: $assetnum')
+          ..write('assetnum: $assetnum, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -2256,10 +2318,10 @@ class $AssetCriticalitysTable extends AssetCriticalitys
   $AssetCriticalitysTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _assetMeta = const VerificationMeta('asset');
   @override
-  late final GeneratedColumn<int> asset = GeneratedColumn<int>(
+  late final GeneratedColumn<String> asset = GeneratedColumn<String>(
       'asset', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('REFERENCES assets (id)'));
   static const VerificationMeta _systemMeta = const VerificationMeta('system');
@@ -2302,6 +2364,8 @@ class $AssetCriticalitysTable extends AssetCriticalitys
     if (data.containsKey('asset')) {
       context.handle(
           _assetMeta, asset.isAcceptableOrUnknown(data['asset']!, _assetMeta));
+    } else if (isInserting) {
+      context.missing(_assetMeta);
     }
     if (data.containsKey('system')) {
       context.handle(_systemMeta,
@@ -2337,7 +2401,7 @@ class $AssetCriticalitysTable extends AssetCriticalitys
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return AssetCriticality(
       asset: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}asset'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}asset'])!,
       system: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}system'])!,
       type: attachedDatabase.typeMapping
@@ -2357,7 +2421,7 @@ class $AssetCriticalitysTable extends AssetCriticalitys
 
 class AssetCriticality extends DataClass
     implements Insertable<AssetCriticality> {
-  final int asset;
+  final String asset;
   final int system;
   final String type;
   final int frequency;
@@ -2371,7 +2435,7 @@ class AssetCriticality extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['asset'] = Variable<int>(asset);
+    map['asset'] = Variable<String>(asset);
     map['system'] = Variable<int>(system);
     map['type'] = Variable<String>(type);
     map['frequency'] = Variable<int>(frequency);
@@ -2393,7 +2457,7 @@ class AssetCriticality extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AssetCriticality(
-      asset: serializer.fromJson<int>(json['asset']),
+      asset: serializer.fromJson<String>(json['asset']),
       system: serializer.fromJson<int>(json['system']),
       type: serializer.fromJson<String>(json['type']),
       frequency: serializer.fromJson<int>(json['frequency']),
@@ -2404,7 +2468,7 @@ class AssetCriticality extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'asset': serializer.toJson<int>(asset),
+      'asset': serializer.toJson<String>(asset),
       'system': serializer.toJson<int>(system),
       'type': serializer.toJson<String>(type),
       'frequency': serializer.toJson<int>(frequency),
@@ -2413,7 +2477,7 @@ class AssetCriticality extends DataClass
   }
 
   AssetCriticality copyWith(
-          {int? asset,
+          {String? asset,
           int? system,
           String? type,
           int? frequency,
@@ -2451,34 +2515,39 @@ class AssetCriticality extends DataClass
 }
 
 class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
-  final Value<int> asset;
+  final Value<String> asset;
   final Value<int> system;
   final Value<String> type;
   final Value<int> frequency;
   final Value<int> downtime;
+  final Value<int> rowid;
   const AssetCriticalitysCompanion({
     this.asset = const Value.absent(),
     this.system = const Value.absent(),
     this.type = const Value.absent(),
     this.frequency = const Value.absent(),
     this.downtime = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   AssetCriticalitysCompanion.insert({
-    this.asset = const Value.absent(),
+    required String asset,
     required int system,
     required String type,
     required int frequency,
     required int downtime,
-  })  : system = Value(system),
+    this.rowid = const Value.absent(),
+  })  : asset = Value(asset),
+        system = Value(system),
         type = Value(type),
         frequency = Value(frequency),
         downtime = Value(downtime);
   static Insertable<AssetCriticality> custom({
-    Expression<int>? asset,
+    Expression<String>? asset,
     Expression<int>? system,
     Expression<String>? type,
     Expression<int>? frequency,
     Expression<int>? downtime,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (asset != null) 'asset': asset,
@@ -2486,21 +2555,24 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       if (type != null) 'type': type,
       if (frequency != null) 'frequency': frequency,
       if (downtime != null) 'downtime': downtime,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   AssetCriticalitysCompanion copyWith(
-      {Value<int>? asset,
+      {Value<String>? asset,
       Value<int>? system,
       Value<String>? type,
       Value<int>? frequency,
-      Value<int>? downtime}) {
+      Value<int>? downtime,
+      Value<int>? rowid}) {
     return AssetCriticalitysCompanion(
       asset: asset ?? this.asset,
       system: system ?? this.system,
       type: type ?? this.type,
       frequency: frequency ?? this.frequency,
       downtime: downtime ?? this.downtime,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -2508,7 +2580,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (asset.present) {
-      map['asset'] = Variable<int>(asset.value);
+      map['asset'] = Variable<String>(asset.value);
     }
     if (system.present) {
       map['system'] = Variable<int>(system.value);
@@ -2522,6 +2594,9 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     if (downtime.present) {
       map['downtime'] = Variable<int>(downtime.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -2532,7 +2607,8 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
           ..write('system: $system, ')
           ..write('type: $type, ')
           ..write('frequency: $frequency, ')
-          ..write('downtime: $downtime')
+          ..write('downtime: $downtime, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }

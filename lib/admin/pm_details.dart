@@ -74,7 +74,8 @@ class _PMDetailViewState extends State<PMDetailView>
                 await generateUploadHelper(
                   processedTemplate,
                   templateNotifier,
-                  selected,
+                  selected.selectedFile!,
+                  selected.selectedTemplate!,
                   uploadNotifier,
                 );
                 _updateFab();
@@ -91,7 +92,8 @@ class _PMDetailViewState extends State<PMDetailView>
                   await generateUploadHelper(
                     processedTemplate,
                     templateNotifier,
-                    selected,
+                    selected.selectedFile!,
+                    selected.selectedTemplate!,
                     uploadNotifier,
                   );
                   _updateFab();
@@ -106,7 +108,7 @@ class _PMDetailViewState extends State<PMDetailView>
                   } catch (e) {
                     templateNotifier.addStatusMessage(selected.selectedFile!,
                         selected.selectedTemplate!, '$e');
-                    ScaffoldMessenger.of(context)
+                    ScaffoldMessenger.of(navigatorKey.currentContext!)
                         .showSnackBar(SnackBar(content: Text('$e')));
                   }
                 },
@@ -632,23 +634,22 @@ ${const ListToCsvConverter().convert(details[tables])}
 Future<void> generateUploadHelper(
   PMMaximo? processedTemplate,
   TemplateNotifier templateNotifier,
-  SelectedTemplate selected,
+  String file,
+  int template,
   UploadNotifier uploadNotifier,
 ) async {
   if (processedTemplate != null) {
     var upload = await generateUploads(processedTemplate);
-    templateNotifier.clearStatusMessage(
-        selected.selectedFile!, selected.selectedTemplate!);
+    templateNotifier.clearStatusMessage(file, template);
     if (upload.containsKey('Errors')) {
       final errors = upload.remove('Errors');
       for (final msg in errors!) {
-        templateNotifier.addStatusMessage(
-            selected.selectedFile!, selected.selectedTemplate!, msg[0]);
+        templateNotifier.addStatusMessage(file, template, msg[0]);
       }
     }
     uploadNotifier.setUploadDetails(
-      selected.selectedFile!,
-      selected.selectedTemplate!,
+      file,
+      template,
       upload,
     );
   }

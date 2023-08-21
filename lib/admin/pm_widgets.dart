@@ -201,10 +201,10 @@ List<Widget> buildPMList(
     }
   }
   if (templateNotify.getLoading()) {
-    list.add(Row(
+    list.add(const Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox(
             height: 100,
             width: 100,

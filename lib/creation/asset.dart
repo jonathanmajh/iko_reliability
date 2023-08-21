@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -99,7 +98,7 @@ class _AssetPageState extends State<AssetPage>
       endDrawer: const EndDrawer(),
       body: TabBarView(
         controller: _tabController,
-        children: [
+        children: const [
           Column(
             children: <Widget>[
               Expanded(
@@ -111,7 +110,7 @@ class _AssetPageState extends State<AssetPage>
             ],
           ),
           Column(
-            children: const <Widget>[
+            children: <Widget>[
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(30),
@@ -246,7 +245,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
                   ));
             }
 
-            if (assetStatus == 'fail'){
+            if (assetStatus == 'fail') {
               return const Icon(
                 Icons.close,
                 color: Colors.red,
@@ -335,8 +334,8 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
                 : const Color.fromARGB(255, 133, 252, 133));
           } else if (assetStatus == 'warning' || assetStatus == 'fail') {
             return (themeManager.isDark
-                ? Color.fromARGB(255, 94, 15, 15)
-                : Color.fromARGB(255, 221, 93, 93));
+                ? const Color.fromARGB(255, 94, 15, 15)
+                : const Color.fromARGB(255, 221, 93, 93));
           } else {
             return (themeManager.isDark
                 ? const Color.fromARGB(255, 17, 17, 17)
@@ -472,7 +471,8 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                 return null;
               },
               inputFormatters: [
-                LengthLimitingTextInputFormatter(50), // to limit total description to 100 characters
+                LengthLimitingTextInputFormatter(
+                    50), // to limit total description to 100 characters
               ],
             ),
           ]),
@@ -732,7 +732,7 @@ class _AssetUploadDialogState extends State<AssetUploadDialog> {
     return AlertDialog(
         title: const Text('Upload Assets'),
         content: Container(
-          child: Text('Are you sure you want to upload these assets?'),
+          child: const Text('Are you sure you want to upload these assets?'),
         ),
         actions: <Widget>[
           TextButton(
@@ -744,7 +744,8 @@ class _AssetUploadDialogState extends State<AssetUploadDialog> {
           TextButton(
             child: const Text('OK'),
             onPressed: () {
-              context.read<AssetCreationNotifier>().uploadAssets(context.read<MaximoServerNotifier>().maximoServerSelected);
+              context.read<AssetCreationNotifier>().uploadAssets(
+                  context.read<MaximoServerNotifier>().maximoServerSelected);
               Navigator.pop(context, 'OK');
             },
           )
