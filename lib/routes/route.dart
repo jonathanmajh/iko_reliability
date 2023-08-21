@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 
-import '../admin/asset.dart';
+import '../creation/asset.dart';
 import '../admin/contractor.dart';
 import '../admin/pm_check.dart';
 import '../admin/pm_meter_update.dart';

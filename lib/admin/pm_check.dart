@@ -71,7 +71,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                         template,
                         uploadNotifier,
                       );
-                      uploadToMaximo(
+                      uploadPMToMaximo(
                         maximo.maximoServerSelected,
                         filename,
                         template,

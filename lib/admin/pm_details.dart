@@ -98,7 +98,7 @@ class _PMDetailViewState extends State<PMDetailView>
                   );
                   _updateFab();
                   try {
-                    await uploadToMaximo(
+                    await uploadPMToMaximo(
                       maximo.maximoServerSelected,
                       selected.selectedFile!,
                       selected.selectedTemplate!,

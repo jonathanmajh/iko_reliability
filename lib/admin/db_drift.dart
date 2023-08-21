@@ -88,7 +88,10 @@ class Assets extends Table {
   TextColumn? get parent => text().nullable()();
   IntColumn get priority => integer()();
   TextColumn get id => text()();
-  BoolColumn get newAsset => boolean().withDefault(const Constant(false))();
+  IntColumn get newAsset => integer().withDefault(const Constant(0))();
+  // 0 = existing asset
+  //1 = new asset
+  //-1 = asset that failed upload (e.g. location and asset were uploaded, but job plan failed)
 
   @override
   List<Set<Column>> get uniqueKeys => [
@@ -222,17 +225,52 @@ class MyDatabase extends _$MyDatabase {
     String description,
     String parent,
   ) async {
+    final parentAsset = await (select(assets)
+          ..where((t) => t.assetnum.equals(parent))
+          ..where((t) => t.siteid.equals(siteid)))
+        .getSingle();
+    final hierarchy = '${parentAsset.hierarchy},$assetnum';
+
     final row = await into(assets).insertReturning(AssetsCompanion.insert(
       description: description,
+      hierarchy: Value(hierarchy),
       assetnum: assetnum,
       siteid: siteid,
       parent: Value(parent),
       priority: 0,
       status: 'Planning',
       changedate: 'N/A',
+      newAsset: const Value(1),
       id: '$siteid$assetnum',
     ));
     return row.id;
+  }
+
+  Future<String> deleteAsset(String assetNum, String siteId) async {
+    final row = await (delete(assets)
+          ..where((t) => t.assetnum.equals(assetNum))
+          ..where((t) => t.siteid.equals(siteId)))
+        .goAndReturn();
+    return row.first.id;
+  }
+
+  ///0 = existing asset
+  ///
+  ///1 = new asset
+  ///
+  ///-1 = asset that failed upload (e.g. location and asset were uploaded, but job plan failed)
+  Future<String> setAssetStatus(
+      String assetNum, String siteId, int assetStatus) async {
+    var res = await (update(assets)
+          ..where((t) => t.siteid.equals(siteId) & t.assetnum.equals(assetNum)))
+        .writeReturning(AssetsCompanion(newAsset: Value(assetStatus)));
+
+    if (res.length > 1) {
+      throw Exception(
+          'More than one asset was updated, database is most likely corrupt');
+    }
+
+    return res[0].id;
   }
 
   Future<int> deleteSystemCriticalitys(int value) async {

@@ -1056,16 +1056,11 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
   static const VerificationMeta _newAssetMeta =
       const VerificationMeta('newAsset');
   @override
-  late final GeneratedColumn<bool> newAsset =
-      GeneratedColumn<bool>('new_asset', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("new_asset" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<int> newAsset = GeneratedColumn<int>(
+      'new_asset', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns => [
         assetnum,
@@ -1177,7 +1172,7 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       newAsset: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}new_asset'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}new_asset'])!,
     );
   }
 
@@ -1197,7 +1192,7 @@ class Asset extends DataClass implements Insertable<Asset> {
   final String? parent;
   final int priority;
   final String id;
-  final bool newAsset;
+  final int newAsset;
   const Asset(
       {required this.assetnum,
       required this.description,
@@ -1225,7 +1220,7 @@ class Asset extends DataClass implements Insertable<Asset> {
     }
     map['priority'] = Variable<int>(priority);
     map['id'] = Variable<String>(id);
-    map['new_asset'] = Variable<bool>(newAsset);
+    map['new_asset'] = Variable<int>(newAsset);
     return map;
   }
 
@@ -1260,7 +1255,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       parent: serializer.fromJson<String?>(json['parent']),
       priority: serializer.fromJson<int>(json['priority']),
       id: serializer.fromJson<String>(json['id']),
-      newAsset: serializer.fromJson<bool>(json['newAsset']),
+      newAsset: serializer.fromJson<int>(json['newAsset']),
     );
   }
   @override
@@ -1276,7 +1271,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       'parent': serializer.toJson<String?>(parent),
       'priority': serializer.toJson<int>(priority),
       'id': serializer.toJson<String>(id),
-      'newAsset': serializer.toJson<bool>(newAsset),
+      'newAsset': serializer.toJson<int>(newAsset),
     };
   }
 
@@ -1290,7 +1285,7 @@ class Asset extends DataClass implements Insertable<Asset> {
           Value<String?> parent = const Value.absent(),
           int? priority,
           String? id,
-          bool? newAsset}) =>
+          int? newAsset}) =>
       Asset(
         assetnum: assetnum ?? this.assetnum,
         description: description ?? this.description,
@@ -1349,7 +1344,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String?> parent;
   final Value<int> priority;
   final Value<String> id;
-  final Value<bool> newAsset;
+  final Value<int> newAsset;
   final Value<int> rowid;
   const AssetsCompanion({
     this.assetnum = const Value.absent(),
@@ -1393,7 +1388,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? parent,
     Expression<int>? priority,
     Expression<String>? id,
-    Expression<bool>? newAsset,
+    Expression<int>? newAsset,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1421,7 +1416,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       Value<String?>? parent,
       Value<int>? priority,
       Value<String>? id,
-      Value<bool>? newAsset,
+      Value<int>? newAsset,
       Value<int>? rowid}) {
     return AssetsCompanion(
       assetnum: assetnum ?? this.assetnum,
@@ -1469,7 +1464,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       map['id'] = Variable<String>(id.value);
     }
     if (newAsset.present) {
-      map['new_asset'] = Variable<bool>(newAsset.value);
+      map['new_asset'] = Variable<int>(newAsset.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
