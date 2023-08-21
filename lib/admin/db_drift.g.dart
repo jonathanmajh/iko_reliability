@@ -124,11 +124,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<String> key;
   final Value<String> value;
   final Value<int> rowid;
-  final Value<int> rowid;
   const SettingsCompanion({
     this.key = const Value.absent(),
     this.value = const Value.absent(),
-    this.rowid = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SettingsCompanion.insert({
@@ -1467,6 +1465,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     }
     if (newAsset.present) {
       map['new_asset'] = Variable<int>(newAsset.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
