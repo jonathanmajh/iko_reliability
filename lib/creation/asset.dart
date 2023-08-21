@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:iko_reliability_flutter/admin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
@@ -67,24 +68,8 @@ class _AssetPageState extends State<AssetPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         toolbarHeight: 100,
-        title: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-          child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(children: [
-                const TextSpan(
-                    text: 'Maximo Asset Creator\n',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 40)),
-                TextSpan(
-                    text: context
-                        .watch<SiteChangeNotifier>()
-                        .getSiteDescription(),
-                    style: const TextStyle(fontSize: 20)),
-              ])),
-        ),
+        title: Text('Maximo Asset Creator - ${siteIDAndDescription[context.watch<SiteChangeNotifier>().selectedSite] ?? 'No Site Selected'}'),
         bottom: TabBar(
           controller: _tabController,
           onTap: (value) {},
@@ -98,7 +83,7 @@ class _AssetPageState extends State<AssetPage>
       endDrawer: const EndDrawer(),
       body: TabBarView(
         controller: _tabController,
-        children: const [
+        children: [
           Column(
             children: <Widget>[
               Expanded(
