@@ -124,9 +124,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<String> key;
   final Value<String> value;
   final Value<int> rowid;
+  final Value<int> rowid;
   const SettingsCompanion({
     this.key = const Value.absent(),
     this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SettingsCompanion.insert({
