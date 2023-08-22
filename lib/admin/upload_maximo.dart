@@ -468,7 +468,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     "DOWNTIME",
     "INTERRUPTIBLE"
   ];
-  result['jobplan'] = Map<String, String>();
+  result['jobplan'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
     List<String> jobPlanBody = [];
     if (!(await isNewJobPlan('${asset.assetnum}${entry.key}', env))) {
@@ -514,7 +514,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     }*/
   }
 
-  result['joblabor'] = Map<String, String>();
+  result['joblabor'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
     if (!(await isNewJobLabor(
         '${asset.assetnum}${entry.key}',
@@ -560,7 +560,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     }*/
   }
 
-  result['jpassetlink'] = Map<String, String>();
+  result['jpassetlink'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
     if (!(await isNewJobAsset('${asset.assetnum}${entry.key}',
         assetCreationNotifier.selectedSite, asset.assetnum, env))) {

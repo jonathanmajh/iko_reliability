@@ -69,7 +69,8 @@ class _AssetPageState extends State<AssetPage>
     return Scaffold(
       appBar: AppBar(
         // toolbarHeight: 100,
-        title: Text('Maximo Asset Creator - ${siteIDAndDescription[context.watch<SiteChangeNotifier>().selectedSite] ?? 'No Site Selected'}'),
+        title: Text(
+            'Maximo Asset Creator - ${siteIDAndDescription[context.watch<SiteChangeNotifier>().selectedSite] ?? 'No Site Selected'}'),
         bottom: TabBar(
           controller: _tabController,
           onTap: (value) {},
@@ -83,7 +84,7 @@ class _AssetPageState extends State<AssetPage>
       endDrawer: const EndDrawer(),
       body: TabBarView(
         controller: _tabController,
-        children: [
+        children: const [
           Column(
             children: <Widget>[
               Expanded(
@@ -377,7 +378,7 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Create Asset'),
-      content: Container(
+      content: SizedBox(
         height: 300,
         width: 300,
         child: Form(
@@ -392,8 +393,7 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                 child: Center(
                   //padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    ('Current Site: ' +
-                        context.read<AssetCreationNotifier>().selectedSite),
+                    ('Current Site: ${context.read<AssetCreationNotifier>().selectedSite}'),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -716,9 +716,7 @@ class _AssetUploadDialogState extends State<AssetUploadDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
         title: const Text('Upload Assets'),
-        content: Container(
-          child: const Text('Are you sure you want to upload these assets?'),
-        ),
+        content: const Text('Are you sure you want to upload these assets?'),
         actions: <Widget>[
           TextButton(
             child: const Text('Cancel'),
@@ -760,16 +758,15 @@ class _AssetErrorMessageDialogState extends State<AssetErrorMessageDialog> {
     super.initState();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Consumer<AssetCreationNotifier>(
         builder: (context, assetCreationNotifier, child) {
       return AlertDialog(
           insetPadding: const EdgeInsets.fromLTRB(400, 0, 400, 0),
           title: const Text('Asset Upload Failed!'),
-          content: Container(
-            child: Text(assetCreationNotifier.failedAssets[widget.assetNum]! +
-                '\n\nPlease use maximo to fix this error, or try uploading again.'),
-          ),
+          content: Text(
+              '${assetCreationNotifier.failedAssets[widget.assetNum]!}\n\nPlease use maximo to fix this error, or try uploading again.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Ok'),
