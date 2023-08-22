@@ -632,16 +632,9 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
 
     columns.addAll([
       PlutoColumn(
-        width: 350,
-        title: 'Hierarchy',
-        readOnly: true,
-        field: 'hierarchy',
-        type: PlutoColumnType.text(),
-        //sort: PlutoColumnSort.ascending,
-      ),
-      PlutoColumn(
           title: 'Actions',
           field: 'actions',
+          width: 100,
           type: PlutoColumnType.text(),
           readOnly: true,
           renderer: (rendererContext) {
@@ -732,11 +725,19 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
             );
           }),
       PlutoColumn(
+        width: 100,
+        title: 'Asset Number',
+        readOnly: true,
+        field: 'hierarchy',
+        type: PlutoColumnType.text(),
+        //sort: PlutoColumnSort.ascending,
+      ),
+      PlutoColumn(
         title: 'Description',
         readOnly: true,
         field: 'description',
         type: PlutoColumnType.text(),
-        width: 900,
+        width: 400,
       ),
       PlutoColumn(
         width: 100,
@@ -747,7 +748,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
-        width: 100,
+        width: 400,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Standard Description',
@@ -755,7 +756,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
-        width: 100,
+        width: 150,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Installation Date',
@@ -763,7 +764,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
-        width: 100,
+        width: 150,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Vendor Number',
@@ -771,7 +772,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
-        width: 100,
+        width: 150,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Manufacturer',
@@ -779,7 +780,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
-        width: 100,
+        width: 150,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Model Number',
@@ -790,7 +791,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
         width: 100,
         readOnly: true,
         enableAutoEditing: false,
-        title: 'Asset Criticality',
+        title: 'Criticality',
         field: 'assetCriticality',
         type: PlutoColumnType.number(),
       ),
@@ -822,6 +823,15 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
             'hierarchy': PlutoCell(value: asset.asset.assetnum),
             'site': PlutoCell(value: asset.asset.siteid),
             'actions': PlutoCell(value: ''),
+            'sjpDescription':
+                PlutoCell(value: asset.uploads?.sjpDescription ?? ''),
+            'installationDate':
+                PlutoCell(value: asset.uploads?.installationDate ?? ''),
+            'vendor': PlutoCell(value: asset.uploads?.vendor ?? ''),
+            'manufacturer': PlutoCell(value: asset.uploads?.manufacturer ?? ''),
+            'modelNum': PlutoCell(value: asset.uploads?.modelNum ?? ''),
+            'assetCriticality':
+                PlutoCell(value: asset.uploads?.assetCriticality ?? 0),
           },
         ));
       }

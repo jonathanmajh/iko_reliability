@@ -116,13 +116,12 @@ class AssetUploads extends Table {
 }
 
 class AssetWithUpload {
+  final Asset asset;
+  final AssetUpload? uploads;
   AssetWithUpload(
     this.asset,
     this.uploads,
   );
-
-  final Asset asset;
-  final AssetUploads? uploads;
 }
 
 class SystemCriticalitys extends Table {
@@ -243,7 +242,7 @@ class MyDatabase extends _$MyDatabase {
     });
   }
 
-  Future<String> addNewAsset(
+  Future<AssetWithUpload> addNewAsset(
     String assetnum,
     String siteid,
     String description,
@@ -274,7 +273,8 @@ class MyDatabase extends _$MyDatabase {
       id: '$siteid$assetnum',
     ));
 
-    await into(assetUploads).insert(AssetUploadsCompanion.insert(
+    final row2 =
+        await into(assetUploads).insertReturning(AssetUploadsCompanion.insert(
       asset: '$siteid$assetnum',
       sjpDescription: Value(sjpDescription ?? description),
       installationDate: Value(installationDate),
@@ -284,7 +284,7 @@ class MyDatabase extends _$MyDatabase {
       assetCriticality: Value(assetCriticality),
     ));
 
-    return row.id;
+    return AssetWithUpload(row, row2);
   }
 
   Future<String> deleteAsset(String assetNum, String siteId) async {
@@ -692,8 +692,7 @@ class MyDatabase extends _$MyDatabase {
     return result.map((row) {
       return AssetWithUpload(
         row.readTable(assets),
-        row.readTableOrNull(assetUploads
-            as ResultSetImplementation<$AssetUploadsTable, AssetUploads>),
+        row.readTableOrNull(assetUploads),
       );
     }).toList();
   }

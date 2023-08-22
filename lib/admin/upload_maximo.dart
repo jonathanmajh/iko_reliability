@@ -459,7 +459,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
               asset.uploads?.assetCriticality,
               asset.uploads?.vendor,
               asset.uploads?.manufacturer,
-              asset.uploads?.modelNum,
+              // asset.uploads?.modelNum,
             ]
           ]),
           headers,
@@ -496,7 +496,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     jobPlanBody = [
       '${asset.asset.assetnum}${entry.key}',
       '0',
-      '${asset.asset.description} - ${entry.value.description}',
+      '${asset.uploads?.sjpDescription ?? asset.asset.description} - ${entry.value.description}',
       '',
       'ACTIVE',
       personGroups[entry.key[entry.key.length - 1]]!,

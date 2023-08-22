@@ -79,7 +79,7 @@ class AssetCreationNotifier extends ChangeNotifier {
 
     var newAsset = await database!.getAsset(site ?? selectedSite, assetNum);
 
-    siteAssets[assetNum] = AssetWithUpload(newAsset, null);
+    siteAssets[assetNum] = id;
     pendingAssets[assetNum] = 'new';
 
     if (!parentAssets.containsKey(parent)) {
@@ -90,7 +90,7 @@ class AssetCreationNotifier extends ChangeNotifier {
 
     print('done adding asset');
     notifyListeners();
-    return id;
+    return id.asset.assetnum;
   }
 
   Future<String> deleteAsset(String assetNum, String site) async {
