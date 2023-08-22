@@ -31,8 +31,8 @@ class AssetCreationNotifier extends ChangeNotifier {
         pendingAssets[row.asset.assetnum] = 'fail';
       }
       siteAssets[row.asset.assetnum] = row;
-      if (parentAssets.containsKey(row.asset.parent)) {
-        parentAssets[row.asset.parent]!.add(row.asset);
+      if (parentAssets.containsKey(row.asset.parent ?? 'Top')) {
+        parentAssets[row.asset.parent ?? 'Top']!.add(row.asset);
       } else {
         parentAssets[row.asset.parent ?? "Top"] = [row.asset];
       }

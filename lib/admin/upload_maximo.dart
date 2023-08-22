@@ -455,11 +455,11 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
             [
               assetCreationNotifier.selectedSite,
               asset.asset.assetnum,
-              asset.uploads?.installationDate,
-              asset.uploads?.assetCriticality,
-              asset.uploads?.vendor,
-              asset.uploads?.manufacturer,
-              // asset.uploads?.modelNum,
+              asset.uploads?.installationDate ?? '',
+              asset.uploads?.assetCriticality ?? '',
+              asset.uploads?.vendor ?? '',
+              asset.uploads?.manufacturer ?? '',
+              // asset.uploads?.modelNum ?? '',
             ]
           ]),
           headers,
