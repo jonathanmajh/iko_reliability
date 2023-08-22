@@ -245,6 +245,9 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
     ));
   }
   for (final task in pmDetails.tasks) {
+    if (task.jptask == null) {
+      throw Exception('Missing task number for task: ${task.description}');
+    }
     if (task.assetNumber == null || task.assetNumber == '') {
       // everything that does not have an asset number falls under the main job plan
       mainJobTasks.add(JobTaskMaximo(
@@ -339,6 +342,10 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
       itemNumber: jobservice.itemNumber,
       vendorId: jobservice.vendorId,
     ));
+  }
+  if (!personGroups.containsKey(pmDetails.crafts[0].laborType)) {
+    throw Exception(
+        'Selected craft type is not valid: ${pmDetails.crafts[0].laborType}');
   }
   var mainJobPlan = JobPlanMaximo(
       description: pmName.pmName,

@@ -92,6 +92,9 @@ Future<PMName> generateName(
     // TODO add the replaced component to the end of the name
   }
   // add craft
+  if (pmdetails.crafts.isEmpty) {
+    throw Exception('No crafts selected for this template');
+  }
   var craft = pmdetails.crafts[0].laborType;
   craft = craft.substring(craft.length - 1);
   number = '$number$craft';

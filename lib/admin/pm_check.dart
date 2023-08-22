@@ -343,7 +343,6 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
   for (var thing in parsedTmpts) {
     for (String ws in thing.keys) {
       for (int templateNumber in thing[ws].keys) {
-        // TODO this is no longer async :(
         try {
           final value = await generateName(
             context.getParsedTemplate(ws, templateNumber),
