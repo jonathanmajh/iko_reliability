@@ -2617,6 +2617,406 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
   }
 }
 
+class $AssetUploadsTable extends AssetUploads
+    with TableInfo<$AssetUploadsTable, AssetUpload> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssetUploadsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _assetMeta = const VerificationMeta('asset');
+  @override
+  late final GeneratedColumn<String> asset = GeneratedColumn<String>(
+      'asset', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES assets (id)'));
+  static const VerificationMeta _sjpDescriptionMeta =
+      const VerificationMeta('sjpDescription');
+  @override
+  late final GeneratedColumn<String> sjpDescription = GeneratedColumn<String>(
+      'sjp_description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _installationDateMeta =
+      const VerificationMeta('installationDate');
+  @override
+  late final GeneratedColumn<String> installationDate = GeneratedColumn<String>(
+      'installation_date', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
+  @override
+  late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
+      'vendor', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _manufacturerMeta =
+      const VerificationMeta('manufacturer');
+  @override
+  late final GeneratedColumn<String> manufacturer = GeneratedColumn<String>(
+      'manufacturer', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _modelNumMeta =
+      const VerificationMeta('modelNum');
+  @override
+  late final GeneratedColumn<String> modelNum = GeneratedColumn<String>(
+      'model_num', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _assetCriticalityMeta =
+      const VerificationMeta('assetCriticality');
+  @override
+  late final GeneratedColumn<int> assetCriticality = GeneratedColumn<int>(
+      'asset_criticality', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        asset,
+        sjpDescription,
+        installationDate,
+        vendor,
+        manufacturer,
+        modelNum,
+        assetCriticality
+      ];
+  @override
+  String get aliasedName => _alias ?? 'asset_uploads';
+  @override
+  String get actualTableName => 'asset_uploads';
+  @override
+  VerificationContext validateIntegrity(Insertable<AssetUpload> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('asset')) {
+      context.handle(
+          _assetMeta, asset.isAcceptableOrUnknown(data['asset']!, _assetMeta));
+    } else if (isInserting) {
+      context.missing(_assetMeta);
+    }
+    if (data.containsKey('sjp_description')) {
+      context.handle(
+          _sjpDescriptionMeta,
+          sjpDescription.isAcceptableOrUnknown(
+              data['sjp_description']!, _sjpDescriptionMeta));
+    }
+    if (data.containsKey('installation_date')) {
+      context.handle(
+          _installationDateMeta,
+          installationDate.isAcceptableOrUnknown(
+              data['installation_date']!, _installationDateMeta));
+    }
+    if (data.containsKey('vendor')) {
+      context.handle(_vendorMeta,
+          vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta));
+    }
+    if (data.containsKey('manufacturer')) {
+      context.handle(
+          _manufacturerMeta,
+          manufacturer.isAcceptableOrUnknown(
+              data['manufacturer']!, _manufacturerMeta));
+    }
+    if (data.containsKey('model_num')) {
+      context.handle(_modelNumMeta,
+          modelNum.isAcceptableOrUnknown(data['model_num']!, _modelNumMeta));
+    }
+    if (data.containsKey('asset_criticality')) {
+      context.handle(
+          _assetCriticalityMeta,
+          assetCriticality.isAcceptableOrUnknown(
+              data['asset_criticality']!, _assetCriticalityMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {asset};
+  @override
+  AssetUpload map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssetUpload(
+      asset: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}asset'])!,
+      sjpDescription: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sjp_description']),
+      installationDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}installation_date']),
+      vendor: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}vendor']),
+      manufacturer: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}manufacturer']),
+      modelNum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}model_num']),
+      assetCriticality: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}asset_criticality']),
+    );
+  }
+
+  @override
+  $AssetUploadsTable createAlias(String alias) {
+    return $AssetUploadsTable(attachedDatabase, alias);
+  }
+}
+
+class AssetUpload extends DataClass implements Insertable<AssetUpload> {
+  final String asset;
+  final String? sjpDescription;
+  final String? installationDate;
+  final String? vendor;
+  final String? manufacturer;
+  final String? modelNum;
+  final int? assetCriticality;
+  const AssetUpload(
+      {required this.asset,
+      this.sjpDescription,
+      this.installationDate,
+      this.vendor,
+      this.manufacturer,
+      this.modelNum,
+      this.assetCriticality});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['asset'] = Variable<String>(asset);
+    if (!nullToAbsent || sjpDescription != null) {
+      map['sjp_description'] = Variable<String>(sjpDescription);
+    }
+    if (!nullToAbsent || installationDate != null) {
+      map['installation_date'] = Variable<String>(installationDate);
+    }
+    if (!nullToAbsent || vendor != null) {
+      map['vendor'] = Variable<String>(vendor);
+    }
+    if (!nullToAbsent || manufacturer != null) {
+      map['manufacturer'] = Variable<String>(manufacturer);
+    }
+    if (!nullToAbsent || modelNum != null) {
+      map['model_num'] = Variable<String>(modelNum);
+    }
+    if (!nullToAbsent || assetCriticality != null) {
+      map['asset_criticality'] = Variable<int>(assetCriticality);
+    }
+    return map;
+  }
+
+  AssetUploadsCompanion toCompanion(bool nullToAbsent) {
+    return AssetUploadsCompanion(
+      asset: Value(asset),
+      sjpDescription: sjpDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sjpDescription),
+      installationDate: installationDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(installationDate),
+      vendor:
+          vendor == null && nullToAbsent ? const Value.absent() : Value(vendor),
+      manufacturer: manufacturer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(manufacturer),
+      modelNum: modelNum == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modelNum),
+      assetCriticality: assetCriticality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assetCriticality),
+    );
+  }
+
+  factory AssetUpload.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssetUpload(
+      asset: serializer.fromJson<String>(json['asset']),
+      sjpDescription: serializer.fromJson<String?>(json['sjpDescription']),
+      installationDate: serializer.fromJson<String?>(json['installationDate']),
+      vendor: serializer.fromJson<String?>(json['vendor']),
+      manufacturer: serializer.fromJson<String?>(json['manufacturer']),
+      modelNum: serializer.fromJson<String?>(json['modelNum']),
+      assetCriticality: serializer.fromJson<int?>(json['assetCriticality']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'asset': serializer.toJson<String>(asset),
+      'sjpDescription': serializer.toJson<String?>(sjpDescription),
+      'installationDate': serializer.toJson<String?>(installationDate),
+      'vendor': serializer.toJson<String?>(vendor),
+      'manufacturer': serializer.toJson<String?>(manufacturer),
+      'modelNum': serializer.toJson<String?>(modelNum),
+      'assetCriticality': serializer.toJson<int?>(assetCriticality),
+    };
+  }
+
+  AssetUpload copyWith(
+          {String? asset,
+          Value<String?> sjpDescription = const Value.absent(),
+          Value<String?> installationDate = const Value.absent(),
+          Value<String?> vendor = const Value.absent(),
+          Value<String?> manufacturer = const Value.absent(),
+          Value<String?> modelNum = const Value.absent(),
+          Value<int?> assetCriticality = const Value.absent()}) =>
+      AssetUpload(
+        asset: asset ?? this.asset,
+        sjpDescription:
+            sjpDescription.present ? sjpDescription.value : this.sjpDescription,
+        installationDate: installationDate.present
+            ? installationDate.value
+            : this.installationDate,
+        vendor: vendor.present ? vendor.value : this.vendor,
+        manufacturer:
+            manufacturer.present ? manufacturer.value : this.manufacturer,
+        modelNum: modelNum.present ? modelNum.value : this.modelNum,
+        assetCriticality: assetCriticality.present
+            ? assetCriticality.value
+            : this.assetCriticality,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('AssetUpload(')
+          ..write('asset: $asset, ')
+          ..write('sjpDescription: $sjpDescription, ')
+          ..write('installationDate: $installationDate, ')
+          ..write('vendor: $vendor, ')
+          ..write('manufacturer: $manufacturer, ')
+          ..write('modelNum: $modelNum, ')
+          ..write('assetCriticality: $assetCriticality')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(asset, sjpDescription, installationDate,
+      vendor, manufacturer, modelNum, assetCriticality);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssetUpload &&
+          other.asset == this.asset &&
+          other.sjpDescription == this.sjpDescription &&
+          other.installationDate == this.installationDate &&
+          other.vendor == this.vendor &&
+          other.manufacturer == this.manufacturer &&
+          other.modelNum == this.modelNum &&
+          other.assetCriticality == this.assetCriticality);
+}
+
+class AssetUploadsCompanion extends UpdateCompanion<AssetUpload> {
+  final Value<String> asset;
+  final Value<String?> sjpDescription;
+  final Value<String?> installationDate;
+  final Value<String?> vendor;
+  final Value<String?> manufacturer;
+  final Value<String?> modelNum;
+  final Value<int?> assetCriticality;
+  final Value<int> rowid;
+  const AssetUploadsCompanion({
+    this.asset = const Value.absent(),
+    this.sjpDescription = const Value.absent(),
+    this.installationDate = const Value.absent(),
+    this.vendor = const Value.absent(),
+    this.manufacturer = const Value.absent(),
+    this.modelNum = const Value.absent(),
+    this.assetCriticality = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AssetUploadsCompanion.insert({
+    required String asset,
+    this.sjpDescription = const Value.absent(),
+    this.installationDate = const Value.absent(),
+    this.vendor = const Value.absent(),
+    this.manufacturer = const Value.absent(),
+    this.modelNum = const Value.absent(),
+    this.assetCriticality = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : asset = Value(asset);
+  static Insertable<AssetUpload> custom({
+    Expression<String>? asset,
+    Expression<String>? sjpDescription,
+    Expression<String>? installationDate,
+    Expression<String>? vendor,
+    Expression<String>? manufacturer,
+    Expression<String>? modelNum,
+    Expression<int>? assetCriticality,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (asset != null) 'asset': asset,
+      if (sjpDescription != null) 'sjp_description': sjpDescription,
+      if (installationDate != null) 'installation_date': installationDate,
+      if (vendor != null) 'vendor': vendor,
+      if (manufacturer != null) 'manufacturer': manufacturer,
+      if (modelNum != null) 'model_num': modelNum,
+      if (assetCriticality != null) 'asset_criticality': assetCriticality,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AssetUploadsCompanion copyWith(
+      {Value<String>? asset,
+      Value<String?>? sjpDescription,
+      Value<String?>? installationDate,
+      Value<String?>? vendor,
+      Value<String?>? manufacturer,
+      Value<String?>? modelNum,
+      Value<int?>? assetCriticality,
+      Value<int>? rowid}) {
+    return AssetUploadsCompanion(
+      asset: asset ?? this.asset,
+      sjpDescription: sjpDescription ?? this.sjpDescription,
+      installationDate: installationDate ?? this.installationDate,
+      vendor: vendor ?? this.vendor,
+      manufacturer: manufacturer ?? this.manufacturer,
+      modelNum: modelNum ?? this.modelNum,
+      assetCriticality: assetCriticality ?? this.assetCriticality,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (asset.present) {
+      map['asset'] = Variable<String>(asset.value);
+    }
+    if (sjpDescription.present) {
+      map['sjp_description'] = Variable<String>(sjpDescription.value);
+    }
+    if (installationDate.present) {
+      map['installation_date'] = Variable<String>(installationDate.value);
+    }
+    if (vendor.present) {
+      map['vendor'] = Variable<String>(vendor.value);
+    }
+    if (manufacturer.present) {
+      map['manufacturer'] = Variable<String>(manufacturer.value);
+    }
+    if (modelNum.present) {
+      map['model_num'] = Variable<String>(modelNum.value);
+    }
+    if (assetCriticality.present) {
+      map['asset_criticality'] = Variable<int>(assetCriticality.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssetUploadsCompanion(')
+          ..write('asset: $asset, ')
+          ..write('sjpDescription: $sjpDescription, ')
+          ..write('installationDate: $installationDate, ')
+          ..write('vendor: $vendor, ')
+          ..write('manufacturer: $manufacturer, ')
+          ..write('modelNum: $modelNum, ')
+          ..write('assetCriticality: $assetCriticality, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(e);
   late final $SettingsTable settings = $SettingsTable(this);
@@ -2629,6 +3029,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
       $SystemCriticalitysTable(this);
   late final $AssetCriticalitysTable assetCriticalitys =
       $AssetCriticalitysTable(this);
+  late final $AssetUploadsTable assetUploads = $AssetUploadsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2641,6 +3042,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         assets,
         workorders,
         systemCriticalitys,
-        assetCriticalitys
+        assetCriticalitys,
+        assetUploads
       ];
 }

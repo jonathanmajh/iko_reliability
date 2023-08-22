@@ -4,6 +4,14 @@ final personGroups = {
   'E': 'ELECTSUP',
 };
 
+final assetCriticality = {
+  9: 'Very High',
+  7: 'High',
+  5: 'Medium',
+  3: 'Low',
+  1: 'Very Low',
+};
+
 final freqUnitToDays = {
   'D': 1,
   'W': 7,
@@ -26,24 +34,26 @@ const workType = {
 };
 
 const assetWorkType = {
-  "BDE" : AssetWorkType("BDE", "Breakdown - Electrical", 4),
-  "BDM" : AssetWorkType("BDM", "Breakdown - Mechanical", 4),
-  "BDO" : AssetWorkType("BDO", "Breakdown - Operational", 4),
-  "CORE" : AssetWorkType("CORE", "Corrective - Post-Repair - Electrical", 3),
-  "CORM" : AssetWorkType("CORM", "Corrective - Post-Repair - Mechanical", 3),
-  "EPIE" : AssetWorkType("EPIE", "Equipment/Process Improvement - Electrical", 1),
-  "EPIM" : AssetWorkType("EPIM", "Equipment/Process Improvement - Mechanical", 1),
-  "HKGM" : AssetWorkType("HKGM", "Housekeeping", 1),
-  "INAE" : AssetWorkType("INAE", "Inspection - Ad Hoc - Electrical", 3),
-  "INAM" : AssetWorkType("INAM", "Inspection - Ad Hoc - Mechanical", 3),
-  "PEME" : AssetWorkType("PEME", "Pre-emptive Maintenance - Electrical", 3),
-  "PEMM" : AssetWorkType("PEMM", "Pre-emptive Maintenance - Mechanical", 3),
-  "RECE" : AssetWorkType("RECE", "Recondition - Electrical", 3),
-  "RECM" : AssetWorkType("RECM", "Recondition - Mechanical", 3),
-  "SAFE" : AssetWorkType("SAFE", "Safety - Electrical", 3),
-  "SAFM" : AssetWorkType("SAFM", "Safety - Mechanical", 3),
-  "TSHE" : AssetWorkType("TSHE", "Troubleshooting - Electrical", 3),
-  "TSHM" : AssetWorkType("TSHM", "Troubleshooting - Mechanical", 3),
+  "BDE": AssetWorkType("BDE", "Breakdown - Electrical", 4),
+  "BDM": AssetWorkType("BDM", "Breakdown - Mechanical", 4),
+  "BDO": AssetWorkType("BDO", "Breakdown - Operational", 4),
+  "CORE": AssetWorkType("CORE", "Corrective - Post-Repair - Electrical", 3),
+  "CORM": AssetWorkType("CORM", "Corrective - Post-Repair - Mechanical", 3),
+  "EPIE":
+      AssetWorkType("EPIE", "Equipment/Process Improvement - Electrical", 1),
+  "EPIM":
+      AssetWorkType("EPIM", "Equipment/Process Improvement - Mechanical", 1),
+  "HKGM": AssetWorkType("HKGM", "Housekeeping", 1),
+  "INAE": AssetWorkType("INAE", "Inspection - Ad Hoc - Electrical", 3),
+  "INAM": AssetWorkType("INAM", "Inspection - Ad Hoc - Mechanical", 3),
+  "PEME": AssetWorkType("PEME", "Pre-emptive Maintenance - Electrical", 3),
+  "PEMM": AssetWorkType("PEMM", "Pre-emptive Maintenance - Mechanical", 3),
+  "RECE": AssetWorkType("RECE", "Recondition - Electrical", 3),
+  "RECM": AssetWorkType("RECM", "Recondition - Mechanical", 3),
+  "SAFE": AssetWorkType("SAFE", "Safety - Electrical", 3),
+  "SAFM": AssetWorkType("SAFM", "Safety - Mechanical", 3),
+  "TSHE": AssetWorkType("TSHE", "Troubleshooting - Electrical", 3),
+  "TSHM": AssetWorkType("TSHM", "Troubleshooting - Mechanical", 3),
 };
 
 const crafts = {

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:auto_route/auto_route.dart';
+import 'package:intl/intl.dart';
 
 import 'package:flutter/services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -23,6 +25,7 @@ void toast(context, msg, [int? time]) {
   ));
 }
 
+@RoutePage()
 class AssetPage extends StatefulWidget {
   const AssetPage({Key? key}) : super(key: key);
 
@@ -196,10 +199,9 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
                 onPressed: () async {
                   var assetNum = rendererContext.row.cells['hierarchy']!.value;
                   try {
-                    var id = await context
-                        .read<AssetCreationNotifier>()
-                        .deleteAsset(assetNum,
-                            context.read<AssetCreationNotifier>().selectedSite);
+                    await context.read<AssetCreationNotifier>().deleteAsset(
+                        assetNum,
+                        context.read<AssetCreationNotifier>().selectedSite);
                     stateManager
                         .removeRows([rendererContext.row], notify: true);
                     toast(context, 'Deleted Asset $assetNum');
@@ -361,11 +363,22 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
   final descriptionTextController = TextEditingController();
   final assetNumTextController = TextEditingController();
   final _dropDownKey = GlobalKey<DropdownSearchState<String>>();
+  final sjpTextController = TextEditingController();
+  final installationDateTextController = TextEditingController();
+  final vendorTextController = TextEditingController();
+  final manufacturerTextController = TextEditingController();
+  final modelNumTextController = TextEditingController();
+  int? assetCriticalityValue;
 
   @override
   void dispose() {
     descriptionTextController.dispose();
     assetNumTextController.dispose();
+    sjpTextController.dispose();
+    vendorTextController.dispose();
+    manufacturerTextController.dispose();
+    installationDateTextController.dispose();
+    modelNumTextController.dispose();
     super.dispose();
   }
 
@@ -377,77 +390,71 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Create Asset'),
+      title: Text(
+          'Create Asset - Current Site: ${context.read<AssetCreationNotifier>().selectedSite}'),
       content: SizedBox(
-        height: 300,
-        width: 300,
+        height: 400,
+        width: 600,
         child: Form(
           key: _formKey,
           child: Column(children: <Widget>[
-            Card(
-              //color: Theme.of(context).colorScheme.,
-              elevation: 0,
-              child: SizedBox(
-                height: 40,
-                width: 300,
-                child: Center(
-                  //padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    ('Current Site: ${context.read<AssetCreationNotifier>().selectedSite}'),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: 275,
+                  child: DropdownSearch<String>(
+                    key: _dropDownKey,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a parent asset';
+                      }
+                      return null;
+                    },
+                    popupProps: const PopupProps.menu(
+                      showSearchBox: true,
+                      showSelectedItems: true,
+                      searchFieldProps: TextFieldProps(
+                        autofocus: true,
+                      ),
+                    ),
+                    items: context
+                        .watch<AssetCreationNotifier>()
+                        .siteAssets
+                        .keys
+                        .toList(),
+                    dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: "Parent Asset",
+                        hintText: "Select Parent Asset",
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            DropdownSearch<String>(
-              key: _dropDownKey,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select a parent asset';
-                }
-                return null;
-              },
-              popupProps: const PopupProps.menu(
-                showSearchBox: true,
-                showSelectedItems: true,
-                searchFieldProps: TextFieldProps(
-                  autofocus: true,
+                SizedBox(
+                  width: 275,
+                  child: TextFormField(
+                    controller: assetNumTextController,
+                    decoration: const InputDecoration(
+                        labelText: 'New Asset Number', hintText: 'X####'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Asset Number must be 5 characters long';
+                      }
+                      if (value.length != 5) {
+                        return 'Asset Number must be 5 characters long';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-              ),
-              items: context
-                  .watch<AssetCreationNotifier>()
-                  .siteAssets
-                  .keys
-                  .toList(),
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: "Parent Asset",
-                  hintText: "Select Parent Asset",
-                ),
-              ),
-            ),
-            TextFormField(
-              controller: assetNumTextController,
-              decoration: const InputDecoration(
-                hintText: 'New Asset Number',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Asset Number must be 5 characters long';
-                }
-                if (value.length != 5) {
-                  return 'Asset Number must be 5 characters long';
-                }
-                return null;
-              },
+              ],
             ),
             TextFormField(
               controller: descriptionTextController,
               decoration: const InputDecoration(
-                hintText: 'Description',
+                labelText: 'Asset Description',
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -457,9 +464,108 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
               },
               inputFormatters: [
                 LengthLimitingTextInputFormatter(
-                    50), // to limit total description to 100 characters
+                    55), // to limit total description to 55 characters
               ],
             ),
+            TextFormField(
+              controller: sjpTextController,
+              decoration: const InputDecoration(
+                  labelText: 'Standard Job Plan Description (Optional)',
+                  hintText: 'Will use Asset Description if empty'),
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(
+                    55), // to limit total description to 55 characters
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: 275,
+                  child: DropdownButtonFormField(
+                    items: assetCriticality.keys
+                        .map<DropdownMenuItem<int>>((int value) {
+                      return DropdownMenuItem(
+                        value: value,
+                        child: Text(assetCriticality[value] ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        assetCriticalityValue = value;
+                      });
+                    },
+                    hint: const Text('Asset Criticality (Optional)'),
+                  ),
+                ),
+                SizedBox(
+                  width: 275,
+                  child: TextFormField(
+                    controller: vendorTextController,
+                    decoration: const InputDecoration(
+                      labelText: 'Vendor Number  (Optional)',
+                      hintText: 'V######: Please refer to Company Master',
+                    ),
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(
+                          7), // to limit total description to 55 characters
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: 275,
+                  child: TextFormField(
+                    controller: manufacturerTextController,
+                    decoration: const InputDecoration(
+                        labelText: 'Manufacturer Code (Optional)',
+                        hintText: 'Please refer to Company Master'),
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(
+                          15), // to limit total description to 55 characters
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 275,
+                  child: TextFormField(
+                    controller: modelNumTextController,
+                    decoration: const InputDecoration(
+                      labelText: 'Model Number (Optional)',
+                    ),
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(
+                          30), // to limit total description to 55 characters
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            TextFormField(
+                controller: installationDateTextController,
+                decoration: const InputDecoration(
+                  labelText: 'Installation Date (Optional)',
+                ),
+                onTap: () async {
+                  DateTime? newDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(1950),
+                    lastDate: DateTime(DateTime.now().year + 5),
+                  );
+                  if (newDate != null) {
+                    setState(() {
+                      installationDateTextController.text =
+                          DateFormat('yyyy-MM-dd').format(newDate);
+                    });
+                  }
+                }),
           ]),
         ),
       ),
@@ -478,9 +584,16 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
             try {
               var assetNum = assetNumTextController.text.toUpperCase();
               var id = await context.read<AssetCreationNotifier>().addAsset(
-                  assetNum,
-                  descriptionTextController.text,
-                  _dropDownKey.currentState!.getSelectedItem!);
+                    assetNum,
+                    descriptionTextController.text,
+                    _dropDownKey.currentState!.getSelectedItem!,
+                    sjpDescription: sjpTextController.text,
+                    installationDate: installationDateTextController.text,
+                    vendor: vendorTextController.text,
+                    manufacturer: manufacturerTextController.text,
+                    modelNum: modelNumTextController.text,
+                    assetCriticality: assetCriticalityValue,
+                  );
               toast(context, 'Created Asset $assetNum, id: $id');
             } catch (err) {
               toast(context, '$err');
@@ -527,21 +640,6 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
         //sort: PlutoColumnSort.ascending,
       ),
       PlutoColumn(
-        title: 'Description',
-        readOnly: true,
-        field: 'description',
-        type: PlutoColumnType.text(),
-        width: 900,
-      ),
-      PlutoColumn(
-        width: 100,
-        readOnly: true,
-        enableAutoEditing: false,
-        title: 'Site',
-        field: 'site',
-        type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
           title: 'Actions',
           field: 'actions',
           type: PlutoColumnType.text(),
@@ -559,10 +657,9 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
                 onPressed: () async {
                   var assetNum = rendererContext.row.cells['hierarchy']!.value;
                   try {
-                    var id = await context
-                        .read<AssetCreationNotifier>()
-                        .deleteAsset(assetNum,
-                            context.read<AssetCreationNotifier>().selectedSite);
+                    await context.read<AssetCreationNotifier>().deleteAsset(
+                        assetNum,
+                        context.read<AssetCreationNotifier>().selectedSite);
                     stateManager
                         .removeRows([rendererContext.row], notify: true);
                     toast(context, 'Deleted Asset $assetNum');
@@ -634,6 +731,69 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
               size: 18,
             );
           }),
+      PlutoColumn(
+        title: 'Description',
+        readOnly: true,
+        field: 'description',
+        type: PlutoColumnType.text(),
+        width: 900,
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        enableAutoEditing: false,
+        title: 'Site',
+        field: 'site',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        enableAutoEditing: false,
+        title: 'Standard Description',
+        field: 'sjpDescription',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        enableAutoEditing: false,
+        title: 'Installation Date',
+        field: 'installationDate',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        enableAutoEditing: false,
+        title: 'Vendor Number',
+        field: 'vendor',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        enableAutoEditing: false,
+        title: 'Manufacturer',
+        field: 'manufacturer',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        enableAutoEditing: false,
+        title: 'Model Number',
+        field: 'modelNum',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        enableAutoEditing: false,
+        title: 'Asset Criticality',
+        field: 'assetCriticality',
+        type: PlutoColumnType.number(),
+      ),
     ]);
   }
 
@@ -651,16 +811,16 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
     return;
   }
 
-  List<PlutoRow> getRows(List<Asset> siteAssets) {
+  List<PlutoRow> getRows(List<AssetWithUpload> siteAssets) {
     List<PlutoRow> rows = [];
 
-    for (Asset asset in siteAssets) {
-      if (asset.newAsset != 0) {
+    for (AssetWithUpload asset in siteAssets) {
+      if (asset.asset.newAsset != 0) {
         rows.add(PlutoRow(
           cells: {
-            'description': PlutoCell(value: asset.description),
-            'hierarchy': PlutoCell(value: asset.assetnum),
-            'site': PlutoCell(value: asset.siteid),
+            'description': PlutoCell(value: asset.asset.description),
+            'hierarchy': PlutoCell(value: asset.asset.assetnum),
+            'site': PlutoCell(value: asset.asset.siteid),
             'actions': PlutoCell(value: ''),
           },
         ));
