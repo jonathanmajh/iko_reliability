@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 DatabaseConnection connect() {
   return DatabaseConnection.delayed(Future(() async {
     final db = await WasmDatabase.open(
-      databaseName: 'todo-app',
+      databaseName: 'iko_reliability',
       sqlite3Uri: Uri.parse('/sqlite3.wasm'),
       driftWorkerUri: Uri.parse('/drift_worker.js'),
     );
