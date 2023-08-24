@@ -4,7 +4,7 @@ import "../admin/db_drift.dart";
 
 ///Function/Equation to calculate risk priority number (RPN)
 ///Currently just a product between all parameters
-///returns null if any parameter is null
+///returns -1 if any parameter is null
 double? rpnFunc(AssetCriticalityWithAsset asset) {
   try {
     double system = sqrt(

@@ -78,11 +78,12 @@ class _EndDrawerState extends State<EndDrawer> {
           )),
           ListTile(
               //environment selection
-              title: const Text('Maximo Environment'),
-              subtitle: const Text('Select which environment to work with'),
-              trailing: Consumer<MaximoServerNotifier>(
+              title: const Text('Select Maximo Environment'),
+              subtitle: Consumer<MaximoServerNotifier>(
                   builder: (context, value, child) {
                 return DropdownButton(
+                  isExpanded: true,
+                  hint: const Text('Select an environment to work with'),
                   value: value.maximoServerSelected,
                   onChanged: (String? newValue) {
                     value.setServer(newValue!);
@@ -198,6 +199,7 @@ class _EndDrawerState extends State<EndDrawer> {
               //asset/site loading
               title: const Text('Load Assets From Maximo'),
               subtitle: DropdownButton(
+                isExpanded: true,
                 onChanged: (String? newValue) {
                   setState(() {
                     siteid = newValue ?? '';
@@ -219,7 +221,7 @@ class _EndDrawerState extends State<EndDrawer> {
               trailing: Consumer<MaximoServerNotifier>(
                 builder: (context, maximo, child) {
                   //asset load button
-                  return ElevatedButton(
+                  return IconButton(
                     onPressed: () async {
                       if (siteid != '') {
                         var processNotifier = Provider.of<ProcessStateNotifier>(
@@ -256,7 +258,7 @@ class _EndDrawerState extends State<EndDrawer> {
                         }
                       }
                     },
-                    child: const Text('Load'),
+                    icon: const Icon(Icons.sync),
                   );
                 },
               )),
@@ -265,13 +267,13 @@ class _EndDrawerState extends State<EndDrawer> {
             title: const Text('Load Observation'),
             subtitle:
                 const Text('Clear and Load Observation list from spreadsheet'),
-            trailing: ElevatedButton(
+            trailing: IconButton(
               //load button
               onPressed: () {
                 database!.clearMeters();
                 database!.addMeters();
               },
-              child: const Text('Load'),
+              icon: const Icon(Icons.input),
             ),
           ),
           const ListTile(

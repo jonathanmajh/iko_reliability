@@ -37,6 +37,14 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         readOnly: true,
         hide: true,
       ),
+      // TODO implement site selection for systems
+      PlutoColumn(
+        width: 150,
+        title: 'Site',
+        field: 'site',
+        type: PlutoColumnType.number(),
+        readOnly: true,
+      ),
       PlutoColumn(
         width: 300,
         title: 'System Name',
@@ -204,6 +212,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     for (var row in dbrows) {
       rows.add(PlutoRow(cells: {
         'id': PlutoCell(value: row.id),
+        'site': PlutoCell(value: row.id),
         'description': PlutoCell(value: row.description),
         'safety': PlutoCell(value: row.safety),
         'regulatory': PlutoCell(value: row.regulatory),
