@@ -42,7 +42,7 @@ class SettingsNotifier extends ChangeNotifier {
     });
 
     if (notify) notifyListeners();
-    database!.updateSettings(newSettings: listSettings);
+    database!.setSettings(newSettings: listSettings);
   }
 
   ///loads settings from the database. Returns true if managed, else returns false
@@ -147,7 +147,7 @@ class SettingsNotifier extends ChangeNotifier {
 
   ///Gets an int list of the rpn percent distributions from very low to very high
   List<int> getRpnPercentDists() {
-    return List.from(rpnDistributionGroups.map((e) => currentSettings[e]));
+    return List.from(criticalityStrings.map((e) => currentSettings[e]));
   }
 
   void addLoadedSites(List<String> sites, {bool notify = false}) {

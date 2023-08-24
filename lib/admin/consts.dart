@@ -5,12 +5,28 @@ final personGroups = {
 };
 
 final assetCriticality = {
-  9: 'Very High',
-  7: 'High',
-  5: 'Medium',
-  3: 'Low',
   1: 'Very Low',
+  3: 'Low',
+  5: 'Medium',
+  7: 'High',
+  9: 'Very High',
 };
+
+List<String> criticalityStrings = [
+  'Very Low',
+  'Low',
+  'Medium',
+  'High',
+  'Very High',
+];
+
+enum CriticalityEnums {
+  percentVL,
+  percentL,
+  percentM,
+  percentH,
+  percentVH,
+}
 
 final freqUnitToDays = {
   'D': 1,
@@ -506,22 +522,6 @@ List<String> systemQuality = [
   '10K in potential claims',
   '40K in potential claims',
   'Potential class action',
-];
-
-List<String> rpnPossibleDistributions = [
-  'Very Low',
-  'Low',
-  'Medium',
-  'High',
-  'Very High',
-];
-
-List<ApplicationSetting> rpnDistributionGroups = [
-  ApplicationSetting.rpnPercentVL,
-  ApplicationSetting.rpnPercentL,
-  ApplicationSetting.rpnPercentM,
-  ApplicationSetting.rpnPercentH,
-  ApplicationSetting.rpnPercentVH
 ];
 
 //For application settings (add with new settings)

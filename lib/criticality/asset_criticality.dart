@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
-import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
+import 'criticality_settings_notifier.dart';
 import 'percent_slider.dart';
 
 import '../admin/consts.dart';
@@ -46,8 +46,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   @override
   void initState() {
     super.initState();
-    AssetCriticalityNotifier assetCriticalityNotifier =
-        context.read<AssetCriticalityNotifier>();
+    String selectedSite =
+        context.read<AssetCriticalitySettingsNotifier>().selectedSite;
 
     detailColumns.addAll([
       PlutoColumn(
@@ -127,21 +127,15 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     Icons.refresh,
                   ),
                   onPressed: () {
-                    debugPrint('${rendererContext.rowIdx}');
-                    assetCriticalityNotifier
-                        .updateCollapsedAssets(stateManager);
-
                     String assetnum =
                         rendererContext.row.cells['assetnum']!.value;
-                    refreshAsset(
-                        assetnum, assetCriticalityNotifier.selectedSite);
+                    refreshAsset(assetnum, selectedSite);
                     //refresh children assets
                     Set<String> childAssetnums = getChildAssetnums(assetnum);
                     for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
                       String tempAssetnum = row.cells['assetnum']!.value;
                       if (childAssetnums.contains(tempAssetnum)) {
-                        refreshAsset(tempAssetnum,
-                            assetCriticalityNotifier.selectedSite);
+                        refreshAsset(tempAssetnum, selectedSite);
                       }
                     }
                   },
@@ -155,7 +149,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   ),
                   onPressed: () {
                     refreshAsset(rendererContext.row.cells['assetnum']!.value,
-                        context.read<AssetCriticalityNotifier>().selectedSite);
+                        selectedSite);
                   },
                   iconSize: 18,
                   color: Colors.green,
@@ -192,7 +186,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               isExpanded: true,
               onChanged: (newValue) {
                 setState(() {
-                  assetCriticalityNotifier.updateCollapsedAssets(stateManager);
                   //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
                   String assetnum =
                       rendererContext.row.cells['assetnum']!.value;
@@ -309,7 +302,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       detailStateManager.setShowLoading(true);
 
       fetchWoHistory(stateManager.currentRow!.cells['assetnum']!.value,
-          context.read<AssetCriticalityNotifier>().selectedSite);
+          context.read<AssetCriticalitySettingsNotifier>().selectedSite);
     }
   }
 
@@ -440,8 +433,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               // key: Key(context.read<AssetCriticalityNotifier>().selectedSite),
               padding: const EdgeInsets.all(30),
               child: FutureBuilder<List<AssetCriticalityWithAsset>>(
-                  future: database!.getAssetCriticalities(
-                      context.watch<AssetCriticalityNotifier>().selectedSite),
+                  future: database!.getAssetCriticalities(context
+                      .watch<AssetCriticalitySettingsNotifier>()
+                      .selectedSite),
                   builder: (BuildContext context,
                       AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
                     List<PlutoRow> rows = [];
@@ -841,13 +835,19 @@ void showRpnDistDialog(BuildContext context) {
     'High',
     'Very High'
   ];
-  SettingsNotifier settingsNotifier =
-      Provider.of<SettingsNotifier>(context, listen: false);
+  AssetCriticalitySettingsNotifier settingsNotifier =
+      Provider.of<AssetCriticalitySettingsNotifier>(context, listen: false);
   List<TextEditingController> distControllers = [];
-  for (ApplicationSetting distSetting in rpnDistributionGroups) {
-    distControllers.add(TextEditingController(
-        text: settingsNotifier.getSetting(distSetting).toString()));
-  }
+  distControllers.add(
+      TextEditingController(text: settingsNotifier.percentVLow.toString()));
+  distControllers
+      .add(TextEditingController(text: settingsNotifier.percentLow.toString()));
+  distControllers.add(
+      TextEditingController(text: settingsNotifier.percentMedium.toString()));
+  distControllers.add(
+      TextEditingController(text: settingsNotifier.percentHigh.toString()));
+  distControllers.add(
+      TextEditingController(text: settingsNotifier.percentVHigh.toString()));
 
   showDialog(
       barrierDismissible: false,
@@ -934,7 +934,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
 
   void reloadTextControllers() {
     for (int i = 0; i < widget.distControllers.length; i++) {
-      widget.distControllers[i].text = dists![i].toString();
+      widget.distControllers[i].text = '${dists![i].toString()}%';
     }
   }
 
@@ -968,104 +968,114 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
         height: MediaQuery.of(context).size.height * 0.7,
         width: MediaQuery.of(context).size.width * 0.7,
         child: Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Expanded(
-              //title
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.only(top: 30.0, left: 30.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Rating Distribution',
-                          style: TextStyle(fontSize: 30.0),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 30.0, left: 30.0, bottom: 30.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Rating Distribution',
+                        style: TextStyle(fontSize: 30.0),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            Expanded(
-              //Multislider/visual representation
-              flex: 3,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: Builder(builder: (context) {
-                    return PercentSlider(
-                      initialValues: () {
-                        List<int> initValues = [];
-                        int sum = 0;
-                        for (int i = 0; i < dists!.length - 1; i++) {
-                          sum += dists![i];
-                          initValues.add(sum);
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Builder(builder: (context) {
+                  return PercentSlider(
+                    initialValues: () {
+                      List<int> initValues = [];
+                      int sum = 0;
+                      for (int i = 0; i < dists!.length - 1; i++) {
+                        sum += dists![i];
+                        initValues.add(sum);
+                      }
+                      return initValues;
+                    }(),
+                    max: total ?? 100,
+                    barColors: colorGradient,
+                    size: const Size(10, 10),
+                    onSliderUpdate: (newPercentDists) {
+                      setState(() {
+                        dists = List.from(newPercentDists);
+                        reloadTextControllers();
+                        if (calculateTotal() == 100) {
+                          calculateRPNDistribution(context);
                         }
-                        return initValues;
-                      }(),
-                      max: total ?? 100,
-                      barColors: colorGradient,
-                      size: const Size(10, 10),
-                      onSliderUpdate: (newPercentDists) {
-                        setState(() {
-                          dists = List.from(newPercentDists);
-                          reloadTextControllers();
-                        });
-                      },
-                      tooltip: rpnPossibleDistributions,
-                    );
-                  }),
-                ),
+                      });
+                    },
+                    tooltip: criticalityStrings,
+                  );
+                }),
               ),
             ),
-            Expanded(
-              //input boxes
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: () {
-                    List<Widget> widgets = [];
-                    for (int i = 0; i < widget.distGroups.length; i++) {
-                      widgets.add(Expanded(
-                          child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            labelText: widget.distGroups[i],
-                          ),
-                          controller: widget.distControllers[i],
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            //limits characters to digits between 0-999
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(3),
-                          ],
-                          onChanged: (value) {
-                            int? val = int.tryParse(value);
-                            setState(() {
-                              dists![i] = val ?? 0;
-                              total = calculateTotal();
-                            });
-                          },
-                        ),
-                      )));
-                    }
-                    return widgets;
-                  }(),
-                ),
-              ),
-            ),
-            Expanded(
+            Center(
                 //print total percentage
-                flex: 1,
-                child: Text('Total: ${total ?? calculateTotal()}%')),
+                child: Text('Total Percentage: ${total ?? calculateTotal()}%')),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: () {
+                  List<Widget> widgets = [];
+                  for (int i = 0; i < widget.distGroups.length; i++) {
+                    widgets.add(Expanded(
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          labelText: widget.distGroups[i],
+                        ),
+                        controller: widget.distControllers[i],
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          //limits characters to digits between 0-99
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(2),
+                        ],
+                        onChanged: (value) {
+                          int? val = int.tryParse(value);
+                          setState(() {
+                            dists![i] = val ?? 0;
+                            total = calculateTotal();
+                            if (calculateTotal() == 100) {
+                              calculateRPNDistribution(context);
+                            }
+                          });
+                        },
+                      ),
+                    )));
+                  }
+                  return widgets;
+                }(),
+              ),
+            ),
+            const Center(
+                //print total percentage
+                child: Text('RPN Cutoffs')),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: generateRow(
+                  context
+                      .read<AssetCriticalityNotifier>()
+                      .rpnCutoffs
+                      .asMap()
+                      .entries
+                      .map((e) => RowofTextWidgets(
+                          label: '${widget.distGroups[e.key]} Cutoff',
+                          value: e.value.toString()))
+                      .toList(),
+                  5),
+            ),
             Expanded(
               //close buttons
               flex: 1,
@@ -1079,20 +1089,18 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                         onPressed: () {
                           //only allow to save changes if total percent is 100%
                           if (calculateTotal() == 100) {
-                            Map<ApplicationSetting, dynamic> settingChanges =
-                                {};
-                            for (int i = 0;
-                                i < rpnDistributionGroups.length;
-                                i++) {
-                              settingChanges[rpnDistributionGroups[i]] =
-                                  dists![i];
-                            }
                             context
                                 .read<AssetCriticalityNotifier>()
                                 .priorityRangesUpToDate = false;
                             context
-                                .read<SettingsNotifier>()
-                                .changeSettings(settingChanges);
+                                .read<AssetCriticalitySettingsNotifier>()
+                                .setPercentages(
+                                  percentVLow: dists![0],
+                                  percentLow: dists![1],
+                                  percentMedium: dists![2],
+                                  percentHigh: dists![3],
+                                  percentVHigh: dists![4],
+                                );
                             Navigator.pop(context);
                           } else {
                             showDialog(
@@ -1114,13 +1122,17 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                         child: const Text('Confirm')),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0, left: 4.0),
+                    padding: const EdgeInsets.only(
+                      bottom: 16.0,
+                      left: 4.0,
+                    ),
                     child: ElevatedButton(
-                        //cancel button
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Cancel')),
+                      //cancel button
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel'),
+                    ),
                   )
                 ],
               ),
@@ -1161,25 +1173,18 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   ///Exclude all work orders before this date
   DateTime? afterDate;
 
-  bool? usingBeforeDate;
-  bool? usingAfterDate;
-
   ///whether to show all sites' work orders or not
-  bool? showAllSites;
+  late WorkOrderFilterBy showAllSites;
 
   @override
   void initState() {
     super.initState();
-    AssetCriticalityNotifier assetCriticalityNotifier =
-        context.read<AssetCriticalityNotifier>();
-    beforeDate = assetCriticalityNotifier.beforeDate;
-    afterDate = assetCriticalityNotifier.afterDate;
-    usingBeforeDate = (beforeDate != null) &&
-        (assetCriticalityNotifier.usingBeforeDate ?? false);
-    usingAfterDate = (afterDate != null) &&
-        (assetCriticalityNotifier.usingAfterDate ?? false);
+    AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier =
+        context.read<AssetCriticalitySettingsNotifier>();
+    beforeDate = assetCriticalitySettingsNotifier.workOrderCutoffStart;
+    afterDate = assetCriticalitySettingsNotifier.workOrderCutoffEnd;
 
-    showAllSites = assetCriticalityNotifier.showAllSites ?? false;
+    showAllSites = assetCriticalitySettingsNotifier.workOrderFilterBy;
   }
 
   @override
@@ -1217,17 +1222,10 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                   children: [
                     buildSettingRow(
                         checkbox: Checkbox(
-                            value: usingAfterDate,
-                            onChanged: (value) => setState(() {
-                                  usingAfterDate = value;
-                                })),
+                            value: true, onChanged: (value) => setState(() {})),
                         title: const Text('Hide Work Orders Before'),
                         valueDisplay: Text(
                           '${afterDate?.year ?? 'YY'}/${afterDate?.month ?? 'mm'}/${afterDate?.day ?? 'dd'}',
-                          style: usingAfterDate!
-                              ? null
-                              : const TextStyle(
-                                  decoration: TextDecoration.lineThrough),
                         ),
                         inputWidget: Builder(
                             builder: (context) => ElevatedButton(
@@ -1239,7 +1237,6 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                                       lastDate: DateTime.now());
                                   if (newDate != null) {
                                     setState(() {
-                                      usingAfterDate = true;
                                       afterDate = newDate;
                                     });
                                   }
@@ -1247,18 +1244,11 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                                 child: const Text('Select Date')))),
                     buildSettingRow(
                         checkbox: Checkbox(
-                            value: usingBeforeDate,
-                            onChanged: (value) => setState(() {
-                                  usingBeforeDate = value;
-                                })),
+                            value: true, onChanged: (value) => setState(() {})),
                         title:
                             const Text('Hide Work Orders After (Inclusive):'),
                         valueDisplay: Text(
                           '${beforeDate?.year ?? 'YY'}/${beforeDate?.month ?? 'mm'}/${beforeDate?.day ?? 'dd'}',
-                          style: usingBeforeDate!
-                              ? null
-                              : const TextStyle(
-                                  decoration: TextDecoration.lineThrough),
                         ),
                         inputWidget: Builder(
                             builder: (context) => ElevatedButton(
@@ -1270,7 +1260,6 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                                       lastDate: DateTime.now());
                                   if (newDate != null) {
                                     setState(() {
-                                      usingBeforeDate = true;
                                       beforeDate = newDate;
                                     });
                                   }
@@ -1279,10 +1268,7 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                     //TODO add a setting for toggling show/hide workorders from all sites not just selected site
                     buildSettingRow(
                         checkbox: Checkbox(
-                            value: showAllSites,
-                            onChanged: (value) => setState(() {
-                                  showAllSites = value;
-                                })),
+                            value: true, onChanged: (value) => setState(() {})),
                         title: const Text('Show work orders from all sites'),
                         valueDisplay: Container(),
                         inputWidget: Container()),
@@ -1294,29 +1280,29 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                 children: [
                   ElevatedButton(
                       onPressed: () {
-                        //TODO: check if settings are valid (e.g. afterdate is not after beforedate). if so, use new settings
-                        if (usingAfterDate! && afterDate == null) {
-                          //if using after date, afterDate must not be null
-                          //TODO: show dialog
-                        } else if (usingBeforeDate! && beforeDate == null) {
-                          //if using before date, beforeDate must not be null
-                          //TODO: show dialog
-                        } else if (usingAfterDate! &&
-                            usingBeforeDate! &&
-                            afterDate!.compareTo(beforeDate!) >= 0) {
-                          //invalid format, afterDate must be before beforeDate
-                          ///TODO: show dialog
-                        } else {
-                          context
-                              .read<AssetCriticalityNotifier>()
-                              .setWOSettings(
-                                  beforeDate: beforeDate,
-                                  afterDate: afterDate,
-                                  usingBeforeDate: usingBeforeDate!,
-                                  usingAfterDate: usingAfterDate!,
-                                  showAllSites: showAllSites!);
-                          Navigator.pop(context);
-                        }
+                        //   //TODO: check if settings are valid (e.g. afterdate is not after beforedate). if so, use new settings
+                        //   if (usingAfterDate! && afterDate == null) {
+                        //     //if using after date, afterDate must not be null
+                        //     //TODO: show dialog
+                        //   } else if (usingBeforeDate! && beforeDate == null) {
+                        //     //if using before date, beforeDate must not be null
+                        //     //TODO: show dialog
+                        //   } else if (usingAfterDate! &&
+                        //       usingBeforeDate! &&
+                        //       afterDate!.compareTo(beforeDate!) >= 0) {
+                        //     //invalid format, afterDate must be before beforeDate
+                        //     ///TODO: show dialog
+                        //   } else {
+                        //     context
+                        //         .read<AssetCriticalityNotifier>()
+                        //         .setWOSettings(
+                        //             beforeDate: beforeDate,
+                        //             afterDate: afterDate,
+                        //             usingBeforeDate: usingBeforeDate!,
+                        //             usingAfterDate: usingAfterDate!,
+                        //             showAllSites: showAllSites!);
+                        //     Navigator.pop(context);
+                        //   }
                       },
                       child: const Text('Confirm')),
                   ElevatedButton(
@@ -1356,4 +1342,106 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
       ],
     );
   }
+}
+
+void calculateRPNDistribution(BuildContext context) {
+  try {
+    AssetCriticalityNotifier assetCriticalityNotifier =
+        context.read<AssetCriticalityNotifier>();
+    AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier =
+        context.read<AssetCriticalitySettingsNotifier>();
+
+    //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
+    List<double> rpnList = List.from(assetCriticalityNotifier.rpnList);
+    rpnList.removeWhere((rpn) => (rpn <= 0));
+
+    //set rpn ranges
+    List<double> newCutoffs = rpnDistRange(rpnList, [
+      assetCriticalitySettingsNotifier.percentVLow,
+      assetCriticalitySettingsNotifier.percentLow,
+      assetCriticalitySettingsNotifier.percentMedium,
+      assetCriticalitySettingsNotifier.percentHigh,
+      assetCriticalitySettingsNotifier.percentVHigh,
+    ]);
+    assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
+    debugPrint('new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
+    assetCriticalityNotifier.priorityRangesUpToDate = true;
+    assetCriticalityNotifier.updateGrid = true;
+  } catch (e) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Could Not Calculate Priority Ranges'),
+            content: Text(
+                //remove the text 'Exception: ' from e.toString()
+                '${e.toString().substring(e.toString().indexOf(' ') + 1)} Try reconfiguring the risk priority distributions.'),
+            actions: [
+              Center(
+                child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK')),
+              )
+            ],
+          );
+        });
+    debugPrint(e.toString());
+  }
+}
+
+class RowofTextWidgets {
+  String label;
+  String value;
+
+  RowofTextWidgets({
+    required this.label,
+    required this.value,
+  });
+}
+
+Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
+  List<Widget> widgets = [];
+  for (RowofTextWidgets value in values) {
+    TextEditingController controller =
+        TextEditingController.fromValue(TextEditingValue(text: value.value));
+    widgets.add(
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              labelText: value.label,
+            ),
+            controller: controller,
+            keyboardType: TextInputType.number,
+            readOnly: true,
+          ),
+        ),
+      ),
+    );
+  }
+  while (widgets.length < minFields) {
+    TextEditingController controller =
+        TextEditingController.fromValue(const TextEditingValue(text: ''));
+    widgets.add(
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            textAlign: TextAlign.center,
+            decoration: const InputDecoration(
+              labelText: '',
+            ),
+            controller: controller,
+            keyboardType: TextInputType.number,
+            readOnly: true,
+          ),
+        ),
+      ),
+    );
+  }
+  return Row(
+    children: widgets,
+  );
 }

@@ -13,6 +13,7 @@ import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import '../criticality/criticality_db_export_import.dart';
+import '../criticality/criticality_settings_notifier.dart';
 import '../main.dart';
 import 'consts.dart';
 import 'db_drift.dart';
@@ -318,11 +319,13 @@ class _EndDrawerState extends State<EndDrawer> {
             ListTile(
               title: const Text('Plant Site'),
               trailing: DropdownButton(
-                value: context.read<AssetCriticalityNotifier>().selectedSite,
+                value: context
+                    .watch<AssetCriticalitySettingsNotifier>()
+                    .selectedSite,
                 items: () {
                   List<DropdownMenuItem<String>> list = [
                     const DropdownMenuItem(
-                        value: 'NONE', child: Text('Select a site'))
+                        value: '', child: Text('Select a site'))
                   ];
                   List<String> loadedSettings = (context
                               .read<SettingsNotifier>()
@@ -332,13 +335,12 @@ class _EndDrawerState extends State<EndDrawer> {
                   loadedSettings.sort((a, b) =>
                       a.compareTo(b)); //put them in alphabetical order
                   list.addAll(loadedSettings.map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(siteIDAndDescription[e] ?? 'NONE'))));
+                      value: e, child: Text(siteIDAndDescription[e] ?? ''))));
                   return list;
                 }(),
                 onChanged: (newValue) {
                   context
-                      .read<AssetCriticalityNotifier>()
+                      .read<AssetCriticalitySettingsNotifier>()
                       .setSite(newValue.toString());
                 },
               ),
@@ -355,46 +357,7 @@ class _EndDrawerState extends State<EndDrawer> {
               trailing: ElevatedButton(
                 child: const Text('Calculate'),
                 onPressed: () {
-                  try {
-                    AssetCriticalityNotifier assetCriticalityNotifier =
-                        context.read<AssetCriticalityNotifier>();
-                    SettingsNotifier settingsNotifier =
-                        context.read<SettingsNotifier>();
-
-                    //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
-                    List<double> rpnList =
-                        List.from(assetCriticalityNotifier.rpnList);
-                    rpnList.removeWhere((rpn) => (rpn <= 0));
-
-                    //set rpn ranges
-                    List<double> newCutoffs = rpnDistRange(
-                        rpnList, settingsNotifier.getRpnPercentDists());
-                    assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
-                    debugPrint(
-                        'new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
-                    assetCriticalityNotifier.priorityRangesUpToDate = true;
-                    assetCriticalityNotifier.updateGrid = true;
-                  } catch (e) {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text(
-                                'Could Not Calculate Priority Ranges'),
-                            content: Text(
-                                //remove the text 'Exception: ' from e.toString()
-                                '${e.toString().substring(e.toString().indexOf(' ') + 1)} Try reconfiguring the risk priority distributions.'),
-                            actions: [
-                              Center(
-                                child: ElevatedButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('OK')),
-                              )
-                            ],
-                          );
-                        });
-                    debugPrint(e.toString());
-                  }
+                  calculateRPNDistribution(context);
                 },
               ),
             ),

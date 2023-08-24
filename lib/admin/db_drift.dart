@@ -199,7 +199,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   ///update settings in database. List of settings has priority
-  Future<void> updateSettings(
+  Future<void> setSettings(
       {Setting? newSetting, List<Setting>? newSettings}) async {
     if (newSettings != null) {
       for (Setting thing in newSettings) {

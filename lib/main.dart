@@ -22,6 +22,7 @@ import 'criticality/criticality_notifier.dart';
 import 'creation/asset_creation_notifier.dart';
 import 'creation/site_change_notifier.dart';
 import 'admin/process_state_notifier.dart';
+import 'criticality/criticality_settings_notifier.dart';
 import 'routes/route.dart';
 
 MyDatabase? database;
@@ -88,6 +89,8 @@ class MyApp extends StatelessWidget {
               create: (context) => AssetCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => AssetCreationNotifier()),
           ChangeNotifierProvider(create: (context) => SiteChangeNotifier()),
+          ChangeNotifierProvider(
+              create: (context) => AssetCriticalitySettingsNotifier()),
         ],
         child: Builder(
           builder: (context) {
