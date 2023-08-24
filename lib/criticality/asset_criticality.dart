@@ -202,8 +202,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     stateManager.changeCellValue(
                         rendererContext.cell, newValue);
                   }
-                  //change cell value
-                  //stateManager.changeCellValue(rendererContext.cell, newValue);
                 });
               },
               items:
@@ -1401,9 +1399,9 @@ class RowofTextWidgets {
 
 Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
   List<Widget> widgets = [];
-  for (RowofTextWidgets value in values) {
-    TextEditingController controller =
-        TextEditingController.fromValue(TextEditingValue(text: value.value));
+  for (var i = 0; i < max(minFields, values.length); i++) {
+    TextEditingController controller = TextEditingController.fromValue(
+        TextEditingValue(text: values.elementAtOrNull(i)?.value ?? ''));
     widgets.add(
       Expanded(
         child: Padding(
@@ -1411,27 +1409,7 @@ Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
           child: TextField(
             textAlign: TextAlign.center,
             decoration: InputDecoration(
-              labelText: value.label,
-            ),
-            controller: controller,
-            keyboardType: TextInputType.number,
-            readOnly: true,
-          ),
-        ),
-      ),
-    );
-  }
-  while (widgets.length < minFields) {
-    TextEditingController controller =
-        TextEditingController.fromValue(const TextEditingValue(text: ''));
-    widgets.add(
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            textAlign: TextAlign.center,
-            decoration: const InputDecoration(
-              labelText: '',
+              labelText: values.elementAtOrNull(i)?.label,
             ),
             controller: controller,
             keyboardType: TextInputType.number,

@@ -51,7 +51,6 @@ class AssetCriticalityNotifier extends ChangeNotifier {
       for (int i = 0; i < criticalityStrings.length; i++) {
         if (rpn <= rpnCutoffs[i]) return criticalityStrings[i];
       }
-      debugPrint('[rpnFindDistribution] overflow');
       return criticalityStrings[4];
     } catch (e) {
       return '---';
