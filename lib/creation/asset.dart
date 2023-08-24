@@ -445,8 +445,15 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                       if (value.length != 5) {
                         return 'Asset Number must be 5 characters long';
                       }
+                      var exp = RegExp(r'(^[a-zA-Z]{1}[0-9]{4}$)');
+                      if (!exp.hasMatch(value)) {
+                        return 'Asset Number must be in the format X####';
+                      }
                       return null;
                     },
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(5),
+                    ],
                   ),
                 ),
               ],
