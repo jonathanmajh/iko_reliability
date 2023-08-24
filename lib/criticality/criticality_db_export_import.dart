@@ -4,23 +4,11 @@ import 'package:flutter/services.dart';
 
 import '../admin/db_drift.dart';
 
-const SETTINGS = [
-  'RPN percent very low',
-  'RPN percent low',
-  'RPN percent medium',
-  'RPN percent high',
-  'RPN percent very high',
-  'before date',
-  'after date',
-];
-
 void exportCriticalityDB(MyDatabase database) async {
   String export = '';
   var data = await database.getSettings();
   for (Setting setting in data) {
-    if (SETTINGS.contains(setting.key)) {
-      export = '$export\r\n${jsonEncode(setting)}';
-    }
+    export = '$export\r\n${jsonEncode(setting)}';
   }
   var data2 = await database.getSystemCriticalities();
   for (SystemCriticality data in data2) {
