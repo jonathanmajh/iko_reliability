@@ -57,7 +57,4 @@ class RpnCriticalityNotifier extends ChangeNotifier {
     }
     return 9;
   }
-
-  // TODO re-evaluate limits
-  // write targets and limits to DB
 }

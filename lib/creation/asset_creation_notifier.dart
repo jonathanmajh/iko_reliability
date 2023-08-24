@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../admin/upload_maximo.dart';
 
-import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
 
@@ -135,15 +134,6 @@ class AssetCreationNotifier extends ChangeNotifier {
     }
 
     return childSet;
-  }
-
-  String getSiteDescription([String? siteid]) {
-    siteid ??= selectedSite;
-    if (siteid == 'NONE') {
-      return 'No Site Selected';
-    } else {
-      return 'Site ${siteIDAndDescription[siteid]!}';
-    }
   }
 
   Future<void> uploadAssets(String env) async {

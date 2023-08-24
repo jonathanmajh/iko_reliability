@@ -35,16 +35,6 @@ class AssetCriticalityNotifier extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  ///gets the site description from a siteid.
-  ///Necessary b/c additional 'entry' of {'NONE': 'Select a site'} is needed, not just [siteIDAndDescription]
-  static String getSiteDescription(String siteid) {
-    if (siteid == 'NONE') {
-      return 'Select a site';
-    } else {
-      return siteIDAndDescription[siteid]!;
-    }
-  }
-
   ///sets the rpnCutoffs to the [newCutoffs] and notifies listeners
   void setRpnCutoffs(List<double> newCutoffs) {
     rpnCutoffs = List.of(newCutoffs);
