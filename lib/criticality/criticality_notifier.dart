@@ -1,29 +1,16 @@
-import 'dart:math';
-
 import 'package:flutter/widgets.dart';
 
 import '../admin/db_drift.dart';
 import '../main.dart';
 
 class SystemsNotifier extends ChangeNotifier {
-  Map<int, Map<String, String>> systems = {};
+  Map<int, String> systems = {};
 
   void updateSystems() async {
     final allSystems = await database!.getSystemCriticalities();
-    systems = {
-      0: {'description': '', 'score': ''}
-    };
+    systems = {0: ''};
     for (var system in allSystems) {
-      systems[system.id] = {
-        'description': system.description,
-        'score': sqrt((system.safety * system.safety +
-                    system.regulatory * system.regulatory +
-                    system.economic * system.economic +
-                    system.throughput * system.throughput +
-                    system.quality * system.quality) /
-                5)
-            .toStringAsFixed(2)
-      };
+      systems[system.id] = system.description;
     }
     // print(systems);
     notifyListeners();

@@ -210,7 +210,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   systems.systems.keys.map<DropdownMenuItem<int>>((int value) {
                 return DropdownMenuItem<int>(
                   value: value,
-                  child: Text(systems.systems[value]!['description']!),
+                  child: Text(systems.systems[value]!),
                 );
               }).toList(),
             );
