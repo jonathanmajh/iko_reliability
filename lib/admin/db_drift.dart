@@ -102,6 +102,28 @@ class Assets extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+class AssetUploads extends Table {
+  TextColumn get asset => text().references(Assets, #id)();
+  TextColumn get sjpDescription => text().nullable()();
+  TextColumn get installationDate => text().nullable()();
+  TextColumn get vendor => text().nullable()();
+  TextColumn get manufacturer => text().nullable()();
+  TextColumn get modelNum => text().nullable()();
+  IntColumn get assetCriticality => integer().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {asset};
+}
+
+class AssetWithUpload {
+  final Asset asset;
+  final AssetUpload? uploads;
+  AssetWithUpload(
+    this.asset,
+    this.uploads,
+  );
+}
+
 class SystemCriticalitys extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get description => text()();
@@ -161,6 +183,7 @@ class AssetCriticalityWithAsset {
   Workorders,
   SystemCriticalitys,
   AssetCriticalitys,
+  AssetUploads,
 ])
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
@@ -219,11 +242,17 @@ class MyDatabase extends _$MyDatabase {
     });
   }
 
-  Future<String> addNewAsset(
+  Future<AssetWithUpload> addNewAsset(
     String assetnum,
     String siteid,
     String description,
     String parent,
+    String? sjpDescription,
+    String? installationDate,
+    String? vendor,
+    String? manufacturer,
+    String? modelNum,
+    int? assetCriticality,
   ) async {
     final parentAsset = await (select(assets)
           ..where((t) => t.assetnum.equals(parent))
@@ -243,7 +272,19 @@ class MyDatabase extends _$MyDatabase {
       newAsset: const Value(1),
       id: '$siteid$assetnum',
     ));
-    return row.id;
+
+    final row2 =
+        await into(assetUploads).insertReturning(AssetUploadsCompanion.insert(
+      asset: '$siteid$assetnum',
+      sjpDescription: Value(sjpDescription ?? description),
+      installationDate: Value(installationDate),
+      vendor: Value(vendor),
+      manufacturer: Value(manufacturer),
+      modelNum: Value(modelNum),
+      assetCriticality: Value(assetCriticality),
+    ));
+
+    return AssetWithUpload(row, row2);
   }
 
   Future<String> deleteAsset(String assetNum, String siteId) async {
@@ -639,6 +680,21 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<Asset>> getSiteAssets(String siteid) async {
     return (select(assets)..where((tbl) => tbl.siteid.equals(siteid))).get();
+  }
+
+  Future<List<AssetWithUpload>> getSiteAssetUploads(String siteid) async {
+    var result = await (select(assets).join([
+      leftOuterJoin(assetUploads, assetUploads.asset.equalsExp(assets.id)),
+    ])
+          ..where(assets.siteid.equals(siteid)))
+        .get();
+
+    return result.map((row) {
+      return AssetWithUpload(
+        row.readTable(assets),
+        row.readTableOrNull(assetUploads),
+      );
+    }).toList();
   }
 
   Future<Asset> getAsset(String siteid, String assetNum) async {

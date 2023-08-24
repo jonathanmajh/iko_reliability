@@ -314,7 +314,7 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
 ///Possible statuses for each key: 'success', 'fail', 'duplicate'.
 ///In case of duplicate, the upload will continue
 Future<Map<String, dynamic>> uploadAssetToMaximo(
-  Asset asset,
+  AssetWithUpload asset,
   String env,
   AssetCreationNotifier assetCreationNotifier,
 ) async {
@@ -372,7 +372,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
 
   print('checking if location exists');
   if (!(await isNewLocation(
-      'L-${asset.assetnum}', assetCreationNotifier.selectedSite, env))) {
+      'L-${asset.asset.assetnum}', assetCreationNotifier.selectedSite, env))) {
     print('location already exists');
     result['location'] = 'duplicate';
     numDuplicates++;
@@ -387,12 +387,12 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
             tableHeaders['Location']!,
             [
               assetCreationNotifier.selectedSite,
-              'L-${asset.assetnum}',
-              asset.description,
+              'L-${asset.asset.assetnum}',
+              asset.asset.description,
               'OPERATING',
               'GENERAL',
               'OPERATING',
-              'L-${asset.parent}'
+              'L-${asset.asset.parent}'
             ]
           ],
         ),
@@ -400,22 +400,12 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
         false,
         false);
     handlePostResult(locationResult, 'location', ['location']);
-    /*if (locationResult['status'] == "failed") {
-      print('location upload failed');
-      result['location'] = 'fail';
-      //result['failReason'] = locationResult['Error']['message'];
-      print(result);
-      return result;
-    } else {
-      print('location upload finished');
-      result['location'] = 'success';
-    }*/
   }
 
   print('checking if asset exists');
   // check if asset already exists
   if (!(await isNewAsset(
-      asset.assetnum, assetCreationNotifier.selectedSite, env))) {
+      asset.asset.assetnum, assetCreationNotifier.selectedSite, env))) {
     print('Asset already exists');
     result['asset'] = 'duplicate';
     numDuplicates++;
@@ -426,13 +416,20 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
         'post',
         env,
         const ListToCsvConverter().convert([
-          ['SITEID', 'ASSETNUM', 'DESCRIPTION', 'LOCATION', 'PARENT', 'STATUS'],
+          [
+            'SITEID',
+            'ASSETNUM',
+            'DESCRIPTION',
+            'LOCATION',
+            'PARENT',
+            'STATUS',
+          ],
           [
             assetCreationNotifier.selectedSite,
-            asset.assetnum,
-            asset.description,
-            'L-${asset.assetnum}',
-            asset.parent,
+            asset.asset.assetnum,
+            asset.asset.description,
+            'L-${asset.asset.assetnum}',
+            asset.asset.parent,
             'OPERATING'
           ]
         ]),
@@ -440,17 +437,36 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
         false,
         false);
     handlePostResult(assetResult, 'asset', ['asset']);
-
-    /*if (assetResult['status'] == 'failed') {
-      print('asset upload failed');
-      result['asset'] = 'fail';
-      print(result);
-      return result;
-      //throw Exception('Failed to upload asset');
-    } else {
-      print('asset upload finished');
-      result['asset'] = 'success';
-    }*/
+    if (asset.uploads != null) {
+      assetResult = await maximoRequest(
+          assetUrl,
+          'post',
+          env,
+          const ListToCsvConverter().convert([
+            [
+              'SITEID',
+              'ASSETNUM',
+              'INSTALLDATE',
+              'PRIORITY',
+              'VENDOR',
+              'MANUFACTURER',
+              // 'IKO_MODELNUM', TODO when DB field is added to Prod
+            ],
+            [
+              assetCreationNotifier.selectedSite,
+              asset.asset.assetnum,
+              asset.uploads?.installationDate ?? '',
+              asset.uploads?.assetCriticality ?? '',
+              asset.uploads?.vendor ?? '',
+              asset.uploads?.manufacturer ?? '',
+              // asset.uploads?.modelNum ?? '',
+            ]
+          ]),
+          headers,
+          false,
+          false);
+      handlePostResult(assetResult, 'asset', ['asset']);
+    }
   }
 
   List<String> jobPlanHeaders = [
@@ -471,16 +487,16 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   result['jobplan'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
     List<String> jobPlanBody = [];
-    if (!(await isNewJobPlan('${asset.assetnum}${entry.key}', env))) {
-      print('${asset.assetnum}${entry.key} jobplan exists');
-      result['jobplan']['${asset.assetnum}${entry.key}'] = 'duplicate';
+    if (!(await isNewJobPlan('${asset.asset.assetnum}${entry.key}', env))) {
+      print('${asset.asset.assetnum}${entry.key} jobplan exists');
+      result['jobplan']['${asset.asset.assetnum}${entry.key}'] = 'duplicate';
       numDuplicates++;
       continue;
     }
     jobPlanBody = [
-      '${asset.assetnum}${entry.key}',
+      '${asset.asset.assetnum}${entry.key}',
       '0',
-      '${asset.description} - ${entry.value.description}',
+      '${asset.uploads?.sjpDescription ?? asset.asset.description} - ${entry.value.description}',
       '',
       'ACTIVE',
       personGroups[entry.key[entry.key.length - 1]]!,
@@ -502,28 +518,22 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
         false,
         false);
 
-    handlePostResult(jobPlanResult, 'jobplan ${asset.assetnum}${entry.key}',
-        ['jobplan', '${asset.assetnum}${entry.key}']);
-
-    /*if (jobPlanResult['status'] == 'failed') {
-      print('${asset.assetnum}${entry.key}: jp upload failed');
-      result['jobplan']['${asset.assetnum}${entry.key}'] = 'fail';
-    } else {
-      //print('${asset.assetnum}${entry.key}: jp upload success');
-      result['jobplan']['${asset.assetnum}${entry.key}'] = 'success';
-    }*/
+    handlePostResult(
+        jobPlanResult,
+        'jobplan ${asset.asset.assetnum}${entry.key}',
+        ['jobplan', '${asset.asset.assetnum}${entry.key}']);
   }
 
   result['joblabor'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
     if (!(await isNewJobLabor(
-        '${asset.assetnum}${entry.key}',
+        '${asset.asset.assetnum}${entry.key}',
         siteIDAndOrgID[assetCreationNotifier.selectedSite]!,
         craftCode[entry.key[entry.key.length - 1]]!,
         "1",
         env))) {
-      print('${asset.assetnum}${entry.key} joblabor exists');
-      result['joblabor']['${asset.assetnum}${entry.key}'] = 'duplicate';
+      print('${asset.asset.assetnum}${entry.key} joblabor exists');
+      result['joblabor']['${asset.asset.assetnum}${entry.key}'] = 'duplicate';
       numDuplicates++;
       continue;
     }
@@ -531,7 +541,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     List<String> jobPlanBody = [
       '',
       '',
-      '${asset.assetnum}${entry.key}',
+      '${asset.asset.assetnum}${entry.key}',
       '0',
       craftCode[entry.key[entry.key.length - 1]]!,
       '1',
@@ -549,23 +559,19 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
         headers,
         false,
         false);
-    handlePostResult(jobLaborResult, 'joblabor ${asset.assetnum}${entry.key}',
-        ['joblabor', '${asset.assetnum}${entry.key}']);
-    /*if (jobLaborResult['status'] == 'failed') {
-      print('${asset.assetnum}${entry.key}: joblabor upload failed');
-      result['joblabor']['${asset.assetnum}${entry.key}'] = 'fail';
-    } else {
-      print('${asset.assetnum}${entry.key}: joblabor upload success');
-      result['joblabor']['${asset.assetnum}${entry.key}'] = 'success';
-    }*/
+    handlePostResult(
+        jobLaborResult,
+        'joblabor ${asset.asset.assetnum}${entry.key}',
+        ['joblabor', '${asset.asset.assetnum}${entry.key}']);
   }
 
   result['jpassetlink'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
-    if (!(await isNewJobAsset('${asset.assetnum}${entry.key}',
-        assetCreationNotifier.selectedSite, asset.assetnum, env))) {
-      print('${asset.assetnum}${entry.key} jpasset exists');
-      result['jpassetlink']['${asset.assetnum}${entry.key}'] = 'duplicate';
+    if (!(await isNewJobAsset('${asset.asset.assetnum}${entry.key}',
+        assetCreationNotifier.selectedSite, asset.asset.assetnum, env))) {
+      print('${asset.asset.assetnum}${entry.key} jpasset exists');
+      result['jpassetlink']['${asset.asset.assetnum}${entry.key}'] =
+          'duplicate';
       numDuplicates++;
       continue;
     }
@@ -573,9 +579,9 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     List<String> jobPlanBody = [
       '',
       '',
-      '${asset.assetnum}${entry.key}',
+      '${asset.asset.assetnum}${entry.key}',
       '0',
-      asset.assetnum,
+      asset.asset.assetnum,
       '0',
       siteIDAndOrgID[assetCreationNotifier.selectedSite]!,
       assetCreationNotifier.selectedSite,
@@ -592,15 +598,8 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
         false);
     handlePostResult(
         jpassetlinkResult,
-        'jpassetlink ${asset.assetnum}${entry.key}',
-        ['jpassetlink', '${asset.assetnum}${entry.key}']);
-    /*if (jpassetlinkResult['status'] == 'failed') {
-      print('${asset.assetnum}${entry.key}: jpassetlink upload failed');
-      result['jpassetlink']['${asset.assetnum}${entry.key}'] = 'fail';
-    } else {
-      print('${asset.assetnum}${entry.key}: jpassetlink upload success');
-      result['jpassetlink']['${asset.assetnum}${entry.key}'] = 'success';
-    }*/
+        'jpassetlink ${asset.asset.assetnum}${entry.key}',
+        ['jpassetlink', '${asset.asset.assetnum}${entry.key}']);
   }
 
   if (numDuplicates >= 56) {
