@@ -124,9 +124,7 @@ class _EndDrawerState extends State<EndDrawer> {
                             content: Text(
                                 'Attempting to Login to: ${maximo.maximoServerSelected}'),
                           ));
-                          getUserMaximo(
-                              useridController.text,
-                              passwordController.text,
+                          getUserMaximo('[APIKEY]', passwordController.text,
                               maximo.maximoServerSelected);
                         },
                       ),
