@@ -76,7 +76,6 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => UploadNotifier()),
           ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
           ChangeNotifierProvider(create: (context) => SystemsNotifier()),
-          ChangeNotifierProvider(create: (context) => WorkOrderNotifier()),
           ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => settingsNotifier),
           ChangeNotifierProvider(
