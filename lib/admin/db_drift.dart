@@ -493,15 +493,12 @@ class MyDatabase extends _$MyDatabase {
 
   Future getWorkOrderMaximo(String assetnum, String env) async {
     // maybe a return to indicate completion
-    List<String> messages = [];
     final result = await maximoRequest(
         'iko_wo?oslc.select=wonum,siteid,description,status,reportdate,IKO_DOWNTIME,WORKTYPE,assetnum&oslc.where=assetnum="$assetnum" and IKO_DOWNTIME>0',
         'get',
         env);
     if (result['member'].length > 0) {
       List<WorkordersCompanion> woInserts = [];
-      // save once without the hierarchy field then loop through again adding hierarchy
-      // because the parent assets might not always come before the child assets
       for (var row in result['member'].toList()) {
         woInserts.add(
           WorkordersCompanion.insert(
@@ -517,13 +514,10 @@ class MyDatabase extends _$MyDatabase {
           ),
         );
       }
-      try {
-        await batch((batch) {
-          batch.insertAllOnConflictUpdate(workorders, woInserts);
-        });
-      } catch (e) {
-        messages.add('Error inserting Meters\n${e.toString()}');
-      }
+
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(workorders, woInserts);
+      });
     }
   }
 
@@ -662,7 +656,7 @@ class MyDatabase extends _$MyDatabase {
           batch.insertAllOnConflictUpdate(assets, assetInserts);
         });
       } catch (e) {
-        messages.add('Error inserting Meters\n${e.toString()}');
+        messages.add('Error getting assets from Maximo\n${e.toString()}');
       }
       var siteAssets = await getSiteAssets(siteid);
       assetCache[siteid] = {};

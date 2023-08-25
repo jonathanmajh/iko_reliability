@@ -10,6 +10,7 @@ class PercentSlider extends StatefulWidget {
       this.min = 0,
       this.max = 100,
       required this.onSliderUpdate,
+      required this.onSliderUpdateEnd,
       required this.barColors,
       this.tooltip,
       this.sliderColor = Colors.grey,
@@ -40,6 +41,9 @@ class PercentSlider extends StatefulWidget {
 
   ///function to run when slider updates
   final Function(List<int?> posList) onSliderUpdate;
+
+  ///function to run when slider stops updating
+  final Function(List<int?> posList) onSliderUpdateEnd;
 
   ///tool tip messages. Length must match the amount of percent bars
   final List<String>? tooltip;
@@ -235,6 +239,7 @@ class _PercentSliderState extends State<PercentSlider> {
                     setState(() {
                       isDragging = false;
                     });
+                    widget.onSliderUpdateEnd(_calculateDistributions());
                   },
                   onPanCancel: () {
                     setState(() {
@@ -245,6 +250,7 @@ class _PercentSliderState extends State<PercentSlider> {
                     setState(() {
                       isDragging = false;
                     });
+                    widget.onSliderUpdateEnd(_calculateDistributions());
                   },
                 ),
               ],

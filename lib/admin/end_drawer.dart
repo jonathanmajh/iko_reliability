@@ -355,15 +355,6 @@ class _EndDrawerState extends State<EndDrawer> {
               ),
             ),
             ListTile(
-              title: const Text('Calculate Priority Ranges'),
-              trailing: ElevatedButton(
-                child: const Text('Calculate'),
-                onPressed: () {
-                  calculateRPNDistribution(context);
-                },
-              ),
-            ),
-            ListTile(
               title: const Text('Export to CSV'),
               trailing: ElevatedButton(
                 child: const Text('Export'),
