@@ -815,7 +815,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
     List<Color> colorGradient = [
       Colors.blue,
       Colors.green,
-      Colors.yellow,
+      Colors.yellow[600]!,
       Colors.orange,
       Colors.red
     ];

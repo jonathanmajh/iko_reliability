@@ -166,7 +166,7 @@ class _PercentSliderState extends State<PercentSlider> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: widget.size.height,
+          height: widget.size.height * 2,
           child: LayoutBuilder(builder: (context, constraints) {
             final maxWidth = constraints.maxWidth;
             if (percentList.length != widget.initialValues.length) {
@@ -182,8 +182,8 @@ class _PercentSliderState extends State<PercentSlider> {
                 //bars
                 Padding(
                   padding: EdgeInsets.only(
-                    top: widget.size.height * 0.3,
-                    bottom: widget.size.height * 0.3,
+                    top: widget.size.height * 0.8,
+                    bottom: widget.size.height * 0.8,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -215,12 +215,27 @@ class _PercentSliderState extends State<PercentSlider> {
                           maxWidth: maxWidth, percent: percentList[i]!),
                       child: Container(
                         height: activeSliderNumber == i
-                            ? widget.size.height * 5
-                            : widget.size.height * 4,
-                        width: widget.size.width,
-                        color: (activeSliderNumber == i)
-                            ? widget.sliderPressedColor
-                            : widget.sliderColor,
+                            ? widget.size.height * 1.5
+                            : widget.size.height * 1,
+                        width: activeSliderNumber == i
+                            ? widget.size.height * 1.5
+                            : widget.size.height * 1,
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                widget.barColors[i],
+                                widget.barColors[i],
+                                widget.barColors[i + 1],
+                                widget.barColors[i + 1],
+                              ],
+                              stops: const [
+                                0.499,
+                                0.5,
+                                0.501,
+                                1,
+                              ],
+                            ),
+                            shape: BoxShape.circle),
                       ),
                     ));
                   }
