@@ -138,21 +138,26 @@ class _PercentSliderState extends State<PercentSlider> {
     required double maxWidth,
     required double tapPosition,
   }) {
-    final maxArea = widget.size.width / 2; //maxWidth * tapSpacesArea;
+    double distanceFromSlider = 0.0;
+    int closestSlider = 0;
+    double closestdistanceFromSlider = maxWidth;
 
     for (int i = 0; i < percentList.length; i++) {
-      if ((tapPosition -
-                  _calculateSliderPosition(
-                      maxWidth: maxWidth, percent: percentList[i]!))
-              .abs() <
-          maxArea) {
-        setState(() {
-          isDragging = true;
-          activeSliderNumber = i;
-        });
-        break;
+      distanceFromSlider = (tapPosition -
+              _calculateSliderPosition(
+                maxWidth: maxWidth,
+                percent: percentList[i]!,
+              ))
+          .abs();
+      if (distanceFromSlider < closestdistanceFromSlider) {
+        closestdistanceFromSlider = distanceFromSlider;
+        closestSlider = i;
       }
     }
+    setState(() {
+      isDragging = true;
+      activeSliderNumber = closestSlider;
+    });
   }
 
   @override
@@ -227,9 +232,6 @@ class _PercentSliderState extends State<PercentSlider> {
                         maxWidth: maxWidth,
                         tapPosition: details.localPosition.dx);
                   },
-                  onPanUpdate: (details) {
-                    _updateSlider(details.localPosition.dx, maxWidth);
-                  },
                   onTapCancel: () {
                     setState(() {
                       isDragging = false;
@@ -240,6 +242,14 @@ class _PercentSliderState extends State<PercentSlider> {
                       isDragging = false;
                     });
                     widget.onSliderUpdateEnd(_calculateDistributions());
+                  },
+                  onPanDown: (details) {
+                    _selectSlider(
+                        maxWidth: maxWidth,
+                        tapPosition: details.localPosition.dx);
+                  },
+                  onPanUpdate: (details) {
+                    _updateSlider(details.localPosition.dx, maxWidth);
                   },
                   onPanCancel: () {
                     setState(() {
