@@ -166,9 +166,9 @@ class _PercentSliderState extends State<PercentSlider> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: widget.size.height * 3,
+          height: widget.size.height,
           child: LayoutBuilder(builder: (context, constraints) {
-            final maxWidth = constraints.maxWidth - 10;
+            final maxWidth = constraints.maxWidth;
             if (percentList.length != widget.initialValues.length) {
               percentList =
                   List<int?>.filled(widget.initialValues.length, null);
@@ -182,9 +182,9 @@ class _PercentSliderState extends State<PercentSlider> {
                 //bars
                 Padding(
                   padding: EdgeInsets.only(
-                      top: widget.size.height * 0.2,
-                      bottom: widget.size.height * 0.2,
-                      right: 10),
+                    top: widget.size.height * 0.3,
+                    bottom: widget.size.height * 0.3,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: () {

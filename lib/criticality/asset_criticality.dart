@@ -813,11 +813,11 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
   Widget build(BuildContext context) {
     ///Color gradient for [MultiSlider]. The colors for the range bars are every other item on the list, starting from index = 1
     List<Color> colorGradient = [
-      Colors.red[200]!,
-      Colors.red[300]!,
-      Colors.red[400]!,
-      Colors.red[700]!,
-      Colors.red[900]!
+      Colors.blue,
+      Colors.green,
+      Colors.yellow,
+      Colors.orange,
+      Colors.red
     ];
     return SingleChildScrollView(
       child: SizedBox(
