@@ -194,6 +194,7 @@ class _PercentSliderState extends State<PercentSlider> {
                         widgetList.add(Flexible(
                           flex: distributions[i],
                           child: Tooltip(
+                              preferBelow: false,
                               message: (widget.tooltip != null && !isDragging)
                                   ? '${widget.tooltip![i]}: ${distributions[i]}'
                                   : '',
