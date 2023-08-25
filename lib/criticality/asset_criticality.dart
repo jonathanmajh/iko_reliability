@@ -116,13 +116,15 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       ),
       PlutoColumn(
           width: 100,
-          title: 'Action',
+          title: 'Status',
           field: 'action',
           type: PlutoColumnType.text(),
           renderer: (rendererContext) {
             return Row(
               children: [
                 IconButton(
+                  tooltip:
+                      'Refresh breakdown information from Maximo.\nUpdates child assets if parent selected',
                   icon: const Icon(
                     Icons.refresh,
                   ),
@@ -143,17 +145,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   color: Colors.green,
                   padding: const EdgeInsets.all(0),
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.info,
-                  ),
-                  onPressed: () {
-                    refreshAsset(rendererContext.row.cells['assetnum']!.value,
-                        selectedSite);
-                  },
-                  iconSize: 18,
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(0),
+                StatusIcon(
+                  rendererContext: rendererContext,
                 ),
               ],
             );
@@ -348,6 +341,15 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
         double? calculatedRPN = rpnFunc(child);
+        String priorityText = context
+            .read<AssetCriticalityNotifier>()
+            .rpnFindDistribution(calculatedRPN ?? -1);
+        if (calculatedRPN != -1) {
+          context.read<AssetStatusNotifier>().updateAssetStatus(
+            assets: [child.asset.assetnum],
+            status: AssetStatus.complete,
+          );
+        }
         rows.add(PlutoRow(
           cells: {
             'assetnum': PlutoCell(value: child.asset.assetnum),
@@ -360,10 +362,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 PlutoCell(value: child.assetCriticality?.frequency ?? 0),
             'downtime': PlutoCell(value: child.assetCriticality?.downtime ?? 0),
             'hierarchy': PlutoCell(value: ''),
-            'newPriority': PlutoCell(
-                value: context
-                    .read<AssetCriticalityNotifier>()
-                    .rpnFindDistribution(calculatedRPN ?? -1)),
+            'newPriority': PlutoCell(value: priorityText),
             'rpn': PlutoCell(value: calculatedRPN),
             'id': PlutoCell(value: child.asset.id),
           },
@@ -385,9 +384,17 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   void refreshAsset(String assetnum, [String? siteid]) async {
     //TODO: use work order settings
+    context.read<AssetStatusNotifier>().updateAssetStatus(
+      assets: [assetnum],
+      status: AssetStatus.refreshingWorkOrders,
+    );
     await database!.getWorkOrderMaximo(
       assetnum,
       context.read<MaximoServerNotifier>().maximoServerSelected,
+    );
+    context.read<AssetStatusNotifier>().updateAssetStatus(
+      assets: [assetnum],
+      status: AssetStatus.incomplete,
     );
     var wos = await database!.getAssetWorkorders(assetnum, siteid);
     double downtime = 0;
@@ -428,7 +435,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           ),
           endDrawer: const EndDrawer(),
           body: Container(
-              // key: Key(context.read<AssetCriticalityNotifier>().selectedSite),
               padding: const EdgeInsets.all(30),
               child: FutureBuilder<List<AssetCriticalityWithAsset>>(
                   future: database!.getAssetCriticalities(context
@@ -533,13 +539,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                           ));
                         },
                         onChanged: (PlutoGridOnChangedEvent event) async {
-                          // Cache cache = context.read<Cache>();
                           AssetCriticalityNotifier assetCriticalityNotifier =
                               context.read<AssetCriticalityNotifier>();
                           assetCriticalityNotifier.priorityRangesUpToDate =
                               false;
-                          // assetCriticalityNotifier
-                          //     .updateCollapsedAssets(stateManager);
                           String rowId = event.row.cells['id']?.value ?? 'N/A';
                           AssetCriticalityWithAsset asset =
                               siteAssets[event.row.cells['assetnum']!.value]!;
@@ -562,9 +565,19 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                             assetCriticalityNotifier
                                 .addToRpnMap({rowId: newRpn});
                           }
-                          event.row.cells['newPriority']!.value = context
+                          String criticalityText = context
                               .read<AssetCriticalityNotifier>()
                               .rpnFindDistribution(newRpn);
+                          event.row.cells['newPriority']!.value =
+                              criticalityText;
+                          if (newRpn != -1) {
+                            context
+                                .read<AssetStatusNotifier>()
+                                .updateAssetStatus(
+                              assets: [event.row.cells['assetnum']!.value],
+                              status: AssetStatus.complete,
+                            );
+                          }
                           updateAsset(event.row);
                           debugPrint('$event');
                         },
@@ -1422,4 +1435,60 @@ Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
   return Row(
     children: widgets,
   );
+}
+
+class StatusIcon extends StatefulWidget {
+  const StatusIcon({super.key, required this.rendererContext});
+
+  final PlutoColumnRendererContext rendererContext;
+
+  @override
+  State<StatusIcon> createState() => _StatusIconState();
+}
+
+class _StatusIconState extends State<StatusIcon> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    AssetStatus status = context
+        .watch<AssetStatusNotifier>()
+        .getAssetStatus(widget.rendererContext.row.cells['assetnum']!.value);
+    print('building status icon: $status');
+    Color color = Colors.grey;
+    IconData icon = Icons.pending;
+    String statusText = '';
+    switch (status) {
+      case AssetStatus.complete:
+        icon = Icons.check_circle;
+        color = Colors.green;
+        statusText = 'RPN generated';
+
+      case AssetStatus.incomplete:
+        icon = Icons.pending;
+        color = Colors.yellow;
+        statusText = 'Please check columns to generate RPN';
+
+      case AssetStatus.parentAsset:
+        icon = Icons.pending;
+        color = Colors.grey;
+        statusText = 'Parent asset: Not ranked';
+
+      case AssetStatus.refreshingWorkOrders:
+        icon = Icons.downloading;
+        color = Colors.blue;
+        statusText = 'Loading...';
+    }
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: color,
+      ),
+      onPressed: () {},
+      tooltip: statusText,
+    );
+  }
 }

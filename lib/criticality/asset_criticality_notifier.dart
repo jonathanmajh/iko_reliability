@@ -57,3 +57,32 @@ class AssetCriticalityNotifier extends ChangeNotifier {
     }
   }
 }
+
+class AssetStatusNotifier extends ChangeNotifier {
+  Map<String, AssetStatus> assets = {};
+  //  assetnum:
+
+  void updateAssetStatus({
+    required List<String> assets,
+    required AssetStatus status,
+  }) {
+    for (var asset in assets) {
+      this.assets[asset] = status;
+    }
+    notifyListeners();
+  }
+
+  AssetStatus getAssetStatus(String assetNum) {
+    if (assets.containsKey(assetNum)) {
+      return assets[assetNum]!;
+    }
+    return AssetStatus.incomplete;
+  }
+}
+
+enum AssetStatus {
+  complete,
+  parentAsset,
+  refreshingWorkOrders,
+  incomplete,
+}
