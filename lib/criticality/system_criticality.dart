@@ -4,7 +4,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:provider/provider.dart';
 
 import '../main.dart';
 
@@ -40,10 +42,31 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
       // TODO implement site selection for systems
       PlutoColumn(
         width: 150,
-        title: 'Site',
-        field: 'site',
-        type: PlutoColumnType.number(),
-        readOnly: true,
+        title: 'Production Line',
+        field: 'line',
+        type: PlutoColumnType.text(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<String>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (String? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: productionLines.keys
+                .toList()
+                .map<DropdownMenuItem<String>>((String key) {
+              return DropdownMenuItem<String>(
+                value: key,
+                child: Text(productionLines[key] ?? 'Unknown'),
+              );
+            }).toList(),
+          );
+        },
       ),
       PlutoColumn(
         width: 300,
@@ -193,6 +216,13 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           format: '#.##',
         ),
       ),
+      PlutoColumn(
+        width: 150,
+        title: 'Site',
+        field: 'site',
+        type: PlutoColumnType.text(),
+        readOnly: true,
+      ),
     ]);
     _loadData().then((fetchedRows) {
       PlutoGridStateManager.initializeRowsAsync(
@@ -212,7 +242,8 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     for (var row in dbrows) {
       rows.add(PlutoRow(cells: {
         'id': PlutoCell(value: row.id),
-        'site': PlutoCell(value: row.id),
+        'line': PlutoCell(value: row.line),
+        'site': PlutoCell(value: row.siteid ?? ''),
         'description': PlutoCell(value: row.description),
         'safety': PlutoCell(value: row.safety),
         'regulatory': PlutoCell(value: row.regulatory),
@@ -330,15 +361,19 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         columns: columns,
         rows: rows,
         configuration: PlutoGridConfiguration(
-            shortcut: PlutoGridShortcut(actions: {
-          ...PlutoGridShortcut.defaultActions,
-          // + / - keys should increase / decrease values
-          LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-          LogicalKeySet(LogicalKeyboardKey.numpadAdd): CustomAddKeyAction(),
-          LogicalKeySet(LogicalKeyboardKey.minus): CustomMinusKeyAction(),
-          LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-              CustomMinusKeyAction(),
-        })),
+          shortcut: PlutoGridShortcut(actions: {
+            ...PlutoGridShortcut.defaultActions,
+            // + / - keys should increase / decrease values
+            LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
+            LogicalKeySet(LogicalKeyboardKey.numpadAdd): CustomAddKeyAction(),
+            LogicalKeySet(LogicalKeyboardKey.minus): CustomMinusKeyAction(),
+            LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                CustomMinusKeyAction(),
+          }),
+          style: context.watch<ThemeManager>().isDark
+              ? const PlutoGridStyleConfig.dark()
+              : const PlutoGridStyleConfig(),
+        ),
         onChanged: (PlutoGridOnChangedEvent event) {
           // score should auto calcualte when values change
           event.row.cells['score']!.value = sqrt(
@@ -385,6 +420,7 @@ Future<int> updateSystem(PlutoRow row) async {
         row.cells['economic']!.value,
         row.cells['throughput']!.value,
         row.cells['quality']!.value,
+        row.cells['line']!.value,
       );
     }
   }

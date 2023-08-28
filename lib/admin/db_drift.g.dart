@@ -1973,6 +1973,11 @@ class $SystemCriticalitysTable extends SystemCriticalitys
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _lineMeta = const VerificationMeta('line');
+  @override
+  late final GeneratedColumn<String> line = GeneratedColumn<String>(
+      'line', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1982,7 +1987,8 @@ class $SystemCriticalitysTable extends SystemCriticalitys
         regulatory,
         economic,
         throughput,
-        quality
+        quality,
+        line
       ];
   @override
   String get aliasedName => _alias ?? 'system_criticalitys';
@@ -2032,6 +2038,12 @@ class $SystemCriticalitysTable extends SystemCriticalitys
       context.handle(_qualityMeta,
           quality.isAcceptableOrUnknown(data['quality']!, _qualityMeta));
     }
+    if (data.containsKey('line')) {
+      context.handle(
+          _lineMeta, line.isAcceptableOrUnknown(data['line']!, _lineMeta));
+    } else if (isInserting) {
+      context.missing(_lineMeta);
+    }
     return context;
   }
 
@@ -2057,6 +2069,8 @@ class $SystemCriticalitysTable extends SystemCriticalitys
           .read(DriftSqlType.int, data['${effectivePrefix}throughput'])!,
       quality: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}quality'])!,
+      line: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}line'])!,
     );
   }
 
@@ -2076,6 +2090,7 @@ class SystemCriticality extends DataClass
   final int economic;
   final int throughput;
   final int quality;
+  final String line;
   const SystemCriticality(
       {required this.id,
       required this.description,
@@ -2084,7 +2099,8 @@ class SystemCriticality extends DataClass
       required this.regulatory,
       required this.economic,
       required this.throughput,
-      required this.quality});
+      required this.quality,
+      required this.line});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2098,6 +2114,7 @@ class SystemCriticality extends DataClass
     map['economic'] = Variable<int>(economic);
     map['throughput'] = Variable<int>(throughput);
     map['quality'] = Variable<int>(quality);
+    map['line'] = Variable<String>(line);
     return map;
   }
 
@@ -2112,6 +2129,7 @@ class SystemCriticality extends DataClass
       economic: Value(economic),
       throughput: Value(throughput),
       quality: Value(quality),
+      line: Value(line),
     );
   }
 
@@ -2127,6 +2145,7 @@ class SystemCriticality extends DataClass
       economic: serializer.fromJson<int>(json['economic']),
       throughput: serializer.fromJson<int>(json['throughput']),
       quality: serializer.fromJson<int>(json['quality']),
+      line: serializer.fromJson<String>(json['line']),
     );
   }
   @override
@@ -2141,6 +2160,7 @@ class SystemCriticality extends DataClass
       'economic': serializer.toJson<int>(economic),
       'throughput': serializer.toJson<int>(throughput),
       'quality': serializer.toJson<int>(quality),
+      'line': serializer.toJson<String>(line),
     };
   }
 
@@ -2152,7 +2172,8 @@ class SystemCriticality extends DataClass
           int? regulatory,
           int? economic,
           int? throughput,
-          int? quality}) =>
+          int? quality,
+          String? line}) =>
       SystemCriticality(
         id: id ?? this.id,
         description: description ?? this.description,
@@ -2162,6 +2183,7 @@ class SystemCriticality extends DataClass
         economic: economic ?? this.economic,
         throughput: throughput ?? this.throughput,
         quality: quality ?? this.quality,
+        line: line ?? this.line,
       );
   @override
   String toString() {
@@ -2173,14 +2195,15 @@ class SystemCriticality extends DataClass
           ..write('regulatory: $regulatory, ')
           ..write('economic: $economic, ')
           ..write('throughput: $throughput, ')
-          ..write('quality: $quality')
+          ..write('quality: $quality, ')
+          ..write('line: $line')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, description, siteid, safety, regulatory,
-      economic, throughput, quality);
+      economic, throughput, quality, line);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2192,7 +2215,8 @@ class SystemCriticality extends DataClass
           other.regulatory == this.regulatory &&
           other.economic == this.economic &&
           other.throughput == this.throughput &&
-          other.quality == this.quality);
+          other.quality == this.quality &&
+          other.line == this.line);
 }
 
 class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
@@ -2204,6 +2228,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
   final Value<int> economic;
   final Value<int> throughput;
   final Value<int> quality;
+  final Value<String> line;
   const SystemCriticalitysCompanion({
     this.id = const Value.absent(),
     this.description = const Value.absent(),
@@ -2213,6 +2238,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     this.economic = const Value.absent(),
     this.throughput = const Value.absent(),
     this.quality = const Value.absent(),
+    this.line = const Value.absent(),
   });
   SystemCriticalitysCompanion.insert({
     this.id = const Value.absent(),
@@ -2223,7 +2249,9 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     this.economic = const Value.absent(),
     this.throughput = const Value.absent(),
     this.quality = const Value.absent(),
-  }) : description = Value(description);
+    required String line,
+  })  : description = Value(description),
+        line = Value(line);
   static Insertable<SystemCriticality> custom({
     Expression<int>? id,
     Expression<String>? description,
@@ -2233,6 +2261,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     Expression<int>? economic,
     Expression<int>? throughput,
     Expression<int>? quality,
+    Expression<String>? line,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2243,6 +2272,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
       if (economic != null) 'economic': economic,
       if (throughput != null) 'throughput': throughput,
       if (quality != null) 'quality': quality,
+      if (line != null) 'line': line,
     });
   }
 
@@ -2254,7 +2284,8 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
       Value<int>? regulatory,
       Value<int>? economic,
       Value<int>? throughput,
-      Value<int>? quality}) {
+      Value<int>? quality,
+      Value<String>? line}) {
     return SystemCriticalitysCompanion(
       id: id ?? this.id,
       description: description ?? this.description,
@@ -2264,6 +2295,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
       economic: economic ?? this.economic,
       throughput: throughput ?? this.throughput,
       quality: quality ?? this.quality,
+      line: line ?? this.line,
     );
   }
 
@@ -2294,6 +2326,9 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     if (quality.present) {
       map['quality'] = Variable<int>(quality.value);
     }
+    if (line.present) {
+      map['line'] = Variable<String>(line.value);
+    }
     return map;
   }
 
@@ -2307,7 +2342,8 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
           ..write('regulatory: $regulatory, ')
           ..write('economic: $economic, ')
           ..write('throughput: $throughput, ')
-          ..write('quality: $quality')
+          ..write('quality: $quality, ')
+          ..write('line: $line')
           ..write(')'))
         .toString();
   }

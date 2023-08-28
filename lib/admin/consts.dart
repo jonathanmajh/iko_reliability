@@ -35,6 +35,17 @@ final freqUnitToDays = {
   'Y': 365,
 };
 
+final productionLines = {
+  'C': 'Common',
+  'S': 'Shingle',
+  'B': 'Insulation',
+  'R': 'Granule',
+  'T': 'TPO',
+  'W': 'Wrapper',
+  'G': 'Mortar',
+  'M': 'Mod',
+};
+
 const workType = {
   'PPM': 'Preventive Maintenance',
   'CAL': 'Calibration',

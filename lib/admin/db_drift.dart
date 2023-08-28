@@ -133,6 +133,7 @@ class SystemCriticalitys extends Table {
   IntColumn get economic => integer().withDefault(const Constant(0))();
   IntColumn get throughput => integer().withDefault(const Constant(0))();
   IntColumn get quality => integer().withDefault(const Constant(0))();
+  TextColumn get line => text()();
 }
 
 class AssetCriticalitys extends Table {
@@ -220,9 +221,9 @@ class MyDatabase extends _$MyDatabase {
     ));
   }
 
-  Future<int> addSystemCriticalitys(String value) async {
+  Future<int> addSystemCriticalitys(String description) async {
     final row = await into(systemCriticalitys).insertReturning(
-        SystemCriticalitysCompanion.insert(description: value));
+        SystemCriticalitysCompanion.insert(description: description, line: ''));
     return row.id;
   }
 
@@ -329,6 +330,7 @@ class MyDatabase extends _$MyDatabase {
     int economic,
     int throughput,
     int quality,
+    String line,
   ) async {
     final row = await (update(systemCriticalitys)
           ..where((tbl) => tbl.id.equals(key)))
@@ -339,6 +341,7 @@ class MyDatabase extends _$MyDatabase {
       economic: Value(economic),
       throughput: Value(throughput),
       quality: Value(quality),
+      line: Value(line),
     ));
     return row.first.id;
   }
@@ -390,7 +393,7 @@ class MyDatabase extends _$MyDatabase {
           economic: Value(row[4]),
           throughput: Value(row[5]),
           quality: Value(row[6]),
-          siteid: Value(row[0]),
+          line: row[0],
         ));
       }
     }
