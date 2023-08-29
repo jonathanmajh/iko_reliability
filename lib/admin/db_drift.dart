@@ -175,17 +175,29 @@ class AssetCriticalityWithAsset {
   final SystemCriticality? systemCriticality;
 }
 
-@DriftDatabase(tables: [
-  Settings,
-  LoginSettings,
-  MeterDBs,
-  Observations,
-  Assets,
-  Workorders,
-  SystemCriticalitys,
-  AssetCriticalitys,
-  AssetUploads,
-])
+@DriftDatabase(
+  tables: [
+    Settings,
+    LoginSettings,
+    MeterDBs,
+    Observations,
+    Assets,
+    Workorders,
+    SystemCriticalitys,
+    AssetCriticalitys,
+    AssetUploads,
+  ],
+  queries: {
+    'systemsFilteredBySite': '''
+SELECT * FROM system_criticalitys
+WHERE line IN (
+		SELECT substr(assetnum, 1, 1)
+		FROM assets
+		WHERE siteid = :siteid
+		)
+''',
+  },
+)
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
 
@@ -550,6 +562,23 @@ class MyDatabase extends _$MyDatabase {
       material.debugPrint('getting data from excel');
       await loadSystems();
       systems = await (select(systemCriticalitys)).get();
+    }
+    return systems;
+  }
+
+  Future<List<SystemCriticality>> getSystemCriticalitiesFiltered(
+      String siteid) async {
+    var systems = await systemsFilteredBySite(siteid).get();
+    if (systems.isEmpty) {
+      // Check if there are any systems in DB
+      systems = await (select(systemCriticalitys)).get();
+      if (systems.isEmpty) {
+        material.debugPrint('getting data from excel');
+        await loadSystems();
+        systems = await systemsFilteredBySite(siteid).get();
+      } else {
+        return [];
+      }
     }
     return systems;
   }

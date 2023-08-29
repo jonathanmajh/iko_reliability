@@ -3066,6 +3066,18 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   late final $AssetCriticalitysTable assetCriticalitys =
       $AssetCriticalitysTable(this);
   late final $AssetUploadsTable assetUploads = $AssetUploadsTable(this);
+  Selectable<SystemCriticality> systemsFilteredBySite(String siteid) {
+    return customSelect(
+        'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1)',
+        variables: [
+          Variable<String>(siteid)
+        ],
+        readsFrom: {
+          systemCriticalitys,
+          assets,
+        }).asyncMap(systemCriticalitys.mapFromRow);
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

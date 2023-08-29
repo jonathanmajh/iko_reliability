@@ -4,10 +4,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
+import '../admin/db_drift.dart';
 import '../admin/end_drawer.dart';
 import '../main.dart';
 
@@ -24,6 +26,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
   List<PlutoRow> rows = [];
   List<Widget> fabList = [];
   late PlutoGridStateManager stateManager;
+  String loadedSite = '';
 
   @override
   void initState() {
@@ -225,42 +228,6 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         readOnly: true,
       ),
     ]);
-    _loadData().then((fetchedRows) {
-      PlutoGridStateManager.initializeRowsAsync(
-        columns,
-        fetchedRows,
-      ).then((value) {
-        stateManager.refRows.addAll(value);
-        stateManager.setShowLoading(false);
-        stateManager.notifyListeners();
-      });
-    });
-  }
-
-  Future<List<PlutoRow>> _loadData() async {
-    final dbrows = await database!.getSystemCriticalities();
-    List<PlutoRow> rows = [];
-    for (var row in dbrows) {
-      rows.add(PlutoRow(cells: {
-        'id': PlutoCell(value: row.id),
-        'line': PlutoCell(value: row.line),
-        'site': PlutoCell(value: row.siteid ?? ''),
-        'description': PlutoCell(value: row.description),
-        'safety': PlutoCell(value: row.safety),
-        'regulatory': PlutoCell(value: row.regulatory),
-        'economic': PlutoCell(value: row.economic),
-        'throughput': PlutoCell(value: row.throughput),
-        'quality': PlutoCell(value: row.quality),
-        'score': PlutoCell(
-            value: sqrt((row.safety * row.safety +
-                    row.regulatory * row.regulatory +
-                    row.economic * row.economic +
-                    row.throughput * row.throughput +
-                    row.quality * row.quality) /
-                5)),
-      }));
-    }
-    return rows;
   }
 
   void _updateFab([bool show = false]) {
@@ -370,45 +337,108 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: fabList,
       ),
-      body: PlutoGrid(
-        columns: columns,
-        rows: rows,
-        configuration: PlutoGridConfiguration(
-          shortcut: PlutoGridShortcut(actions: {
-            ...PlutoGridShortcut.defaultActions,
-            // + / - keys should increase / decrease values
-            LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-            LogicalKeySet(LogicalKeyboardKey.numpadAdd): CustomAddKeyAction(),
-            LogicalKeySet(LogicalKeyboardKey.minus): CustomMinusKeyAction(),
-            LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                CustomMinusKeyAction(),
-          }),
-          style: context.watch<ThemeManager>().isDark
-              ? const PlutoGridStyleConfig.dark()
-              : const PlutoGridStyleConfig(),
-        ),
-        onChanged: (PlutoGridOnChangedEvent event) {
-          // score should auto calcualte when values change
-          event.row.cells['score']!.value = sqrt(
-              (event.row.cells['safety']?.value *
-                          event.row.cells['safety']?.value +
-                      event.row.cells['regulatory']?.value *
-                          event.row.cells['regulatory']?.value +
-                      event.row.cells['economic']?.value *
-                          event.row.cells['economic']?.value +
-                      event.row.cells['throughput']?.value *
-                          event.row.cells['throughput']?.value +
-                      event.row.cells['quality']?.value *
-                          event.row.cells['quality']?.value) /
-                  5);
-          updateSystem(event.row)
-              .then((value) => event.row.cells['id']!.value = value);
-          debugPrint('$event');
-        },
-        onLoaded: (PlutoGridOnLoadedEvent event) {
-          event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
+      body: FutureBuilder<List<SystemCriticality>>(
+        future: database!.getSystemCriticalitiesFiltered(
+            context.watch<SelectedSiteNotifier>().selectedSite),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<SystemCriticality>> snapshot) {
+          List<PlutoRow> rows = [];
+          if (snapshot.hasData) {
+            if (snapshot.data!.isNotEmpty) {
+              if (loadedSite != snapshot.data?.first.siteid) {
+                for (var row in snapshot.data!) {
+                  rows.add(PlutoRow(cells: {
+                    'id': PlutoCell(value: row.id),
+                    'line': PlutoCell(value: row.line),
+                    'site': PlutoCell(value: row.siteid ?? ''),
+                    'description': PlutoCell(value: row.description),
+                    'safety': PlutoCell(value: row.safety),
+                    'regulatory': PlutoCell(value: row.regulatory),
+                    'economic': PlutoCell(value: row.economic),
+                    'throughput': PlutoCell(value: row.throughput),
+                    'quality': PlutoCell(value: row.quality),
+                    'score': PlutoCell(
+                        value: sqrt((row.safety * row.safety +
+                                row.regulatory * row.regulatory +
+                                row.economic * row.economic +
+                                row.throughput * row.throughput +
+                                row.quality * row.quality) /
+                            5)),
+                  }));
+                  stateManager.removeAllRows();
+                  stateManager.appendRows(rows);
+                }
+              }
+            }
+          } else if (snapshot.hasError) {
+            rows.add(PlutoRow(cells: {
+              'id': PlutoCell(value: 0),
+              'line': PlutoCell(value: 'C'),
+              'site': PlutoCell(value: ''),
+              'description': PlutoCell(value: snapshot.error),
+              'safety': PlutoCell(value: 0),
+              'regulatory': PlutoCell(value: 0),
+              'economic': PlutoCell(value: 0),
+              'throughput': PlutoCell(value: 0),
+              'quality': PlutoCell(value: 0),
+              'score': PlutoCell(value: 0),
+            }));
+          } else {
+            rows.add(PlutoRow(cells: {
+              'id': PlutoCell(value: 0),
+              'line': PlutoCell(value: 'C'),
+              'site': PlutoCell(value: ''),
+              'description': PlutoCell(value: 'No Site Selected'),
+              'safety': PlutoCell(value: 0),
+              'regulatory': PlutoCell(value: 0),
+              'economic': PlutoCell(value: 0),
+              'throughput': PlutoCell(value: 0),
+              'quality': PlutoCell(value: 0),
+              'score': PlutoCell(value: 0),
+            }));
+          }
+          return PlutoGrid(
+            columns: columns,
+            rows: rows,
+            configuration: PlutoGridConfiguration(
+              shortcut: PlutoGridShortcut(actions: {
+                ...PlutoGridShortcut.defaultActions,
+                // + / - keys should increase / decrease values
+                LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
+                LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                    CustomAddKeyAction(),
+                LogicalKeySet(LogicalKeyboardKey.minus): CustomMinusKeyAction(),
+                LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                    CustomMinusKeyAction(),
+              }),
+              style: context.watch<ThemeManager>().isDark
+                  ? const PlutoGridStyleConfig.dark()
+                  : const PlutoGridStyleConfig(),
+            ),
+            onChanged: (PlutoGridOnChangedEvent event) {
+              // score should auto calcualte when values change
+              event.row.cells['score']!.value = sqrt(
+                  (event.row.cells['safety']?.value *
+                              event.row.cells['safety']?.value +
+                          event.row.cells['regulatory']?.value *
+                              event.row.cells['regulatory']?.value +
+                          event.row.cells['economic']?.value *
+                              event.row.cells['economic']?.value +
+                          event.row.cells['throughput']?.value *
+                              event.row.cells['throughput']?.value +
+                          event.row.cells['quality']?.value *
+                              event.row.cells['quality']?.value) /
+                      5);
+              updateSystem(event.row)
+                  .then((value) => event.row.cells['id']!.value = value);
+              debugPrint('$event');
+            },
+            onLoaded: (PlutoGridOnLoadedEvent event) {
+              event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
 
-          stateManager = event.stateManager;
+              stateManager = event.stateManager;
+            },
+          );
         },
       ),
     );
