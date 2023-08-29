@@ -317,6 +317,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   AssetWithUpload asset,
   String env,
   AssetCreationNotifier assetCreationNotifier,
+  String selectedSite,
 ) async {
   const assetUrl = 'iko_asset?action=importfile';
   const locationUrl = 'iko_location?action=importfile';
@@ -371,8 +372,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   }
 
   print('checking if location exists');
-  if (!(await isNewLocation(
-      'L-${asset.asset.assetnum}', assetCreationNotifier.selectedSite, env))) {
+  if (!(await isNewLocation('L-${asset.asset.assetnum}', selectedSite, env))) {
     print('location already exists');
     result['location'] = 'duplicate';
     numDuplicates++;
@@ -386,7 +386,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
           [
             tableHeaders['Location']!,
             [
-              assetCreationNotifier.selectedSite,
+              selectedSite,
               'L-${asset.asset.assetnum}',
               asset.asset.description,
               'OPERATING',
@@ -404,8 +404,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
 
   print('checking if asset exists');
   // check if asset already exists
-  if (!(await isNewAsset(
-      asset.asset.assetnum, assetCreationNotifier.selectedSite, env))) {
+  if (!(await isNewAsset(asset.asset.assetnum, selectedSite, env))) {
     print('Asset already exists');
     result['asset'] = 'duplicate';
     numDuplicates++;
@@ -425,7 +424,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
             'STATUS',
           ],
           [
-            assetCreationNotifier.selectedSite,
+            selectedSite,
             asset.asset.assetnum,
             asset.asset.description,
             'L-${asset.asset.assetnum}',
@@ -453,7 +452,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
               // 'IKO_MODELNUM', TODO when DB field is added to Prod
             ],
             [
-              assetCreationNotifier.selectedSite,
+              selectedSite,
               asset.asset.assetnum,
               asset.uploads?.installationDate ?? '',
               asset.uploads?.assetCriticality ?? '',
@@ -528,7 +527,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   for (var entry in assetWorkType.entries) {
     if (!(await isNewJobLabor(
         '${asset.asset.assetnum}${entry.key}',
-        siteIDAndOrgID[assetCreationNotifier.selectedSite]!,
+        siteIDAndOrgID[selectedSite]!,
         craftCode[entry.key[entry.key.length - 1]]!,
         "1",
         env))) {
@@ -546,7 +545,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       craftCode[entry.key[entry.key.length - 1]]!,
       '1',
       '1',
-      siteIDAndOrgID[assetCreationNotifier.selectedSite]!,
+      siteIDAndOrgID[selectedSite]!,
       ''
     ];
 
@@ -568,7 +567,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   result['jpassetlink'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
     if (!(await isNewJobAsset('${asset.asset.assetnum}${entry.key}',
-        assetCreationNotifier.selectedSite, asset.asset.assetnum, env))) {
+        selectedSite, asset.asset.assetnum, env))) {
       print('${asset.asset.assetnum}${entry.key} jpasset exists');
       result['jpassetlink']['${asset.asset.assetnum}${entry.key}'] =
           'duplicate';
@@ -583,8 +582,8 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       '0',
       asset.asset.assetnum,
       '0',
-      siteIDAndOrgID[assetCreationNotifier.selectedSite]!,
-      assetCreationNotifier.selectedSite,
+      siteIDAndOrgID[selectedSite]!,
+      selectedSite,
     ];
 
     var jpassetlinkResult = await maximoRequest(

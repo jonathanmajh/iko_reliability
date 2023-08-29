@@ -5,6 +5,15 @@ import 'package:iko_reliability_flutter/main.dart';
 import '../admin/db_drift.dart';
 import '../admin/consts.dart';
 
+class SelectedSiteNotifier extends ChangeNotifier {
+  String selectedSite = '';
+
+  void setSite(String siteid) {
+    selectedSite = siteid;
+    notifyListeners();
+  }
+}
+
 class SettingsNotifier extends ChangeNotifier {
   ///Map of current settings
   Map<ApplicationSetting, dynamic> currentSettings = {};

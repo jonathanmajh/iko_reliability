@@ -9,9 +9,9 @@ import 'package:iko_reliability_flutter/admin/consts.dart';
 import 'package:iko_reliability_flutter/admin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
-import 'package:iko_reliability_flutter/creation/site_change_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
+import '../settings/settings_notifier.dart';
 import '../settings/theme_manager.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -73,7 +73,7 @@ class _AssetPageState extends State<AssetPage>
       appBar: AppBar(
         // toolbarHeight: 100,
         title: Text(
-            'Maximo Asset Creator - ${siteIDAndDescription[context.watch<SiteChangeNotifier>().selectedSite] ?? 'No Site Selected'}'),
+            'Maximo Asset Creator - ${siteIDAndDescription[context.watch<SelectedSiteNotifier>().selectedSite] ?? 'No Site Selected'}'),
         bottom: TabBar(
           controller: _tabController,
           onTap: (value) {},
@@ -117,7 +117,7 @@ class _AssetPageState extends State<AssetPage>
             return;
           }
 
-          if (context.read<AssetCreationNotifier>().selectedSite == 'NONE') {
+          if (context.read<SelectedSiteNotifier>().selectedSite == '') {
             toast(context, 'Please select a site');
             return;
           }
@@ -201,7 +201,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
                   try {
                     await context.read<AssetCreationNotifier>().deleteAsset(
                         assetNum,
-                        context.read<AssetCreationNotifier>().selectedSite);
+                        context.read<SelectedSiteNotifier>().selectedSite);
                     stateManager
                         .removeRows([rendererContext.row], notify: true);
                     toast(context, 'Deleted Asset $assetNum');
@@ -252,6 +252,9 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
   }
 
   Future<void> _loadGrid(String site) async {
+    await context
+        .read<AssetCreationNotifier>()
+        .setSite(context.read<SelectedSiteNotifier>().selectedSite);
     print('load grid');
     final assetCreationNotifier =
         Provider.of<AssetCreationNotifier>(context, listen: false);
@@ -308,9 +311,9 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
     ThemeManager themeManager =
         Provider.of<ThemeManager>(context, listen: true);
 
-    return Consumer<AssetCreationNotifier>(
-        builder: (context, assetCreationNotifier, child) {
-      _loadGrid(assetCreationNotifier.selectedSite);
+    return Consumer<SelectedSiteNotifier>(
+        builder: (context, selectedSiteNotifier, child) {
+      _loadGrid(selectedSiteNotifier.selectedSite);
       return PlutoGrid(
         rowColorCallback: (rowColorContext) {
           var assetStatus = context
@@ -391,7 +394,7 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-          'Create Asset - Current Site: ${context.read<AssetCreationNotifier>().selectedSite}'),
+          'Create Asset - Current Site: ${context.read<SelectedSiteNotifier>().selectedSite}'),
       content: SizedBox(
         height: 400,
         width: 600,
@@ -594,6 +597,7 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                     assetNum,
                     descriptionTextController.text,
                     _dropDownKey.currentState!.getSelectedItem!,
+                    context.read<SelectedSiteNotifier>().selectedSite,
                     sjpDescription: sjpTextController.text,
                     installationDate: installationDateTextController.text,
                     vendor: vendorTextController.text,
@@ -601,6 +605,10 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                     modelNum: modelNumTextController.text,
                     assetCriticality: assetCriticalityValue,
                   );
+              // force reload table, should switch out loading later
+              context
+                  .read<SelectedSiteNotifier>()
+                  .setSite(context.read<SelectedSiteNotifier>().selectedSite);
               toast(context, 'Created Asset $assetNum, id: $id');
             } catch (err) {
               toast(context, '$err');
@@ -659,7 +667,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
                   try {
                     await context.read<AssetCreationNotifier>().deleteAsset(
                         assetNum,
-                        context.read<AssetCreationNotifier>().selectedSite);
+                        context.read<SelectedSiteNotifier>().selectedSite);
                     stateManager
                         .removeRows([rendererContext.row], notify: true);
                     toast(context, 'Deleted Asset $assetNum');
@@ -905,7 +913,9 @@ class _AssetUploadDialogState extends State<AssetUploadDialog> {
             child: const Text('OK'),
             onPressed: () {
               context.read<AssetCreationNotifier>().uploadAssets(
-                  context.read<MaximoServerNotifier>().maximoServerSelected);
+                    context.read<MaximoServerNotifier>().maximoServerSelected,
+                    context.read<SelectedSiteNotifier>().selectedSite,
+                  );
               Navigator.pop(context, 'OK');
             },
           )

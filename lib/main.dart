@@ -20,7 +20,6 @@ import 'bin/check_update.dart';
 import 'criticality/asset_criticality_notifier.dart';
 import 'criticality/criticality_notifier.dart';
 import 'creation/asset_creation_notifier.dart';
-import 'creation/site_change_notifier.dart';
 import 'admin/process_state_notifier.dart';
 import 'criticality/criticality_settings_notifier.dart';
 import 'routes/route.dart';
@@ -86,10 +85,10 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) => AssetCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => AssetCreationNotifier()),
-          ChangeNotifierProvider(create: (context) => SiteChangeNotifier()),
           ChangeNotifierProvider(
               create: (context) => AssetCriticalitySettingsNotifier()),
           ChangeNotifierProvider(create: (context) => AssetStatusNotifier()),
+          ChangeNotifierProvider(create: (context) => SelectedSiteNotifier()),
         ],
         child: Builder(
           builder: (context) {
