@@ -296,16 +296,6 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
     return rows;
   }
 
-  /// Returns the index of the row with the given asset number
-  int _getAssetIdx(String assetNum) {
-    for (PlutoRow plutoRow in stateManager.refRows) {
-      if (plutoRow.cells['hierarchy']!.value == assetNum) {
-        return stateManager.refRows.indexOf(plutoRow);
-      }
-    }
-    return -1;
-  }
-
   @override
   Widget build(BuildContext context) {
     ThemeManager themeManager =

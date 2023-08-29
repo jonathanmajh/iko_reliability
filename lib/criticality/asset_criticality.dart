@@ -463,184 +463,179 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         ],
       ),
       endDrawer: const EndDrawer(),
-      body: Container(
-        padding: const EdgeInsets.all(30),
-        child: FutureBuilder<List<AssetCriticalityWithAsset>>(
-          future: database!.getAssetCriticalities(
-              context.watch<SelectedSiteNotifier>().selectedSite),
-          builder: (BuildContext context,
-              AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
-            List<PlutoRow> rows = [];
-            if (snapshot.hasData) {
-              if (snapshot.data!.isNotEmpty) {
-                // only update grid if the selected site is different from what is currently loaded
-                // or if grid is marked for update
-                if (loadedSite != snapshot.data?.first.asset.siteid ||
-                    context.watch<AssetCriticalityNotifier>().updateGrid) {
-                  siteAssets = {};
-                  parentAssets = {};
-                  for (var row in snapshot.data!) {
-                    siteAssets[row.asset.assetnum] = row;
-                    if (parentAssets.containsKey(row.asset.parent)) {
-                      parentAssets[row.asset.parent]!.add(row);
-                    } else {
-                      parentAssets[row.asset.parent ?? "Top"] = [row];
-                    }
+      body: FutureBuilder<List<AssetCriticalityWithAsset>>(
+        future: database!.getAssetCriticalities(
+            context.watch<SelectedSiteNotifier>().selectedSite),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
+          List<PlutoRow> rows = [];
+          if (snapshot.hasData) {
+            if (snapshot.data!.isNotEmpty) {
+              // only update grid if the selected site is different from what is currently loaded
+              // or if grid is marked for update
+              if (loadedSite != snapshot.data?.first.asset.siteid ||
+                  context.watch<AssetCriticalityNotifier>().updateGrid) {
+                siteAssets = {};
+                parentAssets = {};
+                for (var row in snapshot.data!) {
+                  siteAssets[row.asset.assetnum] = row;
+                  if (parentAssets.containsKey(row.asset.parent)) {
+                    parentAssets[row.asset.parent]!.add(row);
+                  } else {
+                    parentAssets[row.asset.parent ?? "Top"] = [row];
                   }
-                  context
-                      .read<AssetStatusNotifier>()
-                      .updateParentAssets(parentAssets.keys.toList());
-
-                  loadedSite = snapshot.data!.first.asset.siteid;
-                  rows = getChilds('Top');
-                  stateManager.removeAllRows();
-                  stateManager.appendRows(rows);
-                  //load rpn numbers from plutogrid into AssetCriticalityNotifier
-                  Map<String, double> newRpnMap = {};
-                  for (PlutoRow row in stateManager.rows) {
-                    if (row.cells['id'] != null) {
-                      newRpnMap[row.cells['id']!.value] =
-                          (row.cells['rpn']?.value ?? -1) + 0.0;
-                    }
-                  }
-                  context
-                      .read<AssetCriticalityNotifier>()
-                      .setRpnMap(newRpnMap, notify: false);
-                  stateManager.toggleExpandedRowGroup(
-                      rowGroup: stateManager.rows.first);
-                  stateManager.toggleExpandedRowGroup(
-                      rowGroup: stateManager.rows.first);
-                  context.watch<AssetCriticalityNotifier>().updateGrid = false;
                 }
+                context
+                    .read<AssetStatusNotifier>()
+                    .updateParentAssets(parentAssets.keys.toList());
+
+                loadedSite = snapshot.data!.first.asset.siteid;
+                rows = getChilds('Top');
+                stateManager.removeAllRows();
+                stateManager.appendRows(rows);
+                //load rpn numbers from plutogrid into AssetCriticalityNotifier
+                Map<String, double> newRpnMap = {};
+                for (PlutoRow row in stateManager.rows) {
+                  if (row.cells['id'] != null) {
+                    newRpnMap[row.cells['id']!.value] =
+                        (row.cells['rpn']?.value ?? -1) + 0.0;
+                  }
+                }
+                context
+                    .read<AssetCriticalityNotifier>()
+                    .setRpnMap(newRpnMap, notify: false);
+                stateManager.toggleExpandedRowGroup(
+                    rowGroup: stateManager.rows.first);
+                stateManager.toggleExpandedRowGroup(
+                    rowGroup: stateManager.rows.first);
+                context.watch<AssetCriticalityNotifier>().updateGrid = false;
               }
-            } else if (snapshot.hasError) {
-              rows.add(PlutoRow(
-                cells: {
-                  'assetnum': PlutoCell(value: 'Error!'),
-                  'parent': PlutoCell(value: ''),
-                  'description': PlutoCell(value: snapshot.error),
-                  'priority': PlutoCell(value: 0),
-                  'system': PlutoCell(value: 0),
-                  'action': PlutoCell(value: ''),
-                  'frequency': PlutoCell(value: 0),
-                  'downtime': PlutoCell(value: 0),
-                  'hierarchy': PlutoCell(value: ''),
-                  'newPriority': PlutoCell(value: 0),
-                  'rpn': PlutoCell(value: 0),
-                  'id': PlutoCell(value: ''),
-                },
-              ));
-            } else {
-              rows.add(PlutoRow(
-                cells: {
-                  'assetnum': PlutoCell(value: ''),
-                  'parent': PlutoCell(value: ''),
-                  'description': PlutoCell(value: 'No Site Selected'),
-                  'priority': PlutoCell(value: 0),
-                  'system': PlutoCell(value: 0),
-                  'action': PlutoCell(value: ''),
-                  'frequency': PlutoCell(value: 0),
-                  'downtime': PlutoCell(value: 0),
-                  'hierarchy': PlutoCell(value: ''),
-                  'newPriority': PlutoCell(value: 0),
-                  'rpn': PlutoCell(value: 0),
-                  'id': PlutoCell(value: ''),
-                },
-              ));
             }
-            return PlutoDualGrid(
-              isVertical: true,
-              display: PlutoDualGridDisplayRatio(ratio: 0.75),
-              gridPropsA: PlutoDualGridProps(
-                columns: columns,
-                rows: rows,
-                onLoaded: (PlutoGridOnLoadedEvent event) {
-                  stateManager = event.stateManager;
-                  context.read<AssetCriticalityNotifier>().stateManager =
-                      stateManager;
-                  event.stateManager.addListener(gridAHandler);
-                  stateManager.setShowColumnFilter(true);
-                  stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
-                    resolveColumnDepth: (column) =>
-                        stateManager.columnIndex(column),
-                    showText: (cell) => true,
-                    showCount: false,
-                    showFirstExpandableIcon: true,
-                  ));
-                },
-                onChanged: (PlutoGridOnChangedEvent event) async {
-                  AssetCriticalityNotifier assetCriticalityNotifier =
-                      context.read<AssetCriticalityNotifier>();
-                  assetCriticalityNotifier.priorityRangesUpToDate = false;
-                  String rowId = event.row.cells['id']?.value ?? 'N/A';
-                  AssetCriticalityWithAsset asset =
-                      siteAssets[event.row.cells['assetnum']!.value]!;
-                  asset = AssetCriticalityWithAsset(
-                    asset.asset,
-                    AssetCriticality(
-                      asset: '',
-                      system: 0,
-                      frequency: event.row.cells['frequency']!.value,
-                      downtime: event.row.cells['downtime']!.value,
-                      type: '',
-                    ),
-                    (await database!.getSystemCriticality(
-                            event.row.cells['system']!.value))
-                        .first,
+          } else if (snapshot.hasError) {
+            rows.add(PlutoRow(
+              cells: {
+                'assetnum': PlutoCell(value: 'Error!'),
+                'parent': PlutoCell(value: ''),
+                'description': PlutoCell(value: snapshot.error),
+                'priority': PlutoCell(value: 0),
+                'system': PlutoCell(value: 0),
+                'action': PlutoCell(value: ''),
+                'frequency': PlutoCell(value: 0),
+                'downtime': PlutoCell(value: 0),
+                'hierarchy': PlutoCell(value: ''),
+                'newPriority': PlutoCell(value: 0),
+                'rpn': PlutoCell(value: 0),
+                'id': PlutoCell(value: ''),
+              },
+            ));
+          } else {
+            rows.add(PlutoRow(
+              cells: {
+                'assetnum': PlutoCell(value: ''),
+                'parent': PlutoCell(value: ''),
+                'description': PlutoCell(value: 'No Site Selected'),
+                'priority': PlutoCell(value: 0),
+                'system': PlutoCell(value: 0),
+                'action': PlutoCell(value: ''),
+                'frequency': PlutoCell(value: 0),
+                'downtime': PlutoCell(value: 0),
+                'hierarchy': PlutoCell(value: ''),
+                'newPriority': PlutoCell(value: 0),
+                'rpn': PlutoCell(value: 0),
+                'id': PlutoCell(value: ''),
+              },
+            ));
+          }
+          return PlutoDualGrid(
+            isVertical: true,
+            display: PlutoDualGridDisplayRatio(ratio: 0.75),
+            gridPropsA: PlutoDualGridProps(
+              columns: columns,
+              rows: rows,
+              onLoaded: (PlutoGridOnLoadedEvent event) {
+                stateManager = event.stateManager;
+                context.read<AssetCriticalityNotifier>().stateManager =
+                    stateManager;
+                event.stateManager.addListener(gridAHandler);
+                stateManager.setShowColumnFilter(true);
+                stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
+                  resolveColumnDepth: (column) =>
+                      stateManager.columnIndex(column),
+                  showText: (cell) => true,
+                  showCount: false,
+                  showFirstExpandableIcon: true,
+                ));
+              },
+              onChanged: (PlutoGridOnChangedEvent event) async {
+                AssetCriticalityNotifier assetCriticalityNotifier =
+                    context.read<AssetCriticalityNotifier>();
+                assetCriticalityNotifier.priorityRangesUpToDate = false;
+                String rowId = event.row.cells['id']?.value ?? 'N/A';
+                AssetCriticalityWithAsset asset =
+                    siteAssets[event.row.cells['assetnum']!.value]!;
+                asset = AssetCriticalityWithAsset(
+                  asset.asset,
+                  AssetCriticality(
+                    asset: '',
+                    system: 0,
+                    frequency: event.row.cells['frequency']!.value,
+                    downtime: event.row.cells['downtime']!.value,
+                    type: '',
+                  ),
+                  (await database!.getSystemCriticality(
+                          event.row.cells['system']!.value))
+                      .first,
+                );
+                double newRpn = rpnFunc(asset) ?? -1;
+                event.row.cells['rpn']!.value = newRpn;
+                if (rowId != 'N/A') {
+                  assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
+                }
+                String criticalityText = context
+                    .read<AssetCriticalityNotifier>()
+                    .rpnFindDistribution(newRpn);
+                event.row.cells['newPriority']!.value = criticalityText;
+                if (newRpn > 0) {
+                  context.read<AssetStatusNotifier>().updateAssetStatus(
+                    assets: [event.row.cells['assetnum']!.value],
+                    status: AssetStatus.complete,
                   );
-                  double newRpn = rpnFunc(asset) ?? -1;
-                  event.row.cells['rpn']!.value = newRpn;
-                  if (rowId != 'N/A') {
-                    assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
-                  }
-                  String criticalityText = context
-                      .read<AssetCriticalityNotifier>()
-                      .rpnFindDistribution(newRpn);
-                  event.row.cells['newPriority']!.value = criticalityText;
-                  if (newRpn > 0) {
-                    context.read<AssetStatusNotifier>().updateAssetStatus(
-                      assets: [event.row.cells['assetnum']!.value],
-                      status: AssetStatus.complete,
-                    );
-                  }
-                  updateAsset(event.row);
-                  debugPrint('$event');
-                },
-                configuration: PlutoGridConfiguration(
-                    style: themeManager.isDark
-                        ? const PlutoGridStyleConfig.dark()
-                        : const PlutoGridStyleConfig(),
-                    shortcut: PlutoGridShortcut(actions: {
-                      ...PlutoGridShortcut.defaultActions,
-                      LogicalKeySet(LogicalKeyboardKey.add):
-                          CustomAddKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                          CustomAddKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.minus):
-                          CustomMinusKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                          CustomMinusKeyAction(),
-                    })),
-              ),
-              gridPropsB: PlutoDualGridProps(
-                configuration: PlutoGridConfiguration(
-                    style: themeManager.isDark
-                        ? const PlutoGridStyleConfig.dark()
-                        : const PlutoGridStyleConfig()),
-                columns: detailColumns,
-                rows: detailRows,
-                onLoaded: (PlutoGridOnLoadedEvent event) {
-                  detailStateManager = event.stateManager;
-                },
-              ),
-              divider: themeManager.isDark
-                  ? PlutoDualGridDivider.dark(
-                      indicatorColor:
-                          Theme.of(context).colorScheme.onBackground)
-                  : const PlutoDualGridDivider(),
-            );
-          },
-        ),
+                }
+                updateAsset(event.row);
+                debugPrint('$event');
+              },
+              configuration: PlutoGridConfiguration(
+                  style: themeManager.isDark
+                      ? const PlutoGridStyleConfig.dark()
+                      : const PlutoGridStyleConfig(),
+                  shortcut: PlutoGridShortcut(actions: {
+                    ...PlutoGridShortcut.defaultActions,
+                    LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
+                    LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                        CustomAddKeyAction(),
+                    LogicalKeySet(LogicalKeyboardKey.minus):
+                        CustomMinusKeyAction(),
+                    LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                        CustomMinusKeyAction(),
+                  })),
+            ),
+            gridPropsB: PlutoDualGridProps(
+              configuration: PlutoGridConfiguration(
+                  style: themeManager.isDark
+                      ? const PlutoGridStyleConfig.dark()
+                      : const PlutoGridStyleConfig()),
+              columns: detailColumns,
+              rows: detailRows,
+              onLoaded: (PlutoGridOnLoadedEvent event) {
+                detailStateManager = event.stateManager;
+              },
+            ),
+            divider: themeManager.isDark
+                ? PlutoDualGridDivider.dark(
+                    indicatorColor: Theme.of(context).colorScheme.onBackground)
+                : const PlutoDualGridDivider(),
+          );
+        },
       ),
     );
   }

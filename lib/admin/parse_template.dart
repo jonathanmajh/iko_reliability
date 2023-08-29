@@ -213,7 +213,7 @@ class ParsedTemplate {
         if (row[7] != null && readTasks) {
           //reading job task info of current PM, writing data to [ParsedTemplate] object(s)
           pmTemplates[filename][pmNumber].tasks.add(JobTask(
-              jptask: row[6], // TODO show error for missing jptask number
+              jptask: row[6],
               description: row[7],
               assetNumber: row[4]?.toString().toUpperCase(),
               metername: row[5],
