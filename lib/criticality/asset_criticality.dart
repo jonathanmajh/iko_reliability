@@ -1193,22 +1193,20 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10, bottom: 15, top: 15),
+                  child: Text(
+                    'Work Order View Settings',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                )
+              ],
+            ),
             Expanded(
-                flex: 3,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, bottom: 40),
-                      child: Text(
-                        'Work Order View Settings',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    )
-                  ],
-                )),
-            Expanded(
-                flex: 6,
+                flex: 15,
                 child: ListView(
                   children: [
                     buildSettingRow(
@@ -1294,87 +1292,93 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                         title: const Text('Show work orders from all sites'),
                         valueDisplay: Container(),
                         inputWidget: Container()),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                //TODO: check if settings are valid (e.g. afterdate is not after beforedate). if so, use new settings
+                                if (usingAfterDate! && hideAfterDate == null) {
+                                  //if using after date, afterDate must not be null
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                            title: const Text('Missing Date'),
+                                            content: const Text(
+                                                'Must input a date to see Work Orders After'),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('OK'))
+                                            ],
+                                          ));
+                                } else if (usingBeforeDate! &&
+                                    hideBeforeDate == null) {
+                                  //if using before date, beforeDate must not be null
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                            title: const Text('Missing Date'),
+                                            content: const Text(
+                                                'Must input a date to see  Work Orders Before'),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('OK'))
+                                            ],
+                                          ));
+                                } else if (usingBeforeDate! &&
+                                    usingAfterDate! &&
+                                    hideBeforeDate!.compareTo(hideAfterDate!) >=
+                                        0) {
+                                  //invalid format, afterDate must be before beforeDate
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                            title: const Text('Invalid Dates'),
+                                            content: const Text(
+                                                'The Date inputted to "Hide Work Orders After" must come after the date inputted "Hide Work Orders After"'),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('OK'))
+                                            ],
+                                          ));
+                                } else {
+                                  context
+                                      .read<AssetCriticalityNotifier>()
+                                      .setWOSettings(
+                                          HideAfterDate: hideAfterDate,
+                                          HideBeforeDate: hideBeforeDate,
+                                          usingAfterDate: usingAfterDate!,
+                                          usingBeforeDate: usingBeforeDate!,
+                                          showAllSites: showAllSites!);
+                                  Navigator.pop(context);
+                                }
+                              },
+                              child:
+                                  const Text('Apply Work Order View Settings')),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Cancel')),
+                        )
+                      ],
+                    )
                   ],
                 )),
-            Expanded(
-              flex: 1,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                      onPressed: () {
-                        //TODO: check if settings are valid (e.g. afterdate is not after beforedate). if so, use new settings
-                        if (usingAfterDate! && hideAfterDate == null) {
-                          //if using after date, afterDate must not be null
-                          //TODO: show dialog
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                    title: const Text('Missing Date'),
-                                    content: const Text(
-                                        'Must input a date to see Work Orders After'),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text('OK'))
-                                    ],
-                                  ));
-                        } else if (usingBeforeDate! && hideBeforeDate == null) {
-                          //if using before date, beforeDate must not be null
-                          //TODO: show dialog
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                    title: const Text('Missing Date'),
-                                    content: const Text(
-                                        'Must input a date to see  Work Orders Before'),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text('OK'))
-                                    ],
-                                  ));
-                        } else if (usingBeforeDate! &&
-                            usingAfterDate! &&
-                            hideBeforeDate!.compareTo(hideAfterDate!) >= 0) {
-                          //invalid format, afterDate must be before beforeDate
-                          ///TODO: show dialog
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                    title: const Text('Invalid Dates'),
-                                    content: const Text(
-                                        'The Date inputted to "Hide Work Orders After" must come after the date inputted "Hide Work Orders After"'),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text('OK'))
-                                    ],
-                                  ));
-                        } else {
-                          context
-                              .read<AssetCriticalityNotifier>()
-                              .setWOSettings(
-                                  HideAfterDate: hideAfterDate,
-                                  HideBeforeDate: hideBeforeDate,
-                                  usingAfterDate: usingAfterDate!,
-                                  usingBeforeDate: usingBeforeDate!,
-                                  showAllSites: showAllSites!);
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: const Text('Confirm')),
-                  ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancel'))
-                ],
-              ),
-            )
           ],
         ),
       ),

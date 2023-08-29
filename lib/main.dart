@@ -90,15 +90,22 @@ class MyApp extends StatelessWidget {
               routeInformationParser: _appRouter.defaultRouteParser(),
               title: 'IKO Flutter Reliability',
               theme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
-              ),
-              //sets color for theme
+                  useMaterial3: true,
+                  colorSchemeSeed: const Color(0xFFFF0000),
+                  elevatedButtonTheme: ElevatedButtonThemeData(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(218, 255, 223, 223),
+                          foregroundColor: Color.fromARGB(255, 194, 4, 4)))),
+              //sets color for dark theme
               darkTheme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
-                brightness: Brightness.dark,
-              ),
+                  useMaterial3: true,
+                  colorSchemeSeed: const Color(0xFFFF0000),
+                  brightness: Brightness.dark,
+                  elevatedButtonTheme: ElevatedButtonThemeData(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(223, 68, 40, 40),
+                          foregroundColor:
+                              Color.fromARGB(255, 255, 180, 180)))),
               themeMode: Provider.of<ThemeManager>(context).themeMode,
             );
           },

@@ -291,143 +291,146 @@ class _EndDrawerState extends State<EndDrawer> {
       BuildContext context, ThemeManager themeManager) {
     return Consumer<AssetCriticalityNotifier>(
         builder: (context, assetCriticalityNotifier, child) {
-      return Drawer(
-        child: ListView(
-          children: <Widget>[
-            DrawerHeader(
-                child: ListTile(
-              title: const Text(
-                'Asset Criticality Settings',
-                style: TextStyle(fontSize: 24),
-              ),
-              trailing: Switch(
-                  //true => darkmode on
-                  value: (themeManager.themeMode == ThemeMode.dark),
-                  onChanged: (value) {
-                    themeManager.toggleTheme(value, context);
+      return Container(
+        width: 700,
+        child: Drawer(
+          child: ListView(
+            children: <Widget>[
+              DrawerHeader(
+                  child: ListTile(
+                title: const Text(
+                  'Asset Criticality Settings',
+                  style: TextStyle(fontSize: 24),
+                ),
+                trailing: Switch(
+                    //true => darkmode on
+                    value: (themeManager.themeMode == ThemeMode.dark),
+                    onChanged: (value) {
+                      themeManager.toggleTheme(value, context);
+                    },
+                    thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
+                        (Set<MaterialState> states) {
+                      return (themeManager.themeMode == ThemeMode.dark)
+                          ? const Icon(Icons.dark_mode_rounded)
+                          : const Icon(Icons.light_mode_rounded);
+                    })),
+              )),
+              ListTile(
+                title: const Text('Plant Site'),
+                trailing: DropdownButton(
+                  value: context.read<AssetCriticalityNotifier>().selectedSite,
+                  items: () {
+                    List<DropdownMenuItem<String>> list = [
+                      const DropdownMenuItem(
+                          value: 'NONE', child: Text('Select a site'))
+                    ];
+                    List<String> loadedSettings = (context
+                                .read<SettingsNotifier>()
+                                .getSetting(ApplicationSetting.loadedSites)
+                            as Set<String>)
+                        .toList();
+                    loadedSettings.sort((a, b) =>
+                        a.compareTo(b)); //put them in alphabetical order
+                    list.addAll(loadedSettings.map((e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(siteIDAndDescription[e] ?? 'NONE'))));
+                    return list;
+                  }(),
+                  onChanged: (newValue) {
+                    context
+                        .read<AssetCriticalityNotifier>()
+                        .setSite(newValue.toString());
                   },
-                  thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-                      (Set<MaterialState> states) {
-                    return (themeManager.themeMode == ThemeMode.dark)
-                        ? const Icon(Icons.dark_mode_rounded)
-                        : const Icon(Icons.light_mode_rounded);
-                  })),
-            )),
-            ListTile(
-              title: const Text('Plant Site'),
-              trailing: DropdownButton(
-                value: context.read<AssetCriticalityNotifier>().selectedSite,
-                items: () {
-                  List<DropdownMenuItem<String>> list = [
-                    const DropdownMenuItem(
-                        value: 'NONE', child: Text('Select a site'))
-                  ];
-                  List<String> loadedSettings = (context
-                              .read<SettingsNotifier>()
-                              .getSetting(ApplicationSetting.loadedSites)
-                          as Set<String>)
-                      .toList();
-                  loadedSettings.sort((a, b) =>
-                      a.compareTo(b)); //put them in alphabetical order
-                  list.addAll(loadedSettings.map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(siteIDAndDescription[e] ?? 'NONE'))));
-                  return list;
-                }(),
-                onChanged: (newValue) {
-                  context
-                      .read<AssetCriticalityNotifier>()
-                      .setSite(newValue.toString());
-                },
+                ),
               ),
-            ),
-            ListTile(
-              title: const Text('Risk Priority Distributions'),
-              trailing: ElevatedButton(
-                child: const Text('Configure'),
-                onPressed: () => showRpnDistDialog(context),
+              ListTile(
+                title: const Text('Risk Priority Distributions'),
+                trailing: ElevatedButton(
+                  onPressed: () => showRpnDistDialog(context),
+                  child: const Text('Configure'),
+                ),
               ),
-            ),
-            ListTile(
-              title: const Text('Calculate Priority Ranges'),
-              trailing: ElevatedButton(
-                child: const Text('Calculate'),
-                onPressed: () {
-                  try {
-                    AssetCriticalityNotifier assetCriticalityNotifier =
-                        context.read<AssetCriticalityNotifier>();
-                    SettingsNotifier settingsNotifier =
-                        context.read<SettingsNotifier>();
+              ListTile(
+                title: const Text('Calculate Priority Ranges'),
+                trailing: ElevatedButton(
+                  child: const Text('Calculate'),
+                  onPressed: () {
+                    try {
+                      AssetCriticalityNotifier assetCriticalityNotifier =
+                          context.read<AssetCriticalityNotifier>();
+                      SettingsNotifier settingsNotifier =
+                          context.read<SettingsNotifier>();
 
-                    //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
-                    List<double> rpnList =
-                        List.from(assetCriticalityNotifier.rpnList);
-                    rpnList.removeWhere((rpn) => (rpn <= 0));
+                      //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
+                      List<double> rpnList =
+                          List.from(assetCriticalityNotifier.rpnList);
+                      rpnList.removeWhere((rpn) => (rpn <= 0));
 
-                    //set rpn ranges
-                    List<double> newCutoffs = rpnDistRange(
-                        rpnList, settingsNotifier.getRpnPercentDists());
-                    assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
-                    debugPrint(
-                        'new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
-                    assetCriticalityNotifier.priorityRangesUpToDate = true;
-                  } catch (e) {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text(
-                                'Could Not Calculate Priority Ranges'),
-                            content: Text(
-                                //remove the text 'Exception: ' from e.toString()
-                                '${e.toString().substring(e.toString().indexOf(' ') + 1)} Try reconfiguring the risk priority distributions.'),
-                            actions: [
-                              Center(
-                                child: ElevatedButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('OK')),
-                              )
-                            ],
-                          );
-                        });
-                    debugPrint(e.toString());
-                  }
-                },
-              ),
-            ),
-            ListTile(
-              title: const Text('Export to CSV'),
-              trailing: ElevatedButton(
-                child: const Text('Export'),
-                onPressed: () async {
-                  if (!context
-                      .read<AssetCriticalityNotifier>()
-                      .priorityRangesUpToDate) {
-                    bool value =
-                        await assetCriticalityCSVExportWarning(context);
-                    if (value != true) {
-                      return;
+                      //set rpn ranges
+                      List<double> newCutoffs = rpnDistRange(
+                          rpnList, settingsNotifier.getRpnPercentDists());
+                      assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
+                      debugPrint(
+                          'new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
+                      assetCriticalityNotifier.priorityRangesUpToDate = true;
+                    } catch (e) {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text(
+                                  'Could Not Calculate Priority Ranges'),
+                              content: Text(
+                                  //remove the text 'Exception: ' from e.toString()
+                                  '${e.toString().substring(e.toString().indexOf(' ') + 1)} Try reconfiguring the risk priority distributions.'),
+                              actions: [
+                                Center(
+                                  child: ElevatedButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('OK')),
+                                )
+                              ],
+                            );
+                          });
+                      debugPrint(e.toString());
                     }
-                  }
-                  PlutoGridStateManager? stateManager =
-                      context.read<AssetCriticalityNotifier>().stateManager;
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('Export to CSV'),
+                trailing: ElevatedButton(
+                  child: const Text('Export'),
+                  onPressed: () async {
+                    if (!context
+                        .read<AssetCriticalityNotifier>()
+                        .priorityRangesUpToDate) {
+                      bool value =
+                          await assetCriticalityCSVExportWarning(context);
+                      if (value != true) {
+                        return;
+                      }
+                    }
+                    PlutoGridStateManager? stateManager =
+                        context.read<AssetCriticalityNotifier>().stateManager;
 
-                  //export as csv
-                  if (stateManager != null) {
-                    exportAssetCriticalityAsCSV(
-                        stateManager: stateManager, context: context);
-                  }
-                },
+                    //export as csv
+                    if (stateManager != null) {
+                      exportAssetCriticalityAsCSV(
+                          stateManager: stateManager, context: context);
+                    }
+                  },
+                ),
               ),
-            ),
-            ListTile(
-              title: const Text('Work Order View Settings'),
-              trailing: ElevatedButton(
-                child: const Text('Configure'),
-                onPressed: () => showWOSettingsDialog(context),
-              ),
-            )
-          ],
+
+              //work order settings option
+              Container(
+                height: MediaQuery.of(context).size.height * 0.35,
+                width: MediaQuery.of(context).size.width * 0.7,
+                child: const WorkOrderSettingsDialog(),
+              )
+            ],
+          ),
         ),
       );
     });
