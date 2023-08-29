@@ -180,7 +180,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 builder: (BuildContext context,
                     AsyncSnapshot<List<SystemCriticality>> snapshot) {
                   List<DropdownMenuItem<int>> items = [];
-                  print('System criticality returned ${snapshot.data?.length}');
                   if (snapshot.hasData) {
                     if (snapshot.data?.isNotEmpty ?? false) {
                       items =

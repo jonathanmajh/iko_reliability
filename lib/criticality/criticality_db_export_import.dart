@@ -4,23 +4,30 @@ import 'package:flutter/services.dart';
 
 import '../admin/db_drift.dart';
 
-void exportCriticalityDB(MyDatabase database) async {
-  String export = '';
-  var data = await database.getSettings();
-  for (Setting setting in data) {
-    export = '$export\r\n${jsonEncode(setting)}';
+Future<String> exportCriticalityDB(
+    MyDatabase database, String selectedSite) async {
+  try {
+    String export = '{"selectedSite":"$selectedSite"}';
+    var data = await database.getSettings();
+    for (Setting setting in data) {
+      export = '$export\r\n${jsonEncode(setting)}';
+    }
+    var data2 = await database.getSystemCriticalitiesFiltered(selectedSite);
+    for (SystemCriticality data in data2) {
+      export =
+          '$export\r\n${jsonEncode(data).replaceAll('"siteid":null', '"siteid":"$selectedSite"')}';
+    }
+    var data3 = await database.getAllAssetCriticalities();
+    for (AssetCriticality data in data3) {
+      if (data.asset.substring(0, selectedSite.length) == selectedSite) {
+        export = '$export\r\n${jsonEncode(data)}';
+      }
+    }
+    await Clipboard.setData(ClipboardData(text: export));
+    return 'Data copied to clipboard';
+  } catch (e) {
+    return 'Failed to Export Data: ${e.toString()}';
   }
-  var data2 = await database.getSystemCriticalities();
-  for (SystemCriticality data in data2) {
-    export = '$export\r\n${jsonEncode(data)}';
-  }
-  var data3 = await database.getAllAssetCriticalities();
-  for (AssetCriticality data in data3) {
-    export = '$export\r\n${jsonEncode(data)}';
-  }
-  Clipboard.setData(ClipboardData(text: export)).then((_) {
-    return;
-  });
 }
 
 void importCriticalityDB(MyDatabase database) async {
