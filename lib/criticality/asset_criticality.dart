@@ -376,12 +376,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     return rows;
   }
 
-  void collapseRows() {
-    for (var row in stateManager.iterateAllRow) {
-      debugPrint(row.cells.values.first.value);
-    }
-  }
-
   void refreshAsset(String assetnum, [String? siteid]) async {
     //TODO: use work order settings
     context.read<AssetStatusNotifier>().updateAssetStatus(
@@ -436,13 +430,14 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             title: const Text('Asset Criticality'),
             actions: [
               Builder(
-                  builder: (context) => IconButton(
-                        onPressed: () {
-                          Scaffold.of(context).openEndDrawer();
-                        },
-                        icon: const Icon(Icons.settings),
-                        tooltip: 'Settings',
-                      ))
+                builder: (context) => IconButton(
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                  icon: const Icon(Icons.settings),
+                  tooltip: 'Settings',
+                ),
+              )
             ],
           ),
           endDrawer: const EndDrawer(),

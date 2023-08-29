@@ -8,6 +8,7 @@ import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
+import '../admin/end_drawer.dart';
 import '../main.dart';
 
 @RoutePage()
@@ -351,7 +352,19 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('System Criticality'),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: const Icon(Icons.settings),
+              tooltip: 'Settings',
+            ),
+          )
+        ],
       ),
+      endDrawer: const EndDrawer(),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
