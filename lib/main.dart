@@ -18,7 +18,6 @@ import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
 import 'criticality/asset_criticality_notifier.dart';
-import 'criticality/criticality_notifier.dart';
 import 'creation/asset_creation_notifier.dart';
 import 'admin/process_state_notifier.dart';
 import 'criticality/criticality_settings_notifier.dart';
@@ -74,7 +73,6 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => TemplateNotifier()),
           ChangeNotifierProvider(create: (context) => UploadNotifier()),
           ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
-          ChangeNotifierProvider(create: (context) => SystemsNotifier()),
           ChangeNotifierProvider(create: (context) => settingsNotifier),
           ChangeNotifierProvider(
               create: (context) => ThemeManager(
@@ -234,33 +232,28 @@ class _HomePageState extends State<HomePage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
+            const DrawerHeader(
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'IKO Reliability Maximo',
                   style: TextStyle(
                     // color: Colors.white,
                     fontSize: 24,
                   ),
                 ),
-                const Text(
+                Text(
                   'display name...',
                   style: TextStyle(
                     // color: Colors.white,
                     fontSize: 18,
                   ),
                 ),
-                const Text('userid'),
-                const Text('Status'),
+                Text('userid'),
+                Text('Status'),
                 // update notifier when the menu is opened
-                Consumer<SystemsNotifier>(builder: (context, systems, child) {
-                  systems.updateSystems();
-                  return Text(Provider.of<MaximoServerNotifier>(context)
-                      .maximoServerSelected);
-                }),
               ],
             )),
             const ListTile(

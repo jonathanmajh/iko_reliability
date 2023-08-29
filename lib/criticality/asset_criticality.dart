@@ -15,7 +15,6 @@ import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
 import '../settings/theme_manager.dart';
-import 'criticality_notifier.dart';
 import 'functions.dart';
 
 @RoutePage()
