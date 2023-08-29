@@ -10,7 +10,8 @@ import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
 import '../admin/db_drift.dart';
-import '../admin/end_drawer.dart';
+import '../bin/drawer.dart';
+import '../bin/end_drawer.dart';
 import '../main.dart';
 
 @RoutePage()
@@ -317,6 +318,10 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const Drawer(
+        //navigation drawer
+        child: NavDrawer(),
+      ),
       appBar: AppBar(
         title: const Text('System Criticality'),
         actions: [

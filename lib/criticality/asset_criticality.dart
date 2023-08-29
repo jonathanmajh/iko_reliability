@@ -3,11 +3,12 @@ import 'dart:math';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:iko_reliability_flutter/admin/end_drawer.dart';
+import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
+import '../bin/drawer.dart';
 import 'criticality_settings_notifier.dart';
 import 'percent_slider.dart';
 
@@ -448,6 +449,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   Widget build(BuildContext context) {
     ThemeManager themeManager = Provider.of<ThemeManager>(context);
     return Scaffold(
+      drawer: const Drawer(
+        //navigation drawer
+        child: NavDrawer(),
+      ),
       appBar: AppBar(
         title: const Text('Asset Criticality'),
         actions: [

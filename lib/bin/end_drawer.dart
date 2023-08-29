@@ -13,8 +13,8 @@ import 'package:provider/provider.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import '../criticality/criticality_db_export_import.dart';
 import '../main.dart';
-import 'consts.dart';
-import 'db_drift.dart';
+import '../admin/consts.dart';
+import '../admin/db_drift.dart';
 
 ///Widget for the right-side drawer of the app
 class EndDrawer extends StatefulWidget {
