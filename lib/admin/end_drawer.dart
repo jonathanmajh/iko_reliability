@@ -12,7 +12,6 @@ import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import '../criticality/criticality_db_export_import.dart';
-import '../criticality/criticality_settings_notifier.dart';
 import '../main.dart';
 import 'consts.dart';
 import 'db_drift.dart';
@@ -282,36 +281,7 @@ class _EndDrawerState extends State<EndDrawer> {
         child: ListView(
           children: <Widget>[
             const ThemeToggle(),
-            ListTile(
-              // TODO use generic site selector
-              title: const Text('Plant Site'),
-              trailing: DropdownButton(
-                value: context
-                    .watch<AssetCriticalitySettingsNotifier>()
-                    .selectedSite,
-                items: () {
-                  List<DropdownMenuItem<String>> list = [
-                    const DropdownMenuItem(
-                        value: '', child: Text('Select a site'))
-                  ];
-                  List<String> loadedSettings = (context
-                              .read<SettingsNotifier>()
-                              .getSetting(ApplicationSetting.loadedSites)
-                          as Set<String>)
-                      .toList();
-                  loadedSettings.sort((a, b) =>
-                      a.compareTo(b)); //put them in alphabetical order
-                  list.addAll(loadedSettings.map((e) => DropdownMenuItem(
-                      value: e, child: Text(siteIDAndDescription[e] ?? ''))));
-                  return list;
-                }(),
-                onChanged: (newValue) {
-                  context
-                      .read<AssetCriticalitySettingsNotifier>()
-                      .setSite(newValue.toString());
-                },
-              ),
-            ),
+            const SiteToggle(),
             ListTile(
               title: const Text('Risk Priority Distributions'),
               trailing: ElevatedButton(

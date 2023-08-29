@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import 'criticality_settings_notifier.dart';
@@ -47,6 +48,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   void initState() {
     super.initState();
 
+// Columns for Work Orders
     detailColumns.addAll([
       PlutoColumn(
         readOnly: true,
@@ -93,6 +95,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       ),
     ]);
 
+// Columns for Assets
     columns.addAll([
       PlutoColumn(
         title: '',
@@ -169,41 +172,64 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         type: PlutoColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
-          return Consumer<SystemsNotifier>(builder: (context, systems, child) {
-            return DropdownButton(
-              value: rendererContext.cell.value,
-              icon: const Icon(Icons.arrow_downward),
-              elevation: 16,
-              isExpanded: true,
-              onChanged: (newValue) {
-                setState(() {
-                  //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
-                  String assetnum =
-                      rendererContext.row.cells['assetnum']!.value;
-                  //refresh children assets
-                  Set<String> childAssetnums = getChildAssetnums(assetnum);
-                  for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
-                    String tempAssetnum = row.cells['assetnum']!.value;
-                    if (childAssetnums.contains(tempAssetnum)) {
-                      PlutoCell? tempCellRef = row.cells['system'];
-                      if (tempCellRef != null) {
-                        stateManager.changeCellValue(tempCellRef, newValue);
-                      }
+          return Consumer<SelectedSiteNotifier>(
+            builder: (context, site, child) {
+              return FutureBuilder(
+                future:
+                    database!.getSystemCriticalitiesFiltered(site.selectedSite),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<SystemCriticality>> snapshot) {
+                  List<DropdownMenuItem<int>> items = [];
+                  print('System criticality returned ${snapshot.data?.length}');
+                  if (snapshot.hasData) {
+                    if (snapshot.data?.isNotEmpty ?? false) {
+                      items =
+                          snapshot.data!.map<DropdownMenuItem<int>>((value) {
+                        return DropdownMenuItem<int>(
+                          value: value.id,
+                          child: Text(value.description),
+                        );
+                      }).toList();
+                      items.add(const DropdownMenuItem<int>(
+                        value: 0,
+                        child: Text(''),
+                      ));
                     }
-                    stateManager.changeCellValue(
-                        rendererContext.cell, newValue);
                   }
-                });
-              },
-              items:
-                  systems.systems.keys.map<DropdownMenuItem<int>>((int value) {
-                return DropdownMenuItem<int>(
-                  value: value,
-                  child: Text(systems.systems[value]!),
-                );
-              }).toList(),
-            );
-          });
+                  return DropdownButton(
+                    value: rendererContext.cell.value,
+                    icon: const Icon(Icons.arrow_downward),
+                    elevation: 16,
+                    isExpanded: true,
+                    onChanged: (newValue) {
+                      setState(() {
+                        //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
+                        String assetnum =
+                            rendererContext.row.cells['assetnum']!.value;
+                        //refresh children assets
+                        Set<String> childAssetnums =
+                            getChildAssetnums(assetnum);
+                        for (PlutoRow row
+                            in stateManager.iterateAllRowAndGroup) {
+                          String tempAssetnum = row.cells['assetnum']!.value;
+                          if (childAssetnums.contains(tempAssetnum)) {
+                            PlutoCell? tempCellRef = row.cells['system'];
+                            if (tempCellRef != null) {
+                              stateManager.changeCellValue(
+                                  tempCellRef, newValue);
+                            }
+                          }
+                          stateManager.changeCellValue(
+                              rendererContext.cell, newValue);
+                        }
+                      });
+                    },
+                    items: items,
+                  );
+                },
+              );
+            },
+          );
         },
       ),
       PlutoColumn(
@@ -291,7 +317,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       detailStateManager.setShowLoading(true);
 
       fetchWoHistory(stateManager.currentRow!.cells['assetnum']!.value,
-          context.read<AssetCriticalitySettingsNotifier>().selectedSite);
+          context.read<SelectedSiteNotifier>().selectedSite);
     }
   }
 
@@ -442,7 +468,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         padding: const EdgeInsets.all(30),
         child: FutureBuilder<List<AssetCriticalityWithAsset>>(
           future: database!.getAssetCriticalities(
-              context.watch<AssetCriticalitySettingsNotifier>().selectedSite),
+              context.watch<SelectedSiteNotifier>().selectedSite),
           builder: (BuildContext context,
               AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
             List<PlutoRow> rows = [];
@@ -572,7 +598,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       .read<AssetCriticalityNotifier>()
                       .rpnFindDistribution(newRpn);
                   event.row.cells['newPriority']!.value = criticalityText;
-                  if (newRpn != -1) {
+                  if (newRpn > 0) {
                     context.read<AssetStatusNotifier>().updateAssetStatus(
                       assets: [event.row.cells['assetnum']!.value],
                       status: AssetStatus.complete,
@@ -1176,6 +1202,7 @@ String calculateRPNDistribution(BuildContext context, List<int> dists) {
     AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier =
         context.read<AssetCriticalitySettingsNotifier>();
     assetCriticalitySettingsNotifier.setPercentages(
+      selectedSite: context.read<SelectedSiteNotifier>().selectedSite,
       percentVLow: dists[0],
       percentLow: dists[1],
       percentMedium: dists[2],
@@ -1262,7 +1289,6 @@ class _StatusIconState extends State<StatusIcon> {
     AssetStatus status = context
         .watch<AssetStatusNotifier>()
         .getAssetStatus(widget.rendererContext.row.cells['assetnum']!.value);
-    print('building status icon: $status');
     Color color = Colors.grey;
     IconData icon = Icons.pending;
     String statusText = '';

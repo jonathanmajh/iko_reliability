@@ -11,7 +11,6 @@ enum WorkOrderFilterBy {
 
 class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   ///The id of the currently viewed site on the plutogrid
-  String selectedSite = '';
 
   ///Target percentages for assign criticality values
   int percentVLow = 30;
@@ -33,7 +32,7 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   ///Updates settings based on selected values for site.
   ///Notifies listeners
   void setSite(String site) async {
-    selectedSite = site;
+    String selectedSite = site;
     final settings = await database!.getSettings();
     percentVLow = int.parse(settings
         .firstWhere(
@@ -83,6 +82,7 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   }
 
   void setPercentages({
+    required String selectedSite,
     int? percentVLow,
     int? percentLow,
     int? percentMedium,
