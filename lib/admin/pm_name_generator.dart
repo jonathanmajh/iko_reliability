@@ -46,7 +46,7 @@ Future<PMName> generateName(
     asset = await getCommonParent(pmdetails.assets, pmdetails.siteId!);
   }
   commonParent = asset.assetnum;
-  if (pmdetails.routeCode != null) {
+  if (pmdetails.routeCode != null && pmdetails.routeCode != "null") {
     // use route naming scheme if route code is specified
     number = await findAvailableRouteCode(
       pmdetails.routeCode!,
@@ -92,6 +92,9 @@ Future<PMName> generateName(
     // TODO add the replaced component to the end of the name
   }
   // add craft
+  if (pmdetails.crafts.isEmpty) {
+    throw Exception('No crafts selected for this template');
+  }
   var craft = pmdetails.crafts[0].laborType;
   craft = craft.substring(craft.length - 1);
   number = '$number$craft';

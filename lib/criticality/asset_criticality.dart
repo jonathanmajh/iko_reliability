@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/end_drawer.dart';
@@ -9,7 +10,6 @@ import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import 'percent_slider.dart';
 
-import '../admin/cache_notifier.dart';
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
@@ -17,6 +17,7 @@ import '../settings/theme_manager.dart';
 import 'criticality_notifier.dart';
 import 'functions.dart';
 
+@RoutePage()
 class AssetCriticalityPage extends StatefulWidget {
   const AssetCriticalityPage({Key? key}) : super(key: key);
 
@@ -28,9 +29,9 @@ class AssetCriticalityPage extends StatefulWidget {
 class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   //table objects
   List<PlutoColumn> columns = [];
-  List<PlutoRow> rows = [];
-  Map<String, Asset> siteAssets = {};
-  Map<String, List<Asset>> parentAssets = {};
+  Map<String, AssetCriticalityWithAsset> siteAssets = {};
+  Map<String, List<AssetCriticalityWithAsset>> parentAssets = {};
+  String loadedSite = '';
 
   List<PlutoColumn> detailColumns = [];
   List<PlutoRow> detailRows = [];
@@ -98,7 +99,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       PlutoColumn(
         title: '',
         field: 'id',
-        type: PlutoColumnType.number(),
+        type: PlutoColumnType.text(),
         readOnly: true,
         hide: true,
       ),
@@ -192,7 +193,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               onChanged: (newValue) {
                 setState(() {
                   assetCriticalityNotifier.updateCollapsedAssets(stateManager);
-
                   //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
                   String assetnum =
                       rendererContext.row.cells['assetnum']!.value;
@@ -224,17 +224,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           });
         },
       ),
-
-      // PlutoColumn(
-      //   title: 'Type',
-      //   field: 'type',
-      //   type: PlutoColumnType.text(defaultValue: '1'),
-      // ),
-      // PlutoColumn(
-      //   title: 'Production Line',
-      //   field: 'prodLine',
-      //   type: PlutoColumnType.text(defaultValue: '1'),
-      // ),
       PlutoColumn(
         title: 'Frequency of Breakdown',
         field: 'frequency',
@@ -307,14 +296,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         type: PlutoColumnType.text(defaultValue: '---'),
       ),
     ]);
-    _loadData();
   }
 
   void gridAHandler() {
     if (stateManager.currentRow == null) {
       return;
     }
-
+    // if the selected row changes, load WOs for a different asset
     if (stateManager.currentRow!.key != currentRowKey) {
       currentRowKey = stateManager.currentRow!.key;
 
@@ -347,131 +335,51 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     detailStateManager.setShowLoading(false);
   }
 
-  ///Loading plutogrid data
-  void _loadData() {
-    _loadSiteData(context.read<AssetCriticalityNotifier>().selectedSite)
-        .then((fetchedRows) {
-      PlutoGridStateManager.initializeRowsAsync(
-        columns,
-        fetchedRows,
-      ).then((value) {
-        stateManager.refRows.clear();
-        stateManager.refRows.addAll(value);
-        stateManager.setShowLoading(false);
-        stateManager.notifyListeners();
-        // workaround since setting the group as expanded does not expand first row
-        try {
-          stateManager.toggleExpandedRowGroup(
-              rowGroup: stateManager.rows.first);
-          stateManager.toggleExpandedRowGroup(
-              rowGroup: stateManager.rows.first);
-        } catch (e) {
-          debugPrint("Could not run 'stateManager.toggleExpandedRowGroup'");
-        }
-      }).then((value) {
-        //load rpn numbers from plutogrid into AssetCriticalityNotifier
-        Map<int, double> newRpnMap = {};
-        for (PlutoRow row in stateManager.rows) {
-          if (row.cells['id'] != null) {
-            newRpnMap[row.cells['id']!.value] =
-                (row.cells['rpn']?.value ?? -1) + 0.0;
-          }
-        }
-        context
-            .read<AssetCriticalityNotifier>()
-            .setRpnMap(newRpnMap, notify: false);
-      });
-    });
-  }
-
-  ///Creates a list of [PlutoRow]s from the assets of [siteid]
-  Future<List<PlutoRow>> _loadSiteData(String siteid) async {
-    if (siteIDAndDescription.containsKey(siteid)) {
-      try {
-        siteAssets.clear();
-        parentAssets.clear();
-        final dbrows = await database!
-            .getSiteAssets(siteid); //TODO make it able to load other sites
-        await context.read<WorkOrderNotifier>().updateWorkOrders();
-        for (var row in dbrows) {
-          siteAssets[row.assetnum] = row;
-          if (parentAssets.containsKey(row.parent)) {
-            parentAssets[row.parent]!.add(row);
-          } else {
-            parentAssets[row.parent ?? "Top"] = [row];
-          }
-        }
-        return getChilds('Top');
-      } catch (e) {
-        if (siteIDAndDescription.containsKey(siteid) &&
-            !(context
-                    .read<SettingsNotifier>()
-                    .getSetting(ApplicationSetting.loadedSites) as Set<String>)
-                .contains(siteid)) {
-          debugPrint('Exception: Site $siteid is not loaded');
-          //TODO: show dialog instead of print to console
-        } else {
-          debugPrint(e.toString());
-        }
-        return <PlutoRow>[];
-      }
-    } else {
-      //siteid = 'NONE'
-      siteAssets.clear();
-      parentAssets.clear();
-      return <PlutoRow>[];
-    }
-  }
-
   ///Gets a set of assetnums that have [assetnum] as a parent or ancestor.
   ///Recursive method
   Set<String> getChildAssetnums(String assetnum) {
-    List<Asset>? directChilds = parentAssets[assetnum];
+    List<AssetCriticalityWithAsset>? directChilds = parentAssets[assetnum];
     //exit condition
     if (directChilds == null || directChilds.isEmpty) {
       return <String>{};
     }
 
     Set<String> childSet = {};
-    for (Asset child in directChilds) {
-      childSet.add(child.assetnum);
-      childSet.addAll(getChildAssetnums(child.assetnum));
+    for (AssetCriticalityWithAsset child in directChilds) {
+      childSet.add(child.asset.assetnum);
+      childSet.addAll(getChildAssetnums(child.asset.assetnum));
     }
     return childSet;
   }
 
   List<PlutoRow> getChilds(String parent) {
-    AssetCriticalityNotifier assetCriticalityNotifier =
-        Provider.of<AssetCriticalityNotifier>(context, listen: false);
     List<PlutoRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
-        final asset = context.read<WorkOrderNotifier>().systems[child.assetnum];
-        final cache = Provider.of<Cache>(context, listen: false);
-        double? calculatedRPN = rpnFunc(cache.getSystemScore(asset?.system),
-            asset?.frequency, asset?.downtime);
+        double? calculatedRPN = rpnFunc(child);
         rows.add(PlutoRow(
           cells: {
-            'assetnum': PlutoCell(value: child.assetnum),
-            'parent': PlutoCell(value: child.parent),
-            'description': PlutoCell(value: child.description),
-            'priority': PlutoCell(value: child.priority),
-            'system': PlutoCell(value: asset?.system ?? 0),
+            'assetnum': PlutoCell(value: child.asset.assetnum),
+            'parent': PlutoCell(value: child.asset.parent),
+            'description': PlutoCell(value: child.asset.description),
+            'priority': PlutoCell(value: child.asset.priority),
+            'system': PlutoCell(value: child.systemCriticality?.id ?? 0),
             'action': PlutoCell(value: ''),
-            'frequency': PlutoCell(value: asset?.frequency ?? 0),
-            'downtime': PlutoCell(value: asset?.downtime ?? 0),
+            'frequency':
+                PlutoCell(value: child.assetCriticality?.frequency ?? 0),
+            'downtime': PlutoCell(value: child.assetCriticality?.downtime ?? 0),
             'hierarchy': PlutoCell(value: ''),
             'newPriority': PlutoCell(
-                value: assetCriticalityNotifier
+                value: context
+                    .read<AssetCriticalityNotifier>()
                     .rpnFindDistribution(calculatedRPN ?? -1)),
             'rpn': PlutoCell(value: calculatedRPN),
-            'id': PlutoCell(value: child.id),
+            'id': PlutoCell(value: child.asset.id),
           },
           type: PlutoRowType.group(
-              expanded:
-                  assetCriticalityNotifier.assetIsCollapsed(child.assetnum),
+              expanded: true,
               children: FilteredList<PlutoRow>(
-                  initialList: getChilds(child.assetnum))),
+                  initialList: getChilds(child.asset.assetnum))),
         ));
       }
     }
@@ -513,99 +421,195 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   Widget build(BuildContext context) {
     ThemeManager themeManager = Provider.of<ThemeManager>(context);
     return Builder(builder: (context) {
-      final selectedSite =
-          context.select((AssetCriticalityNotifier acn) => acn.selectedSite);
-      _loadData();
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Asset Criticality'),
-          actions: [
-            Builder(
-                builder: (context) => IconButton(
-                      onPressed: () {
-                        Scaffold.of(context).openEndDrawer();
-                      },
-                      icon: const Icon(Icons.settings),
-                      tooltip: 'Settings',
-                    ))
-          ],
-        ),
-        endDrawer: const EndDrawer(),
-        body: Container(
-            padding: const EdgeInsets.all(30),
-            child: PlutoDualGrid(
-              isVertical: true,
-              gridPropsA: PlutoDualGridProps(
-                columns: columns,
-                rows: rows,
-                onLoaded: (PlutoGridOnLoadedEvent event) {
-                  stateManager = event.stateManager;
-                  context.read<AssetCriticalityNotifier>().stateManager =
-                      stateManager;
-                  event.stateManager.addListener(gridAHandler);
-                  stateManager.setShowColumnFilter(true);
-                  stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
-                    resolveColumnDepth: (column) =>
-                        stateManager.columnIndex(column),
-                    showText: (cell) => true,
-                    showCount: false,
-                    showFirstExpandableIcon: true,
-                  ));
-                },
-                onChanged: (PlutoGridOnChangedEvent event) {
-                  Cache cache = context.read<Cache>();
-                  AssetCriticalityNotifier assetCriticalityNotifier =
-                      context.read<AssetCriticalityNotifier>();
-                  assetCriticalityNotifier.priorityRangesUpToDate = false;
-                  assetCriticalityNotifier.updateCollapsedAssets(stateManager);
-                  int rowId = event.row.cells['id']?.value ?? -1;
-                  double newRpn = rpnFunc(
-                          cache
-                              .getSystemScore(event.row.cells['system']!.value),
-                          event.row.cells['frequency']!.value,
-                          event.row.cells['downtime']!.value) ??
-                      -1;
-                  event.row.cells['rpn']!.value = newRpn;
-                  if (rowId != -1) {
-                    assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
-                  }
-                  updateAsset(event.row);
-                  debugPrint('$event');
-                },
-                configuration: PlutoGridConfiguration(
-                    style: themeManager.isDark
-                        ? const PlutoGridStyleConfig.dark()
-                        : const PlutoGridStyleConfig(),
-                    shortcut: PlutoGridShortcut(actions: {
-                      ...PlutoGridShortcut.defaultActions,
-                      LogicalKeySet(LogicalKeyboardKey.add):
-                          CustomAddKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                          CustomAddKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.minus):
-                          CustomMinusKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                          CustomMinusKeyAction(),
-                    })),
-              ),
-              gridPropsB: PlutoDualGridProps(
-                configuration: PlutoGridConfiguration(
-                    style: themeManager.isDark
-                        ? const PlutoGridStyleConfig.dark()
-                        : const PlutoGridStyleConfig()),
-                columns: detailColumns,
-                rows: detailRows,
-                onLoaded: (PlutoGridOnLoadedEvent event) {
-                  detailStateManager = event.stateManager;
-                },
-              ),
-              divider: themeManager.isDark
-                  ? PlutoDualGridDivider.dark(
-                      indicatorColor:
-                          Theme.of(context).colorScheme.onBackground)
-                  : const PlutoDualGridDivider(),
-            )),
-      );
+          appBar: AppBar(
+            title: const Text('Asset Criticality'),
+            actions: [
+              Builder(
+                  builder: (context) => IconButton(
+                        onPressed: () {
+                          Scaffold.of(context).openEndDrawer();
+                        },
+                        icon: const Icon(Icons.settings),
+                        tooltip: 'Settings',
+                      ))
+            ],
+          ),
+          endDrawer: const EndDrawer(),
+          body: Container(
+              // key: Key(context.read<AssetCriticalityNotifier>().selectedSite),
+              padding: const EdgeInsets.all(30),
+              child: FutureBuilder<List<AssetCriticalityWithAsset>>(
+                  future: database!.getAssetCriticalities(
+                      context.watch<AssetCriticalityNotifier>().selectedSite),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
+                    List<PlutoRow> rows = [];
+                    if (snapshot.hasData) {
+                      if (snapshot.data!.isNotEmpty) {
+                        if (loadedSite != snapshot.data?.first.asset.siteid ||
+                            context
+                                .watch<AssetCriticalityNotifier>()
+                                .updateGrid) {
+                          siteAssets = {};
+                          parentAssets = {};
+                          for (var row in snapshot.data!) {
+                            siteAssets[row.asset.assetnum] = row;
+                            if (parentAssets.containsKey(row.asset.parent)) {
+                              parentAssets[row.asset.parent]!.add(row);
+                            } else {
+                              parentAssets[row.asset.parent ?? "Top"] = [row];
+                            }
+                          }
+                          loadedSite = snapshot.data!.first.asset.siteid;
+                          rows = getChilds('Top');
+                          stateManager.removeAllRows();
+                          stateManager.appendRows(rows);
+                          //load rpn numbers from plutogrid into AssetCriticalityNotifier
+                          Map<String, double> newRpnMap = {};
+                          for (PlutoRow row in stateManager.rows) {
+                            if (row.cells['id'] != null) {
+                              newRpnMap[row.cells['id']!.value] =
+                                  (row.cells['rpn']?.value ?? -1) + 0.0;
+                            }
+                          }
+                          context
+                              .read<AssetCriticalityNotifier>()
+                              .setRpnMap(newRpnMap, notify: false);
+                          stateManager.toggleExpandedRowGroup(
+                              rowGroup: stateManager.rows.first);
+                          stateManager.toggleExpandedRowGroup(
+                              rowGroup: stateManager.rows.first);
+                          context.watch<AssetCriticalityNotifier>().updateGrid =
+                              false;
+                        }
+                      }
+                    } else if (snapshot.hasError) {
+                      rows.add(PlutoRow(
+                        cells: {
+                          'assetnum': PlutoCell(value: 'Error!'),
+                          'parent': PlutoCell(value: ''),
+                          'description': PlutoCell(value: snapshot.error),
+                          'priority': PlutoCell(value: 0),
+                          'system': PlutoCell(value: 0),
+                          'action': PlutoCell(value: ''),
+                          'frequency': PlutoCell(value: 0),
+                          'downtime': PlutoCell(value: 0),
+                          'hierarchy': PlutoCell(value: ''),
+                          'newPriority': PlutoCell(value: 0),
+                          'rpn': PlutoCell(value: 0),
+                          'id': PlutoCell(value: ''),
+                        },
+                      ));
+                    } else {
+                      rows.add(PlutoRow(
+                        cells: {
+                          'assetnum': PlutoCell(value: ''),
+                          'parent': PlutoCell(value: ''),
+                          'description': PlutoCell(value: 'No Site Selected'),
+                          'priority': PlutoCell(value: 0),
+                          'system': PlutoCell(value: 0),
+                          'action': PlutoCell(value: ''),
+                          'frequency': PlutoCell(value: 0),
+                          'downtime': PlutoCell(value: 0),
+                          'hierarchy': PlutoCell(value: ''),
+                          'newPriority': PlutoCell(value: 0),
+                          'rpn': PlutoCell(value: 0),
+                          'id': PlutoCell(value: ''),
+                        },
+                      ));
+                    }
+                    return PlutoDualGrid(
+                      isVertical: true,
+                      display: PlutoDualGridDisplayRatio(ratio: 0.75),
+                      gridPropsA: PlutoDualGridProps(
+                        columns: columns,
+                        rows: rows,
+                        onLoaded: (PlutoGridOnLoadedEvent event) {
+                          stateManager = event.stateManager;
+                          context
+                              .read<AssetCriticalityNotifier>()
+                              .stateManager = stateManager;
+                          event.stateManager.addListener(gridAHandler);
+                          stateManager.setShowColumnFilter(true);
+                          stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
+                            resolveColumnDepth: (column) =>
+                                stateManager.columnIndex(column),
+                            showText: (cell) => true,
+                            showCount: false,
+                            showFirstExpandableIcon: true,
+                          ));
+                        },
+                        onChanged: (PlutoGridOnChangedEvent event) async {
+                          // Cache cache = context.read<Cache>();
+                          AssetCriticalityNotifier assetCriticalityNotifier =
+                              context.read<AssetCriticalityNotifier>();
+                          assetCriticalityNotifier.priorityRangesUpToDate =
+                              false;
+                          // assetCriticalityNotifier
+                          //     .updateCollapsedAssets(stateManager);
+                          String rowId = event.row.cells['id']?.value ?? 'N/A';
+                          AssetCriticalityWithAsset asset =
+                              siteAssets[event.row.cells['assetnum']!.value]!;
+                          asset = AssetCriticalityWithAsset(
+                            asset.asset,
+                            AssetCriticality(
+                              asset: '',
+                              system: 0,
+                              frequency: event.row.cells['frequency']!.value,
+                              downtime: event.row.cells['downtime']!.value,
+                              type: '',
+                            ),
+                            (await database!.getSystemCriticality(
+                                    event.row.cells['system']!.value))
+                                .first,
+                          );
+                          double newRpn = rpnFunc(asset) ?? -1;
+                          event.row.cells['rpn']!.value = newRpn;
+                          if (rowId != 'N/A') {
+                            assetCriticalityNotifier
+                                .addToRpnMap({rowId: newRpn});
+                          }
+                          event.row.cells['newPriority']!.value = context
+                              .read<AssetCriticalityNotifier>()
+                              .rpnFindDistribution(newRpn);
+                          updateAsset(event.row);
+                          debugPrint('$event');
+                        },
+                        configuration: PlutoGridConfiguration(
+                            style: themeManager.isDark
+                                ? const PlutoGridStyleConfig.dark()
+                                : const PlutoGridStyleConfig(),
+                            shortcut: PlutoGridShortcut(actions: {
+                              ...PlutoGridShortcut.defaultActions,
+                              LogicalKeySet(LogicalKeyboardKey.add):
+                                  CustomAddKeyAction(),
+                              LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                                  CustomAddKeyAction(),
+                              LogicalKeySet(LogicalKeyboardKey.minus):
+                                  CustomMinusKeyAction(),
+                              LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                                  CustomMinusKeyAction(),
+                            })),
+                      ),
+                      gridPropsB: PlutoDualGridProps(
+                        configuration: PlutoGridConfiguration(
+                            style: themeManager.isDark
+                                ? const PlutoGridStyleConfig.dark()
+                                : const PlutoGridStyleConfig()),
+                        columns: detailColumns,
+                        rows: detailRows,
+                        onLoaded: (PlutoGridOnLoadedEvent event) {
+                          detailStateManager = event.stateManager;
+                        },
+                      ),
+                      divider: themeManager.isDark
+                          ? PlutoDualGridDivider.dark(
+                              indicatorColor:
+                                  Theme.of(context).colorScheme.onBackground)
+                          : const PlutoDualGridDivider(),
+                    );
+                  })));
     });
   }
 }
@@ -965,17 +969,17 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
         width: MediaQuery.of(context).size.width * 0.7,
         child: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Expanded(
+            const Expanded(
               //title
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.only(top: 30.0, left: 30.0),
+                padding: EdgeInsets.only(top: 30.0, left: 30.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Rating Distribution',
                           style: TextStyle(fontSize: 30.0),

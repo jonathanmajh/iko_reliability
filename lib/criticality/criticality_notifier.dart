@@ -36,9 +36,8 @@ class WorkOrderNotifier extends ChangeNotifier {
   //  assetnum:
 
   Future<int> updateWorkOrders() async {
-    final allWOs = await database!.getAssetCriticalities();
-    for (var asset in allWOs) {
-      systems[asset.asset.assetnum] = asset.assetCriticality;
+    for (var asset in []) {
+      systems[asset.asset.assetnum] = asset.assetCriticality!;
     }
     notifyListeners();
     return 1;

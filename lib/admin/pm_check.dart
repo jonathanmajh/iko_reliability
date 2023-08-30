@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,15 @@ import 'template_notifier.dart';
 import 'pm_widgets.dart';
 import 'upload_maximo.dart';
 
+class PreviousPMIntent extends Intent {
+  const PreviousPMIntent();
+}
+
+class NextPMIntent extends Intent {
+  const NextPMIntent();
+}
+
+@RoutePage()
 class PmCheckPage extends StatefulWidget {
   const PmCheckPage({Key? key}) : super(key: key);
 
@@ -61,7 +71,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                         template,
                         uploadNotifier,
                       );
-                      uploadToMaximo(
+                      uploadPMToMaximo(
                         maximo.maximoServerSelected,
                         filename,
                         template,
@@ -159,69 +169,95 @@ class _PmCheckPageState extends State<PmCheckPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("PM Verify and Upload"),
-        // keep back button with a right side hamburger menu
-        leading: (ModalRoute.of(context)?.canPop ?? false)
-            ? const BackButton()
-            : null,
-        actions: [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () => Scaffold.of(context).openEndDrawer(),
-              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-            ),
+    return Shortcuts(
+      shortcuts: const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.arrowUp): PreviousPMIntent(),
+        SingleActivator(LogicalKeyboardKey.arrowDown): NextPMIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          PreviousPMIntent: CallbackAction<PreviousPMIntent>(
+            onInvoke: (PreviousPMIntent intent) => {
+              Provider.of<TemplateNotifier>(context, listen: false)
+                  .selectPreviousTemplate()
+            },
           ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: fabList,
-      ),
-      body: Column(
-        children: <Widget>[
-          Divider(
-            height: 10,
-            thickness: 1,
-            indent: 0,
-            endIndent: 0,
-            color: Theme.of(context).colorScheme.background,
+          NextPMIntent: CallbackAction<NextPMIntent>(
+            onInvoke: (NextPMIntent intent) => {
+              Provider.of<TemplateNotifier>(context, listen: false)
+                  .selectNextTemplate()
+            },
           ),
-          Expanded(
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                SizedBox(
-                    width: 550,
-                    child: Consumer<TemplateNotifier>(
-                        builder: (context, value, child) {
-                      return ListView(
-                        children: buildPMList(value, context),
-                      );
-                    })),
-                VerticalDivider(
-                  width: 20,
-                  thickness: 1,
-                  indent: 5,
-                  endIndent: 5,
-                  color: Theme.of(context).dividerColor,
-                ),
-                const Expanded(child: PMDetailView()),
-                VerticalDivider(
-                  width: 8,
-                  thickness: 1,
-                  indent: 5,
-                  endIndent: 5,
-                  color: Theme.of(context).colorScheme.background,
-                ),
-              ]))
-        ],
+        },
+        child: Focus(
+            autofocus: true,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text("PM Verify and Upload"),
+                // keep back button with a right side hamburger menu
+                leading: (ModalRoute.of(context)?.canPop ?? false)
+                    ? const BackButton()
+                    : null,
+                actions: [
+                  Builder(
+                    builder: (context) => IconButton(
+                      icon: const Icon(Icons.settings),
+                      onPressed: () => Scaffold.of(context).openEndDrawer(),
+                      tooltip: MaterialLocalizations.of(context)
+                          .openAppDrawerTooltip,
+                    ),
+                  ),
+                ],
+              ),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.startFloat,
+              floatingActionButton: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: fabList,
+              ),
+              body: Column(
+                children: <Widget>[
+                  Divider(
+                    height: 10,
+                    thickness: 1,
+                    indent: 0,
+                    endIndent: 0,
+                    color: Theme.of(context).colorScheme.background,
+                  ),
+                  Expanded(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                        SizedBox(
+                            width: 550,
+                            child: Consumer<TemplateNotifier>(
+                                builder: (context, value, child) {
+                              return ListView(
+                                children: buildPMList(value, context),
+                              );
+                            })),
+                        VerticalDivider(
+                          width: 20,
+                          thickness: 1,
+                          indent: 5,
+                          endIndent: 5,
+                          color: Theme.of(context).dividerColor,
+                        ),
+                        const Expanded(child: PMDetailView()),
+                        VerticalDivider(
+                          width: 8,
+                          thickness: 1,
+                          indent: 5,
+                          endIndent: 5,
+                          color: Theme.of(context).colorScheme.background,
+                        ),
+                      ]))
+                ],
+              ),
+              endDrawer: const EndDrawer(),
+            )),
       ),
-      endDrawer: const EndDrawer(),
     );
   }
 
@@ -307,7 +343,6 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
   for (var thing in parsedTmpts) {
     for (String ws in thing.keys) {
       for (int templateNumber in thing[ws].keys) {
-        // TODO this is no longer async :(
         try {
           final value = await generateName(
             context.getParsedTemplate(ws, templateNumber),

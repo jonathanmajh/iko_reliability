@@ -87,13 +87,41 @@ class Assets extends Table {
   TextColumn get hierarchy => text().nullable()();
   TextColumn? get parent => text().nullable()();
   IntColumn get priority => integer()();
-  IntColumn get id => integer().autoIncrement()();
-  BoolColumn get newAsset => boolean().withDefault(const Constant(false))();
+  TextColumn get id => text()();
+  IntColumn get newAsset => integer().withDefault(const Constant(0))();
+  // 0 = existing asset
+  //1 = new asset
+  //-1 = asset that failed upload (e.g. location and asset were uploaded, but job plan failed)
 
   @override
   List<Set<Column>> get uniqueKeys => [
         {siteid, assetnum}
       ];
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class AssetUploads extends Table {
+  TextColumn get asset => text().references(Assets, #id)();
+  TextColumn get sjpDescription => text().nullable()();
+  TextColumn get installationDate => text().nullable()();
+  TextColumn get vendor => text().nullable()();
+  TextColumn get manufacturer => text().nullable()();
+  TextColumn get modelNum => text().nullable()();
+  IntColumn get assetCriticality => integer().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {asset};
+}
+
+class AssetWithUpload {
+  final Asset asset;
+  final AssetUpload? uploads;
+  AssetWithUpload(
+    this.asset,
+    this.uploads,
+  );
 }
 
 class SystemCriticalitys extends Table {
@@ -108,7 +136,7 @@ class SystemCriticalitys extends Table {
 }
 
 class AssetCriticalitys extends Table {
-  IntColumn get asset => integer().references(Assets, #id)();
+  TextColumn get asset => text().references(Assets, #id)();
   IntColumn get system => integer().references(SystemCriticalitys, #id)();
   TextColumn get type => text()(); // production / non-production
   IntColumn get frequency => integer()();
@@ -138,10 +166,12 @@ class AssetCriticalityWithAsset {
   AssetCriticalityWithAsset(
     this.asset,
     this.assetCriticality,
+    this.systemCriticality,
   );
 
   final Asset asset;
-  final AssetCriticality assetCriticality;
+  final AssetCriticality? assetCriticality;
+  final SystemCriticality? systemCriticality;
 }
 
 @DriftDatabase(tables: [
@@ -153,6 +183,7 @@ class AssetCriticalityWithAsset {
   Workorders,
   SystemCriticalitys,
   AssetCriticalitys,
+  AssetUploads,
 ])
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
@@ -195,22 +226,92 @@ class MyDatabase extends _$MyDatabase {
     return row.id;
   }
 
-  Future<int> addNewAsset(
+  void importCriticality(
+    List<Setting> setting,
+    List<AssetCriticality> criticality,
+    List<SystemCriticality> system,
+  ) async {
+    batch((batch) {
+      batch.insertAllOnConflictUpdate(settings, setting);
+    });
+    batch((batch) {
+      batch.insertAll(assetCriticalitys, criticality);
+    });
+    batch((batch) {
+      batch.insertAll(systemCriticalitys, system);
+    });
+  }
+
+  Future<AssetWithUpload> addNewAsset(
     String assetnum,
     String siteid,
     String description,
     String parent,
+    String? sjpDescription,
+    String? installationDate,
+    String? vendor,
+    String? manufacturer,
+    String? modelNum,
+    int? assetCriticality,
   ) async {
+    final parentAsset = await (select(assets)
+          ..where((t) => t.assetnum.equals(parent))
+          ..where((t) => t.siteid.equals(siteid)))
+        .getSingle();
+    final hierarchy = '${parentAsset.hierarchy},$assetnum';
+
     final row = await into(assets).insertReturning(AssetsCompanion.insert(
       description: description,
+      hierarchy: Value(hierarchy),
       assetnum: assetnum,
       siteid: siteid,
       parent: Value(parent),
       priority: 0,
       status: 'Planning',
       changedate: 'N/A',
+      newAsset: const Value(1),
+      id: '$siteid$assetnum',
     ));
-    return row.id;
+
+    final row2 =
+        await into(assetUploads).insertReturning(AssetUploadsCompanion.insert(
+      asset: '$siteid$assetnum',
+      sjpDescription: Value(sjpDescription ?? description),
+      installationDate: Value(installationDate),
+      vendor: Value(vendor),
+      manufacturer: Value(manufacturer),
+      modelNum: Value(modelNum),
+      assetCriticality: Value(assetCriticality),
+    ));
+
+    return AssetWithUpload(row, row2);
+  }
+
+  Future<String> deleteAsset(String assetNum, String siteId) async {
+    final row = await (delete(assets)
+          ..where((t) => t.assetnum.equals(assetNum))
+          ..where((t) => t.siteid.equals(siteId)))
+        .goAndReturn();
+    return row.first.id;
+  }
+
+  ///0 = existing asset
+  ///
+  ///1 = new asset
+  ///
+  ///-1 = asset that failed upload (e.g. location and asset were uploaded, but job plan failed)
+  Future<String> setAssetStatus(
+      String assetNum, String siteId, int assetStatus) async {
+    var res = await (update(assets)
+          ..where((t) => t.siteid.equals(siteId) & t.assetnum.equals(assetNum)))
+        .writeReturning(AssetsCompanion(newAsset: Value(assetStatus)));
+
+    if (res.length > 1) {
+      throw Exception(
+          'More than one asset was updated, database is most likely corrupt');
+    }
+
+    return res[0].id;
   }
 
   Future<int> deleteSystemCriticalitys(int value) async {
@@ -243,7 +344,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<void> updateAssetCriticality(
-    int assetid,
+    String assetid,
     int system,
     int frequency,
     int downtime,
@@ -426,14 +527,22 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
-  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities() async {
-    var stuff = await (select(assetCriticalitys).join([
-      leftOuterJoin(assets, assets.id.equalsExp(assetCriticalitys.asset))
-    ])).get();
+  Future<List<AssetCriticalityWithAsset>> getAssetCriticalities(
+      String siteid) async {
+    var stuff = await (select(assets).join([
+      leftOuterJoin(
+          assetCriticalitys, assetCriticalitys.asset.equalsExp(assets.id)),
+      leftOuterJoin(systemCriticalitys,
+          systemCriticalitys.id.equalsExp(assetCriticalitys.system))
+    ])
+          ..where(assets.siteid.equals(siteid)))
+        .get();
+
     return stuff.map((row) {
       return AssetCriticalityWithAsset(
         row.readTable(assets),
-        row.readTable(assetCriticalitys),
+        row.readTableOrNull(assetCriticalitys),
+        row.readTableOrNull(systemCriticalitys),
       );
     }).toList();
   }
@@ -445,6 +554,17 @@ class MyDatabase extends _$MyDatabase {
       await loadSystems();
       systems = await (select(systemCriticalitys)).get();
     }
+    return systems;
+  }
+
+  Future<List<AssetCriticality>> getAllAssetCriticalities() async {
+    var criticalities = await (select(assetCriticalitys)).get();
+    return criticalities;
+  }
+
+  Future<List<SystemCriticality>> getSystemCriticality(int id) async {
+    var systems =
+        await (select(systemCriticalitys)..where((t) => t.id.equals(id))).get();
     return systems;
   }
 
@@ -525,15 +645,15 @@ class MyDatabase extends _$MyDatabase {
       for (var row in result['member'].toList()) {
         assetInserts.add(
           AssetsCompanion.insert(
-            assetnum: row['assetnum'],
-            description:
-                row['description'] ?? 'Asset has NO description in Maximo',
-            parent: Value(row['parent']),
-            siteid: row['siteid'],
-            status: row['status'],
-            changedate: row['changedate'],
-            priority: row['priority'] ?? 0,
-          ),
+              assetnum: row['assetnum'],
+              description:
+                  row['description'] ?? 'Asset has NO description in Maximo',
+              parent: Value(row['parent']),
+              siteid: row['siteid'],
+              status: row['status'],
+              changedate: row['changedate'],
+              priority: row['priority'] ?? 0,
+              id: '${row['siteid']}${row['assetnum']}'),
         );
       }
       try {
@@ -560,6 +680,21 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<Asset>> getSiteAssets(String siteid) async {
     return (select(assets)..where((tbl) => tbl.siteid.equals(siteid))).get();
+  }
+
+  Future<List<AssetWithUpload>> getSiteAssetUploads(String siteid) async {
+    var result = await (select(assets).join([
+      leftOuterJoin(assetUploads, assetUploads.asset.equalsExp(assets.id)),
+    ])
+          ..where(assets.siteid.equals(siteid)))
+        .get();
+
+    return result.map((row) {
+      return AssetWithUpload(
+        row.readTable(assets),
+        row.readTableOrNull(assetUploads),
+      );
+    }).toList();
   }
 
   Future<Asset> getAsset(String siteid, String assetNum) async {
@@ -654,7 +789,8 @@ Future<List<String>> maximoAssetCaller(
     }
     messages.add('Updated $siteid');
   }
-  prov.Provider.of<SettingsNotifier>(context, listen: false)
+  prov.Provider.of<SettingsNotifier>(navigatorKey.currentContext!,
+          listen: false)
       .addLoadedSites(loadedSiteIds);
   return messages;
 }

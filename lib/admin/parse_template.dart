@@ -204,9 +204,10 @@ class ParsedTemplate {
             suggestedPmNumber: nextNextRow[8],
             routeName:
                 (nextRow[9] == 'Select Route (Optional)' ? null : nextRow[9]),
-            routeCode: (nextRow[9] == 'Select Route (Optional)'
-                ? null
-                : nextNextRow[9].toString()),
+            routeCode:
+                (nextRow[9] == 'Select Route (Optional)' || nextRow[9] == null
+                    ? null
+                    : nextNextRow[9].toString()),
           );
         }
         if (row[7] != null && readTasks) {
@@ -241,17 +242,12 @@ class ParsedTemplate {
           //read/write craft data
           //parse craft line
           String str = row[0];
-          String laborType;
-          String laborCode;
+          String laborType = str.substring(0, 1).toUpperCase();
+          String laborCode = '';
           int pos = str.lastIndexOf('@');
           if (pos != -1) {
             //if @ symbol exists, might have labor code
-            laborType = str.substring(0, pos).trim();
-            laborType = laborType.substring(laborType.length - 1);
             laborCode = str.substring(pos + 1).trim();
-          } else {
-            laborType = str.substring(str.length - 1);
-            laborCode = '';
           }
 
           pmTemplates[filename][pmNumber].crafts.add(JobCraft(

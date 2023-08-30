@@ -145,6 +145,65 @@ class TemplateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void selectNextTemplate() {
+    var files = allTemplates.keys.toList();
+    if (files.isEmpty) {
+      // no templates loaded nothing to select
+      return;
+    }
+    // select first template of first file
+    if (selectedTemplate.selectedFile == null) {
+      setSelectedTemplate(files[0], 1);
+      return;
+    }
+    var templates = allTemplates[selectedTemplate.selectedFile]!.keys.toList();
+    var templateIndex = templates.indexOf(selectedTemplate.selectedTemplate!);
+    // simple case if there are template in the same file
+    if (templateIndex != templates.length - 1) {
+      setSelectedTemplate(
+          selectedTemplate.selectedFile!, templates[templateIndex + 1]);
+      return;
+    }
+    // if we need to go to the next template
+    var fileIndex = files.indexOf(selectedTemplate.selectedFile!);
+    // last file + last template
+    if (fileIndex == files.length - 1) {
+      return;
+    }
+    // first template of next file
+    setSelectedTemplate(files[fileIndex + 1], 1);
+  }
+
+  void selectPreviousTemplate() {
+    var files = allTemplates.keys.toList();
+    if (files.isEmpty) {
+      // no templates loaded nothing to select
+      return;
+    }
+    // select first template of first file
+    if (selectedTemplate.selectedFile == null) {
+      setSelectedTemplate(files[0], 1);
+      return;
+    }
+    var templates = allTemplates[selectedTemplate.selectedFile]!.keys.toList();
+    var templateIndex = templates.indexOf(selectedTemplate.selectedTemplate!);
+    // simple case if there are template in the same file
+    if (templateIndex != 0) {
+      setSelectedTemplate(
+          selectedTemplate.selectedFile!, templates[templateIndex - 1]);
+      return;
+    }
+    // if we need to go to the previous template
+    var fileIndex = files.indexOf(selectedTemplate.selectedFile!);
+    // first file + first template
+    if (fileIndex == 0) {
+      return;
+    }
+    // first template of previous file
+    setSelectedTemplate(
+        files[fileIndex - 1], allTemplates[files[fileIndex - 1]]!.keys.length);
+  }
+
   SelectedTemplate getSelectedTemplate() {
     return selectedTemplate;
   }
