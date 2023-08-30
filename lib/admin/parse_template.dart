@@ -243,6 +243,10 @@ class ParsedTemplate {
           //parse craft line
           String str = row[0];
           String laborType = str.substring(0, 1).toUpperCase();
+          // Patch for Production which is code O, but starts with P
+          if (laborType == 'P') {
+            laborType = 'O';
+          }
           String laborCode = '';
           int pos = str.lastIndexOf('@');
           if (pos != -1) {
