@@ -77,7 +77,14 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
           orElse: () => Setting(key: '', value: workOrderCutoffEnd.toString()),
         )
         .value);
-
+    final filterByString = settings
+        .firstWhere(
+          (element) => element.key == '$selectedSite-workOrderFilterBy',
+          orElse: () =>
+              Setting(key: '', value: WorkOrderFilterBy.currentSite.toString()),
+        )
+        .value;
+    workOrderFilterBy = WorkOrderFilterBy.values.byName(filterByString);
     notifyListeners();
   }
 
@@ -127,24 +134,32 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   ///function to set the work order settings
   void setWOSettings({
     required String selectedSite,
-    required DateTime workOrderCutoffStart,
-    required DateTime workOrderCutoffEnd,
-    required WorkOrderFilterBy workOrderFilterBy,
+    DateTime? workOrderCutoffStart,
+    DateTime? workOrderCutoffEnd,
+    WorkOrderFilterBy? workOrderFilterBy,
   }) {
-    this.workOrderCutoffStart = workOrderCutoffStart;
-    this.workOrderCutoffEnd = workOrderCutoffEnd;
-    this.workOrderFilterBy = workOrderFilterBy;
-    database!.setSettings(
-        newSetting: Setting(
-            key: '$selectedSite-workOrderCutoffStart',
-            value: workOrderCutoffStart.toString()));
-    database!.setSettings(
-        newSetting: Setting(
-            key: '$selectedSite-workOrderCutoffEnd',
-            value: workOrderCutoffEnd.toString()));
-    database!.setSettings(
-        newSetting: Setting(
-            key: '$selectedSite-workOrderFilterBy',
-            value: workOrderFilterBy.toString()));
+    if (workOrderCutoffStart != null) {
+      this.workOrderCutoffStart = workOrderCutoffStart;
+      database!.setSettings(
+          newSetting: Setting(
+              key: '$selectedSite-workOrderCutoffStart',
+              value: workOrderCutoffStart.toString()));
+    }
+    if (workOrderCutoffEnd != null) {
+      this.workOrderCutoffEnd = workOrderCutoffEnd;
+      database!.setSettings(
+          newSetting: Setting(
+              key: '$selectedSite-workOrderCutoffEnd',
+              value: workOrderCutoffEnd.toString()));
+    }
+
+    if (workOrderFilterBy != null) {
+      this.workOrderFilterBy = workOrderFilterBy;
+      database!.setSettings(
+          newSetting: Setting(
+              key: '$selectedSite-workOrderFilterBy',
+              value: workOrderFilterBy.toString()));
+    }
+    notifyListeners();
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
+import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import '../bin/drawer.dart';
@@ -1014,23 +1015,23 @@ class WorkOrderSettingsDialog extends StatefulWidget {
 
 class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   ///Exculde all work orders after this date
-  DateTime? beforeDate;
+  DateTime? startDate;
 
   ///Exclude all work orders before this date
-  DateTime? afterDate;
+  DateTime? endDate;
 
   ///whether to show all sites' work orders or not
-  late WorkOrderFilterBy showAllSites;
+  late WorkOrderFilterBy siteFilterBy;
 
   @override
   void initState() {
     super.initState();
     AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier =
         context.read<AssetCriticalitySettingsNotifier>();
-    beforeDate = assetCriticalitySettingsNotifier.workOrderCutoffStart;
-    afterDate = assetCriticalitySettingsNotifier.workOrderCutoffEnd;
+    startDate = assetCriticalitySettingsNotifier.workOrderCutoffStart;
+    endDate = assetCriticalitySettingsNotifier.workOrderCutoffEnd;
 
-    showAllSites = assetCriticalitySettingsNotifier.workOrderFilterBy;
+    siteFilterBy = assetCriticalitySettingsNotifier.workOrderFilterBy;
   }
 
   @override
@@ -1056,7 +1057,7 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10, bottom: 40),
                       child: Text(
-                        'Work Order View Settings',
+                        'Breakdown Calculation Settings',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     )
@@ -1069,21 +1070,28 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                     buildSettingRow(
                         checkbox: Checkbox(
                             value: true, onChanged: (value) => setState(() {})),
-                        title: const Text('Hide Work Orders Before'),
-                        valueDisplay: Text(
-                          '${afterDate?.year ?? 'YY'}/${afterDate?.month ?? 'mm'}/${afterDate?.day ?? 'dd'}',
-                        ),
+                        title: const Text('Ignore Work Orders Before'),
+                        valueDisplay:
+                            Text(DateFormat('yyyy-MM-dd').format(startDate!)),
                         inputWidget: Builder(
                             builder: (context) => ElevatedButton(
                                 onPressed: () async {
                                   DateTime? newDate = await showDatePicker(
                                       context: context,
-                                      initialDate: afterDate ?? DateTime.now(),
+                                      initialDate: startDate ?? DateTime.now(),
                                       firstDate: DateTime(1951),
                                       lastDate: DateTime.now());
                                   if (newDate != null) {
                                     setState(() {
-                                      afterDate = newDate;
+                                      startDate = newDate;
+                                      context
+                                          .read<
+                                              AssetCriticalitySettingsNotifier>()
+                                          .setWOSettings(
+                                              selectedSite: context
+                                                  .read<SelectedSiteNotifier>()
+                                                  .selectedSite,
+                                              workOrderCutoffStart: newDate);
                                     });
                                   }
                                 },
@@ -1091,22 +1099,28 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                     buildSettingRow(
                         checkbox: Checkbox(
                             value: true, onChanged: (value) => setState(() {})),
-                        title:
-                            const Text('Hide Work Orders After (Inclusive):'),
-                        valueDisplay: Text(
-                          '${beforeDate?.year ?? 'YY'}/${beforeDate?.month ?? 'mm'}/${beforeDate?.day ?? 'dd'}',
-                        ),
+                        title: const Text('Ignore Work Orders After'),
+                        valueDisplay:
+                            Text(DateFormat('yyyy-MM-dd').format(endDate!)),
                         inputWidget: Builder(
                             builder: (context) => ElevatedButton(
                                 onPressed: () async {
                                   DateTime? newDate = await showDatePicker(
                                       context: context,
-                                      initialDate: beforeDate ?? DateTime.now(),
+                                      initialDate: endDate ?? DateTime.now(),
                                       firstDate: DateTime(1951),
                                       lastDate: DateTime.now());
                                   if (newDate != null) {
                                     setState(() {
-                                      beforeDate = newDate;
+                                      endDate = newDate;
+                                      context
+                                          .read<
+                                              AssetCriticalitySettingsNotifier>()
+                                          .setWOSettings(
+                                              selectedSite: context
+                                                  .read<SelectedSiteNotifier>()
+                                                  .selectedSite,
+                                              workOrderCutoffEnd: newDate);
                                     });
                                   }
                                 },
@@ -1126,36 +1140,16 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                 children: [
                   ElevatedButton(
                       onPressed: () {
-                        //   //TODO: check if settings are valid (e.g. afterdate is not after beforedate). if so, use new settings
-                        //   if (usingAfterDate! && afterDate == null) {
-                        //     //if using after date, afterDate must not be null
-                        //     //TODO: show dialog
-                        //   } else if (usingBeforeDate! && beforeDate == null) {
-                        //     //if using before date, beforeDate must not be null
-                        //     //TODO: show dialog
-                        //   } else if (usingAfterDate! &&
-                        //       usingBeforeDate! &&
-                        //       afterDate!.compareTo(beforeDate!) >= 0) {
-                        //     //invalid format, afterDate must be before beforeDate
-                        //     ///TODO: show dialog
-                        //   } else {
-                        //     context
-                        //         .read<AssetCriticalityNotifier>()
-                        //         .setWOSettings(
-                        //             beforeDate: beforeDate,
-                        //             afterDate: afterDate,
-                        //             usingBeforeDate: usingBeforeDate!,
-                        //             usingAfterDate: usingAfterDate!,
-                        //             showAllSites: showAllSites!);
-                        //     Navigator.pop(context);
-                        //   }
-                      },
-                      child: const Text('Confirm')),
-                  ElevatedButton(
-                      onPressed: () {
+                        if (endDate!.compareTo(startDate!) < 0) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                'End date is before Start date! Please correct dates'),
+                          ));
+                        }
                         Navigator.pop(context);
                       },
-                      child: const Text('Cancel'))
+                      child: const Text('Confirm')),
                 ],
               ),
             )
