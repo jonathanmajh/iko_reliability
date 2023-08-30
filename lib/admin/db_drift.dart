@@ -584,12 +584,7 @@ class MyDatabase extends _$MyDatabase {
     if (systems.isNotEmpty) {
       return systems;
     }
-    // Check if there are any systems in DB
-    systems = await (select(systemCriticalitys)).get();
-    if (systems.isNotEmpty) {
-      return systems;
-    }
-    material.debugPrint('getting data from excel');
+    // if there are no systems in DB load systems from Excel
     await loadSystems();
     systems = await systemsFilteredBySite(siteid).get();
     return systems;
