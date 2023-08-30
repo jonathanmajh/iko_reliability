@@ -3078,6 +3078,14 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         }).asyncMap(systemCriticalitys.mapFromRow);
   }
 
+  Selectable<int?> maxSystemID() {
+    return customSelect('SELECT max(id) AS _c0 FROM system_criticalitys',
+        variables: [],
+        readsFrom: {
+          systemCriticalitys,
+        }).map((QueryRow row) => row.readNullable<int>('_c0'));
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

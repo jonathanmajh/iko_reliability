@@ -196,6 +196,9 @@ WHERE line IN (
 		WHERE siteid = :siteid
 		)
 ''',
+    'maxSystemID': '''
+select max(id) from system_criticalitys
+''',
   },
 )
 class MyDatabase extends _$MyDatabase {
@@ -239,19 +242,22 @@ class MyDatabase extends _$MyDatabase {
     return row.id;
   }
 
-  void importCriticality(
-    List<Setting> setting,
-    List<AssetCriticality> criticality,
-    List<SystemCriticality> system,
-  ) async {
-    batch((batch) {
+  Future<void> importCriticality({
+    required List<Setting> setting,
+    required List<AssetCriticality> criticality,
+    required List<SystemCriticality> system,
+    required String siteid,
+  }) async {
+    await batch((batch) {
       batch.insertAllOnConflictUpdate(settings, setting);
     });
-    batch((batch) {
-      batch.insertAll(assetCriticalitys, criticality);
-    });
-    batch((batch) {
+    await (delete(systemCriticalitys)..where((t) => t.siteid.equals(siteid)))
+        .go();
+    await batch((batch) {
       batch.insertAll(systemCriticalitys, system);
+    });
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(assetCriticalitys, criticality);
     });
   }
 

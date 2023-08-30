@@ -339,9 +339,15 @@ class _EndDrawerState extends State<EndDrawer> {
             ListTile(
               title: const Text('Import Settings'),
               trailing: ElevatedButton(
-                child: const Text('Import'),
-                onPressed: () => importCriticalityDB(database!),
-              ),
+                  child: const Text('Import'),
+                  onPressed: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(await importCriticalityDB(
+                        database!,
+                      )),
+                    ));
+                    Navigator.of(context).pop();
+                  }),
             ),
           ],
         ),
