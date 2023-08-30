@@ -125,20 +125,26 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   }
 
   ///function to set the work order settings
-  // void setWOSettings({
-  //   required DateTime? beforeDate,
-  //   required DateTime? afterDate,
-  //   required bool usingBeforeDate,
-  //   required bool usingAfterDate,
-  //   required bool showAllSites,
-  //   bool notify = true,
-  // }) {
-  //   this.beforeDate = beforeDate;
-  //   this.afterDate = afterDate;
-  //   this.usingBeforeDate = usingBeforeDate;
-  //   this.usingAfterDate = usingAfterDate;
-  //   this.showAllSites = showAllSites;
-
-  //   if (notify) notifyListeners();
-  // }
+  void setWOSettings({
+    required String selectedSite,
+    required DateTime workOrderCutoffStart,
+    required DateTime workOrderCutoffEnd,
+    required WorkOrderFilterBy workOrderFilterBy,
+  }) {
+    this.workOrderCutoffStart = workOrderCutoffStart;
+    this.workOrderCutoffEnd = workOrderCutoffEnd;
+    this.workOrderFilterBy = workOrderFilterBy;
+    database!.setSettings(
+        newSetting: Setting(
+            key: '$selectedSite-workOrderCutoffStart',
+            value: workOrderCutoffStart.toString()));
+    database!.setSettings(
+        newSetting: Setting(
+            key: '$selectedSite-workOrderCutoffEnd',
+            value: workOrderCutoffEnd.toString()));
+    database!.setSettings(
+        newSetting: Setting(
+            key: '$selectedSite-workOrderFilterBy',
+            value: workOrderFilterBy.toString()));
+  }
 }
