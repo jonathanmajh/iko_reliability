@@ -574,18 +574,24 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<SystemCriticality>> getSystemCriticalitiesFiltered(
       String siteid) async {
-    var systems = await systemsFilteredBySite(siteid).get();
-    if (systems.isEmpty) {
-      // Check if there are any systems in DB
-      systems = await (select(systemCriticalitys)).get();
-      if (systems.isEmpty) {
-        material.debugPrint('getting data from excel');
-        await loadSystems();
-        systems = await systemsFilteredBySite(siteid).get();
-      } else {
-        return [];
-      }
+    var systems = await (select(systemCriticalitys)
+          ..where((tbl) => tbl.siteid.equals(siteid)))
+        .get();
+    if (systems.isNotEmpty) {
+      return systems;
     }
+    systems = await systemsFilteredBySite(siteid).get();
+    if (systems.isNotEmpty) {
+      return systems;
+    }
+    // Check if there are any systems in DB
+    systems = await (select(systemCriticalitys)).get();
+    if (systems.isNotEmpty) {
+      return systems;
+    }
+    material.debugPrint('getting data from excel');
+    await loadSystems();
+    systems = await systemsFilteredBySite(siteid).get();
     return systems;
   }
 
