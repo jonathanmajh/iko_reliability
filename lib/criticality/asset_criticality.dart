@@ -94,6 +94,20 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         field: 'downtime',
         type: PlutoColumnType.text(),
       ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        title: 'Site',
+        field: 'site',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        title: 'Included',
+        field: 'included',
+        type: PlutoColumnType.text(),
+      ),
     ]);
 
 // Columns for Assets
@@ -324,20 +338,40 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   void fetchWoHistory(String assetnum, String siteid) async {
     var wos = await database!.getAssetWorkorders(assetnum, siteid);
     List<PlutoRow> rows = [];
+    List<PlutoRow> excludedRows = [];
     for (var wo in wos) {
-      rows.add(PlutoRow(cells: {
-        'wonum': PlutoCell(value: wo.wonum),
-        'description': PlutoCell(value: wo.description),
-        'type': PlutoCell(value: wo.type),
-        'status': PlutoCell(value: wo.status),
-        'reportdate': PlutoCell(value: wo.reportdate),
-        'downtime': PlutoCell(value: wo.downtime),
-      }));
+      if (isWorkOrderInRange(wo)) {
+        rows.add(PlutoRow(
+          cells: {
+            'wonum': PlutoCell(value: wo.wonum),
+            'description': PlutoCell(value: wo.description),
+            'type': PlutoCell(value: wo.type),
+            'status': PlutoCell(value: wo.status),
+            'reportdate': PlutoCell(value: wo.reportdate),
+            'downtime': PlutoCell(value: wo.downtime),
+            'site': PlutoCell(value: siteIDAndDescription[wo.siteid]),
+            'included': PlutoCell(value: ('Yes')),
+          },
+        ));
+      } else {
+        excludedRows.add(PlutoRow(
+          cells: {
+            'wonum': PlutoCell(value: wo.wonum),
+            'description': PlutoCell(value: wo.description),
+            'type': PlutoCell(value: wo.type),
+            'status': PlutoCell(value: wo.status),
+            'reportdate': PlutoCell(value: wo.reportdate),
+            'downtime': PlutoCell(value: wo.downtime),
+            'site': PlutoCell(value: siteIDAndDescription[wo.siteid]),
+            'included': PlutoCell(value: ('No')),
+          },
+        ));
+      }
     }
 
     detailStateManager.removeRows(detailStateManager.rows);
     detailStateManager.resetCurrentState();
-    detailStateManager.appendRows(rows);
+    detailStateManager.appendRows([...rows, ...excludedRows]);
 
     detailStateManager.setShowLoading(false);
   }
@@ -400,29 +434,28 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   void refreshAsset(String assetnum) async {
+    // change status icon
     AssetStatus previousStatus =
         context.read<AssetStatusNotifier>().getAssetStatus(assetnum);
     context.read<AssetStatusNotifier>().updateAssetStatus(
       assets: [assetnum],
       status: AssetStatus.refreshingWorkOrders,
     );
-    String selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
+    // get all WOs from Maximo
     try {
       await database!.getWorkOrderMaximo(
         assetnum,
         context.read<MaximoServerNotifier>().maximoServerSelected,
       );
     } catch (e) {
-      context.read<AssetStatusNotifier>().updateAssetStatus(
-        assets: [assetnum],
-        status: AssetStatus.refreshError,
-      );
+      previousStatus = AssetStatus.refreshError;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
             'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}'),
       ));
       return;
     }
+    // bring back previous status Icon
     context.read<AssetStatusNotifier>().updateAssetStatus(
       assets: [assetnum],
       status: previousStatus,
@@ -433,25 +466,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     AssetCriticalitySettingsNotifier assetCriticalitySettings =
         context.read<AssetCriticalitySettingsNotifier>();
     for (var wo in wos) {
-      // skip (continue) all WOs that fail criterions
-      // make sure dates are within range
-      DateTime reportedDate = DateTime.parse(wo.reportdate);
-      if (reportedDate
-              .compareTo(assetCriticalitySettings.workOrderCutoffStart) <
-          0) {
+      if (!isWorkOrderInRange(wo)) {
         continue;
-      }
-      if (reportedDate.compareTo(assetCriticalitySettings.workOrderCutoffEnd) >
-          0) {
-        continue;
-      }
-      // check site
-      switch (assetCriticalitySettings.workOrderFilterBy) {
-        case WorkOrderFilterBy.currentSite:
-          if (wo.siteid != selectedSite) {
-            continue;
-          }
-        default:
       }
       downtime = downtime + wo.downtime;
       dtEvents++;
@@ -467,6 +483,30 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         stateManager.notifyListeners();
       }
     }
+  }
+
+  bool isWorkOrderInRange(Workorder workorder) {
+    String selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
+    AssetCriticalitySettingsNotifier assetCriticalitySettings =
+        context.read<AssetCriticalitySettingsNotifier>();
+    DateTime reportedDate = DateTime.parse(workorder.reportdate);
+    if (reportedDate.compareTo(assetCriticalitySettings.workOrderCutoffStart) <
+        0) {
+      return false;
+    }
+    if (reportedDate.compareTo(assetCriticalitySettings.workOrderCutoffEnd) >
+        0) {
+      return false;
+    }
+    // check site
+    switch (assetCriticalitySettings.workOrderFilterBy) {
+      case WorkOrderFilterBy.currentSite:
+        if (workorder.siteid != selectedSite) {
+          return false;
+        }
+      default:
+    }
+    return true;
   }
 
   @override
@@ -493,8 +533,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       ),
       endDrawer: const EndDrawer(),
       body: FutureBuilder<List<AssetCriticalityWithAsset>>(
-        future: database!.getAssetCriticalities(
-            context.watch<SelectedSiteNotifier>().selectedSite),
+        future: () async {
+          context
+              .read<AssetCriticalitySettingsNotifier>()
+              .setSite(context.watch<SelectedSiteNotifier>().selectedSite);
+          return database!.getAssetCriticalities(
+              context.watch<SelectedSiteNotifier>().selectedSite);
+        }(),
         builder: (BuildContext context,
             AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
           List<PlutoRow> rows = [];
@@ -657,6 +702,12 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               rows: detailRows,
               onLoaded: (PlutoGridOnLoadedEvent event) {
                 detailStateManager = event.stateManager;
+              },
+              rowColorCallback: (rowColorContext) {
+                if (rowColorContext.row.cells['included']!.value != 'Yes') {
+                  return Colors.grey;
+                }
+                return themeManager.isDark ? Colors.black : Colors.white;
               },
             ),
             divider: themeManager.isDark
@@ -1045,7 +1096,7 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   DateTime? endDate;
 
   ///whether to show all sites' work orders or not
-  late WorkOrderFilterBy siteFilterBy;
+  WorkOrderFilterBy? siteFilterBy;
 
   @override
   void initState() {

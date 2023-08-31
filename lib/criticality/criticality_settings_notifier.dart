@@ -86,8 +86,8 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
     final filterByString = settings
         .firstWhere(
           (element) => element.key == '$selectedSite-workOrderFilterBy',
-          orElse: () =>
-              Setting(key: '', value: WorkOrderFilterBy.currentSite.toString()),
+          orElse: () => Setting(
+              key: '', value: WorkOrderFilterBy.currentSite.name.toString()),
         )
         .value;
     workOrderFilterBy = WorkOrderFilterBy.values.byName(filterByString);
@@ -169,7 +169,7 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
       database!.setSettings(
         newSetting: Setting(
             key: '$selectedSite-workOrderFilterBy',
-            value: workOrderFilterBy.toString()),
+            value: workOrderFilterBy.name.toString()),
       );
     }
     frequencyPeriodYears = this
