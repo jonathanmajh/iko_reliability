@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
@@ -577,6 +578,9 @@ class MyDatabase extends _$MyDatabase {
     var systems = await (select(systemCriticalitys)
           ..where((tbl) => tbl.siteid.equals(siteid)))
         .get();
+    if (siteid == '') {
+      return systems;
+    }
     if (systems.isNotEmpty) {
       return systems;
     }
@@ -585,6 +589,7 @@ class MyDatabase extends _$MyDatabase {
       return systems;
     }
     // if there are no systems in DB load systems from Excel
+    debugPrint('Loading all Systems');
     await loadSystems();
     systems = await systemsFilteredBySite(siteid).get();
     return systems;

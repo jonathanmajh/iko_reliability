@@ -85,7 +85,6 @@ class AssetStatusNotifier extends ChangeNotifier {
 
   void updateParentAssets(List<String> parentAssets) {
     this.parentAssets = parentAssets;
-    notifyListeners();
   }
 }
 
