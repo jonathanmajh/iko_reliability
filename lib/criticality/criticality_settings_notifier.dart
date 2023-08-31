@@ -4,9 +4,13 @@ import '../admin/db_drift.dart';
 import '../main.dart';
 
 enum WorkOrderFilterBy {
-  currentSite,
-  similarPlant,
-  allSites,
+  currentSite('Current Site'),
+  similarPlant('Similar Plants (Not Implemented)'),
+  allSites('All Sites');
+
+  const WorkOrderFilterBy(this.description);
+
+  final String description;
 }
 
 class AssetCriticalitySettingsNotifier extends ChangeNotifier {
@@ -27,6 +31,8 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   ///Site Filter for work orders used to determine frequency + impact
   ///Currently not used
   WorkOrderFilterBy workOrderFilterBy = WorkOrderFilterBy.currentSite;
+
+  double frequencyPeriodYears = 10;
 
   ///sets [selectedSite] to [site].
   ///Updates settings based on selected values for site.
@@ -98,34 +104,38 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   }) {
     if (percentVLow != null) {
       database!.setSettings(
-          newSetting: Setting(
-              key: '$selectedSite-percentVLow', value: percentVLow.toString()));
+        newSetting: Setting(
+            key: '$selectedSite-percentVLow', value: percentVLow.toString()),
+      );
       this.percentVLow = percentVLow;
     }
     if (percentLow != null) {
       database!.setSettings(
-          newSetting: Setting(
-              key: '$selectedSite-percentLow', value: percentLow.toString()));
+        newSetting: Setting(
+            key: '$selectedSite-percentLow', value: percentLow.toString()),
+      );
       this.percentLow = percentLow;
     }
     if (percentMedium != null) {
       database!.setSettings(
-          newSetting: Setting(
-              key: '$selectedSite-percentMedium',
-              value: percentMedium.toString()));
+        newSetting: Setting(
+            key: '$selectedSite-percentMedium',
+            value: percentMedium.toString()),
+      );
       this.percentMedium = percentMedium;
     }
     if (percentHigh != null) {
       database!.setSettings(
-          newSetting: Setting(
-              key: '$selectedSite-percentHigh', value: percentHigh.toString()));
+        newSetting: Setting(
+            key: '$selectedSite-percentHigh', value: percentHigh.toString()),
+      );
       this.percentHigh = percentHigh;
     }
     if (percentVHigh != null) {
       database!.setSettings(
-          newSetting: Setting(
-              key: '$selectedSite-percentVHigh',
-              value: percentVHigh.toString()));
+        newSetting: Setting(
+            key: '$selectedSite-percentVHigh', value: percentVHigh.toString()),
+      );
       this.percentVHigh = percentVHigh;
     }
     notifyListeners();
@@ -141,25 +151,33 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
     if (workOrderCutoffStart != null) {
       this.workOrderCutoffStart = workOrderCutoffStart;
       database!.setSettings(
-          newSetting: Setting(
-              key: '$selectedSite-workOrderCutoffStart',
-              value: workOrderCutoffStart.toString()));
+        newSetting: Setting(
+            key: '$selectedSite-workOrderCutoffStart',
+            value: workOrderCutoffStart.toString()),
+      );
     }
     if (workOrderCutoffEnd != null) {
       this.workOrderCutoffEnd = workOrderCutoffEnd;
       database!.setSettings(
-          newSetting: Setting(
-              key: '$selectedSite-workOrderCutoffEnd',
-              value: workOrderCutoffEnd.toString()));
+        newSetting: Setting(
+            key: '$selectedSite-workOrderCutoffEnd',
+            value: workOrderCutoffEnd.toString()),
+      );
     }
-
     if (workOrderFilterBy != null) {
       this.workOrderFilterBy = workOrderFilterBy;
       database!.setSettings(
-          newSetting: Setting(
-              key: '$selectedSite-workOrderFilterBy',
-              value: workOrderFilterBy.toString()));
+        newSetting: Setting(
+            key: '$selectedSite-workOrderFilterBy',
+            value: workOrderFilterBy.toString()),
+      );
     }
+    frequencyPeriodYears = this
+            .workOrderCutoffEnd
+            .difference(this.workOrderCutoffStart)
+            .inDays
+            .toDouble() /
+        365;
     notifyListeners();
   }
 }

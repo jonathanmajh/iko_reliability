@@ -322,7 +322,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   void fetchWoHistory(String assetnum, String siteid) async {
-    //TODO: use work order settings
     var wos = await database!.getAssetWorkorders(assetnum, siteid);
     List<PlutoRow> rows = [];
     for (var wo in wos) {
@@ -400,12 +399,14 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     return rows;
   }
 
-  void refreshAsset(String assetnum, [String? siteid]) async {
-    //TODO: use work order settings
+  void refreshAsset(String assetnum) async {
+    AssetStatus previousStatus =
+        context.read<AssetStatusNotifier>().getAssetStatus(assetnum);
     context.read<AssetStatusNotifier>().updateAssetStatus(
       assets: [assetnum],
       status: AssetStatus.refreshingWorkOrders,
     );
+    String selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
     try {
       await database!.getWorkOrderMaximo(
         assetnum,
@@ -424,16 +425,39 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     }
     context.read<AssetStatusNotifier>().updateAssetStatus(
       assets: [assetnum],
-      status: AssetStatus.incomplete,
+      status: previousStatus,
     );
-    var wos = await database!.getAssetWorkorders(assetnum, siteid);
+    var wos = await database!.getAssetWorkorders(assetnum);
     double downtime = 0;
-    double dtEvents = wos.length.toDouble();
+    double dtEvents = 0;
+    AssetCriticalitySettingsNotifier assetCriticalitySettings =
+        context.read<AssetCriticalitySettingsNotifier>();
     for (var wo in wos) {
-      downtime += wo.downtime;
+      // skip (continue) all WOs that fail criterions
+      // make sure dates are within range
+      DateTime reportedDate = DateTime.parse(wo.reportdate);
+      if (reportedDate
+              .compareTo(assetCriticalitySettings.workOrderCutoffStart) <
+          0) {
+        continue;
+      }
+      if (reportedDate.compareTo(assetCriticalitySettings.workOrderCutoffEnd) >
+          0) {
+        continue;
+      }
+      // check site
+      switch (assetCriticalitySettings.workOrderFilterBy) {
+        case WorkOrderFilterBy.currentSite:
+          if (wo.siteid != selectedSite) {
+            continue;
+          }
+        default:
+      }
+      downtime = downtime + wo.downtime;
+      dtEvents++;
     }
-    downtime = downtime / years;
-    dtEvents = dtEvents / years;
+    downtime = downtime / assetCriticalitySettings.frequencyPeriodYears;
+    dtEvents = dtEvents / assetCriticalitySettings.frequencyPeriodYears;
     for (var row in stateManager.iterateRowAndGroup) {
       if (row.cells['assetnum']!.value == assetnum) {
         stateManager.changeCellValue(
@@ -1125,13 +1149,31 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                                   }
                                 },
                                 child: const Text('Select Date')))),
-                    //TODO add a setting for toggling show/hide workorders from all sites not just selected site
-                    buildSettingRow(
-                        checkbox: Checkbox(
-                            value: true, onChanged: (value) => setState(() {})),
-                        title: const Text('Show work orders from all sites'),
-                        valueDisplay: Container(),
-                        inputWidget: Container()),
+                    ListTile(
+                      title: const Text('Consider Work Orders from:'),
+                      subtitle: Consumer<AssetCriticalitySettingsNotifier>(
+                        builder: (context, value, child) {
+                          return DropdownButton(
+                              isExpanded: true,
+                              value: value.workOrderFilterBy,
+                              items: WorkOrderFilterBy.values.map((filter) {
+                                return DropdownMenuItem(
+                                    value: filter,
+                                    child: Text(filter.description));
+                              }).toList(),
+                              onChanged: (WorkOrderFilterBy? newValue) {
+                                setState(() {
+                                  siteFilterBy = newValue!;
+                                  value.setWOSettings(
+                                      selectedSite: context
+                                          .read<SelectedSiteNotifier>()
+                                          .selectedSite,
+                                      workOrderFilterBy: newValue);
+                                });
+                              });
+                        },
+                      ),
+                    )
                   ],
                 )),
             Expanded(
