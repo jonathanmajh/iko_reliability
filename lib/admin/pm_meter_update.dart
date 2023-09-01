@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../main.dart';
 import 'db_drift.dart';
-import 'end_drawer.dart';
+import '../bin/end_drawer.dart';
 import 'pm_meter_update_functions.dart';
 
 @RoutePage()

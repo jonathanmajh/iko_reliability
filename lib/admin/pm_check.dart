@@ -9,9 +9,10 @@ import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:provider/provider.dart';
 
+import '../bin/drawer.dart';
 import 'consts.dart';
 import '../main.dart';
-import 'end_drawer.dart';
+import '../bin/end_drawer.dart';
 import 'generate_job_plans.dart';
 import 'pm_details.dart';
 import 'template_notifier.dart';
@@ -192,12 +193,13 @@ class _PmCheckPageState extends State<PmCheckPage> {
         child: Focus(
             autofocus: true,
             child: Scaffold(
+              drawer: const Drawer(
+                //navigation drawer
+                child: NavDrawer(),
+              ),
               appBar: AppBar(
                 title: const Text("PM Verify and Upload"),
                 // keep back button with a right side hamburger menu
-                leading: (ModalRoute.of(context)?.canPop ?? false)
-                    ? const BackButton()
-                    : null,
                 actions: [
                   Builder(
                     builder: (context) => IconButton(

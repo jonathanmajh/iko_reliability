@@ -10,6 +10,7 @@ class PercentSlider extends StatefulWidget {
       this.min = 0,
       this.max = 100,
       required this.onSliderUpdate,
+      required this.onSliderUpdateEnd,
       required this.barColors,
       this.tooltip,
       this.sliderColor = Colors.grey,
@@ -40,6 +41,9 @@ class PercentSlider extends StatefulWidget {
 
   ///function to run when slider updates
   final Function(List<int?> posList) onSliderUpdate;
+
+  ///function to run when slider stops updating
+  final Function(List<int?> posList) onSliderUpdateEnd;
 
   ///tool tip messages. Length must match the amount of percent bars
   final List<String>? tooltip;
@@ -134,21 +138,26 @@ class _PercentSliderState extends State<PercentSlider> {
     required double maxWidth,
     required double tapPosition,
   }) {
-    final maxArea = widget.size.width / 2; //maxWidth * tapSpacesArea;
+    double distanceFromSlider = 0.0;
+    int closestSlider = 0;
+    double closestdistanceFromSlider = maxWidth;
 
     for (int i = 0; i < percentList.length; i++) {
-      if ((tapPosition -
-                  _calculateSliderPosition(
-                      maxWidth: maxWidth, percent: percentList[i]!))
-              .abs() <
-          maxArea) {
-        setState(() {
-          isDragging = true;
-          activeSliderNumber = i;
-        });
-        break;
+      distanceFromSlider = (tapPosition -
+              _calculateSliderPosition(
+                maxWidth: maxWidth,
+                percent: percentList[i]!,
+              ))
+          .abs();
+      if (distanceFromSlider < closestdistanceFromSlider) {
+        closestdistanceFromSlider = distanceFromSlider;
+        closestSlider = i;
       }
     }
+    setState(() {
+      isDragging = true;
+      activeSliderNumber = closestSlider;
+    });
   }
 
   @override
@@ -157,9 +166,9 @@ class _PercentSliderState extends State<PercentSlider> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: widget.size.height * 3,
+          height: widget.size.height * 2,
           child: LayoutBuilder(builder: (context, constraints) {
-            final maxWidth = constraints.maxWidth - 10;
+            final maxWidth = constraints.maxWidth;
             if (percentList.length != widget.initialValues.length) {
               percentList =
                   List<int?>.filled(widget.initialValues.length, null);
@@ -173,9 +182,9 @@ class _PercentSliderState extends State<PercentSlider> {
                 //bars
                 Padding(
                   padding: EdgeInsets.only(
-                      top: widget.size.height * 0.2,
-                      bottom: widget.size.height * 0.2,
-                      right: 10),
+                    top: widget.size.height * 0.8,
+                    bottom: widget.size.height * 0.8,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: () {
@@ -185,6 +194,7 @@ class _PercentSliderState extends State<PercentSlider> {
                         widgetList.add(Flexible(
                           flex: distributions[i],
                           child: Tooltip(
+                              preferBelow: false,
                               message: (widget.tooltip != null && !isDragging)
                                   ? '${widget.tooltip![i]}: ${distributions[i]}'
                                   : '',
@@ -206,12 +216,27 @@ class _PercentSliderState extends State<PercentSlider> {
                           maxWidth: maxWidth, percent: percentList[i]!),
                       child: Container(
                         height: activeSliderNumber == i
-                            ? widget.size.height * 5
-                            : widget.size.height * 4,
-                        width: widget.size.width,
-                        color: (activeSliderNumber == i)
-                            ? widget.sliderPressedColor
-                            : widget.sliderColor,
+                            ? widget.size.height * 1.5
+                            : widget.size.height * 1,
+                        width: activeSliderNumber == i
+                            ? widget.size.height * 1.5
+                            : widget.size.height * 1,
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                widget.barColors[i],
+                                widget.barColors[i],
+                                widget.barColors[i + 1],
+                                widget.barColors[i + 1],
+                              ],
+                              stops: const [
+                                0.499,
+                                0.5,
+                                0.501,
+                                1,
+                              ],
+                            ),
+                            shape: BoxShape.circle),
                       ),
                     ));
                   }
@@ -223,9 +248,6 @@ class _PercentSliderState extends State<PercentSlider> {
                         maxWidth: maxWidth,
                         tapPosition: details.localPosition.dx);
                   },
-                  onPanUpdate: (details) {
-                    _updateSlider(details.localPosition.dx, maxWidth);
-                  },
                   onTapCancel: () {
                     setState(() {
                       isDragging = false;
@@ -235,6 +257,15 @@ class _PercentSliderState extends State<PercentSlider> {
                     setState(() {
                       isDragging = false;
                     });
+                    widget.onSliderUpdateEnd(_calculateDistributions());
+                  },
+                  onPanDown: (details) {
+                    _selectSlider(
+                        maxWidth: maxWidth,
+                        tapPosition: details.localPosition.dx);
+                  },
+                  onPanUpdate: (details) {
+                    _updateSlider(details.localPosition.dx, maxWidth);
                   },
                   onPanCancel: () {
                     setState(() {
@@ -245,6 +276,7 @@ class _PercentSliderState extends State<PercentSlider> {
                     setState(() {
                       isDragging = false;
                     });
+                    widget.onSliderUpdateEnd(_calculateDistributions());
                   },
                 ),
               ],

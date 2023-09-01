@@ -213,7 +213,7 @@ class ParsedTemplate {
         if (row[7] != null && readTasks) {
           //reading job task info of current PM, writing data to [ParsedTemplate] object(s)
           pmTemplates[filename][pmNumber].tasks.add(JobTask(
-              jptask: row[6], // TODO show error for missing jptask number
+              jptask: row[6],
               description: row[7],
               assetNumber: row[4]?.toString().toUpperCase(),
               metername: row[5],
@@ -243,6 +243,10 @@ class ParsedTemplate {
           //parse craft line
           String str = row[0];
           String laborType = str.substring(0, 1).toUpperCase();
+          // Patch for Production which is code O, but starts with P
+          if (laborType == 'P') {
+            laborType = 'O';
+          }
           String laborCode = '';
           int pos = str.lastIndexOf('@');
           if (pos != -1) {

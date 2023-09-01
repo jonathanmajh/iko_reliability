@@ -14,14 +14,14 @@ import 'package:window_size/window_size.dart';
 
 import 'admin/cache_notifier.dart';
 import 'admin/db_drift.dart';
-import 'admin/end_drawer.dart';
+import 'bin/drawer.dart';
+import 'bin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
 import 'criticality/asset_criticality_notifier.dart';
-import 'criticality/criticality_notifier.dart';
 import 'creation/asset_creation_notifier.dart';
-import 'creation/site_change_notifier.dart';
 import 'admin/process_state_notifier.dart';
+import 'criticality/criticality_settings_notifier.dart';
 import 'routes/route.dart';
 
 MyDatabase? database;
@@ -74,9 +74,6 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => TemplateNotifier()),
           ChangeNotifierProvider(create: (context) => UploadNotifier()),
           ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
-          ChangeNotifierProvider(create: (context) => SystemsNotifier()),
-          ChangeNotifierProvider(create: (context) => WorkOrderNotifier()),
-          ChangeNotifierProvider(create: (context) => RpnCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => settingsNotifier),
           ChangeNotifierProvider(
               create: (context) => ThemeManager(
@@ -87,7 +84,10 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) => AssetCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => AssetCreationNotifier()),
-          ChangeNotifierProvider(create: (context) => SiteChangeNotifier()),
+          ChangeNotifierProvider(
+              create: (context) => AssetCriticalitySettingsNotifier()),
+          ChangeNotifierProvider(create: (context) => AssetStatusNotifier()),
+          ChangeNotifierProvider(create: (context) => SelectedSiteNotifier()),
         ],
         child: Builder(
           builder: (context) {
@@ -228,136 +228,9 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("IKO Reliability Maximo Tool (beta)"),
       ),
-      drawer: Drawer(
+      drawer: const Drawer(
         //navigation drawer
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'IKO Reliability Maximo',
-                  style: TextStyle(
-                    // color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
-                const Text(
-                  'display name...',
-                  style: TextStyle(
-                    // color: Colors.white,
-                    fontSize: 18,
-                  ),
-                ),
-                const Text('userid'),
-                const Text('Status'),
-                // update notifier when the menu is opened
-                Consumer<SystemsNotifier>(builder: (context, systems, child) {
-                  systems.updateSystems();
-                  return Text(Provider.of<MaximoServerNotifier>(context)
-                      .maximoServerSelected);
-                }),
-              ],
-            )),
-            const ListTile(
-              leading: Icon(Icons.message),
-              title: Text('Home'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.account_circle),
-              title: const Text('Test'),
-              onTap: () {
-                context.router.pushNamed("/test");
-                // change app state...
-                Navigator.pop(context); // close the drawer
-              },
-            ),
-            ExpansionTile(
-              title: const Text("Assets"),
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Create Assets'),
-                  onTap: () {
-                    context.router.pushNamed("/asset");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Asset Criticality'),
-                  onTap: () {
-                    context.router.pushNamed("/asset/criticality");
-                    try {
-                      context
-                          .read<Cache>()
-                          .calculateSystemScores(); //load system score data
-                    } catch (e) {
-                      debugPrint(
-                          'Could not load system scores from cache \n$e');
-                    }
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('System Criticality'),
-                  onTap: () {
-                    context.router.pushNamed("/asset/system-criticality");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-              ],
-            ),
-            ExpansionTile(
-              title: const Text("Maximo Admin"),
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Validate PMs'),
-                  onTap: () {
-                    context.router.pushNamed("/pm/check");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Update PM Meters'),
-                  onTap: () {
-                    context.router.pushNamed("/pm/update-meter");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Create Assets'),
-                  onTap: () {
-                    context.router.pushNamed("/asset");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Create Contractors'),
-                  onTap: () {
-                    context.router.pushNamed("/contractor");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-              ],
-            )
-          ],
-        ),
+        child: NavDrawer(),
       ),
       body: ListView(// homepage widgets
           children: const <Widget>[

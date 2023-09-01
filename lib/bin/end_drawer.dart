@@ -4,7 +4,6 @@ import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
 import 'package:iko_reliability_flutter/admin/file_export.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
-import 'package:iko_reliability_flutter/creation/site_change_notifier.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
@@ -14,8 +13,8 @@ import 'package:provider/provider.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import '../criticality/criticality_db_export_import.dart';
 import '../main.dart';
-import 'consts.dart';
-import 'db_drift.dart';
+import '../admin/consts.dart';
+import '../admin/db_drift.dart';
 
 ///Widget for the right-side drawer of the app
 class EndDrawer extends StatefulWidget {
@@ -44,44 +43,28 @@ class _EndDrawerState extends State<EndDrawer> {
     var themeManager = Provider.of<ThemeManager>(context);
     if (ModalRoute.of(context)!.settings.name == 'AssetCriticalityRoute') {
       return assetCriticalityEndDrawer(context, themeManager);
-    } else if (ModalRoute.of(context)!.settings.name == 'AssetRoute') {
-      return assetCreationEndDrawer(context, themeManager);
+    } else if (ModalRoute.of(context)!.settings.name == 'HomeRoute') {
+      return homeRouteEndDrawer(context, themeManager);
     } else {
       return defaultEndDrawer(context, themeManager);
     }
   }
+  // Add HomeRoute
 
   ///Widget for default end drawer. Could not extract widget due to _passVisibility error
-  Widget defaultEndDrawer(BuildContext context, ThemeManager themeManager) {
+  Widget homeRouteEndDrawer(BuildContext context, ThemeManager themeManager) {
     return Drawer(
       child: ListView(
         children: <Widget>[
-          DrawerHeader(
-              child: ListTile(
-            title: const Text(
-              'Settings',
-              style: TextStyle(fontSize: 24),
-            ),
-            trailing: Switch(
-                //true => darkmode on
-                value: (themeManager.themeMode == ThemeMode.dark),
-                onChanged: (value) {
-                  themeManager.toggleTheme(value, context);
-                },
-                thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-                    (Set<MaterialState> states) {
-                  return (themeManager.themeMode == ThemeMode.dark)
-                      ? const Icon(Icons.dark_mode_rounded)
-                      : const Icon(Icons.light_mode_rounded);
-                })),
-          )),
+          const ThemeToggle(),
           ListTile(
               //environment selection
-              title: const Text('Maximo Environment'),
-              subtitle: const Text('Select which environment to work with'),
-              trailing: Consumer<MaximoServerNotifier>(
+              title: const Text('Select Maximo Environment'),
+              subtitle: Consumer<MaximoServerNotifier>(
                   builder: (context, value, child) {
                 return DropdownButton(
+                  isExpanded: true,
+                  hint: const Text('Select an environment to work with'),
                   value: value.maximoServerSelected,
                   onChanged: (String? newValue) {
                     value.setServer(newValue!);
@@ -197,6 +180,7 @@ class _EndDrawerState extends State<EndDrawer> {
               //asset/site loading
               title: const Text('Load Assets From Maximo'),
               subtitle: DropdownButton(
+                isExpanded: true,
                 onChanged: (String? newValue) {
                   setState(() {
                     siteid = newValue ?? '';
@@ -218,7 +202,7 @@ class _EndDrawerState extends State<EndDrawer> {
               trailing: Consumer<MaximoServerNotifier>(
                 builder: (context, maximo, child) {
                   //asset load button
-                  return ElevatedButton(
+                  return IconButton(
                     onPressed: () async {
                       if (siteid != '') {
                         var processNotifier = Provider.of<ProcessStateNotifier>(
@@ -255,7 +239,7 @@ class _EndDrawerState extends State<EndDrawer> {
                         }
                       }
                     },
-                    child: const Text('Load'),
+                    icon: const Icon(Icons.sync),
                   );
                 },
               )),
@@ -264,13 +248,13 @@ class _EndDrawerState extends State<EndDrawer> {
             title: const Text('Load Observation'),
             subtitle:
                 const Text('Clear and Load Observation list from spreadsheet'),
-            trailing: ElevatedButton(
+            trailing: IconButton(
               //load button
               onPressed: () {
                 database!.clearMeters();
                 database!.addMeters();
               },
-              child: const Text('Load'),
+              icon: const Icon(Icons.input),
             ),
           ),
           const ListTile(
@@ -296,106 +280,13 @@ class _EndDrawerState extends State<EndDrawer> {
       return Drawer(
         child: ListView(
           children: <Widget>[
-            DrawerHeader(
-                child: ListTile(
-              title: const Text(
-                'Asset Criticality Settings',
-                style: TextStyle(fontSize: 24),
-              ),
-              trailing: Switch(
-                  //true => darkmode on
-                  value: (themeManager.themeMode == ThemeMode.dark),
-                  onChanged: (value) {
-                    themeManager.toggleTheme(value, context);
-                  },
-                  thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-                      (Set<MaterialState> states) {
-                    return (themeManager.themeMode == ThemeMode.dark)
-                        ? const Icon(Icons.dark_mode_rounded)
-                        : const Icon(Icons.light_mode_rounded);
-                  })),
-            )),
-            ListTile(
-              title: const Text('Plant Site'),
-              trailing: DropdownButton(
-                value: context.read<AssetCriticalityNotifier>().selectedSite,
-                items: () {
-                  List<DropdownMenuItem<String>> list = [
-                    const DropdownMenuItem(
-                        value: 'NONE', child: Text('Select a site'))
-                  ];
-                  List<String> loadedSettings = (context
-                              .read<SettingsNotifier>()
-                              .getSetting(ApplicationSetting.loadedSites)
-                          as Set<String>)
-                      .toList();
-                  loadedSettings.sort((a, b) =>
-                      a.compareTo(b)); //put them in alphabetical order
-                  list.addAll(loadedSettings.map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(siteIDAndDescription[e] ?? 'NONE'))));
-                  return list;
-                }(),
-                onChanged: (newValue) {
-                  context
-                      .read<AssetCriticalityNotifier>()
-                      .setSite(newValue.toString());
-                },
-              ),
-            ),
+            const ThemeToggle(),
+            const SiteToggle(),
             ListTile(
               title: const Text('Risk Priority Distributions'),
               trailing: ElevatedButton(
                 child: const Text('Configure'),
                 onPressed: () => showRpnDistDialog(context),
-              ),
-            ),
-            ListTile(
-              title: const Text('Calculate Priority Ranges'),
-              trailing: ElevatedButton(
-                child: const Text('Calculate'),
-                onPressed: () {
-                  try {
-                    AssetCriticalityNotifier assetCriticalityNotifier =
-                        context.read<AssetCriticalityNotifier>();
-                    SettingsNotifier settingsNotifier =
-                        context.read<SettingsNotifier>();
-
-                    //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
-                    List<double> rpnList =
-                        List.from(assetCriticalityNotifier.rpnList);
-                    rpnList.removeWhere((rpn) => (rpn <= 0));
-
-                    //set rpn ranges
-                    List<double> newCutoffs = rpnDistRange(
-                        rpnList, settingsNotifier.getRpnPercentDists());
-                    assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
-                    debugPrint(
-                        'new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
-                    assetCriticalityNotifier.priorityRangesUpToDate = true;
-                    assetCriticalityNotifier.updateGrid = true;
-                  } catch (e) {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text(
-                                'Could Not Calculate Priority Ranges'),
-                            content: Text(
-                                //remove the text 'Exception: ' from e.toString()
-                                '${e.toString().substring(e.toString().indexOf(' ') + 1)} Try reconfiguring the risk priority distributions.'),
-                            actions: [
-                              Center(
-                                child: ElevatedButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('OK')),
-                              )
-                            ],
-                          );
-                        });
-                    debugPrint(e.toString());
-                  }
-                },
               ),
             ),
             ListTile(
@@ -434,16 +325,29 @@ class _EndDrawerState extends State<EndDrawer> {
             ListTile(
               title: const Text('Export Settings'),
               trailing: ElevatedButton(
-                child: const Text('Export'),
-                onPressed: () => exportCriticalityDB(database!),
-              ),
+                  child: const Text('Export'),
+                  onPressed: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(await exportCriticalityDB(
+                        database!,
+                        context.read<SelectedSiteNotifier>().selectedSite,
+                      )),
+                    ));
+                    Navigator.of(context).pop();
+                  }),
             ),
             ListTile(
               title: const Text('Import Settings'),
               trailing: ElevatedButton(
-                child: const Text('Import'),
-                onPressed: () => importCriticalityDB(database!),
-              ),
+                  child: const Text('Import'),
+                  onPressed: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(await importCriticalityDB(
+                        database!,
+                      )),
+                    ));
+                    Navigator.of(context).pop();
+                  }),
             ),
           ],
         ),
@@ -451,65 +355,77 @@ class _EndDrawerState extends State<EndDrawer> {
     });
   }
 
-  Widget assetCreationEndDrawer(
-      BuildContext context, ThemeManager themeManager) {
+  Widget defaultEndDrawer(BuildContext context, ThemeManager themeManager) {
     return Consumer<AssetCreationNotifier>(
       builder: (context, assetCreationNotifier, child) {
         return Drawer(
           child: ListView(
-            children: <Widget>[
-              DrawerHeader(
-                  child: ListTile(
-                title: const Text(
-                  'Asset Creation Settings',
-                  style: TextStyle(fontSize: 24),
-                ),
-                trailing: Switch(
-                    //true => darkmode on
-                    value: (themeManager.themeMode == ThemeMode.dark),
-                    onChanged: (value) {
-                      themeManager.toggleTheme(value, context);
-                    },
-                    thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-                        (Set<MaterialState> states) {
-                      return (themeManager.themeMode == ThemeMode.dark)
-                          ? const Icon(Icons.dark_mode_rounded)
-                          : const Icon(Icons.light_mode_rounded);
-                    })),
-              )),
-              ListTile(
-                title: const Text('Plant Site'),
-                trailing: DropdownButton(
-                  value: assetCreationNotifier.selectedSite,
-                  items: () {
-                    List<DropdownMenuItem<String>> list = [
-                      const DropdownMenuItem(
-                          value: 'NONE', child: Text('Select a site'))
-                    ];
-                    List<String> loadedSettings = (context
-                                .read<SettingsNotifier>()
-                                .getSetting(ApplicationSetting.loadedSites)
-                            as Set<String>)
-                        .toList();
-                    loadedSettings.sort((a, b) =>
-                        a.compareTo(b)); //put them in alphabetical order
-                    list.addAll(loadedSettings.map((e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(siteIDAndDescription[e] ?? 'NONE'))));
-                    return list;
-                  }(),
-                  onChanged: (newValue) {
-                    assetCreationNotifier.setSite(newValue.toString());
-                    context
-                        .read<SiteChangeNotifier>()
-                        .setSite(newValue.toString());
-                  },
-                ),
-              ),
+            children: const <Widget>[
+              ThemeToggle(),
+              SiteToggle(),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class ThemeToggle extends StatelessWidget {
+  const ThemeToggle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    var themeManager = Provider.of<ThemeManager>(context);
+    return DrawerHeader(
+        child: ListTile(
+      title: const Text(
+        'Settings',
+        style: TextStyle(fontSize: 24),
+      ),
+      trailing: Switch(
+          //true => darkmode on
+          value: (themeManager.themeMode == ThemeMode.dark),
+          onChanged: (value) {
+            themeManager.toggleTheme(value, context);
+          },
+          thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
+              (Set<MaterialState> states) {
+            return (themeManager.themeMode == ThemeMode.dark)
+                ? const Icon(Icons.dark_mode_rounded)
+                : const Icon(Icons.light_mode_rounded);
+          })),
+    ));
+  }
+}
+
+class SiteToggle extends StatelessWidget {
+  const SiteToggle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text('Plant Site'),
+      trailing: DropdownButton(
+        value: context.watch<SelectedSiteNotifier>().selectedSite,
+        items: () {
+          List<DropdownMenuItem<String>> list = [
+            const DropdownMenuItem(value: '', child: Text('Select a site'))
+          ];
+          List<String> loadedSettings = (context
+                  .read<SettingsNotifier>()
+                  .getSetting(ApplicationSetting.loadedSites) as Set<String>)
+              .toList();
+          loadedSettings
+              .sort((a, b) => a.compareTo(b)); //put them in alphabetical order
+          list.addAll(loadedSettings.map((e) => DropdownMenuItem(
+              value: e, child: Text(siteIDAndDescription[e] ?? ''))));
+          return list;
+        }(),
+        onChanged: (newValue) {
+          context.read<SelectedSiteNotifier>().setSite(newValue!);
+        },
+      ),
     );
   }
 }

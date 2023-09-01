@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
@@ -133,6 +134,7 @@ class SystemCriticalitys extends Table {
   IntColumn get economic => integer().withDefault(const Constant(0))();
   IntColumn get throughput => integer().withDefault(const Constant(0))();
   IntColumn get quality => integer().withDefault(const Constant(0))();
+  TextColumn get line => text()();
 }
 
 class AssetCriticalitys extends Table {
@@ -174,17 +176,32 @@ class AssetCriticalityWithAsset {
   final SystemCriticality? systemCriticality;
 }
 
-@DriftDatabase(tables: [
-  Settings,
-  LoginSettings,
-  MeterDBs,
-  Observations,
-  Assets,
-  Workorders,
-  SystemCriticalitys,
-  AssetCriticalitys,
-  AssetUploads,
-])
+@DriftDatabase(
+  tables: [
+    Settings,
+    LoginSettings,
+    MeterDBs,
+    Observations,
+    Assets,
+    Workorders,
+    SystemCriticalitys,
+    AssetCriticalitys,
+    AssetUploads,
+  ],
+  queries: {
+    'systemsFilteredBySite': '''
+SELECT * FROM system_criticalitys
+WHERE line IN (
+		SELECT substr(assetnum, 1, 1)
+		FROM assets
+		WHERE siteid = :siteid
+		)
+''',
+    'maxSystemID': '''
+select max(id) from system_criticalitys
+''',
+  },
+)
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
 
@@ -199,7 +216,7 @@ class MyDatabase extends _$MyDatabase {
   }
 
   ///update settings in database. List of settings has priority
-  Future<void> updateSettings(
+  Future<void> setSettings(
       {Setting? newSetting, List<Setting>? newSettings}) async {
     if (newSettings != null) {
       for (Setting thing in newSettings) {
@@ -220,25 +237,28 @@ class MyDatabase extends _$MyDatabase {
     ));
   }
 
-  Future<int> addSystemCriticalitys(String value) async {
+  Future<int> addSystemCriticalitys(String description) async {
     final row = await into(systemCriticalitys).insertReturning(
-        SystemCriticalitysCompanion.insert(description: value));
+        SystemCriticalitysCompanion.insert(description: description, line: ''));
     return row.id;
   }
 
-  void importCriticality(
-    List<Setting> setting,
-    List<AssetCriticality> criticality,
-    List<SystemCriticality> system,
-  ) async {
-    batch((batch) {
+  Future<void> importCriticality({
+    required List<Setting> setting,
+    required List<AssetCriticality> criticality,
+    required List<SystemCriticality> system,
+    required String siteid,
+  }) async {
+    await batch((batch) {
       batch.insertAllOnConflictUpdate(settings, setting);
     });
-    batch((batch) {
-      batch.insertAll(assetCriticalitys, criticality);
-    });
-    batch((batch) {
+    await (delete(systemCriticalitys)..where((t) => t.siteid.equals(siteid)))
+        .go();
+    await batch((batch) {
       batch.insertAll(systemCriticalitys, system);
+    });
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(assetCriticalitys, criticality);
     });
   }
 
@@ -329,6 +349,7 @@ class MyDatabase extends _$MyDatabase {
     int economic,
     int throughput,
     int quality,
+    String line,
   ) async {
     final row = await (update(systemCriticalitys)
           ..where((tbl) => tbl.id.equals(key)))
@@ -339,6 +360,7 @@ class MyDatabase extends _$MyDatabase {
       economic: Value(economic),
       throughput: Value(throughput),
       quality: Value(quality),
+      line: Value(line),
     ));
     return row.first.id;
   }
@@ -390,7 +412,7 @@ class MyDatabase extends _$MyDatabase {
           economic: Value(row[4]),
           throughput: Value(row[5]),
           quality: Value(row[6]),
-          siteid: Value(row[0]),
+          line: row[0],
         ));
       }
     }
@@ -493,15 +515,12 @@ class MyDatabase extends _$MyDatabase {
 
   Future getWorkOrderMaximo(String assetnum, String env) async {
     // maybe a return to indicate completion
-    List<String> messages = [];
     final result = await maximoRequest(
         'iko_wo?oslc.select=wonum,siteid,description,status,reportdate,IKO_DOWNTIME,WORKTYPE,assetnum&oslc.where=assetnum="$assetnum" and IKO_DOWNTIME>0',
         'get',
         env);
     if (result['member'].length > 0) {
       List<WorkordersCompanion> woInserts = [];
-      // save once without the hierarchy field then loop through again adding hierarchy
-      // because the parent assets might not always come before the child assets
       for (var row in result['member'].toList()) {
         woInserts.add(
           WorkordersCompanion.insert(
@@ -517,13 +536,10 @@ class MyDatabase extends _$MyDatabase {
           ),
         );
       }
-      try {
-        await batch((batch) {
-          batch.insertAllOnConflictUpdate(workorders, woInserts);
-        });
-      } catch (e) {
-        messages.add('Error inserting Meters\n${e.toString()}');
-      }
+
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(workorders, woInserts);
+      });
     }
   }
 
@@ -554,6 +570,28 @@ class MyDatabase extends _$MyDatabase {
       await loadSystems();
       systems = await (select(systemCriticalitys)).get();
     }
+    return systems;
+  }
+
+  Future<List<SystemCriticality>> getSystemCriticalitiesFiltered(
+      String siteid) async {
+    var systems = await (select(systemCriticalitys)
+          ..where((tbl) => tbl.siteid.equals(siteid)))
+        .get();
+    if (siteid == '') {
+      return systems;
+    }
+    if (systems.isNotEmpty) {
+      return systems;
+    }
+    systems = await systemsFilteredBySite(siteid).get();
+    if (systems.isNotEmpty) {
+      return systems;
+    }
+    // if there are no systems in DB load systems from Excel
+    debugPrint('Loading all Systems');
+    await loadSystems();
+    systems = await systemsFilteredBySite(siteid).get();
     return systems;
   }
 
@@ -662,7 +700,7 @@ class MyDatabase extends _$MyDatabase {
           batch.insertAllOnConflictUpdate(assets, assetInserts);
         });
       } catch (e) {
-        messages.add('Error inserting Meters\n${e.toString()}');
+        messages.add('Error getting assets from Maximo\n${e.toString()}');
       }
       var siteAssets = await getSiteAssets(siteid);
       assetCache[siteid] = {};

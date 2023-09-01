@@ -3,18 +3,20 @@ import 'dart:math';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:iko_reliability_flutter/admin/end_drawer.dart';
+import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
+import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
+import '../bin/drawer.dart';
+import 'criticality_settings_notifier.dart';
 import 'percent_slider.dart';
 
 import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
 import '../settings/theme_manager.dart';
-import 'criticality_notifier.dart';
 import 'functions.dart';
 
 @RoutePage()
@@ -46,9 +48,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   @override
   void initState() {
     super.initState();
-    AssetCriticalityNotifier assetCriticalityNotifier =
-        context.read<AssetCriticalityNotifier>();
 
+// Columns for Work Orders
     detailColumns.addAll([
       PlutoColumn(
         readOnly: true,
@@ -93,8 +94,23 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         field: 'downtime',
         type: PlutoColumnType.text(),
       ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        title: 'Site',
+        field: 'site',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        width: 100,
+        readOnly: true,
+        title: 'Included',
+        field: 'included',
+        type: PlutoColumnType.text(),
+      ),
     ]);
 
+// Columns for Assets
     columns.addAll([
       PlutoColumn(
         title: '',
@@ -116,32 +132,28 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       ),
       PlutoColumn(
           width: 100,
-          title: 'Action',
+          title: 'Status',
           field: 'action',
           type: PlutoColumnType.text(),
           renderer: (rendererContext) {
             return Row(
               children: [
                 IconButton(
+                  tooltip:
+                      'Refresh breakdown information from Maximo.\nUpdates child assets if parent selected',
                   icon: const Icon(
                     Icons.refresh,
                   ),
                   onPressed: () {
-                    debugPrint('${rendererContext.rowIdx}');
-                    assetCriticalityNotifier
-                        .updateCollapsedAssets(stateManager);
-
                     String assetnum =
                         rendererContext.row.cells['assetnum']!.value;
-                    refreshAsset(
-                        assetnum, assetCriticalityNotifier.selectedSite);
+                    refreshAsset(assetnum);
                     //refresh children assets
                     Set<String> childAssetnums = getChildAssetnums(assetnum);
                     for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
                       String tempAssetnum = row.cells['assetnum']!.value;
                       if (childAssetnums.contains(tempAssetnum)) {
-                        refreshAsset(tempAssetnum,
-                            assetCriticalityNotifier.selectedSite);
+                        refreshAsset(tempAssetnum);
                       }
                     }
                   },
@@ -149,17 +161,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   color: Colors.green,
                   padding: const EdgeInsets.all(0),
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.info,
-                  ),
-                  onPressed: () {
-                    refreshAsset(rendererContext.row.cells['assetnum']!.value,
-                        context.read<AssetCriticalityNotifier>().selectedSite);
-                  },
-                  iconSize: 18,
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(0),
+                StatusIcon(
+                  rendererContext: rendererContext,
                 ),
               ],
             );
@@ -184,44 +187,63 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         type: PlutoColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
-          return Consumer<SystemsNotifier>(builder: (context, systems, child) {
-            return DropdownButton(
-              value: rendererContext.cell.value,
-              icon: const Icon(Icons.arrow_downward),
-              elevation: 16,
-              isExpanded: true,
-              onChanged: (newValue) {
-                setState(() {
-                  assetCriticalityNotifier.updateCollapsedAssets(stateManager);
-                  //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
-                  String assetnum =
-                      rendererContext.row.cells['assetnum']!.value;
-                  //refresh children assets
-                  Set<String> childAssetnums = getChildAssetnums(assetnum);
-                  for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
-                    String tempAssetnum = row.cells['assetnum']!.value;
-                    if (childAssetnums.contains(tempAssetnum)) {
-                      PlutoCell? tempCellRef = row.cells['system'];
-                      if (tempCellRef != null) {
-                        stateManager.changeCellValue(tempCellRef, newValue);
-                      }
+          return Consumer<SelectedSiteNotifier>(
+            builder: (context, site, child) {
+              return FutureBuilder(
+                future:
+                    database!.getSystemCriticalitiesFiltered(site.selectedSite),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<SystemCriticality>> snapshot) {
+                  List<DropdownMenuItem<int>> items = [];
+                  if (snapshot.hasData) {
+                    if (snapshot.data?.isNotEmpty ?? false) {
+                      items =
+                          snapshot.data!.map<DropdownMenuItem<int>>((value) {
+                        return DropdownMenuItem<int>(
+                          value: value.id,
+                          child: Text(value.description),
+                        );
+                      }).toList();
+                      items.add(const DropdownMenuItem<int>(
+                        value: 0,
+                        child: Text(''),
+                      ));
                     }
-                    stateManager.changeCellValue(
-                        rendererContext.cell, newValue);
                   }
-                  //change cell value
-                  //stateManager.changeCellValue(rendererContext.cell, newValue);
-                });
-              },
-              items:
-                  systems.systems.keys.map<DropdownMenuItem<int>>((int value) {
-                return DropdownMenuItem<int>(
-                  value: value,
-                  child: Text(systems.systems[value]!['description']!),
-                );
-              }).toList(),
-            );
-          });
+                  return DropdownButton(
+                    value: rendererContext.cell.value,
+                    icon: const Icon(Icons.arrow_downward),
+                    elevation: 16,
+                    isExpanded: true,
+                    onChanged: (newValue) {
+                      setState(() {
+                        //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
+                        String assetnum =
+                            rendererContext.row.cells['assetnum']!.value;
+                        //refresh children assets
+                        Set<String> childAssetnums =
+                            getChildAssetnums(assetnum);
+                        for (PlutoRow row
+                            in stateManager.iterateAllRowAndGroup) {
+                          String tempAssetnum = row.cells['assetnum']!.value;
+                          if (childAssetnums.contains(tempAssetnum)) {
+                            PlutoCell? tempCellRef = row.cells['system'];
+                            if (tempCellRef != null) {
+                              stateManager.changeCellValue(
+                                  tempCellRef, newValue);
+                            }
+                          }
+                          stateManager.changeCellValue(
+                              rendererContext.cell, newValue);
+                        }
+                      });
+                    },
+                    items: items,
+                  );
+                },
+              );
+            },
+          );
         },
       ),
       PlutoColumn(
@@ -309,28 +331,47 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       detailStateManager.setShowLoading(true);
 
       fetchWoHistory(stateManager.currentRow!.cells['assetnum']!.value,
-          context.read<AssetCriticalityNotifier>().selectedSite);
+          context.read<SelectedSiteNotifier>().selectedSite);
     }
   }
 
   void fetchWoHistory(String assetnum, String siteid) async {
-    //TODO: use work order settings
     var wos = await database!.getAssetWorkorders(assetnum, siteid);
     List<PlutoRow> rows = [];
+    List<PlutoRow> excludedRows = [];
     for (var wo in wos) {
-      rows.add(PlutoRow(cells: {
-        'wonum': PlutoCell(value: wo.wonum),
-        'description': PlutoCell(value: wo.description),
-        'type': PlutoCell(value: wo.type),
-        'status': PlutoCell(value: wo.status),
-        'reportdate': PlutoCell(value: wo.reportdate),
-        'downtime': PlutoCell(value: wo.downtime),
-      }));
+      if (isWorkOrderInRange(wo)) {
+        rows.add(PlutoRow(
+          cells: {
+            'wonum': PlutoCell(value: wo.wonum),
+            'description': PlutoCell(value: wo.description),
+            'type': PlutoCell(value: wo.type),
+            'status': PlutoCell(value: wo.status),
+            'reportdate': PlutoCell(value: wo.reportdate),
+            'downtime': PlutoCell(value: wo.downtime),
+            'site': PlutoCell(value: siteIDAndDescription[wo.siteid]),
+            'included': PlutoCell(value: ('Yes')),
+          },
+        ));
+      } else {
+        excludedRows.add(PlutoRow(
+          cells: {
+            'wonum': PlutoCell(value: wo.wonum),
+            'description': PlutoCell(value: wo.description),
+            'type': PlutoCell(value: wo.type),
+            'status': PlutoCell(value: wo.status),
+            'reportdate': PlutoCell(value: wo.reportdate),
+            'downtime': PlutoCell(value: wo.downtime),
+            'site': PlutoCell(value: siteIDAndDescription[wo.siteid]),
+            'included': PlutoCell(value: ('No')),
+          },
+        ));
+      }
     }
 
     detailStateManager.removeRows(detailStateManager.rows);
     detailStateManager.resetCurrentState();
-    detailStateManager.appendRows(rows);
+    detailStateManager.appendRows([...rows, ...excludedRows]);
 
     detailStateManager.setShowLoading(false);
   }
@@ -356,7 +397,16 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     List<PlutoRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
-        double? calculatedRPN = rpnFunc(child);
+        double calculatedRPN = rpnFunc(child) ?? -1;
+        String priorityText = context
+            .read<AssetCriticalityNotifier>()
+            .rpnFindDistribution(calculatedRPN);
+        if (calculatedRPN > 0) {
+          context.read<AssetStatusNotifier>().updateAssetStatus(
+            assets: [child.asset.assetnum],
+            status: AssetStatus.complete,
+          );
+        }
         rows.add(PlutoRow(
           cells: {
             'assetnum': PlutoCell(value: child.asset.assetnum),
@@ -369,10 +419,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 PlutoCell(value: child.assetCriticality?.frequency ?? 0),
             'downtime': PlutoCell(value: child.assetCriticality?.downtime ?? 0),
             'hierarchy': PlutoCell(value: ''),
-            'newPriority': PlutoCell(
-                value: context
-                    .read<AssetCriticalityNotifier>()
-                    .rpnFindDistribution(calculatedRPN ?? -1)),
+            'newPriority': PlutoCell(value: priorityText),
             'rpn': PlutoCell(value: calculatedRPN),
             'id': PlutoCell(value: child.asset.id),
           },
@@ -386,26 +433,47 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     return rows;
   }
 
-  void collapseRows() {
-    for (var row in stateManager.iterateAllRow) {
-      debugPrint(row.cells.values.first.value);
-    }
-  }
-
-  void refreshAsset(String assetnum, [String? siteid]) async {
-    //TODO: use work order settings
-    await database!.getWorkOrderMaximo(
-      assetnum,
-      context.read<MaximoServerNotifier>().maximoServerSelected,
+  void refreshAsset(String assetnum) async {
+    // change status icon
+    AssetStatus previousStatus =
+        context.read<AssetStatusNotifier>().getAssetStatus(assetnum);
+    context.read<AssetStatusNotifier>().updateAssetStatus(
+      assets: [assetnum],
+      status: AssetStatus.refreshingWorkOrders,
     );
-    var wos = await database!.getAssetWorkorders(assetnum, siteid);
-    double downtime = 0;
-    double dtEvents = wos.length.toDouble();
-    for (var wo in wos) {
-      downtime += wo.downtime;
+    // get all WOs from Maximo
+    try {
+      await database!.getWorkOrderMaximo(
+        assetnum,
+        context.read<MaximoServerNotifier>().maximoServerSelected,
+      );
+    } catch (e) {
+      previousStatus = AssetStatus.refreshError;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+            'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}'),
+      ));
+      return;
     }
-    downtime = downtime / years;
-    dtEvents = dtEvents / years;
+    // bring back previous status Icon
+    context.read<AssetStatusNotifier>().updateAssetStatus(
+      assets: [assetnum],
+      status: previousStatus,
+    );
+    var wos = await database!.getAssetWorkorders(assetnum);
+    double downtime = 0;
+    double dtEvents = 0;
+    AssetCriticalitySettingsNotifier assetCriticalitySettings =
+        context.read<AssetCriticalitySettingsNotifier>();
+    for (var wo in wos) {
+      if (!isWorkOrderInRange(wo)) {
+        continue;
+      }
+      downtime = downtime + wo.downtime;
+      dtEvents++;
+    }
+    downtime = downtime / assetCriticalitySettings.frequencyPeriodYears;
+    dtEvents = dtEvents / assetCriticalitySettings.frequencyPeriodYears;
     for (var row in stateManager.iterateRowAndGroup) {
       if (row.cells['assetnum']!.value == assetnum) {
         stateManager.changeCellValue(
@@ -417,200 +485,245 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     }
   }
 
+  bool isWorkOrderInRange(Workorder workorder) {
+    String selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
+    AssetCriticalitySettingsNotifier assetCriticalitySettings =
+        context.read<AssetCriticalitySettingsNotifier>();
+    DateTime reportedDate = DateTime.parse(workorder.reportdate);
+    if (reportedDate.compareTo(assetCriticalitySettings.workOrderCutoffStart) <
+        0) {
+      return false;
+    }
+    if (reportedDate.compareTo(assetCriticalitySettings.workOrderCutoffEnd) >
+        0) {
+      return false;
+    }
+    // check site
+    switch (assetCriticalitySettings.workOrderFilterBy) {
+      case WorkOrderFilterBy.currentSite:
+        if (workorder.siteid != selectedSite) {
+          return false;
+        }
+      default:
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeManager themeManager = Provider.of<ThemeManager>(context);
-    return Builder(builder: (context) {
-      return Scaffold(
-          appBar: AppBar(
-            title: const Text('Asset Criticality'),
-            actions: [
-              Builder(
-                  builder: (context) => IconButton(
-                        onPressed: () {
-                          Scaffold.of(context).openEndDrawer();
-                        },
-                        icon: const Icon(Icons.settings),
-                        tooltip: 'Settings',
-                      ))
-            ],
-          ),
-          endDrawer: const EndDrawer(),
-          body: Container(
-              // key: Key(context.read<AssetCriticalityNotifier>().selectedSite),
-              padding: const EdgeInsets.all(30),
-              child: FutureBuilder<List<AssetCriticalityWithAsset>>(
-                  future: database!.getAssetCriticalities(
-                      context.watch<AssetCriticalityNotifier>().selectedSite),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
-                    List<PlutoRow> rows = [];
-                    if (snapshot.hasData) {
-                      if (snapshot.data!.isNotEmpty) {
-                        if (loadedSite != snapshot.data?.first.asset.siteid ||
-                            context
-                                .watch<AssetCriticalityNotifier>()
-                                .updateGrid) {
-                          siteAssets = {};
-                          parentAssets = {};
-                          for (var row in snapshot.data!) {
-                            siteAssets[row.asset.assetnum] = row;
-                            if (parentAssets.containsKey(row.asset.parent)) {
-                              parentAssets[row.asset.parent]!.add(row);
-                            } else {
-                              parentAssets[row.asset.parent ?? "Top"] = [row];
-                            }
-                          }
-                          loadedSite = snapshot.data!.first.asset.siteid;
-                          rows = getChilds('Top');
-                          stateManager.removeAllRows();
-                          stateManager.appendRows(rows);
-                          //load rpn numbers from plutogrid into AssetCriticalityNotifier
-                          Map<String, double> newRpnMap = {};
-                          for (PlutoRow row in stateManager.rows) {
-                            if (row.cells['id'] != null) {
-                              newRpnMap[row.cells['id']!.value] =
-                                  (row.cells['rpn']?.value ?? -1) + 0.0;
-                            }
-                          }
-                          context
-                              .read<AssetCriticalityNotifier>()
-                              .setRpnMap(newRpnMap, notify: false);
-                          stateManager.toggleExpandedRowGroup(
-                              rowGroup: stateManager.rows.first);
-                          stateManager.toggleExpandedRowGroup(
-                              rowGroup: stateManager.rows.first);
-                          context.watch<AssetCriticalityNotifier>().updateGrid =
-                              false;
-                        }
-                      }
-                    } else if (snapshot.hasError) {
-                      rows.add(PlutoRow(
-                        cells: {
-                          'assetnum': PlutoCell(value: 'Error!'),
-                          'parent': PlutoCell(value: ''),
-                          'description': PlutoCell(value: snapshot.error),
-                          'priority': PlutoCell(value: 0),
-                          'system': PlutoCell(value: 0),
-                          'action': PlutoCell(value: ''),
-                          'frequency': PlutoCell(value: 0),
-                          'downtime': PlutoCell(value: 0),
-                          'hierarchy': PlutoCell(value: ''),
-                          'newPriority': PlutoCell(value: 0),
-                          'rpn': PlutoCell(value: 0),
-                          'id': PlutoCell(value: ''),
-                        },
-                      ));
-                    } else {
-                      rows.add(PlutoRow(
-                        cells: {
-                          'assetnum': PlutoCell(value: ''),
-                          'parent': PlutoCell(value: ''),
-                          'description': PlutoCell(value: 'No Site Selected'),
-                          'priority': PlutoCell(value: 0),
-                          'system': PlutoCell(value: 0),
-                          'action': PlutoCell(value: ''),
-                          'frequency': PlutoCell(value: 0),
-                          'downtime': PlutoCell(value: 0),
-                          'hierarchy': PlutoCell(value: ''),
-                          'newPriority': PlutoCell(value: 0),
-                          'rpn': PlutoCell(value: 0),
-                          'id': PlutoCell(value: ''),
-                        },
-                      ));
-                    }
-                    return PlutoDualGrid(
-                      isVertical: true,
-                      display: PlutoDualGridDisplayRatio(ratio: 0.75),
-                      gridPropsA: PlutoDualGridProps(
-                        columns: columns,
-                        rows: rows,
-                        onLoaded: (PlutoGridOnLoadedEvent event) {
-                          stateManager = event.stateManager;
-                          context
-                              .read<AssetCriticalityNotifier>()
-                              .stateManager = stateManager;
-                          event.stateManager.addListener(gridAHandler);
-                          stateManager.setShowColumnFilter(true);
-                          stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
-                            resolveColumnDepth: (column) =>
-                                stateManager.columnIndex(column),
-                            showText: (cell) => true,
-                            showCount: false,
-                            showFirstExpandableIcon: true,
-                          ));
-                        },
-                        onChanged: (PlutoGridOnChangedEvent event) async {
-                          // Cache cache = context.read<Cache>();
-                          AssetCriticalityNotifier assetCriticalityNotifier =
-                              context.read<AssetCriticalityNotifier>();
-                          assetCriticalityNotifier.priorityRangesUpToDate =
-                              false;
-                          // assetCriticalityNotifier
-                          //     .updateCollapsedAssets(stateManager);
-                          String rowId = event.row.cells['id']?.value ?? 'N/A';
-                          AssetCriticalityWithAsset asset =
-                              siteAssets[event.row.cells['assetnum']!.value]!;
-                          asset = AssetCriticalityWithAsset(
-                            asset.asset,
-                            AssetCriticality(
-                              asset: '',
-                              system: 0,
-                              frequency: event.row.cells['frequency']!.value,
-                              downtime: event.row.cells['downtime']!.value,
-                              type: '',
-                            ),
-                            (await database!.getSystemCriticality(
-                                    event.row.cells['system']!.value))
-                                .first,
-                          );
-                          double newRpn = rpnFunc(asset) ?? -1;
-                          event.row.cells['rpn']!.value = newRpn;
-                          if (rowId != 'N/A') {
-                            assetCriticalityNotifier
-                                .addToRpnMap({rowId: newRpn});
-                          }
-                          event.row.cells['newPriority']!.value = context
-                              .read<AssetCriticalityNotifier>()
-                              .rpnFindDistribution(newRpn);
-                          updateAsset(event.row);
-                          debugPrint('$event');
-                        },
-                        configuration: PlutoGridConfiguration(
-                            style: themeManager.isDark
-                                ? const PlutoGridStyleConfig.dark()
-                                : const PlutoGridStyleConfig(),
-                            shortcut: PlutoGridShortcut(actions: {
-                              ...PlutoGridShortcut.defaultActions,
-                              LogicalKeySet(LogicalKeyboardKey.add):
-                                  CustomAddKeyAction(),
-                              LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                                  CustomAddKeyAction(),
-                              LogicalKeySet(LogicalKeyboardKey.minus):
-                                  CustomMinusKeyAction(),
-                              LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                                  CustomMinusKeyAction(),
-                            })),
-                      ),
-                      gridPropsB: PlutoDualGridProps(
-                        configuration: PlutoGridConfiguration(
-                            style: themeManager.isDark
-                                ? const PlutoGridStyleConfig.dark()
-                                : const PlutoGridStyleConfig()),
-                        columns: detailColumns,
-                        rows: detailRows,
-                        onLoaded: (PlutoGridOnLoadedEvent event) {
-                          detailStateManager = event.stateManager;
-                        },
-                      ),
-                      divider: themeManager.isDark
-                          ? PlutoDualGridDivider.dark(
-                              indicatorColor:
-                                  Theme.of(context).colorScheme.onBackground)
-                          : const PlutoDualGridDivider(),
+    return Scaffold(
+      drawer: const Drawer(
+        //navigation drawer
+        child: NavDrawer(),
+      ),
+      appBar: AppBar(
+        title: const Text('Asset Criticality'),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: const Icon(Icons.settings),
+              tooltip: 'Settings',
+            ),
+          )
+        ],
+      ),
+      endDrawer: const EndDrawer(),
+      body: FutureBuilder<List<AssetCriticalityWithAsset>>(
+        future: () async {
+          context
+              .read<AssetCriticalitySettingsNotifier>()
+              .setSite(context.watch<SelectedSiteNotifier>().selectedSite);
+          return database!.getAssetCriticalities(
+              context.watch<SelectedSiteNotifier>().selectedSite);
+        }(),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
+          List<PlutoRow> rows = [];
+          if (snapshot.hasData) {
+            if (snapshot.data!.isNotEmpty) {
+              // only update grid if the selected site is different from what is currently loaded
+              // or if grid is marked for update
+              if (loadedSite != snapshot.data?.first.asset.siteid ||
+                  context.watch<AssetCriticalityNotifier>().updateGrid) {
+                siteAssets = {};
+                parentAssets = {};
+                for (var row in snapshot.data!) {
+                  siteAssets[row.asset.assetnum] = row;
+                  if (parentAssets.containsKey(row.asset.parent)) {
+                    parentAssets[row.asset.parent]!.add(row);
+                  } else {
+                    parentAssets[row.asset.parent ?? "Top"] = [row];
+                  }
+                }
+                context
+                    .read<AssetStatusNotifier>()
+                    .updateParentAssets(parentAssets.keys.toList());
+
+                loadedSite = snapshot.data!.first.asset.siteid;
+                rows = getChilds('Top');
+                stateManager.removeAllRows();
+                stateManager.appendRows(rows);
+                //load rpn numbers from plutogrid into AssetCriticalityNotifier
+                Map<String, double> newRpnMap = {};
+                for (PlutoRow row in stateManager.rows) {
+                  if (row.cells['id'] != null) {
+                    newRpnMap[row.cells['id']!.value] =
+                        (row.cells['rpn']?.value ?? -1) + 0.0;
+                  }
+                }
+                context
+                    .read<AssetCriticalityNotifier>()
+                    .setRpnMap(newRpnMap, notify: false);
+                stateManager.toggleExpandedRowGroup(
+                    rowGroup: stateManager.rows.first);
+                stateManager.toggleExpandedRowGroup(
+                    rowGroup: stateManager.rows.first);
+                context.watch<AssetCriticalityNotifier>().updateGrid = false;
+              }
+            }
+          } else if (snapshot.hasError) {
+            rows.add(PlutoRow(
+              cells: {
+                'assetnum': PlutoCell(value: 'Error!'),
+                'parent': PlutoCell(value: ''),
+                'description': PlutoCell(value: snapshot.error),
+                'priority': PlutoCell(value: 0),
+                'system': PlutoCell(value: 0),
+                'action': PlutoCell(value: ''),
+                'frequency': PlutoCell(value: 0),
+                'downtime': PlutoCell(value: 0),
+                'hierarchy': PlutoCell(value: ''),
+                'newPriority': PlutoCell(value: 0),
+                'rpn': PlutoCell(value: 0),
+                'id': PlutoCell(value: ''),
+              },
+            ));
+          } else {
+            rows.add(PlutoRow(
+              cells: {
+                'assetnum': PlutoCell(value: ''),
+                'parent': PlutoCell(value: ''),
+                'description': PlutoCell(value: 'No Site Selected'),
+                'priority': PlutoCell(value: 0),
+                'system': PlutoCell(value: 0),
+                'action': PlutoCell(value: ''),
+                'frequency': PlutoCell(value: 0),
+                'downtime': PlutoCell(value: 0),
+                'hierarchy': PlutoCell(value: ''),
+                'newPriority': PlutoCell(value: 0),
+                'rpn': PlutoCell(value: 0),
+                'id': PlutoCell(value: ''),
+              },
+            ));
+          }
+          return PlutoDualGrid(
+            isVertical: true,
+            display: PlutoDualGridDisplayRatio(ratio: 0.75),
+            gridPropsA: PlutoDualGridProps(
+              columns: columns,
+              rows: rows,
+              onLoaded: (PlutoGridOnLoadedEvent event) {
+                stateManager = event.stateManager;
+                context.read<AssetCriticalityNotifier>().stateManager =
+                    stateManager;
+                event.stateManager.addListener(gridAHandler);
+                stateManager.setShowColumnFilter(true);
+                stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
+                  resolveColumnDepth: (column) =>
+                      stateManager.columnIndex(column),
+                  showText: (cell) => true,
+                  showCount: false,
+                  showFirstExpandableIcon: true,
+                ));
+              },
+              onChanged: (PlutoGridOnChangedEvent event) async {
+                AssetCriticalityNotifier assetCriticalityNotifier =
+                    context.read<AssetCriticalityNotifier>();
+                assetCriticalityNotifier.priorityRangesUpToDate = false;
+                String rowId = event.row.cells['id']?.value ?? 'N/A';
+                AssetCriticalityWithAsset asset =
+                    siteAssets[event.row.cells['assetnum']!.value]!;
+                // Create an new ACWA object for rpn calculation
+                try {
+                  asset = AssetCriticalityWithAsset(
+                    asset.asset,
+                    AssetCriticality(
+                      asset: '',
+                      system: 0,
+                      frequency: event.row.cells['frequency']!.value,
+                      downtime: event.row.cells['downtime']!.value,
+                      type: '',
+                    ),
+                    // TODO this causes an error when reloading asset with no system selected
+                    (await database!.getSystemCriticality(
+                            event.row.cells['system']!.value))
+                        .first,
+                  );
+                  double newRpn = rpnFunc(asset) ?? -1;
+                  event.row.cells['rpn']!.value = newRpn;
+                  if (rowId != 'N/A') {
+                    assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
+                  }
+                  String criticalityText = context
+                      .read<AssetCriticalityNotifier>()
+                      .rpnFindDistribution(newRpn);
+                  event.row.cells['newPriority']!.value = criticalityText;
+                  if (newRpn > 0) {
+                    context.read<AssetStatusNotifier>().updateAssetStatus(
+                      assets: [event.row.cells['assetnum']!.value],
+                      status: AssetStatus.complete,
                     );
-                  })));
-    });
+                  }
+                } catch (e) {
+                  debugPrint('Failed to calculate RPN number ${e.toString()}');
+                }
+                updateAsset(event.row);
+                debugPrint('$event');
+              },
+              configuration: PlutoGridConfiguration(
+                  style: themeManager.isDark
+                      ? const PlutoGridStyleConfig.dark()
+                      : const PlutoGridStyleConfig(),
+                  shortcut: PlutoGridShortcut(actions: {
+                    ...PlutoGridShortcut.defaultActions,
+                    LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
+                    LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                        CustomAddKeyAction(),
+                    LogicalKeySet(LogicalKeyboardKey.minus):
+                        CustomMinusKeyAction(),
+                    LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                        CustomMinusKeyAction(),
+                  })),
+            ),
+            gridPropsB: PlutoDualGridProps(
+              configuration: PlutoGridConfiguration(
+                  style: themeManager.isDark
+                      ? const PlutoGridStyleConfig.dark()
+                      : const PlutoGridStyleConfig()),
+              columns: detailColumns,
+              rows: detailRows,
+              onLoaded: (PlutoGridOnLoadedEvent event) {
+                detailStateManager = event.stateManager;
+              },
+              rowColorCallback: (rowColorContext) {
+                if (rowColorContext.row.cells['included']!.value != 'Yes') {
+                  return Colors.grey;
+                }
+                return themeManager.isDark ? Colors.black : Colors.white;
+              },
+            ),
+            divider: themeManager.isDark
+                ? PlutoDualGridDivider.dark(
+                    indicatorColor: Theme.of(context).colorScheme.onBackground)
+                : const PlutoDualGridDivider(),
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -666,171 +779,6 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
   }
 }
 
-int ratingFromValue(double value, Map<int, Map<String, dynamic>> definition) {
-  for (var i = 1; i < 11; i++) {
-    if (value < definition[i]!['high']!) {
-      return i;
-    }
-  }
-  return 1;
-}
-
-///To calculate the system score for an asset.
-///Uses the root mean squared (RMS) of the asset's ratings of safety, regulatory, economic, throughput, and quality.
-///Economic and quality values are integers from 1-5, while the rest are between 1-10.
-///System score is used to calculate risk priority number (RPN)
-double calculateSystemScore(List<int> ratings) {
-  if (ratings.length != 5) {
-    throw Exception(
-        'Error in parameter [ratings] for function [calculateSystemScore]. Must have a length of 5');
-  }
-  num sum2 = 0;
-  for (int rating in ratings) {
-    sum2 += pow(rating, 2);
-  }
-  return sqrt(sum2 / ratings.length);
-}
-
-///returns a list of rpn maximum values (inclusive) for rpn assessments (e.g. very low, medium, high, etc) in order to have the
-///closest percent distribution to that listed in {rpnPercentDist}
-///Params:
-/// - rpnList: list of all the rpns (without 0 or -1 values)
-/// - rpnPercentDist: desired rpn percent distribution in rpn assessments. Listed from least serious (very low) to most serious (very high)
-/// - tolerance: a percentage. if the difference between the desired and actual percent distribution is greater than the tolerance, use a different distribution
-/// Returns list of rpn maximum values for each distribution range, from very low to very high
-List<double> rpnDistRange(List<double> rpnList, List<int> rpnPercentDist,
-    {double tolerance = 10}) {
-  /* 
-  duplicates must be found as consider the following example:
-    say the rpns are [1, 2, 3, 3, 3, 4, 5, 6, 7, 8] and we want to get 30% dist for very low.
-    index = rpns.length * 30% - 1 = 2, so the cutoff point should be at rpn = rpns[2] = 3
-    however, since there are duplicates of the cutoff point, the actual cutoff point will be at index = 4
-    hence the distrubution will be 50%.
-    if we set rpn = 2 as the cutoff point, the distrubution will be 20%, which is closer to 30% than 50% is
-  */
-
-  ///searches for duplicates of the item at index a in an ordered list.
-  ///returns a List<int> of length 2 of the indicies of the furthest duplicate of item at index. result = [first, last]
-  ///recursive(ish) function (don't use optional param {searchDownwardsThruList} when calling)
-  dynamic searchForDuplicate(List orderedRpnList, int index,
-      {bool? searchDownwardsThruList}) {
-    if (searchDownwardsThruList == null) {
-      return <int>[
-        searchForDuplicate(orderedRpnList, index - 1,
-            searchDownwardsThruList: true),
-        searchForDuplicate(orderedRpnList, index - 1,
-            searchDownwardsThruList: false)
-      ];
-      //recursive conditions
-    } else if (searchDownwardsThruList) {
-      try {
-        if (orderedRpnList[index] == orderedRpnList[index + 1]) {
-          return (searchForDuplicate(orderedRpnList, index - 1,
-              searchDownwardsThruList: true));
-        } else {
-          return index + 1;
-        }
-      } catch (e) {
-        return index + 1;
-      }
-    } else {
-      try {
-        if (orderedRpnList[index] == orderedRpnList[index - 1]) {
-          return (searchForDuplicate(orderedRpnList, index + 1,
-              searchDownwardsThruList: false));
-        } else {
-          return index - 1;
-        }
-      } catch (e) {
-        return index - 1;
-      }
-    }
-  }
-
-  List<double> percentDist = List.from(rpnPercentDist
-      .map((i) => i.toDouble())
-      .toList()
-      .reversed); //order list from highest to lowest priority. Will process from lowest to highest, but Dart only has list.removeLast
-  List<double> list = List<double>.of(rpnList); //copy the ordered rpn list.
-  list.sort((a, b) => b.compareTo(
-      a)); //reversed (highest to lowest) for now, to use List.removelast. Since ordered, should be more efficient than removeWhere()
-  while (list.isNotEmpty && list.last <= 0) {
-    //remove all not yet calculated rpns
-    list.removeLast();
-  }
-  if (Set.from(list).length < 5) {
-    throw Exception(
-        'Need at least 5 distinct RPNs to calculate distributions. Currently have ${Set.from(list).length} distinct RPN values.');
-  }
-  list = List.from(list.reversed); //reverse the list back to lowest to highest
-  List<double> rangeDist = [];
-  double diff = 100000.01; //some large number
-  double targetDist = 0;
-
-  while (percentDist.length > 1) {
-    targetDist += percentDist.removeLast();
-    //get supposed index position of the cutoff RPN in [list]
-    int index = (list.length * targetDist / 100).round() - 1;
-    //check for duplicates of the value at i
-    List<int> duplicates = searchForDuplicate(list, index);
-    if (duplicates[0] == index && duplicates[1] == index) {
-      //no duplicates, list[index] is cutoff RPN for current dist
-      //calculate the difference between ideal percent distribution and actual
-      diff = targetDist - ((list.length - index - 1) / list.length * 100);
-    } else {
-      //duplicates exist, three possible cutoff RPNs: RPN at list[index], the RPN right before it, and the RPN after it. Use whatever results in percent distribution closer to [targetDist]
-      int? indexDwn = (duplicates[0] - 1) >= 0
-          ? searchForDuplicate(list, duplicates[0] - 1)[0]
-          : null; //lower index on list, RPN right above list[index]. Note that list is from greatest to least. Must account for dupes
-      int indexMid = duplicates[0];
-      int? indexUp =
-          (duplicates[1] + 1) < list.length ? (duplicates[1] + 1) : null;
-
-      if (indexDwn != null) {
-        index = indexDwn;
-        diff = targetDist - ((index + 1) / list.length * 100);
-      }
-      if (indexUp != null) {
-        double tempDiff = targetDist - ((indexUp + 1) / list.length * 100);
-        if (tempDiff.abs() < diff.abs()) {
-          diff = tempDiff;
-          index = indexUp;
-        }
-      }
-      double tempDiff = targetDist - ((indexMid + 1) / list.length * 100);
-      if (tempDiff.abs() < diff.abs()) {
-        diff = tempDiff;
-        index = indexMid;
-      }
-    }
-    if (diff.abs() > tolerance) {
-      //when actual percent distripution becomes way off
-      debugPrint(
-          'Tolerance exceeded. Use different percent distribution. Diff = $diff%, RPN = ${list[index]}, Target = $targetDist%');
-      throw Exception(
-          'Calculated distributions are way off the configured distributions.');
-    }
-
-    //add to cutoff RPN to [rangeDist]
-    rangeDist.add(list[index]);
-    //modify the remaining percent distributions with the difference
-    for (int i = 0; i < percentDist.length; i++) {
-      percentDist[i] += diff / (percentDist.length);
-    }
-  }
-
-  //make highest priority cutoff RPN include all RPNs
-  rangeDist.add(list.last);
-
-  //cannot have duplicates in [rangeDist]
-  if (Set.from(rangeDist).length != rangeDist.length) {
-    debugPrint(
-        'error: duplicate values in [rangeDist]. rangeDist = \n$rangeDist');
-    throw Exception('An unexpected error occured.');
-  }
-  return rangeDist;
-}
-
 ///shows the dialog for changing rpn rating distributions
 void showRpnDistDialog(BuildContext context) {
   ///Text for the labels
@@ -841,21 +789,28 @@ void showRpnDistDialog(BuildContext context) {
     'High',
     'Very High'
   ];
-  SettingsNotifier settingsNotifier =
-      Provider.of<SettingsNotifier>(context, listen: false);
+  AssetCriticalitySettingsNotifier settingsNotifier =
+      Provider.of<AssetCriticalitySettingsNotifier>(context, listen: false);
   List<TextEditingController> distControllers = [];
-  for (ApplicationSetting distSetting in rpnDistributionGroups) {
-    distControllers.add(TextEditingController(
-        text: settingsNotifier.getSetting(distSetting).toString()));
-  }
+  distControllers.add(
+      TextEditingController(text: settingsNotifier.percentVLow.toString()));
+  distControllers
+      .add(TextEditingController(text: settingsNotifier.percentLow.toString()));
+  distControllers.add(
+      TextEditingController(text: settingsNotifier.percentMedium.toString()));
+  distControllers.add(
+      TextEditingController(text: settingsNotifier.percentHigh.toString()));
+  distControllers.add(
+      TextEditingController(text: settingsNotifier.percentVHigh.toString()));
 
   showDialog(
-      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return Dialog(
           child: RpnDistDialog(
-              distGroups: distGroups, distControllers: distControllers),
+            distGroups: distGroups,
+            distControllers: distControllers,
+          ),
         );
       });
 }
@@ -909,6 +864,8 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
   ///total percent distribution. Should be 100
   int? total;
 
+  String calculationMessage = '';
+
   ///Calculates the points for the [MultiSlider]
   List<double> calculatePoints() {
     List<double> points = [0];
@@ -923,18 +880,9 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
     return points;
   }
 
-  ///returns the sum of all distributions. Should be equal to 100
-  int calculateTotal() {
-    int sum = 0;
-    for (int dist in dists!) {
-      sum += dist;
-    }
-    return sum;
-  }
-
   void reloadTextControllers() {
     for (int i = 0; i < widget.distControllers.length; i++) {
-      widget.distControllers[i].text = dists![i].toString();
+      widget.distControllers[i].text = '${dists![i].toString()}%';
     }
   }
 
@@ -957,115 +905,132 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
   Widget build(BuildContext context) {
     ///Color gradient for [MultiSlider]. The colors for the range bars are every other item on the list, starting from index = 1
     List<Color> colorGradient = [
-      Colors.red[200]!,
-      Colors.red[300]!,
-      Colors.red[400]!,
-      Colors.red[700]!,
-      Colors.red[900]!
+      Colors.blue,
+      Colors.green,
+      Colors.yellow[600]!,
+      Colors.orange,
+      Colors.red
     ];
     return SingleChildScrollView(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.7,
         width: MediaQuery.of(context).size.width * 0.7,
         child: Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Expanded(
-              //title
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.only(top: 30.0, left: 30.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Rating Distribution',
-                          style: TextStyle(fontSize: 30.0),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 30.0, left: 30.0, bottom: 30.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Rating Distribution',
+                        style: TextStyle(fontSize: 30.0),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            Expanded(
-              //Multislider/visual representation
-              flex: 3,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: Builder(builder: (context) {
-                    return PercentSlider(
-                      initialValues: () {
-                        List<int> initValues = [];
-                        int sum = 0;
-                        for (int i = 0; i < dists!.length - 1; i++) {
-                          sum += dists![i];
-                          initValues.add(sum);
-                        }
-                        return initValues;
-                      }(),
-                      max: total ?? 100,
-                      barColors: colorGradient,
-                      size: const Size(10, 10),
-                      onSliderUpdate: (newPercentDists) {
+            Center(
+              // fancy slider
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Builder(builder: (context) {
+                  return PercentSlider(
+                    initialValues: () {
+                      List<int> initValues = [];
+                      int sum = 0;
+                      for (int i = 0; i < dists!.length - 1; i++) {
+                        sum += dists![i];
+                        initValues.add(sum);
+                      }
+                      return initValues;
+                    }(),
+                    max: total ?? 100,
+                    barColors: colorGradient,
+                    size: const Size(10, 10),
+                    onSliderUpdate: (newPercentDists) {
+                      dists = List.from(newPercentDists);
+                      setState(() {
+                        reloadTextControllers();
+                      });
+                    },
+                    onSliderUpdateEnd: (newPercentDists) {
+                      setState(() {
+                        dists = List.from(newPercentDists);
                         setState(() {
-                          dists = List.from(newPercentDists);
-                          reloadTextControllers();
+                          calculationMessage =
+                              calculateRPNDistribution(context, dists!);
                         });
-                      },
-                      tooltip: rpnPossibleDistributions,
-                    );
-                  }),
-                ),
+                      });
+                    },
+                    tooltip: criticalityStrings,
+                  );
+                }),
               ),
             ),
-            Expanded(
-              //input boxes
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: () {
-                    List<Widget> widgets = [];
-                    for (int i = 0; i < widget.distGroups.length; i++) {
-                      widgets.add(Expanded(
-                          child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            labelText: widget.distGroups[i],
-                          ),
-                          controller: widget.distControllers[i],
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            //limits characters to digits between 0-999
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(3),
-                          ],
-                          onChanged: (value) {
-                            int? val = int.tryParse(value);
-                            setState(() {
-                              dists![i] = val ?? 0;
-                              total = calculateTotal();
-                            });
-                          },
-                        ),
-                      )));
-                    }
-                    return widgets;
-                  }(),
-                ),
-              ),
-            ),
-            Expanded(
+            Center(
                 //print total percentage
-                flex: 1,
-                child: Text('Total: ${total ?? calculateTotal()}%')),
+                child: Text(
+                    'Total Percentage: ${total ?? calculateTotal(dists!)}%')),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: () {
+                  List<Widget> widgets = [];
+                  for (int i = 0; i < widget.distGroups.length; i++) {
+                    widgets.add(Expanded(
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          labelText: widget.distGroups[i],
+                        ),
+                        controller: widget.distControllers[i],
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          //limits characters to digits between 0-99
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(2),
+                        ],
+                        onChanged: (value) {
+                          int? val = int.tryParse(value);
+                          setState(() {
+                            dists![i] = val ?? 0;
+                            setState(() {
+                              calculationMessage =
+                                  calculateRPNDistribution(context, dists!);
+                            });
+                          });
+                        },
+                      ),
+                    )));
+                  }
+                  return widgets;
+                }(),
+              ),
+            ),
+            const Center(child: Text('RPN Cutoffs')),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: generateRow(
+                  context
+                      .read<AssetCriticalityNotifier>()
+                      .rpnCutoffs
+                      .asMap()
+                      .entries
+                      .map((e) => RowofTextWidgets(
+                          label: '${widget.distGroups[e.key]} Cutoff',
+                          value: e.value.toString()))
+                      .toList(),
+                  5),
+            ),
+            Center(child: Text(calculationMessage)),
             Expanded(
               //close buttons
               flex: 1,
@@ -1075,52 +1040,27 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
                     child: ElevatedButton(
-                        //save changes button
-                        onPressed: () {
-                          //only allow to save changes if total percent is 100%
-                          if (calculateTotal() == 100) {
-                            Map<ApplicationSetting, dynamic> settingChanges =
-                                {};
-                            for (int i = 0;
-                                i < rpnDistributionGroups.length;
-                                i++) {
-                              settingChanges[rpnDistributionGroups[i]] =
-                                  dists![i];
-                            }
-                            context
-                                .read<AssetCriticalityNotifier>()
-                                .priorityRangesUpToDate = false;
-                            context
-                                .read<SettingsNotifier>()
-                                .changeSettings(settingChanges);
-                            Navigator.pop(context);
-                          } else {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) => AlertDialog(
-                                      title:
-                                          const Text('Improper Distributions'),
-                                      content: const Text(
-                                          'The total percentage must be 100%'),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                            child: const Text('OK'))
-                                      ],
-                                    ));
-                          }
-                        },
-                        child: const Text('Confirm')),
+                      child: const Text('Calculate'),
+                      onPressed: () {
+                        setState(() {
+                          calculationMessage =
+                              calculateRPNDistribution(context, dists!);
+                        });
+                      },
+                    ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0, left: 4.0),
+                    padding: const EdgeInsets.only(
+                      bottom: 16.0,
+                      left: 4.0,
+                    ),
                     child: ElevatedButton(
-                        //cancel button
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Cancel')),
+                      //close button ratings are auto saved
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Close'),
+                    ),
                   )
                 ],
               ),
@@ -1156,30 +1096,23 @@ class WorkOrderSettingsDialog extends StatefulWidget {
 
 class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   ///Exculde all work orders after this date
-  DateTime? beforeDate;
+  DateTime? startDate;
 
   ///Exclude all work orders before this date
-  DateTime? afterDate;
-
-  bool? usingBeforeDate;
-  bool? usingAfterDate;
+  DateTime? endDate;
 
   ///whether to show all sites' work orders or not
-  bool? showAllSites;
+  WorkOrderFilterBy? siteFilterBy;
 
   @override
   void initState() {
     super.initState();
-    AssetCriticalityNotifier assetCriticalityNotifier =
-        context.read<AssetCriticalityNotifier>();
-    beforeDate = assetCriticalityNotifier.beforeDate;
-    afterDate = assetCriticalityNotifier.afterDate;
-    usingBeforeDate = (beforeDate != null) &&
-        (assetCriticalityNotifier.usingBeforeDate ?? false);
-    usingAfterDate = (afterDate != null) &&
-        (assetCriticalityNotifier.usingAfterDate ?? false);
+    AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier =
+        context.read<AssetCriticalitySettingsNotifier>();
+    startDate = assetCriticalitySettingsNotifier.workOrderCutoffStart;
+    endDate = assetCriticalitySettingsNotifier.workOrderCutoffEnd;
 
-    showAllSites = assetCriticalityNotifier.showAllSites ?? false;
+    siteFilterBy = assetCriticalitySettingsNotifier.workOrderFilterBy;
   }
 
   @override
@@ -1205,7 +1138,7 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10, bottom: 40),
                       child: Text(
-                        'Work Order View Settings',
+                        'Breakdown Calculation Settings',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     )
@@ -1217,75 +1150,87 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                   children: [
                     buildSettingRow(
                         checkbox: Checkbox(
-                            value: usingAfterDate,
-                            onChanged: (value) => setState(() {
-                                  usingAfterDate = value;
-                                })),
-                        title: const Text('Hide Work Orders Before'),
-                        valueDisplay: Text(
-                          '${afterDate?.year ?? 'YY'}/${afterDate?.month ?? 'mm'}/${afterDate?.day ?? 'dd'}',
-                          style: usingAfterDate!
-                              ? null
-                              : const TextStyle(
-                                  decoration: TextDecoration.lineThrough),
-                        ),
+                            value: true, onChanged: (value) => setState(() {})),
+                        title: const Text('Ignore Work Orders Before'),
+                        valueDisplay:
+                            Text(DateFormat('yyyy-MM-dd').format(startDate!)),
                         inputWidget: Builder(
                             builder: (context) => ElevatedButton(
                                 onPressed: () async {
                                   DateTime? newDate = await showDatePicker(
                                       context: context,
-                                      initialDate: afterDate ?? DateTime.now(),
+                                      initialDate: startDate ?? DateTime.now(),
                                       firstDate: DateTime(1951),
                                       lastDate: DateTime.now());
                                   if (newDate != null) {
                                     setState(() {
-                                      usingAfterDate = true;
-                                      afterDate = newDate;
+                                      startDate = newDate;
+                                      context
+                                          .read<
+                                              AssetCriticalitySettingsNotifier>()
+                                          .setWOSettings(
+                                              selectedSite: context
+                                                  .read<SelectedSiteNotifier>()
+                                                  .selectedSite,
+                                              workOrderCutoffStart: newDate);
                                     });
                                   }
                                 },
                                 child: const Text('Select Date')))),
                     buildSettingRow(
                         checkbox: Checkbox(
-                            value: usingBeforeDate,
-                            onChanged: (value) => setState(() {
-                                  usingBeforeDate = value;
-                                })),
-                        title:
-                            const Text('Hide Work Orders After (Inclusive):'),
-                        valueDisplay: Text(
-                          '${beforeDate?.year ?? 'YY'}/${beforeDate?.month ?? 'mm'}/${beforeDate?.day ?? 'dd'}',
-                          style: usingBeforeDate!
-                              ? null
-                              : const TextStyle(
-                                  decoration: TextDecoration.lineThrough),
-                        ),
+                            value: true, onChanged: (value) => setState(() {})),
+                        title: const Text('Ignore Work Orders After'),
+                        valueDisplay:
+                            Text(DateFormat('yyyy-MM-dd').format(endDate!)),
                         inputWidget: Builder(
                             builder: (context) => ElevatedButton(
                                 onPressed: () async {
                                   DateTime? newDate = await showDatePicker(
                                       context: context,
-                                      initialDate: beforeDate ?? DateTime.now(),
+                                      initialDate: endDate ?? DateTime.now(),
                                       firstDate: DateTime(1951),
                                       lastDate: DateTime.now());
                                   if (newDate != null) {
                                     setState(() {
-                                      usingBeforeDate = true;
-                                      beforeDate = newDate;
+                                      endDate = newDate;
+                                      context
+                                          .read<
+                                              AssetCriticalitySettingsNotifier>()
+                                          .setWOSettings(
+                                              selectedSite: context
+                                                  .read<SelectedSiteNotifier>()
+                                                  .selectedSite,
+                                              workOrderCutoffEnd: newDate);
                                     });
                                   }
                                 },
                                 child: const Text('Select Date')))),
-                    //TODO add a setting for toggling show/hide workorders from all sites not just selected site
-                    buildSettingRow(
-                        checkbox: Checkbox(
-                            value: showAllSites,
-                            onChanged: (value) => setState(() {
-                                  showAllSites = value;
-                                })),
-                        title: const Text('Show work orders from all sites'),
-                        valueDisplay: Container(),
-                        inputWidget: Container()),
+                    ListTile(
+                      title: const Text('Consider Work Orders from:'),
+                      subtitle: Consumer<AssetCriticalitySettingsNotifier>(
+                        builder: (context, value, child) {
+                          return DropdownButton(
+                              isExpanded: true,
+                              value: value.workOrderFilterBy,
+                              items: WorkOrderFilterBy.values.map((filter) {
+                                return DropdownMenuItem(
+                                    value: filter,
+                                    child: Text(filter.description));
+                              }).toList(),
+                              onChanged: (WorkOrderFilterBy? newValue) {
+                                setState(() {
+                                  siteFilterBy = newValue!;
+                                  value.setWOSettings(
+                                      selectedSite: context
+                                          .read<SelectedSiteNotifier>()
+                                          .selectedSite,
+                                      workOrderFilterBy: newValue);
+                                });
+                              });
+                        },
+                      ),
+                    )
                   ],
                 )),
             Expanded(
@@ -1294,36 +1239,16 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
                 children: [
                   ElevatedButton(
                       onPressed: () {
-                        //TODO: check if settings are valid (e.g. afterdate is not after beforedate). if so, use new settings
-                        if (usingAfterDate! && afterDate == null) {
-                          //if using after date, afterDate must not be null
-                          //TODO: show dialog
-                        } else if (usingBeforeDate! && beforeDate == null) {
-                          //if using before date, beforeDate must not be null
-                          //TODO: show dialog
-                        } else if (usingAfterDate! &&
-                            usingBeforeDate! &&
-                            afterDate!.compareTo(beforeDate!) >= 0) {
-                          //invalid format, afterDate must be before beforeDate
-                          ///TODO: show dialog
-                        } else {
-                          context
-                              .read<AssetCriticalityNotifier>()
-                              .setWOSettings(
-                                  beforeDate: beforeDate,
-                                  afterDate: afterDate,
-                                  usingBeforeDate: usingBeforeDate!,
-                                  usingAfterDate: usingAfterDate!,
-                                  showAllSites: showAllSites!);
-                          Navigator.pop(context);
+                        if (endDate!.compareTo(startDate!) < 0) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                'End date is before Start date! Please correct dates'),
+                          ));
                         }
-                      },
-                      child: const Text('Confirm')),
-                  ElevatedButton(
-                      onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text('Cancel'))
+                      child: const Text('Confirm')),
                 ],
               ),
             )
@@ -1354,6 +1279,143 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
           child: inputWidget,
         )
       ],
+    );
+  }
+}
+
+String calculateRPNDistribution(BuildContext context, List<int> dists) {
+  if (calculateTotal(dists) != 100) {
+    return 'Please make sure percentages add up to 100%';
+  }
+  try {
+    AssetCriticalityNotifier assetCriticalityNotifier =
+        context.read<AssetCriticalityNotifier>();
+    AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier =
+        context.read<AssetCriticalitySettingsNotifier>();
+    assetCriticalitySettingsNotifier.setPercentages(
+      selectedSite: context.read<SelectedSiteNotifier>().selectedSite,
+      percentVLow: dists[0],
+      percentLow: dists[1],
+      percentMedium: dists[2],
+      percentHigh: dists[3],
+      percentVHigh: dists[4],
+    );
+    //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
+    List<double> rpnList = List.from(assetCriticalityNotifier.rpnList);
+    rpnList.removeWhere((rpn) => (rpn <= 0));
+
+    //set rpn ranges
+    List<double> newCutoffs = calculateRPNDistRange(rpnList, [
+      assetCriticalitySettingsNotifier.percentVLow,
+      assetCriticalitySettingsNotifier.percentLow,
+      assetCriticalitySettingsNotifier.percentMedium,
+      assetCriticalitySettingsNotifier.percentHigh,
+      assetCriticalitySettingsNotifier.percentVHigh,
+    ]);
+    assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
+    debugPrint('new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
+    assetCriticalityNotifier.priorityRangesUpToDate = true;
+    assetCriticalityNotifier.updateGrid = true;
+  } catch (e) {
+    debugPrint(e.toString());
+    return e.toString();
+  }
+  return 'RPN cutoffs successfully calculated';
+}
+
+class RowofTextWidgets {
+  String label;
+  String value;
+
+  RowofTextWidgets({
+    required this.label,
+    required this.value,
+  });
+}
+
+Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
+  List<Widget> widgets = [];
+  for (var i = 0; i < max(minFields, values.length); i++) {
+    TextEditingController controller = TextEditingController.fromValue(
+        TextEditingValue(text: values.elementAtOrNull(i)?.value ?? ''));
+    widgets.add(
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              labelText: values.elementAtOrNull(i)?.label,
+            ),
+            controller: controller,
+            keyboardType: TextInputType.number,
+            readOnly: true,
+          ),
+        ),
+      ),
+    );
+  }
+  return Row(
+    children: widgets,
+  );
+}
+
+class StatusIcon extends StatefulWidget {
+  const StatusIcon({super.key, required this.rendererContext});
+
+  final PlutoColumnRendererContext rendererContext;
+
+  @override
+  State<StatusIcon> createState() => _StatusIconState();
+}
+
+class _StatusIconState extends State<StatusIcon> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    AssetStatus status = context
+        .watch<AssetStatusNotifier>()
+        .getAssetStatus(widget.rendererContext.row.cells['assetnum']!.value);
+    Color color = Colors.grey;
+    IconData icon = Icons.pending;
+    String statusText = '';
+    switch (status) {
+      case AssetStatus.complete:
+        icon = Icons.check_circle;
+        color = Colors.green;
+        statusText = 'RPN generated';
+
+      case AssetStatus.incomplete:
+        icon = Icons.pending;
+        color = Colors.orange;
+        statusText = 'Please check columns to generate RPN';
+
+      case AssetStatus.parentAsset:
+        icon = Icons.hide_source;
+        color = Colors.grey;
+        statusText = 'Parent asset: Not ranked';
+
+      case AssetStatus.refreshingWorkOrders:
+        icon = Icons.downloading;
+        color = Colors.blue;
+        statusText = 'Loading...';
+
+      case AssetStatus.refreshError:
+        icon = Icons.error;
+        color = Colors.red;
+        statusText = 'Error refreshing WOs';
+    }
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: color,
+      ),
+      onPressed: () {},
+      tooltip: statusText,
     );
   }
 }

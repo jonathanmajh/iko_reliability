@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import '../admin/upload_maximo.dart';
 
-import '../admin/consts.dart';
 import '../admin/db_drift.dart';
 import '../main.dart';
 
 class AssetCreationNotifier extends ChangeNotifier {
-  String selectedSite = 'NONE';
-
   Map<String, AssetWithUpload> siteAssets = {};
   Map<String, String> pendingAssets = {};
   Map<String, String> failedAssets = {};
   Map<String, List<Asset>> parentAssets = {};
 
   Future<void> setSite(String site, [bool notify = true]) async {
-    if (site == 'NONE') {
+    if (site == '') {
       return;
     }
 
@@ -38,8 +35,6 @@ class AssetCreationNotifier extends ChangeNotifier {
       }
     }
 
-    selectedSite = site;
-
     if (notify) {
       notifyListeners();
     }
@@ -50,8 +45,8 @@ class AssetCreationNotifier extends ChangeNotifier {
   Future<String> addAsset(
     String assetNum,
     String description,
-    String parent, {
-    String? site,
+    String parent,
+    String site, {
     String? sjpDescription,
     String? installationDate,
     String? vendor,
@@ -66,7 +61,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     print('adding asset');
     var id = await database!.addNewAsset(
       assetNum,
-      (site ?? selectedSite),
+      site,
       description,
       parent,
       sjpDescription,
@@ -77,7 +72,7 @@ class AssetCreationNotifier extends ChangeNotifier {
       assetCriticality,
     );
 
-    var newAsset = await database!.getAsset(site ?? selectedSite, assetNum);
+    var newAsset = await database!.getAsset(site, assetNum);
 
     siteAssets[assetNum] = id;
     pendingAssets[assetNum] = 'new';
@@ -137,16 +132,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     return childSet;
   }
 
-  String getSiteDescription([String? siteid]) {
-    siteid ??= selectedSite;
-    if (siteid == 'NONE') {
-      return 'No Site Selected';
-    } else {
-      return 'Site ${siteIDAndDescription[siteid]!}';
-    }
-  }
-
-  Future<void> uploadAssets(String env) async {
+  Future<void> uploadAssets(String env, String selectedSite) async {
     if (pendingAssets.isEmpty) {
       return;
     }
@@ -161,8 +147,8 @@ class AssetCreationNotifier extends ChangeNotifier {
         pendingAssets[assetNum] = 'pending';
         notifyListeners();
         print('something');
-        var result =
-            await uploadAssetToMaximo(siteAssets[assetNum]!, env, this);
+        var result = await uploadAssetToMaximo(
+            siteAssets[assetNum]!, env, this, selectedSite);
         var assetcheck = await database!.getAsset(selectedSite, assetNum);
         print(assetcheck.toString());
         if (result['result'] == 'success') {
