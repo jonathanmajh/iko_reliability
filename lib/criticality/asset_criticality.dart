@@ -647,33 +647,39 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 String rowId = event.row.cells['id']?.value ?? 'N/A';
                 AssetCriticalityWithAsset asset =
                     siteAssets[event.row.cells['assetnum']!.value]!;
-                asset = AssetCriticalityWithAsset(
-                  asset.asset,
-                  AssetCriticality(
-                    asset: '',
-                    system: 0,
-                    frequency: event.row.cells['frequency']!.value,
-                    downtime: event.row.cells['downtime']!.value,
-                    type: '',
-                  ),
-                  (await database!.getSystemCriticality(
-                          event.row.cells['system']!.value))
-                      .first,
-                );
-                double newRpn = rpnFunc(asset) ?? -1;
-                event.row.cells['rpn']!.value = newRpn;
-                if (rowId != 'N/A') {
-                  assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
-                }
-                String criticalityText = context
-                    .read<AssetCriticalityNotifier>()
-                    .rpnFindDistribution(newRpn);
-                event.row.cells['newPriority']!.value = criticalityText;
-                if (newRpn > 0) {
-                  context.read<AssetStatusNotifier>().updateAssetStatus(
-                    assets: [event.row.cells['assetnum']!.value],
-                    status: AssetStatus.complete,
+                // Create an new ACWA object for rpn calculation
+                try {
+                  asset = AssetCriticalityWithAsset(
+                    asset.asset,
+                    AssetCriticality(
+                      asset: '',
+                      system: 0,
+                      frequency: event.row.cells['frequency']!.value,
+                      downtime: event.row.cells['downtime']!.value,
+                      type: '',
+                    ),
+                    // TODO this causes an error when reloading asset with no system selected
+                    (await database!.getSystemCriticality(
+                            event.row.cells['system']!.value))
+                        .first,
                   );
+                  double newRpn = rpnFunc(asset) ?? -1;
+                  event.row.cells['rpn']!.value = newRpn;
+                  if (rowId != 'N/A') {
+                    assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
+                  }
+                  String criticalityText = context
+                      .read<AssetCriticalityNotifier>()
+                      .rpnFindDistribution(newRpn);
+                  event.row.cells['newPriority']!.value = criticalityText;
+                  if (newRpn > 0) {
+                    context.read<AssetStatusNotifier>().updateAssetStatus(
+                      assets: [event.row.cells['assetnum']!.value],
+                      status: AssetStatus.complete,
+                    );
+                  }
+                } catch (e) {
+                  debugPrint('Failed to calculate RPN number ${e.toString()}');
                 }
                 updateAsset(event.row);
                 debugPrint('$event');
