@@ -1,11 +1,10 @@
 //handling local database (drift)
 
-import 'dart:io';
-
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
+import 'package:http/http.dart' as http;
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
@@ -239,7 +238,8 @@ class MyDatabase extends _$MyDatabase {
 
   Future<int> addSystemCriticalitys(String description) async {
     final row = await into(systemCriticalitys).insertReturning(
-        SystemCriticalitysCompanion.insert(description: description, line: ''));
+        SystemCriticalitysCompanion.insert(
+            description: description, line: 'C'));
     return row.id;
   }
 
@@ -396,10 +396,9 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<void> loadSystems() async {
-    final bytes =
-        File.fromUri(Uri.parse('lib/criticality/CriticalityData.xlsx'))
-            .readAsBytesSync();
-    final decoder = SpreadsheetDecoder.decodeBytes(bytes);
+    http.Response response = await http.get(Uri.parse(
+        'https://raw.githubusercontent.com/jonathanmajh/iko_reliability/master/lib/criticality/CriticalityData.xlsx'));
+    final decoder = SpreadsheetDecoder.decodeBytes(response.bodyBytes);
     final sheet = decoder.tables.values.first;
     List<SystemCriticalitysCompanion> inserts = [];
     for (var i = 2; i < sheet.maxRows; i++) {

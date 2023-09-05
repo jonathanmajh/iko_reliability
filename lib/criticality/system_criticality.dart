@@ -284,23 +284,24 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     });
   }
 
-  void addRow() {
-    final newRows = stateManager.getNewRows();
-    newRows.first.cells['id'] = PlutoCell(value: -1);
-    //cells with ID -1 are new,
-    //once they are added to DB they are assigned a proper ID
-    //TODO read only scores when new
-    stateManager.appendRows(newRows);
-    stateManager.setCurrentCell(
-      newRows.first.cells.entries.first.value,
-      stateManager.refRows.length - 1,
-    );
-    stateManager.moveScrollByRow(
-      PlutoMoveDirection.down,
-      stateManager.refRows.length - 2,
-    );
+  Future<void> addRow() async {
+    // final newRows = stateManager.getNewRows();
+    final id = await database!.addSystemCriticalitys('New!');
+    // newRows.first.cells['id'] = PlutoCell(value: id);
+    // //cells with ID -1 are new,
+    // //once they are added to DB they are assigned a proper ID
+    // //TODO read only scores when new
+    // stateManager.appendRows(newRows);
+    // stateManager.setCurrentCell(
+    //   newRows.first.cells.entries.first.value,
+    //   stateManager.refRows.length - 1,
+    // );
+    // stateManager.moveScrollByRow(
+    //   PlutoMoveDirection.down,
+    //   stateManager.refRows.length - 2,
+    // );
 
-    stateManager.setKeepFocus(true);
+    // stateManager.setKeepFocus(true);
   }
 
   void deleteRow() async {
