@@ -143,6 +143,7 @@ class AssetCriticalitys extends Table {
   IntColumn get frequency => integer()();
   IntColumn get downtime => integer()();
   BoolColumn get manual => boolean().withDefault(const Constant(false))();
+  IntColumn get newPriority => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {asset};

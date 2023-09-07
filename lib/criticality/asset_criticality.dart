@@ -165,7 +165,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 ),
                 StatusIcon(
                   rendererContext: rendererContext,
+                  stateManager: stateManager,
                 ),
+                // TODO lock icon for override
+                // TODO set values for filtering
               ],
             );
           }),
@@ -316,8 +319,28 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         width: 100,
         title: 'New Priority',
         field: 'newPriority',
-        readOnly: true,
-        type: PlutoColumnType.text(defaultValue: '---'),
+        type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, ...assetCriticality.keys]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text('$value: ${assetCriticality[value] ?? ""}'),
+              );
+            }).toList(),
+          );
+        },
       ),
     ]);
   }
@@ -645,6 +668,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 ));
               },
               onChanged: (PlutoGridOnChangedEvent event) async {
+                if (event.columnIdx == 2) {
+                  // dont need to worry about events in this column
+                  return;
+                }
                 debugPrint('running grid A on change event');
                 AssetCriticalityNotifier assetCriticalityNotifier =
                     context.read<AssetCriticalityNotifier>();
@@ -687,6 +714,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 } catch (e) {
                   debugPrint('Failed to calculate RPN number ${e.toString()}');
                 }
+                // add columnidx check for below
                 updateAsset(
                     event.row, !systemUpdate.remove(asset.asset.assetnum));
                 debugPrint('$event');
@@ -1371,9 +1399,14 @@ Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
 }
 
 class StatusIcon extends StatefulWidget {
-  const StatusIcon({super.key, required this.rendererContext});
+  const StatusIcon({
+    super.key,
+    required this.rendererContext,
+    required this.stateManager,
+  });
 
   final PlutoColumnRendererContext rendererContext;
+  final PlutoGridStateManager stateManager;
 
   @override
   State<StatusIcon> createState() => _StatusIconState();
@@ -1393,32 +1426,42 @@ class _StatusIconState extends State<StatusIcon> {
     Color color = Colors.grey;
     IconData icon = Icons.pending;
     String statusText = '';
+    String searchText = '';
     switch (status) {
       case AssetStatus.complete:
         icon = Icons.check_circle;
         color = Colors.green;
         statusText = 'RPN generated';
+        searchText = 'complete-child';
 
       case AssetStatus.incomplete:
         icon = Icons.pending;
         color = Colors.orange;
         statusText = 'Please check columns to generate RPN';
+        searchText = 'pending-child';
 
       case AssetStatus.parentAsset:
         icon = Icons.hide_source;
         color = Colors.grey;
         statusText = 'Parent asset: Not ranked';
+        searchText = 'parent';
 
       case AssetStatus.refreshingWorkOrders:
         icon = Icons.downloading;
         color = Colors.blue;
         statusText = 'Loading...';
+        searchText = 'loading-child';
 
       case AssetStatus.refreshError:
         icon = Icons.error;
         color = Colors.red;
         statusText = 'Error refreshing WOs';
+        searchText = 'error-child';
     }
+    widget.stateManager.changeCellValue(
+      widget.rendererContext.cell,
+      searchText,
+    );
     return IconButton(
       icon: Icon(
         icon,

@@ -2397,9 +2397,15 @@ class $AssetCriticalitysTable extends AssetCriticalitys
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("manual" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _newPriorityMeta =
+      const VerificationMeta('newPriority');
+  @override
+  late final GeneratedColumn<int> newPriority = GeneratedColumn<int>(
+      'new_priority', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [asset, system, type, frequency, downtime, manual];
+      [asset, system, type, frequency, downtime, manual, newPriority];
   @override
   String get aliasedName => _alias ?? 'asset_criticalitys';
   @override
@@ -2443,6 +2449,12 @@ class $AssetCriticalitysTable extends AssetCriticalitys
       context.handle(_manualMeta,
           manual.isAcceptableOrUnknown(data['manual']!, _manualMeta));
     }
+    if (data.containsKey('new_priority')) {
+      context.handle(
+          _newPriorityMeta,
+          newPriority.isAcceptableOrUnknown(
+              data['new_priority']!, _newPriorityMeta));
+    }
     return context;
   }
 
@@ -2464,6 +2476,8 @@ class $AssetCriticalitysTable extends AssetCriticalitys
           .read(DriftSqlType.int, data['${effectivePrefix}downtime'])!,
       manual: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}manual'])!,
+      newPriority: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}new_priority']),
     );
   }
 
@@ -2481,13 +2495,15 @@ class AssetCriticality extends DataClass
   final int frequency;
   final int downtime;
   final bool manual;
+  final int? newPriority;
   const AssetCriticality(
       {required this.asset,
       required this.system,
       required this.type,
       required this.frequency,
       required this.downtime,
-      required this.manual});
+      required this.manual,
+      this.newPriority});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2497,6 +2513,9 @@ class AssetCriticality extends DataClass
     map['frequency'] = Variable<int>(frequency);
     map['downtime'] = Variable<int>(downtime);
     map['manual'] = Variable<bool>(manual);
+    if (!nullToAbsent || newPriority != null) {
+      map['new_priority'] = Variable<int>(newPriority);
+    }
     return map;
   }
 
@@ -2508,6 +2527,9 @@ class AssetCriticality extends DataClass
       frequency: Value(frequency),
       downtime: Value(downtime),
       manual: Value(manual),
+      newPriority: newPriority == null && nullToAbsent
+          ? const Value.absent()
+          : Value(newPriority),
     );
   }
 
@@ -2521,6 +2543,7 @@ class AssetCriticality extends DataClass
       frequency: serializer.fromJson<int>(json['frequency']),
       downtime: serializer.fromJson<int>(json['downtime']),
       manual: serializer.fromJson<bool>(json['manual']),
+      newPriority: serializer.fromJson<int?>(json['newPriority']),
     );
   }
   @override
@@ -2533,6 +2556,7 @@ class AssetCriticality extends DataClass
       'frequency': serializer.toJson<int>(frequency),
       'downtime': serializer.toJson<int>(downtime),
       'manual': serializer.toJson<bool>(manual),
+      'newPriority': serializer.toJson<int?>(newPriority),
     };
   }
 
@@ -2542,7 +2566,8 @@ class AssetCriticality extends DataClass
           String? type,
           int? frequency,
           int? downtime,
-          bool? manual}) =>
+          bool? manual,
+          Value<int?> newPriority = const Value.absent()}) =>
       AssetCriticality(
         asset: asset ?? this.asset,
         system: system ?? this.system,
@@ -2550,6 +2575,7 @@ class AssetCriticality extends DataClass
         frequency: frequency ?? this.frequency,
         downtime: downtime ?? this.downtime,
         manual: manual ?? this.manual,
+        newPriority: newPriority.present ? newPriority.value : this.newPriority,
       );
   @override
   String toString() {
@@ -2559,14 +2585,15 @@ class AssetCriticality extends DataClass
           ..write('type: $type, ')
           ..write('frequency: $frequency, ')
           ..write('downtime: $downtime, ')
-          ..write('manual: $manual')
+          ..write('manual: $manual, ')
+          ..write('newPriority: $newPriority')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(asset, system, type, frequency, downtime, manual);
+  int get hashCode => Object.hash(
+      asset, system, type, frequency, downtime, manual, newPriority);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2576,7 +2603,8 @@ class AssetCriticality extends DataClass
           other.type == this.type &&
           other.frequency == this.frequency &&
           other.downtime == this.downtime &&
-          other.manual == this.manual);
+          other.manual == this.manual &&
+          other.newPriority == this.newPriority);
 }
 
 class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
@@ -2586,6 +2614,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
   final Value<int> frequency;
   final Value<int> downtime;
   final Value<bool> manual;
+  final Value<int?> newPriority;
   final Value<int> rowid;
   const AssetCriticalitysCompanion({
     this.asset = const Value.absent(),
@@ -2594,6 +2623,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     this.frequency = const Value.absent(),
     this.downtime = const Value.absent(),
     this.manual = const Value.absent(),
+    this.newPriority = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetCriticalitysCompanion.insert({
@@ -2603,6 +2633,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     required int frequency,
     required int downtime,
     this.manual = const Value.absent(),
+    this.newPriority = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : asset = Value(asset),
         system = Value(system),
@@ -2616,6 +2647,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     Expression<int>? frequency,
     Expression<int>? downtime,
     Expression<bool>? manual,
+    Expression<int>? newPriority,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2625,6 +2657,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       if (frequency != null) 'frequency': frequency,
       if (downtime != null) 'downtime': downtime,
       if (manual != null) 'manual': manual,
+      if (newPriority != null) 'new_priority': newPriority,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2636,6 +2669,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       Value<int>? frequency,
       Value<int>? downtime,
       Value<bool>? manual,
+      Value<int?>? newPriority,
       Value<int>? rowid}) {
     return AssetCriticalitysCompanion(
       asset: asset ?? this.asset,
@@ -2644,6 +2678,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       frequency: frequency ?? this.frequency,
       downtime: downtime ?? this.downtime,
       manual: manual ?? this.manual,
+      newPriority: newPriority ?? this.newPriority,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2669,6 +2704,9 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     if (manual.present) {
       map['manual'] = Variable<bool>(manual.value);
     }
+    if (newPriority.present) {
+      map['new_priority'] = Variable<int>(newPriority.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2684,6 +2722,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
           ..write('frequency: $frequency, ')
           ..write('downtime: $downtime, ')
           ..write('manual: $manual, ')
+          ..write('newPriority: $newPriority, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
