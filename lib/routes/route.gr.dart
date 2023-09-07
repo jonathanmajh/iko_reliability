@@ -57,6 +57,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const SystemCriticalityPage(),
       );
     },
+    TimesheetRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const TimesheetPage(),
+      );
+    },
   };
 }
 
@@ -154,6 +160,20 @@ class SystemCriticalityRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SystemCriticalityRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [TimesheetPage]
+class TimesheetRoute extends PageRouteInfo<void> {
+  const TimesheetRoute({List<PageRouteInfo>? children})
+      : super(
+          TimesheetRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'TimesheetRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
