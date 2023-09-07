@@ -142,6 +142,7 @@ class AssetCriticalitys extends Table {
   TextColumn get type => text()(); // production / non-production
   IntColumn get frequency => integer()();
   IntColumn get downtime => integer()();
+  BoolColumn get manual => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {asset};
@@ -366,18 +367,15 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<void> updateAssetCriticality(
-    String assetid,
-    int system,
-    int frequency,
-    int downtime,
-    String type,
-  ) async {
+      String assetid, int system, int frequency, int downtime, String type,
+      [bool manual = false]) async {
     await (into(assetCriticalitys).insertOnConflictUpdate(AssetCriticality(
       asset: assetid,
       system: system,
       type: type,
       frequency: frequency,
       downtime: downtime,
+      manual: manual,
     )));
   }
 

@@ -34,6 +34,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   Map<String, AssetCriticalityWithAsset> siteAssets = {};
   Map<String, List<AssetCriticalityWithAsset>> parentAssets = {};
   String loadedSite = '';
+  // used to track if update event is done by system or manually
+  List<String> systemUpdate = [];
 
   List<PlutoColumn> detailColumns = [];
   List<PlutoRow> detailRows = [];
@@ -434,6 +436,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   void refreshAsset(String assetnum) async {
+    // add list asset to list of assets being updated by system
+    systemUpdate.addAll([assetnum, assetnum]);
     // change status icon
     AssetStatus previousStatus =
         context.read<AssetStatusNotifier>().getAssetStatus(assetnum);
@@ -480,7 +484,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             row.cells['downtime']!, ratingFromValue(downtime, impactRating));
         stateManager.changeCellValue(row.cells['frequency']!,
             ratingFromValue(dtEvents, frequencyRating));
-        stateManager.notifyListeners();
+        // stateManager.notifyListeners();
       }
     }
   }
@@ -641,6 +645,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 ));
               },
               onChanged: (PlutoGridOnChangedEvent event) async {
+                debugPrint('running grid A on change event');
                 AssetCriticalityNotifier assetCriticalityNotifier =
                     context.read<AssetCriticalityNotifier>();
                 assetCriticalityNotifier.priorityRangesUpToDate = false;
@@ -657,6 +662,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       frequency: event.row.cells['frequency']!.value,
                       downtime: event.row.cells['downtime']!.value,
                       type: '',
+                      manual: false,
                     ),
                     // TODO this causes an error when reloading asset with no system selected
                     (await database!.getSystemCriticality(
@@ -681,8 +687,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 } catch (e) {
                   debugPrint('Failed to calculate RPN number ${e.toString()}');
                 }
-                updateAsset(event.row);
+                updateAsset(
+                    event.row, !systemUpdate.remove(asset.asset.assetnum));
                 debugPrint('$event');
+                systemUpdate.remove(asset.asset.assetnum);
               },
               configuration: PlutoGridConfiguration(
                   style: themeManager.isDark
@@ -727,17 +735,19 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 }
 
-Future<void> updateAsset(PlutoRow row) async {
+Future<void> updateAsset(PlutoRow row, bool manual) async {
   if (!row.cells.containsKey('id')) {
     return;
     //this shouldnt happen
   }
+  debugPrint('event is for manual update? $manual');
   await database!.updateAssetCriticality(
     row.cells['id']!.value,
     row.cells['system']!.value,
     row.cells['frequency']!.value,
     row.cells['downtime']!.value,
     'type', //row.cells['type']!.value,
+    manual,
   );
 }
 

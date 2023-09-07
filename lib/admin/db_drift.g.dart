@@ -2388,9 +2388,18 @@ class $AssetCriticalitysTable extends AssetCriticalitys
   late final GeneratedColumn<int> downtime = GeneratedColumn<int>(
       'downtime', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _manualMeta = const VerificationMeta('manual');
+  @override
+  late final GeneratedColumn<bool> manual = GeneratedColumn<bool>(
+      'manual', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("manual" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns =>
-      [asset, system, type, frequency, downtime];
+      [asset, system, type, frequency, downtime, manual];
   @override
   String get aliasedName => _alias ?? 'asset_criticalitys';
   @override
@@ -2430,6 +2439,10 @@ class $AssetCriticalitysTable extends AssetCriticalitys
     } else if (isInserting) {
       context.missing(_downtimeMeta);
     }
+    if (data.containsKey('manual')) {
+      context.handle(_manualMeta,
+          manual.isAcceptableOrUnknown(data['manual']!, _manualMeta));
+    }
     return context;
   }
 
@@ -2449,6 +2462,8 @@ class $AssetCriticalitysTable extends AssetCriticalitys
           .read(DriftSqlType.int, data['${effectivePrefix}frequency'])!,
       downtime: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}downtime'])!,
+      manual: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}manual'])!,
     );
   }
 
@@ -2465,12 +2480,14 @@ class AssetCriticality extends DataClass
   final String type;
   final int frequency;
   final int downtime;
+  final bool manual;
   const AssetCriticality(
       {required this.asset,
       required this.system,
       required this.type,
       required this.frequency,
-      required this.downtime});
+      required this.downtime,
+      required this.manual});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2479,6 +2496,7 @@ class AssetCriticality extends DataClass
     map['type'] = Variable<String>(type);
     map['frequency'] = Variable<int>(frequency);
     map['downtime'] = Variable<int>(downtime);
+    map['manual'] = Variable<bool>(manual);
     return map;
   }
 
@@ -2489,6 +2507,7 @@ class AssetCriticality extends DataClass
       type: Value(type),
       frequency: Value(frequency),
       downtime: Value(downtime),
+      manual: Value(manual),
     );
   }
 
@@ -2501,6 +2520,7 @@ class AssetCriticality extends DataClass
       type: serializer.fromJson<String>(json['type']),
       frequency: serializer.fromJson<int>(json['frequency']),
       downtime: serializer.fromJson<int>(json['downtime']),
+      manual: serializer.fromJson<bool>(json['manual']),
     );
   }
   @override
@@ -2512,6 +2532,7 @@ class AssetCriticality extends DataClass
       'type': serializer.toJson<String>(type),
       'frequency': serializer.toJson<int>(frequency),
       'downtime': serializer.toJson<int>(downtime),
+      'manual': serializer.toJson<bool>(manual),
     };
   }
 
@@ -2520,13 +2541,15 @@ class AssetCriticality extends DataClass
           int? system,
           String? type,
           int? frequency,
-          int? downtime}) =>
+          int? downtime,
+          bool? manual}) =>
       AssetCriticality(
         asset: asset ?? this.asset,
         system: system ?? this.system,
         type: type ?? this.type,
         frequency: frequency ?? this.frequency,
         downtime: downtime ?? this.downtime,
+        manual: manual ?? this.manual,
       );
   @override
   String toString() {
@@ -2535,13 +2558,15 @@ class AssetCriticality extends DataClass
           ..write('system: $system, ')
           ..write('type: $type, ')
           ..write('frequency: $frequency, ')
-          ..write('downtime: $downtime')
+          ..write('downtime: $downtime, ')
+          ..write('manual: $manual')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(asset, system, type, frequency, downtime);
+  int get hashCode =>
+      Object.hash(asset, system, type, frequency, downtime, manual);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2550,7 +2575,8 @@ class AssetCriticality extends DataClass
           other.system == this.system &&
           other.type == this.type &&
           other.frequency == this.frequency &&
-          other.downtime == this.downtime);
+          other.downtime == this.downtime &&
+          other.manual == this.manual);
 }
 
 class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
@@ -2559,6 +2585,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
   final Value<String> type;
   final Value<int> frequency;
   final Value<int> downtime;
+  final Value<bool> manual;
   final Value<int> rowid;
   const AssetCriticalitysCompanion({
     this.asset = const Value.absent(),
@@ -2566,6 +2593,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     this.type = const Value.absent(),
     this.frequency = const Value.absent(),
     this.downtime = const Value.absent(),
+    this.manual = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetCriticalitysCompanion.insert({
@@ -2574,6 +2602,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     required String type,
     required int frequency,
     required int downtime,
+    this.manual = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : asset = Value(asset),
         system = Value(system),
@@ -2586,6 +2615,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     Expression<String>? type,
     Expression<int>? frequency,
     Expression<int>? downtime,
+    Expression<bool>? manual,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2594,6 +2624,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       if (type != null) 'type': type,
       if (frequency != null) 'frequency': frequency,
       if (downtime != null) 'downtime': downtime,
+      if (manual != null) 'manual': manual,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2604,6 +2635,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       Value<String>? type,
       Value<int>? frequency,
       Value<int>? downtime,
+      Value<bool>? manual,
       Value<int>? rowid}) {
     return AssetCriticalitysCompanion(
       asset: asset ?? this.asset,
@@ -2611,6 +2643,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       type: type ?? this.type,
       frequency: frequency ?? this.frequency,
       downtime: downtime ?? this.downtime,
+      manual: manual ?? this.manual,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2633,6 +2666,9 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     if (downtime.present) {
       map['downtime'] = Variable<int>(downtime.value);
     }
+    if (manual.present) {
+      map['manual'] = Variable<bool>(manual.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2647,6 +2683,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
           ..write('type: $type, ')
           ..write('frequency: $frequency, ')
           ..write('downtime: $downtime, ')
+          ..write('manual: $manual, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
