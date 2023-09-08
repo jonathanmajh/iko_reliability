@@ -88,6 +88,7 @@ class MyApp extends StatelessWidget {
               create: (context) => AssetCriticalitySettingsNotifier()),
           ChangeNotifierProvider(create: (context) => AssetStatusNotifier()),
           ChangeNotifierProvider(create: (context) => SelectedSiteNotifier()),
+          ChangeNotifierProvider(create: (context) => AssetOverrideNotifier()),
         ],
         child: Builder(
           builder: (context) {

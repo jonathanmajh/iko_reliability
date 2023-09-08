@@ -163,12 +163,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   color: Colors.green,
                   padding: const EdgeInsets.all(0),
                 ),
-                StatusIcon(
-                  rendererContext: rendererContext,
-                  stateManager: stateManager,
-                ),
-                // TODO lock icon for override
-                // TODO set values for filtering
+                StatusIcon(rendererContext: rendererContext),
               ],
             );
           }),
@@ -291,6 +286,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 downtime: rendererContext.row.cells['downtime']!.value,
                 system: rendererContext.row.cells['system']!.value,
               );
+              context.read<AssetOverrideNotifier>().updateAssetOverride(
+                assets: [rendererContext.row.cells['assetnum']!.value],
+                status: AssetOverride.breakdowns,
+              );
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
@@ -325,6 +324,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 manual: true,
                 frequency: rendererContext.row.cells['frequency']!.value,
                 system: rendererContext.row.cells['system']!.value,
+              );
+              context.read<AssetOverrideNotifier>().updateAssetOverride(
+                assets: [rendererContext.row.cells['assetnum']!.value],
+                status: AssetOverride.breakdowns,
               );
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
@@ -370,6 +373,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 system: rendererContext.row.cells['system']!.value,
                 frequency: rendererContext.row.cells['frequency']!.value,
               );
+              context.read<AssetOverrideNotifier>().updateAssetOverride(
+                assets: [rendererContext.row.cells['assetnum']!.value],
+                status: AssetOverride.priority,
+              );
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
@@ -384,6 +391,18 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           );
         },
       ),
+      PlutoColumn(
+          width: 100,
+          title: 'Override',
+          field: 'override',
+          type: PlutoColumnType.text(),
+          renderer: (rendererContext) {
+            return Row(
+              children: [
+                OverrideStatusIcon(rendererContext: rendererContext),
+              ],
+            );
+          }),
     ]);
   }
 
@@ -469,6 +488,18 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             context
                 .read<AssetCriticalityNotifier>()
                 .rpnFindDistribution(calculatedRPN);
+        if (child.assetCriticality?.newPriority != null) {
+          context.read<AssetOverrideNotifier>().updateAssetOverride(
+            assets: [child.asset.assetnum],
+            status: AssetOverride.priority,
+          );
+        }
+        if (child.assetCriticality?.manual ?? false) {
+          context.read<AssetOverrideNotifier>().updateAssetOverride(
+            assets: [child.asset.assetnum],
+            status: AssetOverride.breakdowns,
+          );
+        }
         if (calculatedRPN > 0) {
           context.read<AssetStatusNotifier>().updateAssetStatus(
             assets: [child.asset.assetnum],
@@ -490,6 +521,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'newPriority': PlutoCell(value: priorityText),
             'rpn': PlutoCell(value: calculatedRPN),
             'id': PlutoCell(value: child.asset.id),
+            'override': PlutoCell(value: ''),
           },
           type: PlutoRowType.group(
               expanded: true,
@@ -674,6 +706,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 'newPriority': PlutoCell(value: 0),
                 'rpn': PlutoCell(value: 0),
                 'id': PlutoCell(value: ''),
+                'override': PlutoCell(value: ''),
               },
             ));
           } else {
@@ -691,6 +724,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 'newPriority': PlutoCell(value: 0),
                 'rpn': PlutoCell(value: 0),
                 'id': PlutoCell(value: ''),
+                'override': PlutoCell(value: ''),
               },
             ));
           }
@@ -1425,11 +1459,9 @@ class StatusIcon extends StatefulWidget {
   const StatusIcon({
     super.key,
     required this.rendererContext,
-    required this.stateManager,
   });
 
   final PlutoColumnRendererContext rendererContext;
-  final PlutoGridStateManager stateManager;
 
   @override
   State<StatusIcon> createState() => _StatusIconState();
@@ -1443,6 +1475,7 @@ class _StatusIconState extends State<StatusIcon> {
 
   @override
   Widget build(BuildContext context) {
+    PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
     AssetStatus status = context
         .watch<AssetStatusNotifier>()
         .getAssetStatus(widget.rendererContext.row.cells['assetnum']!.value);
@@ -1481,7 +1514,7 @@ class _StatusIconState extends State<StatusIcon> {
         statusText = 'Error refreshing WOs';
         searchText = 'error-child';
     }
-    widget.stateManager.changeCellValue(
+    stateManager.changeCellValue(
       widget.rendererContext.cell,
       searchText,
     );
@@ -1491,6 +1524,85 @@ class _StatusIconState extends State<StatusIcon> {
         color: color,
       ),
       onPressed: () {},
+      tooltip: statusText,
+    );
+  }
+}
+
+class OverrideStatusIcon extends StatefulWidget {
+  const OverrideStatusIcon({
+    super.key,
+    required this.rendererContext,
+  });
+
+  final PlutoColumnRendererContext rendererContext;
+
+  @override
+  State<OverrideStatusIcon> createState() => _OverrideStatusIconState();
+}
+
+class _OverrideStatusIconState extends State<OverrideStatusIcon> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
+    AssetOverride status = context
+        .watch<AssetOverrideNotifier>()
+        .getAssetStatus(widget.rendererContext.row.cells['assetnum']!.value);
+    Color color = Colors.green;
+    IconData icon = Icons.lock_open;
+    String statusText = '';
+    String searchText = '';
+    switch (status) {
+      case AssetOverride.none:
+        statusText = 'No Overrides';
+        searchText = 'none';
+
+      case AssetOverride.priority:
+        icon = Icons.lock;
+        color = Colors.orange;
+        statusText = 'New Priority is overridden';
+        searchText = 'priority';
+
+      case AssetOverride.breakdowns:
+        icon = Icons.lock_clock;
+        color = Colors.orange;
+        statusText = 'Breakdown information overridden';
+        searchText = 'breakdowns';
+    }
+    stateManager.changeCellValue(
+      widget.rendererContext.cell,
+      searchText,
+    );
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: color,
+      ),
+      onPressed: () async {
+        context.read<AssetOverrideNotifier>().updateAssetOverride(
+          assets: [widget.rendererContext.row.cells['assetnum']!.value],
+          status: AssetOverride.none,
+        );
+        await database!.removeAssetOverride(
+            assetid: widget.rendererContext.row.cells['id']!.value);
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['frequency']!,
+          0,
+        );
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['downtime']!,
+          0,
+        );
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['newPriority']!,
+          0,
+        );
+      },
       tooltip: statusText,
     );
   }

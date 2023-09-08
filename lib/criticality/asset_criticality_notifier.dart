@@ -70,6 +70,7 @@ class AssetStatusNotifier extends ChangeNotifier {
     for (var asset in assets) {
       this.assets[asset] = status;
     }
+    // TODO this is causing setState() or markNeedsBuild() called during build
     notifyListeners();
   }
 
@@ -94,4 +95,31 @@ enum AssetStatus {
   refreshingWorkOrders,
   incomplete,
   refreshError,
+}
+
+class AssetOverrideNotifier extends ChangeNotifier {
+  Map<String, AssetOverride> assets = {};
+
+  void updateAssetOverride({
+    required List<String> assets,
+    required AssetOverride status,
+  }) {
+    for (var asset in assets) {
+      this.assets[asset] = status;
+    }
+    notifyListeners();
+  }
+
+  AssetOverride getAssetStatus(String assetNum) {
+    if (assets.containsKey(assetNum)) {
+      return assets[assetNum]!;
+    }
+    return AssetOverride.none;
+  }
+}
+
+enum AssetOverride {
+  none, //lock open
+  priority, //lock
+  breakdowns, //lock clock
 }

@@ -389,6 +389,19 @@ class MyDatabase extends _$MyDatabase {
     )));
   }
 
+  Future<void> removeAssetOverride({
+    required String assetid,
+  }) async {
+    (update(assetCriticalitys)..where((tbl) => tbl.asset.equals(assetid)))
+        .write(AssetCriticalitysCompanion(
+      asset: Value(assetid),
+      manual: const Value(false),
+      newPriority: const Value(null),
+      frequency: const Value(0),
+      downtime: const Value(0),
+    ));
+  }
+
   Future<AssetCriticalityWithAsset> getAssetCriticality({
     required String assetid,
   }) async {
