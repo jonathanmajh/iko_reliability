@@ -489,22 +489,16 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 .read<AssetCriticalityNotifier>()
                 .rpnFindDistribution(calculatedRPN);
         if (child.assetCriticality?.newPriority != null) {
-          context.read<AssetOverrideNotifier>().updateAssetOverride(
-            assets: [child.asset.assetnum],
-            status: AssetOverride.priority,
-          );
+          context.read<AssetOverrideNotifier>().assets[child.asset.assetnum] =
+              AssetOverride.priority;
         }
         if (child.assetCriticality?.manual ?? false) {
-          context.read<AssetOverrideNotifier>().updateAssetOverride(
-            assets: [child.asset.assetnum],
-            status: AssetOverride.breakdowns,
-          );
+          context.read<AssetOverrideNotifier>().assets[child.asset.assetnum] =
+              AssetOverride.breakdowns;
         }
         if (calculatedRPN > 0) {
-          context.read<AssetStatusNotifier>().updateAssetStatus(
-            assets: [child.asset.assetnum],
-            status: AssetStatus.complete,
-          );
+          context.read<AssetStatusNotifier>().assets[child.asset.assetnum] =
+              AssetStatus.complete;
         }
         rows.add(PlutoRow(
           cells: {

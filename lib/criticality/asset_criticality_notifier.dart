@@ -70,7 +70,6 @@ class AssetStatusNotifier extends ChangeNotifier {
     for (var asset in assets) {
       this.assets[asset] = status;
     }
-    // TODO this is causing setState() or markNeedsBuild() called during build
     notifyListeners();
   }
 
