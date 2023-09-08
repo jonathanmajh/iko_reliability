@@ -42,18 +42,18 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   }
 
   ///finds the risk priority for a given rpn
-  String rpnFindDistribution(double rpn) {
+  int rpnFindDistribution(double rpn) {
     try {
       if (rpnCutoffs.length != 5) {
         throw Exception('Unexpected format for List [rpnCutoffs]');
       }
       if (rpn <= 0) throw Exception('Negative RPN');
-      for (int i = 0; i < criticalityStrings.length; i++) {
-        if (rpn <= rpnCutoffs[i]) return criticalityStrings[i];
+      for (int i = 0; i < assetCriticality.length; i++) {
+        if (rpn <= rpnCutoffs[i]) return assetCriticality.keys.elementAt(i);
       }
-      return criticalityStrings[4];
+      return assetCriticality.keys.last;
     } catch (e) {
-      return '---';
+      return 0;
     }
   }
 }

@@ -367,17 +367,44 @@ class MyDatabase extends _$MyDatabase {
     return row.first.id;
   }
 
-  Future<void> updateAssetCriticality(
-      String assetid, int system, int frequency, int downtime, String type,
-      [bool manual = false]) async {
-    await (into(assetCriticalitys).insertOnConflictUpdate(AssetCriticality(
-      asset: assetid,
-      system: system,
-      type: type,
-      frequency: frequency,
-      downtime: downtime,
-      manual: manual,
+  Future<void> updateAssetCriticality({
+    required String assetid,
+    int? system,
+    int? frequency,
+    int? downtime,
+    bool? manual,
+    int? newPriority,
+  }) async {
+    String type = 'type';
+    await (into(assetCriticalitys)
+        .insertOnConflictUpdate(AssetCriticalitysCompanion(
+      asset: Value(assetid),
+      system: system != null ? Value(system) : const Value.absent(),
+      type: Value(type),
+      frequency: frequency != null ? Value(frequency) : const Value.absent(),
+      downtime: downtime != null ? Value(downtime) : const Value.absent(),
+      manual: manual != null ? Value(manual) : const Value.absent(),
+      newPriority:
+          newPriority != null ? Value(newPriority) : const Value.absent(),
     )));
+  }
+
+  Future<AssetCriticalityWithAsset> getAssetCriticality({
+    required String assetid,
+  }) async {
+    var stuff = await (select(assets).join([
+      leftOuterJoin(
+          assetCriticalitys, assetCriticalitys.asset.equalsExp(assets.id)),
+      leftOuterJoin(systemCriticalitys,
+          systemCriticalitys.id.equalsExp(assetCriticalitys.system))
+    ])
+          ..where(assets.id.equals(assetid)))
+        .getSingle();
+    return AssetCriticalityWithAsset(
+      stuff.readTable(assets),
+      stuff.readTableOrNull(assetCriticalitys),
+      stuff.readTableOrNull(systemCriticalitys),
+    );
   }
 
   Future<LoginSetting> getLoginSettings(String key) async {
