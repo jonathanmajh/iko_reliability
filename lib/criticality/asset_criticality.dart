@@ -528,6 +528,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   void refreshAsset(String assetnum) async {
+    // if asset has been locked dont refresh
+    if (navigatorKey.currentContext!
+            .read<AssetOverrideNotifier>()
+            .getAssetStatus(assetnum) !=
+        AssetOverride.none) {
+      return;
+    }
     // change status icon
     AssetStatus previousStatus =
         context.read<AssetStatusNotifier>().getAssetStatus(assetnum);
