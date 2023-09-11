@@ -484,7 +484,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     List<PlutoRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
-        double calculatedRPN = rpnFunc(child) ?? -1;
+        double calculatedRPN = child.assetCriticality?.newRPN ?? -1;
         int priorityText = child.assetCriticality?.newPriority ??
             context
                 .read<AssetCriticalityNotifier>()
@@ -581,8 +581,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         // update values in db
         await database!.updateAssetCriticality(
           assetid: row.cells['id']!.value,
-          frequency: row.cells['frequency']!.value,
-          downtime: row.cells['downtime']!.value,
+          frequency: ratingFromValue(dtEvents, frequencyRating),
+          downtime: ratingFromValue(downtime, impactRating),
           system: row.cells['system']!.value,
         );
         stateManager.changeCellValue(
@@ -670,7 +670,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 context
                     .read<AssetStatusNotifier>()
                     .updateParentAssets(parentAssets.keys.toList());
-
                 loadedSite = snapshot.data!.first.asset.siteid;
                 rows = getChilds('Top');
                 stateManager.removeAllRows();
@@ -770,6 +769,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 // Create an new ACWA object for rpn calculation
                 try {
                   double newRpn = rpnFunc(assetCrit) ?? -1;
+                  await database!.updateAssetCriticality(
+                    assetid: event.row.cells['id']!.value,
+                    downtime: event.row.cells['downtime']!.value,
+                    system: event.row.cells['system']!.value,
+                    frequency: event.row.cells['frequency']!.value,
+                    newRPN: newRpn,
+                  );
                   event.row.cells['rpn']!.value = newRpn;
                   assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
                   event.row.cells['newPriority']!.value =

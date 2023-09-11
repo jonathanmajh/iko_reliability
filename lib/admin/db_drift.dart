@@ -1,5 +1,7 @@
 //handling local database (drift)
 
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -134,6 +136,7 @@ class SystemCriticalitys extends Table {
   IntColumn get throughput => integer().withDefault(const Constant(0))();
   IntColumn get quality => integer().withDefault(const Constant(0))();
   TextColumn get line => text()();
+  RealColumn get score => real().withDefault(const Constant(0))();
 }
 
 class AssetCriticalitys extends Table {
@@ -144,6 +147,7 @@ class AssetCriticalitys extends Table {
   IntColumn get downtime => integer()();
   BoolColumn get manual => boolean().withDefault(const Constant(false))();
   IntColumn get newPriority => integer().nullable()();
+  RealColumn get newRPN => real().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {asset};
@@ -239,9 +243,11 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<int> addSystemCriticalitys(String description) async {
-    final row = await into(systemCriticalitys).insertReturning(
-        SystemCriticalitysCompanion.insert(
-            description: description, line: 'C'));
+    final row = await into(systemCriticalitys)
+        .insertReturning(SystemCriticalitysCompanion.insert(
+      description: description,
+      line: 'C',
+    ));
     return row.id;
   }
 
@@ -343,16 +349,17 @@ class MyDatabase extends _$MyDatabase {
     return row.first.id;
   }
 
-  Future<int> updateSystemCriticalitys(
-    int key,
-    String description,
-    int safety,
-    int regulatory,
-    int economic,
-    int throughput,
-    int quality,
-    String line,
-  ) async {
+  Future<int> updateSystemCriticalitys({
+    required int key,
+    required String description,
+    required int safety,
+    required int regulatory,
+    required int economic,
+    required int throughput,
+    required int quality,
+    required String line,
+    required double score,
+  }) async {
     final row = await (update(systemCriticalitys)
           ..where((tbl) => tbl.id.equals(key)))
         .writeReturning(SystemCriticalitysCompanion(
@@ -363,6 +370,12 @@ class MyDatabase extends _$MyDatabase {
       throughput: Value(throughput),
       quality: Value(quality),
       line: Value(line),
+      score: Value(sqrt((pow(safety, 2) +
+              pow(regulatory, 2) +
+              pow(economic, 2) +
+              pow(throughput, 2) +
+              pow(quality, 2)) /
+          5)),
     ));
     return row.first.id;
   }
@@ -374,6 +387,7 @@ class MyDatabase extends _$MyDatabase {
     int? downtime,
     bool? manual,
     int? newPriority,
+    double? newRPN,
   }) async {
     String type = 'type';
     await (into(assetCriticalitys)
@@ -386,6 +400,7 @@ class MyDatabase extends _$MyDatabase {
       manual: manual != null ? Value(manual) : const Value.absent(),
       newPriority:
           newPriority != null ? Value(newPriority) : const Value.absent(),
+      newRPN: newRPN != null ? Value(newRPN) : const Value.absent(),
     )));
   }
 
@@ -443,15 +458,22 @@ class MyDatabase extends _$MyDatabase {
     for (var i = 2; i < sheet.maxRows; i++) {
       var row = sheet.rows[i];
       if (row[1] != null) {
-        inserts.add(SystemCriticalitysCompanion.insert(
-          description: row[1],
-          safety: Value(row[2]),
-          regulatory: Value(row[3]),
-          economic: Value(row[4]),
-          throughput: Value(row[5]),
-          quality: Value(row[6]),
-          line: row[0],
-        ));
+        inserts.add(
+          SystemCriticalitysCompanion.insert(
+              description: row[1],
+              safety: Value(row[2]),
+              regulatory: Value(row[3]),
+              economic: Value(row[4]),
+              throughput: Value(row[5]),
+              quality: Value(row[6]),
+              line: row[0],
+              score: Value(sqrt((pow(row[2], 2) +
+                      pow(row[3], 2) +
+                      pow(row[4], 2) +
+                      pow(row[5], 2) +
+                      pow(row[6], 2)) /
+                  5))),
+        );
       }
     }
     try {

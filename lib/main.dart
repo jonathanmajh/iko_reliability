@@ -12,7 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
 import 'package:window_size/window_size.dart';
 
-import 'admin/cache_notifier.dart';
 import 'admin/db_drift.dart';
 import 'bin/drawer.dart';
 import 'bin/end_drawer.dart';
@@ -80,7 +79,6 @@ class MyApp extends StatelessWidget {
                   settingsNotifier.getSetting(ApplicationSetting.darkmodeOn))),
           //set initial brightness according to system settings
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
-          ChangeNotifierProvider(create: (context) => Cache()),
           ChangeNotifierProvider(
               create: (context) => AssetCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => AssetCreationNotifier()),

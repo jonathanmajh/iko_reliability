@@ -7,18 +7,7 @@ import "../admin/db_drift.dart";
 ///returns -1 if any parameter is null
 double? rpnFunc(AssetCriticalityWithAsset asset) {
   try {
-    double system = sqrt(
-        (asset.systemCriticality!.safety * asset.systemCriticality!.safety +
-                asset.systemCriticality!.regulatory *
-                    asset.systemCriticality!.regulatory +
-                asset.systemCriticality!.economic *
-                    asset.systemCriticality!.economic +
-                asset.systemCriticality!.throughput *
-                    asset.systemCriticality!.throughput +
-                asset.systemCriticality!.quality *
-                    asset.systemCriticality!.quality) /
-            5);
-    return system *
+    return asset.systemCriticality!.score *
         asset.assetCriticality!.frequency *
         asset.assetCriticality!.downtime;
   } catch (e) {

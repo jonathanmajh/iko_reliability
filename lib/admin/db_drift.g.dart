@@ -1978,6 +1978,13 @@ class $SystemCriticalitysTable extends SystemCriticalitys
   late final GeneratedColumn<String> line = GeneratedColumn<String>(
       'line', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _scoreMeta = const VerificationMeta('score');
+  @override
+  late final GeneratedColumn<double> score = GeneratedColumn<double>(
+      'score', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1988,7 +1995,8 @@ class $SystemCriticalitysTable extends SystemCriticalitys
         economic,
         throughput,
         quality,
-        line
+        line,
+        score
       ];
   @override
   String get aliasedName => _alias ?? 'system_criticalitys';
@@ -2044,6 +2052,10 @@ class $SystemCriticalitysTable extends SystemCriticalitys
     } else if (isInserting) {
       context.missing(_lineMeta);
     }
+    if (data.containsKey('score')) {
+      context.handle(
+          _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
+    }
     return context;
   }
 
@@ -2071,6 +2083,8 @@ class $SystemCriticalitysTable extends SystemCriticalitys
           .read(DriftSqlType.int, data['${effectivePrefix}quality'])!,
       line: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}line'])!,
+      score: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}score'])!,
     );
   }
 
@@ -2091,6 +2105,7 @@ class SystemCriticality extends DataClass
   final int throughput;
   final int quality;
   final String line;
+  final double score;
   const SystemCriticality(
       {required this.id,
       required this.description,
@@ -2100,7 +2115,8 @@ class SystemCriticality extends DataClass
       required this.economic,
       required this.throughput,
       required this.quality,
-      required this.line});
+      required this.line,
+      required this.score});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2115,6 +2131,7 @@ class SystemCriticality extends DataClass
     map['throughput'] = Variable<int>(throughput);
     map['quality'] = Variable<int>(quality);
     map['line'] = Variable<String>(line);
+    map['score'] = Variable<double>(score);
     return map;
   }
 
@@ -2130,6 +2147,7 @@ class SystemCriticality extends DataClass
       throughput: Value(throughput),
       quality: Value(quality),
       line: Value(line),
+      score: Value(score),
     );
   }
 
@@ -2146,6 +2164,7 @@ class SystemCriticality extends DataClass
       throughput: serializer.fromJson<int>(json['throughput']),
       quality: serializer.fromJson<int>(json['quality']),
       line: serializer.fromJson<String>(json['line']),
+      score: serializer.fromJson<double>(json['score']),
     );
   }
   @override
@@ -2161,6 +2180,7 @@ class SystemCriticality extends DataClass
       'throughput': serializer.toJson<int>(throughput),
       'quality': serializer.toJson<int>(quality),
       'line': serializer.toJson<String>(line),
+      'score': serializer.toJson<double>(score),
     };
   }
 
@@ -2173,7 +2193,8 @@ class SystemCriticality extends DataClass
           int? economic,
           int? throughput,
           int? quality,
-          String? line}) =>
+          String? line,
+          double? score}) =>
       SystemCriticality(
         id: id ?? this.id,
         description: description ?? this.description,
@@ -2184,6 +2205,7 @@ class SystemCriticality extends DataClass
         throughput: throughput ?? this.throughput,
         quality: quality ?? this.quality,
         line: line ?? this.line,
+        score: score ?? this.score,
       );
   @override
   String toString() {
@@ -2196,14 +2218,15 @@ class SystemCriticality extends DataClass
           ..write('economic: $economic, ')
           ..write('throughput: $throughput, ')
           ..write('quality: $quality, ')
-          ..write('line: $line')
+          ..write('line: $line, ')
+          ..write('score: $score')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, description, siteid, safety, regulatory,
-      economic, throughput, quality, line);
+      economic, throughput, quality, line, score);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2216,7 +2239,8 @@ class SystemCriticality extends DataClass
           other.economic == this.economic &&
           other.throughput == this.throughput &&
           other.quality == this.quality &&
-          other.line == this.line);
+          other.line == this.line &&
+          other.score == this.score);
 }
 
 class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
@@ -2229,6 +2253,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
   final Value<int> throughput;
   final Value<int> quality;
   final Value<String> line;
+  final Value<double> score;
   const SystemCriticalitysCompanion({
     this.id = const Value.absent(),
     this.description = const Value.absent(),
@@ -2239,6 +2264,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     this.throughput = const Value.absent(),
     this.quality = const Value.absent(),
     this.line = const Value.absent(),
+    this.score = const Value.absent(),
   });
   SystemCriticalitysCompanion.insert({
     this.id = const Value.absent(),
@@ -2250,6 +2276,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     this.throughput = const Value.absent(),
     this.quality = const Value.absent(),
     required String line,
+    this.score = const Value.absent(),
   })  : description = Value(description),
         line = Value(line);
   static Insertable<SystemCriticality> custom({
@@ -2262,6 +2289,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     Expression<int>? throughput,
     Expression<int>? quality,
     Expression<String>? line,
+    Expression<double>? score,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2273,6 +2301,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
       if (throughput != null) 'throughput': throughput,
       if (quality != null) 'quality': quality,
       if (line != null) 'line': line,
+      if (score != null) 'score': score,
     });
   }
 
@@ -2285,7 +2314,8 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
       Value<int>? economic,
       Value<int>? throughput,
       Value<int>? quality,
-      Value<String>? line}) {
+      Value<String>? line,
+      Value<double>? score}) {
     return SystemCriticalitysCompanion(
       id: id ?? this.id,
       description: description ?? this.description,
@@ -2296,6 +2326,7 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
       throughput: throughput ?? this.throughput,
       quality: quality ?? this.quality,
       line: line ?? this.line,
+      score: score ?? this.score,
     );
   }
 
@@ -2329,6 +2360,9 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     if (line.present) {
       map['line'] = Variable<String>(line.value);
     }
+    if (score.present) {
+      map['score'] = Variable<double>(score.value);
+    }
     return map;
   }
 
@@ -2343,7 +2377,8 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
           ..write('economic: $economic, ')
           ..write('throughput: $throughput, ')
           ..write('quality: $quality, ')
-          ..write('line: $line')
+          ..write('line: $line, ')
+          ..write('score: $score')
           ..write(')'))
         .toString();
   }
@@ -2403,9 +2438,16 @@ class $AssetCriticalitysTable extends AssetCriticalitys
   late final GeneratedColumn<int> newPriority = GeneratedColumn<int>(
       'new_priority', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _newRPNMeta = const VerificationMeta('newRPN');
+  @override
+  late final GeneratedColumn<double> newRPN = GeneratedColumn<double>(
+      'new_r_p_n', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns =>
-      [asset, system, type, frequency, downtime, manual, newPriority];
+      [asset, system, type, frequency, downtime, manual, newPriority, newRPN];
   @override
   String get aliasedName => _alias ?? 'asset_criticalitys';
   @override
@@ -2455,6 +2497,10 @@ class $AssetCriticalitysTable extends AssetCriticalitys
           newPriority.isAcceptableOrUnknown(
               data['new_priority']!, _newPriorityMeta));
     }
+    if (data.containsKey('new_r_p_n')) {
+      context.handle(_newRPNMeta,
+          newRPN.isAcceptableOrUnknown(data['new_r_p_n']!, _newRPNMeta));
+    }
     return context;
   }
 
@@ -2478,6 +2524,8 @@ class $AssetCriticalitysTable extends AssetCriticalitys
           .read(DriftSqlType.bool, data['${effectivePrefix}manual'])!,
       newPriority: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}new_priority']),
+      newRPN: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}new_r_p_n'])!,
     );
   }
 
@@ -2496,6 +2544,7 @@ class AssetCriticality extends DataClass
   final int downtime;
   final bool manual;
   final int? newPriority;
+  final double newRPN;
   const AssetCriticality(
       {required this.asset,
       required this.system,
@@ -2503,7 +2552,8 @@ class AssetCriticality extends DataClass
       required this.frequency,
       required this.downtime,
       required this.manual,
-      this.newPriority});
+      this.newPriority,
+      required this.newRPN});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2516,6 +2566,7 @@ class AssetCriticality extends DataClass
     if (!nullToAbsent || newPriority != null) {
       map['new_priority'] = Variable<int>(newPriority);
     }
+    map['new_r_p_n'] = Variable<double>(newRPN);
     return map;
   }
 
@@ -2530,6 +2581,7 @@ class AssetCriticality extends DataClass
       newPriority: newPriority == null && nullToAbsent
           ? const Value.absent()
           : Value(newPriority),
+      newRPN: Value(newRPN),
     );
   }
 
@@ -2544,6 +2596,7 @@ class AssetCriticality extends DataClass
       downtime: serializer.fromJson<int>(json['downtime']),
       manual: serializer.fromJson<bool>(json['manual']),
       newPriority: serializer.fromJson<int?>(json['newPriority']),
+      newRPN: serializer.fromJson<double>(json['newRPN']),
     );
   }
   @override
@@ -2557,6 +2610,7 @@ class AssetCriticality extends DataClass
       'downtime': serializer.toJson<int>(downtime),
       'manual': serializer.toJson<bool>(manual),
       'newPriority': serializer.toJson<int?>(newPriority),
+      'newRPN': serializer.toJson<double>(newRPN),
     };
   }
 
@@ -2567,7 +2621,8 @@ class AssetCriticality extends DataClass
           int? frequency,
           int? downtime,
           bool? manual,
-          Value<int?> newPriority = const Value.absent()}) =>
+          Value<int?> newPriority = const Value.absent(),
+          double? newRPN}) =>
       AssetCriticality(
         asset: asset ?? this.asset,
         system: system ?? this.system,
@@ -2576,6 +2631,7 @@ class AssetCriticality extends DataClass
         downtime: downtime ?? this.downtime,
         manual: manual ?? this.manual,
         newPriority: newPriority.present ? newPriority.value : this.newPriority,
+        newRPN: newRPN ?? this.newRPN,
       );
   @override
   String toString() {
@@ -2586,14 +2642,15 @@ class AssetCriticality extends DataClass
           ..write('frequency: $frequency, ')
           ..write('downtime: $downtime, ')
           ..write('manual: $manual, ')
-          ..write('newPriority: $newPriority')
+          ..write('newPriority: $newPriority, ')
+          ..write('newRPN: $newRPN')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(
-      asset, system, type, frequency, downtime, manual, newPriority);
+      asset, system, type, frequency, downtime, manual, newPriority, newRPN);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2604,7 +2661,8 @@ class AssetCriticality extends DataClass
           other.frequency == this.frequency &&
           other.downtime == this.downtime &&
           other.manual == this.manual &&
-          other.newPriority == this.newPriority);
+          other.newPriority == this.newPriority &&
+          other.newRPN == this.newRPN);
 }
 
 class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
@@ -2615,6 +2673,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
   final Value<int> downtime;
   final Value<bool> manual;
   final Value<int?> newPriority;
+  final Value<double> newRPN;
   final Value<int> rowid;
   const AssetCriticalitysCompanion({
     this.asset = const Value.absent(),
@@ -2624,6 +2683,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     this.downtime = const Value.absent(),
     this.manual = const Value.absent(),
     this.newPriority = const Value.absent(),
+    this.newRPN = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetCriticalitysCompanion.insert({
@@ -2634,6 +2694,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     required int downtime,
     this.manual = const Value.absent(),
     this.newPriority = const Value.absent(),
+    this.newRPN = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : asset = Value(asset),
         system = Value(system),
@@ -2648,6 +2709,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     Expression<int>? downtime,
     Expression<bool>? manual,
     Expression<int>? newPriority,
+    Expression<double>? newRPN,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2658,6 +2720,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       if (downtime != null) 'downtime': downtime,
       if (manual != null) 'manual': manual,
       if (newPriority != null) 'new_priority': newPriority,
+      if (newRPN != null) 'new_r_p_n': newRPN,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2670,6 +2733,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       Value<int>? downtime,
       Value<bool>? manual,
       Value<int?>? newPriority,
+      Value<double>? newRPN,
       Value<int>? rowid}) {
     return AssetCriticalitysCompanion(
       asset: asset ?? this.asset,
@@ -2679,6 +2743,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       downtime: downtime ?? this.downtime,
       manual: manual ?? this.manual,
       newPriority: newPriority ?? this.newPriority,
+      newRPN: newRPN ?? this.newRPN,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2707,6 +2772,9 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     if (newPriority.present) {
       map['new_priority'] = Variable<int>(newPriority.value);
     }
+    if (newRPN.present) {
+      map['new_r_p_n'] = Variable<double>(newRPN.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2723,6 +2791,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
           ..write('downtime: $downtime, ')
           ..write('manual: $manual, ')
           ..write('newPriority: $newPriority, ')
+          ..write('newRPN: $newRPN, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

@@ -2,8 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../admin/cache_notifier.dart';
-
 class NavDrawer extends StatelessWidget {
   const NavDrawer({super.key});
 
@@ -71,13 +69,6 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Asset Criticality'),
               onTap: () {
                 context.router.pushNamed("/asset/criticality");
-                try {
-                  context
-                      .read<Cache>()
-                      .calculateSystemScores(); //load system score data
-                } catch (e) {
-                  debugPrint('Could not load system scores from cache \n$e');
-                }
                 // change app state...
                 Navigator.pop(context); // close the drawer
               },

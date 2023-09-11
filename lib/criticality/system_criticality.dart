@@ -363,13 +363,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                     'economic': PlutoCell(value: row.economic),
                     'throughput': PlutoCell(value: row.throughput),
                     'quality': PlutoCell(value: row.quality),
-                    'score': PlutoCell(
-                        value: sqrt((row.safety * row.safety +
-                                row.regulatory * row.regulatory +
-                                row.economic * row.economic +
-                                row.throughput * row.throughput +
-                                row.quality * row.quality) /
-                            5)),
+                    'score': PlutoCell(value: row.score),
                   }));
                   stateManager.removeAllRows();
                   stateManager.appendRows(rows);
@@ -462,14 +456,15 @@ Future<int> updateSystem(PlutoRow row) async {
           .addSystemCriticalitys(row.cells['description']!.value);
     } else {
       id = await database!.updateSystemCriticalitys(
-        row.cells['id']!.value,
-        row.cells['description']!.value,
-        row.cells['safety']!.value,
-        row.cells['regulatory']!.value,
-        row.cells['economic']!.value,
-        row.cells['throughput']!.value,
-        row.cells['quality']!.value,
-        row.cells['line']!.value,
+        key: row.cells['id']!.value,
+        description: row.cells['description']!.value,
+        safety: row.cells['safety']!.value,
+        regulatory: row.cells['regulatory']!.value,
+        economic: row.cells['economic']!.value,
+        throughput: row.cells['throughput']!.value,
+        quality: row.cells['quality']!.value,
+        line: row.cells['line']!.value,
+        score: row.cells['score']!.value,
       );
     }
   }

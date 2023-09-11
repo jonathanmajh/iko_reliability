@@ -1,6 +1,5 @@
 //for widgets in the right-side drawer
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
 import 'package:iko_reliability_flutter/admin/file_export.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
@@ -223,9 +222,6 @@ class _EndDrawerState extends State<EndDrawer> {
                           ));
                           List<String> messages = await maximoAssetCaller(
                               siteid, maximo.maximoServerSelected, context);
-                          context
-                              .read<Cache>()
-                              .calculateSystemScores(); //reload system scores
                           processNotifier.popProcessingDialog(context);
                           if (messages.isNotEmpty) {
                             showDataAlert(messages, 'Site Assets Loaded');
