@@ -18,7 +18,16 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   PlutoGridStateManager? stateManager;
 
   ///list of rpns. Not ordered
-  List<double> get rpnList => List<double>.of(rpnMap.values);
+  ///exclude -1 and 0 values from the rpnlist
+  List<double> get rpnList =>
+      List<double>.of(rpnMap.values.where((element) => element > 0));
+
+  Map<double, int> frequencyOfRPNs() {
+    Map<double, int> temp = {};
+    rpnList
+        .forEach((x) => temp[x] = !temp.containsKey(x) ? (1) : (temp[x]! + 1));
+    return temp;
+  }
 
   ///whether to reload the grid
   bool updateGrid = false;

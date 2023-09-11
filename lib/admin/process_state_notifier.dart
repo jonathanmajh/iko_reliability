@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 // app while processes are still running. Also to show undismissible dialog windows to prevent user
 // input from messing with the processes.
 
-//TODO: make another version of this to keep track of unsaved changes in app
-
 ///records the application processing states
 class ProcessStateNotifier extends ChangeNotifier {
   ///Map of the currently running processes where the index of the ProcessStates are the keys

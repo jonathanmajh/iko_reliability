@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
+import 'package:iko_reliability_flutter/admin/consts.dart';
 
 import '../admin/db_drift.dart';
 import '../main.dart';
@@ -22,6 +24,14 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   int percentMedium = 20;
   int percentHigh = 15;
   int percentVHigh = 10;
+
+  FiveCriticality get fiveCriticality => FiveCriticality(
+        veryLow: percentVLow.toDouble(),
+        low: percentLow.toDouble(),
+        medium: percentMedium.toDouble(),
+        high: percentHigh.toDouble(),
+        veryHigh: percentVHigh.toDouble(),
+      );
 
   ///Cut off dates for work orders used to determine frequency + impact
   DateTime workOrderCutoffStart =
@@ -180,4 +190,122 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
         365;
     notifyListeners();
   }
+}
+
+class FiveCriticality {
+  double veryLow;
+  double low;
+  double medium;
+  double high;
+  double veryHigh;
+
+  FiveCriticality({
+    required this.veryLow,
+    required this.low,
+    required this.medium,
+    required this.high,
+    required this.veryHigh,
+  });
+
+  double getOrdered(int i) {
+    switch (i) {
+      case 0:
+        return veryLow;
+      case 1:
+        return low;
+      case 2:
+        return medium;
+      case 3:
+        return high;
+      case 4:
+        return veryHigh;
+      default:
+        throw Exception('$i is not defined for FiveCriticality');
+    }
+  }
+
+  List<double> ordered() {
+    return [
+      veryLow,
+      low,
+      medium,
+      high,
+      veryHigh,
+    ];
+  }
+}
+
+FiveCriticality calculateRPNCutOffs({
+  required FiveCriticality targetPercentages,
+  required Map<double, int> frequencyOfRPNs,
+}) {
+  if (frequencyOfRPNs.keys.length < 5) {
+    throw Exception(
+        'At least 5 unique values required to calculate Criticality from RPN\nCurrent values ${frequencyOfRPNs.keys.toList()}');
+  }
+  List<double> sortedUniqueRPNs = frequencyOfRPNs.keys.toList();
+  sortedUniqueRPNs.sort();
+  final totalRPNCount = frequencyOfRPNs.values.toList().sum;
+  List<double> results = [];
+  List<double> result = [0, 0];
+  List<double> results2 = [];
+  int cumulativePercentage = 0;
+  // calculations
+  for (int i = 0; i < 5; i++) {
+    try {
+      cumulativePercentage += targetPercentages.getOrdered(i).toInt();
+      result = calculateSingleCutoff(
+        target: cumulativePercentage,
+        sortedUniqueRPNs: sortedUniqueRPNs,
+        frequencyOfRPNs: frequencyOfRPNs,
+        totalRPNCount: totalRPNCount,
+      );
+      results.add(result[1]);
+      results2.add(result[2]);
+    } catch (e) {
+      throw Exception(
+          'RPN calculation failed: ${criticalityStrings[i]} target of ${targetPercentages.getOrdered(i)}% cannot be achieved');
+    }
+  }
+  debugPrint(
+      'Number of assets in each group: $results2, Total: $totalRPNCount');
+  return FiveCriticality(
+    veryLow: results[0],
+    low: results[1],
+    medium: results[2],
+    high: results[3],
+    veryHigh: results[4],
+  );
+}
+
+/// returns index of next rpn, largets rpn in range, total assets in range
+List<double> calculateSingleCutoff({
+  required int target,
+  required List<double> sortedUniqueRPNs,
+  required Map<double, int> frequencyOfRPNs,
+  required int totalRPNCount,
+}) {
+  // since the last group encompases all of the elements we can just pass the full set back
+  if (target == 100) {
+    return [0, sortedUniqueRPNs.last, totalRPNCount.toDouble()];
+  }
+  int i = 1;
+  double currentPercent = 0;
+  double previousPercent = 0;
+  // calculation for very low
+  while (i <= sortedUniqueRPNs.length) {
+    int sumRPNs = 0;
+    sortedUniqueRPNs.sublist(0, i).forEach((element) {
+      sumRPNs = sumRPNs + frequencyOfRPNs[element]!;
+    });
+    currentPercent = sumRPNs / totalRPNCount * 100;
+    // keep going to the next value until the new percentage is larger than previous percentage
+    if ((currentPercent - target).abs() > (previousPercent - target).abs()) {
+      return [previousPercent, sortedUniqueRPNs[i - 1], sumRPNs.toDouble()];
+    } else {
+      previousPercent = currentPercent;
+      i++;
+    }
+  }
+  throw Exception('RPN Cannot be calculated');
 }

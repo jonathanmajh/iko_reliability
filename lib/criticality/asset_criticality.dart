@@ -124,6 +124,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       PlutoColumn(
         title: 'Hierarchy',
         field: 'hierarchy',
+        width: 250,
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
@@ -1396,20 +1397,16 @@ String calculateRPNDistribution(BuildContext context, List<int> dists) {
       percentHigh: dists[3],
       percentVHigh: dists[4],
     );
-    //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
-    List<double> rpnList = List.from(assetCriticalityNotifier.rpnList);
-    rpnList.removeWhere((rpn) => (rpn <= 0));
-
     //set rpn ranges
-    List<double> newCutoffs = calculateRPNDistRange(rpnList, [
-      assetCriticalitySettingsNotifier.percentVLow,
-      assetCriticalitySettingsNotifier.percentLow,
-      assetCriticalitySettingsNotifier.percentMedium,
-      assetCriticalitySettingsNotifier.percentHigh,
-      assetCriticalitySettingsNotifier.percentVHigh,
-    ]);
+    List<double> newCutoffs = calculateRPNCutOffs(
+      targetPercentages: assetCriticalitySettingsNotifier.fiveCriticality,
+      frequencyOfRPNs: assetCriticalityNotifier.frequencyOfRPNs(),
+    ).ordered();
     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
     debugPrint('new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
+    if (newCutoffs.toSet().length != newCutoffs.length) {
+      return 'Duplicate values in RPN cutoffs\nIncrease percentage of duplicate value, Or ensure RPN values are more spread out';
+    }
     assetCriticalityNotifier.priorityRangesUpToDate = true;
     assetCriticalityNotifier.updateGrid = true;
   } catch (e) {
