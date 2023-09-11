@@ -5,6 +5,7 @@ import '../admin/contractor.dart';
 import '../admin/pm_check.dart';
 import '../admin/pm_meter_update.dart';
 import '../criticality/asset_criticality.dart';
+import '../criticality/spare_criticality.dart';
 import '../criticality/system_criticality.dart';
 import '../main.dart';
 
@@ -22,12 +23,12 @@ class AppRouter extends _$AppRouter {
         // AutoRoute(path: "/test", page: MyTestPage),
         // AutoRoute(path: "/readbook", page: EpubPage),
         AutoRoute(path: "/asset", page: AssetRoute.page),
-        AutoRoute(path: "/asset/criticality", page: AssetCriticalityRoute.page),
+        AutoRoute(path: "/criticality/asset", page: AssetCriticalityRoute.page),
         AutoRoute(
-            path: "/asset/system-criticality",
-            page: SystemCriticalityRoute.page),
+            path: "/criticality/system", page: SystemCriticalityRoute.page),
         AutoRoute(path: "/contractor", page: ContractorRoute.page),
         AutoRoute(path: "/pm/check", page: PmCheckRoute.page),
         AutoRoute(path: "/pm/update-meter", page: PmMeterUpdateRoute.page),
+        AutoRoute(path: '/criticality/spare', page: SpareCriticalityRoute.page)
       ];
 }
