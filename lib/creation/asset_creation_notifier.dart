@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../admin/upload_maximo.dart';
 
-import '../admin/db_drift.dart';
+import '../bin/db_drift.dart';
 import '../main.dart';
 
 class AssetCreationNotifier extends ChangeNotifier {

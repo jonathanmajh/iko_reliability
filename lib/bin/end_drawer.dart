@@ -1,7 +1,7 @@
 //for widgets in the right-side drawer
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/admin/file_export.dart';
-import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
+import 'package:iko_reliability_flutter/criticality/file_export.dart';
+import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
@@ -12,8 +12,8 @@ import 'package:provider/provider.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import '../criticality/criticality_db_export_import.dart';
 import '../main.dart';
-import '../admin/consts.dart';
-import '../admin/db_drift.dart';
+import 'consts.dart';
+import 'db_drift.dart';
 
 ///Widget for the right-side drawer of the app
 class EndDrawer extends StatefulWidget {

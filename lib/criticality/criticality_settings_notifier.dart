@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
-import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/bin/consts.dart';
 
-import '../admin/db_drift.dart';
+import '../bin/db_drift.dart';
 import '../main.dart';
 
 enum WorkOrderFilterBy {

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/services.dart';
 
-import '../admin/db_drift.dart';
+import '../bin/db_drift.dart';
 
 Future<String> exportCriticalityDB(
     MyDatabase database, String selectedSite) async {

@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import 'generate_uploads.dart';
+import '../admin/generate_uploads.dart';
 import 'package:csv/csv.dart';
 
 ///Saves string contents into a file selected by the user. Shows a file picker dialog.

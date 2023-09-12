@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/main.dart';
-import '../admin/db_drift.dart';
-import '../admin/consts.dart';
+import '../bin/db_drift.dart';
+import '../bin/consts.dart';
 
 class SelectedSiteNotifier extends ChangeNotifier {
   String selectedSite = '';

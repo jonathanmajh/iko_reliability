@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
-import 'db_drift.dart';
+import '../bin/db_drift.dart';
 import '../bin/end_drawer.dart';
 import 'pm_meter_update_functions.dart';
 

@@ -3,7 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
@@ -12,14 +12,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
 import 'package:window_size/window_size.dart';
 
-import 'admin/db_drift.dart';
+import 'bin/db_drift.dart';
 import 'bin/drawer.dart';
 import 'bin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
 import 'criticality/asset_criticality_notifier.dart';
 import 'creation/asset_creation_notifier.dart';
-import 'admin/process_state_notifier.dart';
+import 'bin/process_state_notifier.dart';
 import 'criticality/criticality_settings_notifier.dart';
 import 'routes/route.dart';
 

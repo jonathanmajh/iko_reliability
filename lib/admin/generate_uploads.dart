@@ -1,10 +1,10 @@
 import 'package:csv/csv.dart';
-import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/admin/generate_job_plans.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../main.dart';
-import 'db_drift.dart';
+import '../bin/db_drift.dart';
 
 Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
   Map<String, List<List<String>>> generated = {};

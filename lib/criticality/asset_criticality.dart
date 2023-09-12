@@ -13,8 +13,8 @@ import '../bin/drawer.dart';
 import 'criticality_settings_notifier.dart';
 import 'percent_slider.dart';
 
-import '../admin/consts.dart';
-import '../admin/db_drift.dart';
+import '../bin/consts.dart';
+import '../bin/db_drift.dart';
 import '../main.dart';
 import '../settings/theme_manager.dart';
 import 'functions.dart';

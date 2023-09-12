@@ -1,6 +1,6 @@
 import "dart:math";
 
-import "../admin/db_drift.dart";
+import '../bin/db_drift.dart';
 
 ///Function/Equation to calculate risk priority number (RPN)
 ///Currently just a product between all parameters

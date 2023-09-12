@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import '../main.dart';
-import 'consts.dart';
+import '../bin/consts.dart';
 import 'package:http/http.dart' as http;
 
 ///gets a Map of user data information from Maximo using HTTP and saves login data into local database if successful

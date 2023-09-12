@@ -42,15 +42,6 @@ class NavDrawer extends StatelessWidget {
             Navigator.pop(context); // close the drawer
           },
         ),
-        ListTile(
-          leading: const Icon(Icons.settings),
-          title: const Text('Create Assets'),
-          onTap: () {
-            context.router.pushNamed("/asset");
-            // change app state...
-            Navigator.pop(context); // close the drawer
-          },
-        ),
         ExpansionTile(
           title: const Text("Criticality"),
           children: <Widget>[

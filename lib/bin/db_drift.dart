@@ -10,10 +10,10 @@ import 'package:http/http.dart' as http;
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
-import './connections/connection.dart' as impl;
+import '../admin/connections/connection.dart' as impl;
 import '../main.dart';
 import 'consts.dart';
-import 'upload_maximo.dart';
+import '../admin/upload_maximo.dart';
 
 part 'db_drift.g.dart';
 
@@ -179,6 +179,60 @@ class AssetCriticalityWithAsset {
   final Asset asset;
   final AssetCriticality? assetCriticality;
   final SystemCriticality? systemCriticality;
+}
+
+class SpareParts extends Table {
+  TextColumn get itemnum => text()();
+  TextColumn get assetnum => text()();
+  TextColumn get siteid => text()();
+  RealColumn get quantity => real()();
+  IntColumn get sparepartid => integer()();
+
+  @override
+  Set<Column> get primaryKey => {sparepartid};
+}
+
+class Purchases extends Table {
+  TextColumn get prnum => text()();
+  TextColumn get prDescription => text()();
+  TextColumn get poDescription => text()();
+  TextColumn get ponum => text()();
+  TextColumn get startDate => text()();
+  TextColumn get siteid => text()();
+  TextColumn get endDate => text()();
+  RealColumn get leadTime => real()();
+  TextColumn get itemnum => text()();
+  TextColumn get unitCost => text()();
+  TextColumn get poStatus => text()();
+  IntColumn get prlineid => integer()();
+
+  @override
+  Set<Column> get primaryKey => {prlineid};
+}
+
+class Items extends Table {
+  TextColumn get itemnum => text()();
+  TextColumn get description => text()();
+  TextColumn get status => text()();
+  TextColumn get commodityGroup => text()();
+  TextColumn get glClass => text()();
+
+  @override
+  Set<Column> get primaryKey => {itemnum};
+}
+
+class SpareCriticalitys extends Table {
+  TextColumn get id => text()();
+  IntColumn get usage => integer()();
+  IntColumn get leadTime => integer()();
+  IntColumn get cost => integer()();
+  RealColumn get assetRPN => real()();
+  BoolColumn get manual => boolean()();
+  IntColumn get newPriority => integer()();
+  RealColumn get newRPN => real()();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 @DriftDatabase(

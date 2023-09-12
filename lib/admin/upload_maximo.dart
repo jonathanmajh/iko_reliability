@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:flutter/widgets.dart';
-import 'package:iko_reliability_flutter/admin/db_drift.dart';
+import 'package:iko_reliability_flutter/bin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
 import '../creation/asset_creation_notifier.dart';
-import 'consts.dart';
+import '../bin/consts.dart';
 import 'package:http/http.dart' as http;
 
 Future<Map<String, List<List<String>>>> uploadPMToMaximo(

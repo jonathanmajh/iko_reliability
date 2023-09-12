@@ -3,13 +3,13 @@ import 'dart:math';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
-import '../admin/db_drift.dart';
+import '../bin/db_drift.dart';
 import '../bin/drawer.dart';
 import '../bin/end_drawer.dart';
 import '../main.dart';

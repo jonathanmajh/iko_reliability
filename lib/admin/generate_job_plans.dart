@@ -1,7 +1,7 @@
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 
 import '../main.dart';
-import 'consts.dart';
+import '../bin/consts.dart';
 import 'pm_name_generator.dart';
 
 class JobAssetMaximo {

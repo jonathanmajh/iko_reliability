@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../admin/consts.dart';
+import '../bin/consts.dart';
 
 ///ChangeNotifier for data in AssetCriticalityPage
 class AssetCriticalityNotifier extends ChangeNotifier {
