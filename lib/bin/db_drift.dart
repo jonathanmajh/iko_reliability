@@ -246,6 +246,10 @@ class SpareCriticalitys extends Table {
     SystemCriticalitys,
     AssetCriticalitys,
     AssetUploads,
+    SpareParts,
+    Purchases,
+    Items,
+    SpareCriticalitys,
   ],
   queries: {
     'systemsFilteredBySite': '''

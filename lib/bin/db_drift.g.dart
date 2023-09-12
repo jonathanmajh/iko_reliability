@@ -3198,6 +3198,1569 @@ class AssetUploadsCompanion extends UpdateCompanion<AssetUpload> {
   }
 }
 
+class $SparePartsTable extends SpareParts
+    with TableInfo<$SparePartsTable, SparePart> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SparePartsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _itemnumMeta =
+      const VerificationMeta('itemnum');
+  @override
+  late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
+      'itemnum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _assetnumMeta =
+      const VerificationMeta('assetnum');
+  @override
+  late final GeneratedColumn<String> assetnum = GeneratedColumn<String>(
+      'assetnum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
+  @override
+  late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
+      'siteid', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantityMeta =
+      const VerificationMeta('quantity');
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+      'quantity', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _sparepartidMeta =
+      const VerificationMeta('sparepartid');
+  @override
+  late final GeneratedColumn<int> sparepartid = GeneratedColumn<int>(
+      'sparepartid', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [itemnum, assetnum, siteid, quantity, sparepartid];
+  @override
+  String get aliasedName => _alias ?? 'spare_parts';
+  @override
+  String get actualTableName => 'spare_parts';
+  @override
+  VerificationContext validateIntegrity(Insertable<SparePart> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('itemnum')) {
+      context.handle(_itemnumMeta,
+          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+    } else if (isInserting) {
+      context.missing(_itemnumMeta);
+    }
+    if (data.containsKey('assetnum')) {
+      context.handle(_assetnumMeta,
+          assetnum.isAcceptableOrUnknown(data['assetnum']!, _assetnumMeta));
+    } else if (isInserting) {
+      context.missing(_assetnumMeta);
+    }
+    if (data.containsKey('siteid')) {
+      context.handle(_siteidMeta,
+          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+    } else if (isInserting) {
+      context.missing(_siteidMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(_quantityMeta,
+          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('sparepartid')) {
+      context.handle(
+          _sparepartidMeta,
+          sparepartid.isAcceptableOrUnknown(
+              data['sparepartid']!, _sparepartidMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {sparepartid};
+  @override
+  SparePart map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SparePart(
+      itemnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
+      assetnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}assetnum'])!,
+      siteid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
+      quantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
+      sparepartid: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sparepartid'])!,
+    );
+  }
+
+  @override
+  $SparePartsTable createAlias(String alias) {
+    return $SparePartsTable(attachedDatabase, alias);
+  }
+}
+
+class SparePart extends DataClass implements Insertable<SparePart> {
+  final String itemnum;
+  final String assetnum;
+  final String siteid;
+  final double quantity;
+  final int sparepartid;
+  const SparePart(
+      {required this.itemnum,
+      required this.assetnum,
+      required this.siteid,
+      required this.quantity,
+      required this.sparepartid});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['itemnum'] = Variable<String>(itemnum);
+    map['assetnum'] = Variable<String>(assetnum);
+    map['siteid'] = Variable<String>(siteid);
+    map['quantity'] = Variable<double>(quantity);
+    map['sparepartid'] = Variable<int>(sparepartid);
+    return map;
+  }
+
+  SparePartsCompanion toCompanion(bool nullToAbsent) {
+    return SparePartsCompanion(
+      itemnum: Value(itemnum),
+      assetnum: Value(assetnum),
+      siteid: Value(siteid),
+      quantity: Value(quantity),
+      sparepartid: Value(sparepartid),
+    );
+  }
+
+  factory SparePart.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SparePart(
+      itemnum: serializer.fromJson<String>(json['itemnum']),
+      assetnum: serializer.fromJson<String>(json['assetnum']),
+      siteid: serializer.fromJson<String>(json['siteid']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      sparepartid: serializer.fromJson<int>(json['sparepartid']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'itemnum': serializer.toJson<String>(itemnum),
+      'assetnum': serializer.toJson<String>(assetnum),
+      'siteid': serializer.toJson<String>(siteid),
+      'quantity': serializer.toJson<double>(quantity),
+      'sparepartid': serializer.toJson<int>(sparepartid),
+    };
+  }
+
+  SparePart copyWith(
+          {String? itemnum,
+          String? assetnum,
+          String? siteid,
+          double? quantity,
+          int? sparepartid}) =>
+      SparePart(
+        itemnum: itemnum ?? this.itemnum,
+        assetnum: assetnum ?? this.assetnum,
+        siteid: siteid ?? this.siteid,
+        quantity: quantity ?? this.quantity,
+        sparepartid: sparepartid ?? this.sparepartid,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('SparePart(')
+          ..write('itemnum: $itemnum, ')
+          ..write('assetnum: $assetnum, ')
+          ..write('siteid: $siteid, ')
+          ..write('quantity: $quantity, ')
+          ..write('sparepartid: $sparepartid')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(itemnum, assetnum, siteid, quantity, sparepartid);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SparePart &&
+          other.itemnum == this.itemnum &&
+          other.assetnum == this.assetnum &&
+          other.siteid == this.siteid &&
+          other.quantity == this.quantity &&
+          other.sparepartid == this.sparepartid);
+}
+
+class SparePartsCompanion extends UpdateCompanion<SparePart> {
+  final Value<String> itemnum;
+  final Value<String> assetnum;
+  final Value<String> siteid;
+  final Value<double> quantity;
+  final Value<int> sparepartid;
+  const SparePartsCompanion({
+    this.itemnum = const Value.absent(),
+    this.assetnum = const Value.absent(),
+    this.siteid = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.sparepartid = const Value.absent(),
+  });
+  SparePartsCompanion.insert({
+    required String itemnum,
+    required String assetnum,
+    required String siteid,
+    required double quantity,
+    this.sparepartid = const Value.absent(),
+  })  : itemnum = Value(itemnum),
+        assetnum = Value(assetnum),
+        siteid = Value(siteid),
+        quantity = Value(quantity);
+  static Insertable<SparePart> custom({
+    Expression<String>? itemnum,
+    Expression<String>? assetnum,
+    Expression<String>? siteid,
+    Expression<double>? quantity,
+    Expression<int>? sparepartid,
+  }) {
+    return RawValuesInsertable({
+      if (itemnum != null) 'itemnum': itemnum,
+      if (assetnum != null) 'assetnum': assetnum,
+      if (siteid != null) 'siteid': siteid,
+      if (quantity != null) 'quantity': quantity,
+      if (sparepartid != null) 'sparepartid': sparepartid,
+    });
+  }
+
+  SparePartsCompanion copyWith(
+      {Value<String>? itemnum,
+      Value<String>? assetnum,
+      Value<String>? siteid,
+      Value<double>? quantity,
+      Value<int>? sparepartid}) {
+    return SparePartsCompanion(
+      itemnum: itemnum ?? this.itemnum,
+      assetnum: assetnum ?? this.assetnum,
+      siteid: siteid ?? this.siteid,
+      quantity: quantity ?? this.quantity,
+      sparepartid: sparepartid ?? this.sparepartid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (itemnum.present) {
+      map['itemnum'] = Variable<String>(itemnum.value);
+    }
+    if (assetnum.present) {
+      map['assetnum'] = Variable<String>(assetnum.value);
+    }
+    if (siteid.present) {
+      map['siteid'] = Variable<String>(siteid.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (sparepartid.present) {
+      map['sparepartid'] = Variable<int>(sparepartid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SparePartsCompanion(')
+          ..write('itemnum: $itemnum, ')
+          ..write('assetnum: $assetnum, ')
+          ..write('siteid: $siteid, ')
+          ..write('quantity: $quantity, ')
+          ..write('sparepartid: $sparepartid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PurchasesTable extends Purchases
+    with TableInfo<$PurchasesTable, Purchase> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PurchasesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _prnumMeta = const VerificationMeta('prnum');
+  @override
+  late final GeneratedColumn<String> prnum = GeneratedColumn<String>(
+      'prnum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _prDescriptionMeta =
+      const VerificationMeta('prDescription');
+  @override
+  late final GeneratedColumn<String> prDescription = GeneratedColumn<String>(
+      'pr_description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _poDescriptionMeta =
+      const VerificationMeta('poDescription');
+  @override
+  late final GeneratedColumn<String> poDescription = GeneratedColumn<String>(
+      'po_description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _ponumMeta = const VerificationMeta('ponum');
+  @override
+  late final GeneratedColumn<String> ponum = GeneratedColumn<String>(
+      'ponum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _startDateMeta =
+      const VerificationMeta('startDate');
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+      'start_date', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
+  @override
+  late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
+      'siteid', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _endDateMeta =
+      const VerificationMeta('endDate');
+  @override
+  late final GeneratedColumn<String> endDate = GeneratedColumn<String>(
+      'end_date', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _leadTimeMeta =
+      const VerificationMeta('leadTime');
+  @override
+  late final GeneratedColumn<double> leadTime = GeneratedColumn<double>(
+      'lead_time', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _itemnumMeta =
+      const VerificationMeta('itemnum');
+  @override
+  late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
+      'itemnum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _unitCostMeta =
+      const VerificationMeta('unitCost');
+  @override
+  late final GeneratedColumn<String> unitCost = GeneratedColumn<String>(
+      'unit_cost', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _poStatusMeta =
+      const VerificationMeta('poStatus');
+  @override
+  late final GeneratedColumn<String> poStatus = GeneratedColumn<String>(
+      'po_status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _prlineidMeta =
+      const VerificationMeta('prlineid');
+  @override
+  late final GeneratedColumn<int> prlineid = GeneratedColumn<int>(
+      'prlineid', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        prnum,
+        prDescription,
+        poDescription,
+        ponum,
+        startDate,
+        siteid,
+        endDate,
+        leadTime,
+        itemnum,
+        unitCost,
+        poStatus,
+        prlineid
+      ];
+  @override
+  String get aliasedName => _alias ?? 'purchases';
+  @override
+  String get actualTableName => 'purchases';
+  @override
+  VerificationContext validateIntegrity(Insertable<Purchase> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('prnum')) {
+      context.handle(
+          _prnumMeta, prnum.isAcceptableOrUnknown(data['prnum']!, _prnumMeta));
+    } else if (isInserting) {
+      context.missing(_prnumMeta);
+    }
+    if (data.containsKey('pr_description')) {
+      context.handle(
+          _prDescriptionMeta,
+          prDescription.isAcceptableOrUnknown(
+              data['pr_description']!, _prDescriptionMeta));
+    } else if (isInserting) {
+      context.missing(_prDescriptionMeta);
+    }
+    if (data.containsKey('po_description')) {
+      context.handle(
+          _poDescriptionMeta,
+          poDescription.isAcceptableOrUnknown(
+              data['po_description']!, _poDescriptionMeta));
+    } else if (isInserting) {
+      context.missing(_poDescriptionMeta);
+    }
+    if (data.containsKey('ponum')) {
+      context.handle(
+          _ponumMeta, ponum.isAcceptableOrUnknown(data['ponum']!, _ponumMeta));
+    } else if (isInserting) {
+      context.missing(_ponumMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(_startDateMeta,
+          startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta));
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('siteid')) {
+      context.handle(_siteidMeta,
+          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+    } else if (isInserting) {
+      context.missing(_siteidMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(_endDateMeta,
+          endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta));
+    } else if (isInserting) {
+      context.missing(_endDateMeta);
+    }
+    if (data.containsKey('lead_time')) {
+      context.handle(_leadTimeMeta,
+          leadTime.isAcceptableOrUnknown(data['lead_time']!, _leadTimeMeta));
+    } else if (isInserting) {
+      context.missing(_leadTimeMeta);
+    }
+    if (data.containsKey('itemnum')) {
+      context.handle(_itemnumMeta,
+          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+    } else if (isInserting) {
+      context.missing(_itemnumMeta);
+    }
+    if (data.containsKey('unit_cost')) {
+      context.handle(_unitCostMeta,
+          unitCost.isAcceptableOrUnknown(data['unit_cost']!, _unitCostMeta));
+    } else if (isInserting) {
+      context.missing(_unitCostMeta);
+    }
+    if (data.containsKey('po_status')) {
+      context.handle(_poStatusMeta,
+          poStatus.isAcceptableOrUnknown(data['po_status']!, _poStatusMeta));
+    } else if (isInserting) {
+      context.missing(_poStatusMeta);
+    }
+    if (data.containsKey('prlineid')) {
+      context.handle(_prlineidMeta,
+          prlineid.isAcceptableOrUnknown(data['prlineid']!, _prlineidMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {prlineid};
+  @override
+  Purchase map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Purchase(
+      prnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}prnum'])!,
+      prDescription: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pr_description'])!,
+      poDescription: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}po_description'])!,
+      ponum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}ponum'])!,
+      startDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}start_date'])!,
+      siteid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
+      endDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}end_date'])!,
+      leadTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}lead_time'])!,
+      itemnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
+      unitCost: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit_cost'])!,
+      poStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}po_status'])!,
+      prlineid: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}prlineid'])!,
+    );
+  }
+
+  @override
+  $PurchasesTable createAlias(String alias) {
+    return $PurchasesTable(attachedDatabase, alias);
+  }
+}
+
+class Purchase extends DataClass implements Insertable<Purchase> {
+  final String prnum;
+  final String prDescription;
+  final String poDescription;
+  final String ponum;
+  final String startDate;
+  final String siteid;
+  final String endDate;
+  final double leadTime;
+  final String itemnum;
+  final String unitCost;
+  final String poStatus;
+  final int prlineid;
+  const Purchase(
+      {required this.prnum,
+      required this.prDescription,
+      required this.poDescription,
+      required this.ponum,
+      required this.startDate,
+      required this.siteid,
+      required this.endDate,
+      required this.leadTime,
+      required this.itemnum,
+      required this.unitCost,
+      required this.poStatus,
+      required this.prlineid});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['prnum'] = Variable<String>(prnum);
+    map['pr_description'] = Variable<String>(prDescription);
+    map['po_description'] = Variable<String>(poDescription);
+    map['ponum'] = Variable<String>(ponum);
+    map['start_date'] = Variable<String>(startDate);
+    map['siteid'] = Variable<String>(siteid);
+    map['end_date'] = Variable<String>(endDate);
+    map['lead_time'] = Variable<double>(leadTime);
+    map['itemnum'] = Variable<String>(itemnum);
+    map['unit_cost'] = Variable<String>(unitCost);
+    map['po_status'] = Variable<String>(poStatus);
+    map['prlineid'] = Variable<int>(prlineid);
+    return map;
+  }
+
+  PurchasesCompanion toCompanion(bool nullToAbsent) {
+    return PurchasesCompanion(
+      prnum: Value(prnum),
+      prDescription: Value(prDescription),
+      poDescription: Value(poDescription),
+      ponum: Value(ponum),
+      startDate: Value(startDate),
+      siteid: Value(siteid),
+      endDate: Value(endDate),
+      leadTime: Value(leadTime),
+      itemnum: Value(itemnum),
+      unitCost: Value(unitCost),
+      poStatus: Value(poStatus),
+      prlineid: Value(prlineid),
+    );
+  }
+
+  factory Purchase.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Purchase(
+      prnum: serializer.fromJson<String>(json['prnum']),
+      prDescription: serializer.fromJson<String>(json['prDescription']),
+      poDescription: serializer.fromJson<String>(json['poDescription']),
+      ponum: serializer.fromJson<String>(json['ponum']),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      siteid: serializer.fromJson<String>(json['siteid']),
+      endDate: serializer.fromJson<String>(json['endDate']),
+      leadTime: serializer.fromJson<double>(json['leadTime']),
+      itemnum: serializer.fromJson<String>(json['itemnum']),
+      unitCost: serializer.fromJson<String>(json['unitCost']),
+      poStatus: serializer.fromJson<String>(json['poStatus']),
+      prlineid: serializer.fromJson<int>(json['prlineid']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'prnum': serializer.toJson<String>(prnum),
+      'prDescription': serializer.toJson<String>(prDescription),
+      'poDescription': serializer.toJson<String>(poDescription),
+      'ponum': serializer.toJson<String>(ponum),
+      'startDate': serializer.toJson<String>(startDate),
+      'siteid': serializer.toJson<String>(siteid),
+      'endDate': serializer.toJson<String>(endDate),
+      'leadTime': serializer.toJson<double>(leadTime),
+      'itemnum': serializer.toJson<String>(itemnum),
+      'unitCost': serializer.toJson<String>(unitCost),
+      'poStatus': serializer.toJson<String>(poStatus),
+      'prlineid': serializer.toJson<int>(prlineid),
+    };
+  }
+
+  Purchase copyWith(
+          {String? prnum,
+          String? prDescription,
+          String? poDescription,
+          String? ponum,
+          String? startDate,
+          String? siteid,
+          String? endDate,
+          double? leadTime,
+          String? itemnum,
+          String? unitCost,
+          String? poStatus,
+          int? prlineid}) =>
+      Purchase(
+        prnum: prnum ?? this.prnum,
+        prDescription: prDescription ?? this.prDescription,
+        poDescription: poDescription ?? this.poDescription,
+        ponum: ponum ?? this.ponum,
+        startDate: startDate ?? this.startDate,
+        siteid: siteid ?? this.siteid,
+        endDate: endDate ?? this.endDate,
+        leadTime: leadTime ?? this.leadTime,
+        itemnum: itemnum ?? this.itemnum,
+        unitCost: unitCost ?? this.unitCost,
+        poStatus: poStatus ?? this.poStatus,
+        prlineid: prlineid ?? this.prlineid,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Purchase(')
+          ..write('prnum: $prnum, ')
+          ..write('prDescription: $prDescription, ')
+          ..write('poDescription: $poDescription, ')
+          ..write('ponum: $ponum, ')
+          ..write('startDate: $startDate, ')
+          ..write('siteid: $siteid, ')
+          ..write('endDate: $endDate, ')
+          ..write('leadTime: $leadTime, ')
+          ..write('itemnum: $itemnum, ')
+          ..write('unitCost: $unitCost, ')
+          ..write('poStatus: $poStatus, ')
+          ..write('prlineid: $prlineid')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      prnum,
+      prDescription,
+      poDescription,
+      ponum,
+      startDate,
+      siteid,
+      endDate,
+      leadTime,
+      itemnum,
+      unitCost,
+      poStatus,
+      prlineid);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Purchase &&
+          other.prnum == this.prnum &&
+          other.prDescription == this.prDescription &&
+          other.poDescription == this.poDescription &&
+          other.ponum == this.ponum &&
+          other.startDate == this.startDate &&
+          other.siteid == this.siteid &&
+          other.endDate == this.endDate &&
+          other.leadTime == this.leadTime &&
+          other.itemnum == this.itemnum &&
+          other.unitCost == this.unitCost &&
+          other.poStatus == this.poStatus &&
+          other.prlineid == this.prlineid);
+}
+
+class PurchasesCompanion extends UpdateCompanion<Purchase> {
+  final Value<String> prnum;
+  final Value<String> prDescription;
+  final Value<String> poDescription;
+  final Value<String> ponum;
+  final Value<String> startDate;
+  final Value<String> siteid;
+  final Value<String> endDate;
+  final Value<double> leadTime;
+  final Value<String> itemnum;
+  final Value<String> unitCost;
+  final Value<String> poStatus;
+  final Value<int> prlineid;
+  const PurchasesCompanion({
+    this.prnum = const Value.absent(),
+    this.prDescription = const Value.absent(),
+    this.poDescription = const Value.absent(),
+    this.ponum = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.siteid = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.leadTime = const Value.absent(),
+    this.itemnum = const Value.absent(),
+    this.unitCost = const Value.absent(),
+    this.poStatus = const Value.absent(),
+    this.prlineid = const Value.absent(),
+  });
+  PurchasesCompanion.insert({
+    required String prnum,
+    required String prDescription,
+    required String poDescription,
+    required String ponum,
+    required String startDate,
+    required String siteid,
+    required String endDate,
+    required double leadTime,
+    required String itemnum,
+    required String unitCost,
+    required String poStatus,
+    this.prlineid = const Value.absent(),
+  })  : prnum = Value(prnum),
+        prDescription = Value(prDescription),
+        poDescription = Value(poDescription),
+        ponum = Value(ponum),
+        startDate = Value(startDate),
+        siteid = Value(siteid),
+        endDate = Value(endDate),
+        leadTime = Value(leadTime),
+        itemnum = Value(itemnum),
+        unitCost = Value(unitCost),
+        poStatus = Value(poStatus);
+  static Insertable<Purchase> custom({
+    Expression<String>? prnum,
+    Expression<String>? prDescription,
+    Expression<String>? poDescription,
+    Expression<String>? ponum,
+    Expression<String>? startDate,
+    Expression<String>? siteid,
+    Expression<String>? endDate,
+    Expression<double>? leadTime,
+    Expression<String>? itemnum,
+    Expression<String>? unitCost,
+    Expression<String>? poStatus,
+    Expression<int>? prlineid,
+  }) {
+    return RawValuesInsertable({
+      if (prnum != null) 'prnum': prnum,
+      if (prDescription != null) 'pr_description': prDescription,
+      if (poDescription != null) 'po_description': poDescription,
+      if (ponum != null) 'ponum': ponum,
+      if (startDate != null) 'start_date': startDate,
+      if (siteid != null) 'siteid': siteid,
+      if (endDate != null) 'end_date': endDate,
+      if (leadTime != null) 'lead_time': leadTime,
+      if (itemnum != null) 'itemnum': itemnum,
+      if (unitCost != null) 'unit_cost': unitCost,
+      if (poStatus != null) 'po_status': poStatus,
+      if (prlineid != null) 'prlineid': prlineid,
+    });
+  }
+
+  PurchasesCompanion copyWith(
+      {Value<String>? prnum,
+      Value<String>? prDescription,
+      Value<String>? poDescription,
+      Value<String>? ponum,
+      Value<String>? startDate,
+      Value<String>? siteid,
+      Value<String>? endDate,
+      Value<double>? leadTime,
+      Value<String>? itemnum,
+      Value<String>? unitCost,
+      Value<String>? poStatus,
+      Value<int>? prlineid}) {
+    return PurchasesCompanion(
+      prnum: prnum ?? this.prnum,
+      prDescription: prDescription ?? this.prDescription,
+      poDescription: poDescription ?? this.poDescription,
+      ponum: ponum ?? this.ponum,
+      startDate: startDate ?? this.startDate,
+      siteid: siteid ?? this.siteid,
+      endDate: endDate ?? this.endDate,
+      leadTime: leadTime ?? this.leadTime,
+      itemnum: itemnum ?? this.itemnum,
+      unitCost: unitCost ?? this.unitCost,
+      poStatus: poStatus ?? this.poStatus,
+      prlineid: prlineid ?? this.prlineid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (prnum.present) {
+      map['prnum'] = Variable<String>(prnum.value);
+    }
+    if (prDescription.present) {
+      map['pr_description'] = Variable<String>(prDescription.value);
+    }
+    if (poDescription.present) {
+      map['po_description'] = Variable<String>(poDescription.value);
+    }
+    if (ponum.present) {
+      map['ponum'] = Variable<String>(ponum.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (siteid.present) {
+      map['siteid'] = Variable<String>(siteid.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<String>(endDate.value);
+    }
+    if (leadTime.present) {
+      map['lead_time'] = Variable<double>(leadTime.value);
+    }
+    if (itemnum.present) {
+      map['itemnum'] = Variable<String>(itemnum.value);
+    }
+    if (unitCost.present) {
+      map['unit_cost'] = Variable<String>(unitCost.value);
+    }
+    if (poStatus.present) {
+      map['po_status'] = Variable<String>(poStatus.value);
+    }
+    if (prlineid.present) {
+      map['prlineid'] = Variable<int>(prlineid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PurchasesCompanion(')
+          ..write('prnum: $prnum, ')
+          ..write('prDescription: $prDescription, ')
+          ..write('poDescription: $poDescription, ')
+          ..write('ponum: $ponum, ')
+          ..write('startDate: $startDate, ')
+          ..write('siteid: $siteid, ')
+          ..write('endDate: $endDate, ')
+          ..write('leadTime: $leadTime, ')
+          ..write('itemnum: $itemnum, ')
+          ..write('unitCost: $unitCost, ')
+          ..write('poStatus: $poStatus, ')
+          ..write('prlineid: $prlineid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _itemnumMeta =
+      const VerificationMeta('itemnum');
+  @override
+  late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
+      'itemnum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _commodityGroupMeta =
+      const VerificationMeta('commodityGroup');
+  @override
+  late final GeneratedColumn<String> commodityGroup = GeneratedColumn<String>(
+      'commodity_group', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _glClassMeta =
+      const VerificationMeta('glClass');
+  @override
+  late final GeneratedColumn<String> glClass = GeneratedColumn<String>(
+      'gl_class', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [itemnum, description, status, commodityGroup, glClass];
+  @override
+  String get aliasedName => _alias ?? 'items';
+  @override
+  String get actualTableName => 'items';
+  @override
+  VerificationContext validateIntegrity(Insertable<Item> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('itemnum')) {
+      context.handle(_itemnumMeta,
+          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+    } else if (isInserting) {
+      context.missing(_itemnumMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('commodity_group')) {
+      context.handle(
+          _commodityGroupMeta,
+          commodityGroup.isAcceptableOrUnknown(
+              data['commodity_group']!, _commodityGroupMeta));
+    } else if (isInserting) {
+      context.missing(_commodityGroupMeta);
+    }
+    if (data.containsKey('gl_class')) {
+      context.handle(_glClassMeta,
+          glClass.isAcceptableOrUnknown(data['gl_class']!, _glClassMeta));
+    } else if (isInserting) {
+      context.missing(_glClassMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {itemnum};
+  @override
+  Item map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Item(
+      itemnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      commodityGroup: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}commodity_group'])!,
+      glClass: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}gl_class'])!,
+    );
+  }
+
+  @override
+  $ItemsTable createAlias(String alias) {
+    return $ItemsTable(attachedDatabase, alias);
+  }
+}
+
+class Item extends DataClass implements Insertable<Item> {
+  final String itemnum;
+  final String description;
+  final String status;
+  final String commodityGroup;
+  final String glClass;
+  const Item(
+      {required this.itemnum,
+      required this.description,
+      required this.status,
+      required this.commodityGroup,
+      required this.glClass});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['itemnum'] = Variable<String>(itemnum);
+    map['description'] = Variable<String>(description);
+    map['status'] = Variable<String>(status);
+    map['commodity_group'] = Variable<String>(commodityGroup);
+    map['gl_class'] = Variable<String>(glClass);
+    return map;
+  }
+
+  ItemsCompanion toCompanion(bool nullToAbsent) {
+    return ItemsCompanion(
+      itemnum: Value(itemnum),
+      description: Value(description),
+      status: Value(status),
+      commodityGroup: Value(commodityGroup),
+      glClass: Value(glClass),
+    );
+  }
+
+  factory Item.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Item(
+      itemnum: serializer.fromJson<String>(json['itemnum']),
+      description: serializer.fromJson<String>(json['description']),
+      status: serializer.fromJson<String>(json['status']),
+      commodityGroup: serializer.fromJson<String>(json['commodityGroup']),
+      glClass: serializer.fromJson<String>(json['glClass']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'itemnum': serializer.toJson<String>(itemnum),
+      'description': serializer.toJson<String>(description),
+      'status': serializer.toJson<String>(status),
+      'commodityGroup': serializer.toJson<String>(commodityGroup),
+      'glClass': serializer.toJson<String>(glClass),
+    };
+  }
+
+  Item copyWith(
+          {String? itemnum,
+          String? description,
+          String? status,
+          String? commodityGroup,
+          String? glClass}) =>
+      Item(
+        itemnum: itemnum ?? this.itemnum,
+        description: description ?? this.description,
+        status: status ?? this.status,
+        commodityGroup: commodityGroup ?? this.commodityGroup,
+        glClass: glClass ?? this.glClass,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Item(')
+          ..write('itemnum: $itemnum, ')
+          ..write('description: $description, ')
+          ..write('status: $status, ')
+          ..write('commodityGroup: $commodityGroup, ')
+          ..write('glClass: $glClass')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(itemnum, description, status, commodityGroup, glClass);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Item &&
+          other.itemnum == this.itemnum &&
+          other.description == this.description &&
+          other.status == this.status &&
+          other.commodityGroup == this.commodityGroup &&
+          other.glClass == this.glClass);
+}
+
+class ItemsCompanion extends UpdateCompanion<Item> {
+  final Value<String> itemnum;
+  final Value<String> description;
+  final Value<String> status;
+  final Value<String> commodityGroup;
+  final Value<String> glClass;
+  final Value<int> rowid;
+  const ItemsCompanion({
+    this.itemnum = const Value.absent(),
+    this.description = const Value.absent(),
+    this.status = const Value.absent(),
+    this.commodityGroup = const Value.absent(),
+    this.glClass = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ItemsCompanion.insert({
+    required String itemnum,
+    required String description,
+    required String status,
+    required String commodityGroup,
+    required String glClass,
+    this.rowid = const Value.absent(),
+  })  : itemnum = Value(itemnum),
+        description = Value(description),
+        status = Value(status),
+        commodityGroup = Value(commodityGroup),
+        glClass = Value(glClass);
+  static Insertable<Item> custom({
+    Expression<String>? itemnum,
+    Expression<String>? description,
+    Expression<String>? status,
+    Expression<String>? commodityGroup,
+    Expression<String>? glClass,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (itemnum != null) 'itemnum': itemnum,
+      if (description != null) 'description': description,
+      if (status != null) 'status': status,
+      if (commodityGroup != null) 'commodity_group': commodityGroup,
+      if (glClass != null) 'gl_class': glClass,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ItemsCompanion copyWith(
+      {Value<String>? itemnum,
+      Value<String>? description,
+      Value<String>? status,
+      Value<String>? commodityGroup,
+      Value<String>? glClass,
+      Value<int>? rowid}) {
+    return ItemsCompanion(
+      itemnum: itemnum ?? this.itemnum,
+      description: description ?? this.description,
+      status: status ?? this.status,
+      commodityGroup: commodityGroup ?? this.commodityGroup,
+      glClass: glClass ?? this.glClass,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (itemnum.present) {
+      map['itemnum'] = Variable<String>(itemnum.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (commodityGroup.present) {
+      map['commodity_group'] = Variable<String>(commodityGroup.value);
+    }
+    if (glClass.present) {
+      map['gl_class'] = Variable<String>(glClass.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ItemsCompanion(')
+          ..write('itemnum: $itemnum, ')
+          ..write('description: $description, ')
+          ..write('status: $status, ')
+          ..write('commodityGroup: $commodityGroup, ')
+          ..write('glClass: $glClass, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SpareCriticalitysTable extends SpareCriticalitys
+    with TableInfo<$SpareCriticalitysTable, SpareCriticality> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SpareCriticalitysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _usageMeta = const VerificationMeta('usage');
+  @override
+  late final GeneratedColumn<int> usage = GeneratedColumn<int>(
+      'usage', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _leadTimeMeta =
+      const VerificationMeta('leadTime');
+  @override
+  late final GeneratedColumn<int> leadTime = GeneratedColumn<int>(
+      'lead_time', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _costMeta = const VerificationMeta('cost');
+  @override
+  late final GeneratedColumn<int> cost = GeneratedColumn<int>(
+      'cost', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _assetRPNMeta =
+      const VerificationMeta('assetRPN');
+  @override
+  late final GeneratedColumn<double> assetRPN = GeneratedColumn<double>(
+      'asset_r_p_n', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _manualMeta = const VerificationMeta('manual');
+  @override
+  late final GeneratedColumn<bool> manual = GeneratedColumn<bool>(
+      'manual', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("manual" IN (0, 1))'));
+  static const VerificationMeta _newPriorityMeta =
+      const VerificationMeta('newPriority');
+  @override
+  late final GeneratedColumn<int> newPriority = GeneratedColumn<int>(
+      'new_priority', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _newRPNMeta = const VerificationMeta('newRPN');
+  @override
+  late final GeneratedColumn<double> newRPN = GeneratedColumn<double>(
+      'new_r_p_n', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, usage, leadTime, cost, assetRPN, manual, newPriority, newRPN];
+  @override
+  String get aliasedName => _alias ?? 'spare_criticalitys';
+  @override
+  String get actualTableName => 'spare_criticalitys';
+  @override
+  VerificationContext validateIntegrity(Insertable<SpareCriticality> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('usage')) {
+      context.handle(
+          _usageMeta, usage.isAcceptableOrUnknown(data['usage']!, _usageMeta));
+    } else if (isInserting) {
+      context.missing(_usageMeta);
+    }
+    if (data.containsKey('lead_time')) {
+      context.handle(_leadTimeMeta,
+          leadTime.isAcceptableOrUnknown(data['lead_time']!, _leadTimeMeta));
+    } else if (isInserting) {
+      context.missing(_leadTimeMeta);
+    }
+    if (data.containsKey('cost')) {
+      context.handle(
+          _costMeta, cost.isAcceptableOrUnknown(data['cost']!, _costMeta));
+    } else if (isInserting) {
+      context.missing(_costMeta);
+    }
+    if (data.containsKey('asset_r_p_n')) {
+      context.handle(_assetRPNMeta,
+          assetRPN.isAcceptableOrUnknown(data['asset_r_p_n']!, _assetRPNMeta));
+    } else if (isInserting) {
+      context.missing(_assetRPNMeta);
+    }
+    if (data.containsKey('manual')) {
+      context.handle(_manualMeta,
+          manual.isAcceptableOrUnknown(data['manual']!, _manualMeta));
+    } else if (isInserting) {
+      context.missing(_manualMeta);
+    }
+    if (data.containsKey('new_priority')) {
+      context.handle(
+          _newPriorityMeta,
+          newPriority.isAcceptableOrUnknown(
+              data['new_priority']!, _newPriorityMeta));
+    } else if (isInserting) {
+      context.missing(_newPriorityMeta);
+    }
+    if (data.containsKey('new_r_p_n')) {
+      context.handle(_newRPNMeta,
+          newRPN.isAcceptableOrUnknown(data['new_r_p_n']!, _newRPNMeta));
+    } else if (isInserting) {
+      context.missing(_newRPNMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SpareCriticality map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SpareCriticality(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      usage: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}usage'])!,
+      leadTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}lead_time'])!,
+      cost: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}cost'])!,
+      assetRPN: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}asset_r_p_n'])!,
+      manual: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}manual'])!,
+      newPriority: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}new_priority'])!,
+      newRPN: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}new_r_p_n'])!,
+    );
+  }
+
+  @override
+  $SpareCriticalitysTable createAlias(String alias) {
+    return $SpareCriticalitysTable(attachedDatabase, alias);
+  }
+}
+
+class SpareCriticality extends DataClass
+    implements Insertable<SpareCriticality> {
+  final String id;
+  final int usage;
+  final int leadTime;
+  final int cost;
+  final double assetRPN;
+  final bool manual;
+  final int newPriority;
+  final double newRPN;
+  const SpareCriticality(
+      {required this.id,
+      required this.usage,
+      required this.leadTime,
+      required this.cost,
+      required this.assetRPN,
+      required this.manual,
+      required this.newPriority,
+      required this.newRPN});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['usage'] = Variable<int>(usage);
+    map['lead_time'] = Variable<int>(leadTime);
+    map['cost'] = Variable<int>(cost);
+    map['asset_r_p_n'] = Variable<double>(assetRPN);
+    map['manual'] = Variable<bool>(manual);
+    map['new_priority'] = Variable<int>(newPriority);
+    map['new_r_p_n'] = Variable<double>(newRPN);
+    return map;
+  }
+
+  SpareCriticalitysCompanion toCompanion(bool nullToAbsent) {
+    return SpareCriticalitysCompanion(
+      id: Value(id),
+      usage: Value(usage),
+      leadTime: Value(leadTime),
+      cost: Value(cost),
+      assetRPN: Value(assetRPN),
+      manual: Value(manual),
+      newPriority: Value(newPriority),
+      newRPN: Value(newRPN),
+    );
+  }
+
+  factory SpareCriticality.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SpareCriticality(
+      id: serializer.fromJson<String>(json['id']),
+      usage: serializer.fromJson<int>(json['usage']),
+      leadTime: serializer.fromJson<int>(json['leadTime']),
+      cost: serializer.fromJson<int>(json['cost']),
+      assetRPN: serializer.fromJson<double>(json['assetRPN']),
+      manual: serializer.fromJson<bool>(json['manual']),
+      newPriority: serializer.fromJson<int>(json['newPriority']),
+      newRPN: serializer.fromJson<double>(json['newRPN']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'usage': serializer.toJson<int>(usage),
+      'leadTime': serializer.toJson<int>(leadTime),
+      'cost': serializer.toJson<int>(cost),
+      'assetRPN': serializer.toJson<double>(assetRPN),
+      'manual': serializer.toJson<bool>(manual),
+      'newPriority': serializer.toJson<int>(newPriority),
+      'newRPN': serializer.toJson<double>(newRPN),
+    };
+  }
+
+  SpareCriticality copyWith(
+          {String? id,
+          int? usage,
+          int? leadTime,
+          int? cost,
+          double? assetRPN,
+          bool? manual,
+          int? newPriority,
+          double? newRPN}) =>
+      SpareCriticality(
+        id: id ?? this.id,
+        usage: usage ?? this.usage,
+        leadTime: leadTime ?? this.leadTime,
+        cost: cost ?? this.cost,
+        assetRPN: assetRPN ?? this.assetRPN,
+        manual: manual ?? this.manual,
+        newPriority: newPriority ?? this.newPriority,
+        newRPN: newRPN ?? this.newRPN,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('SpareCriticality(')
+          ..write('id: $id, ')
+          ..write('usage: $usage, ')
+          ..write('leadTime: $leadTime, ')
+          ..write('cost: $cost, ')
+          ..write('assetRPN: $assetRPN, ')
+          ..write('manual: $manual, ')
+          ..write('newPriority: $newPriority, ')
+          ..write('newRPN: $newRPN')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, usage, leadTime, cost, assetRPN, manual, newPriority, newRPN);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SpareCriticality &&
+          other.id == this.id &&
+          other.usage == this.usage &&
+          other.leadTime == this.leadTime &&
+          other.cost == this.cost &&
+          other.assetRPN == this.assetRPN &&
+          other.manual == this.manual &&
+          other.newPriority == this.newPriority &&
+          other.newRPN == this.newRPN);
+}
+
+class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
+  final Value<String> id;
+  final Value<int> usage;
+  final Value<int> leadTime;
+  final Value<int> cost;
+  final Value<double> assetRPN;
+  final Value<bool> manual;
+  final Value<int> newPriority;
+  final Value<double> newRPN;
+  final Value<int> rowid;
+  const SpareCriticalitysCompanion({
+    this.id = const Value.absent(),
+    this.usage = const Value.absent(),
+    this.leadTime = const Value.absent(),
+    this.cost = const Value.absent(),
+    this.assetRPN = const Value.absent(),
+    this.manual = const Value.absent(),
+    this.newPriority = const Value.absent(),
+    this.newRPN = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SpareCriticalitysCompanion.insert({
+    required String id,
+    required int usage,
+    required int leadTime,
+    required int cost,
+    required double assetRPN,
+    required bool manual,
+    required int newPriority,
+    required double newRPN,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        usage = Value(usage),
+        leadTime = Value(leadTime),
+        cost = Value(cost),
+        assetRPN = Value(assetRPN),
+        manual = Value(manual),
+        newPriority = Value(newPriority),
+        newRPN = Value(newRPN);
+  static Insertable<SpareCriticality> custom({
+    Expression<String>? id,
+    Expression<int>? usage,
+    Expression<int>? leadTime,
+    Expression<int>? cost,
+    Expression<double>? assetRPN,
+    Expression<bool>? manual,
+    Expression<int>? newPriority,
+    Expression<double>? newRPN,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (usage != null) 'usage': usage,
+      if (leadTime != null) 'lead_time': leadTime,
+      if (cost != null) 'cost': cost,
+      if (assetRPN != null) 'asset_r_p_n': assetRPN,
+      if (manual != null) 'manual': manual,
+      if (newPriority != null) 'new_priority': newPriority,
+      if (newRPN != null) 'new_r_p_n': newRPN,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SpareCriticalitysCompanion copyWith(
+      {Value<String>? id,
+      Value<int>? usage,
+      Value<int>? leadTime,
+      Value<int>? cost,
+      Value<double>? assetRPN,
+      Value<bool>? manual,
+      Value<int>? newPriority,
+      Value<double>? newRPN,
+      Value<int>? rowid}) {
+    return SpareCriticalitysCompanion(
+      id: id ?? this.id,
+      usage: usage ?? this.usage,
+      leadTime: leadTime ?? this.leadTime,
+      cost: cost ?? this.cost,
+      assetRPN: assetRPN ?? this.assetRPN,
+      manual: manual ?? this.manual,
+      newPriority: newPriority ?? this.newPriority,
+      newRPN: newRPN ?? this.newRPN,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (usage.present) {
+      map['usage'] = Variable<int>(usage.value);
+    }
+    if (leadTime.present) {
+      map['lead_time'] = Variable<int>(leadTime.value);
+    }
+    if (cost.present) {
+      map['cost'] = Variable<int>(cost.value);
+    }
+    if (assetRPN.present) {
+      map['asset_r_p_n'] = Variable<double>(assetRPN.value);
+    }
+    if (manual.present) {
+      map['manual'] = Variable<bool>(manual.value);
+    }
+    if (newPriority.present) {
+      map['new_priority'] = Variable<int>(newPriority.value);
+    }
+    if (newRPN.present) {
+      map['new_r_p_n'] = Variable<double>(newRPN.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SpareCriticalitysCompanion(')
+          ..write('id: $id, ')
+          ..write('usage: $usage, ')
+          ..write('leadTime: $leadTime, ')
+          ..write('cost: $cost, ')
+          ..write('assetRPN: $assetRPN, ')
+          ..write('manual: $manual, ')
+          ..write('newPriority: $newPriority, ')
+          ..write('newRPN: $newRPN, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(e);
   late final $SettingsTable settings = $SettingsTable(this);
@@ -3211,6 +4774,11 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   late final $AssetCriticalitysTable assetCriticalitys =
       $AssetCriticalitysTable(this);
   late final $AssetUploadsTable assetUploads = $AssetUploadsTable(this);
+  late final $SparePartsTable spareParts = $SparePartsTable(this);
+  late final $PurchasesTable purchases = $PurchasesTable(this);
+  late final $ItemsTable items = $ItemsTable(this);
+  late final $SpareCriticalitysTable spareCriticalitys =
+      $SpareCriticalitysTable(this);
   Selectable<SystemCriticality> systemsFilteredBySite(String siteid) {
     return customSelect(
         'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1)',
@@ -3244,6 +4812,10 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         workorders,
         systemCriticalitys,
         assetCriticalitys,
-        assetUploads
+        assetUploads,
+        spareParts,
+        purchases,
+        items,
+        spareCriticalitys
       ];
 }
