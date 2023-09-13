@@ -535,6 +535,196 @@ List<String> systemQuality = [
   'Potential class action',
 ];
 
+Map<int, Map<String, dynamic>> usageRating = {
+  1: {
+    'description': 'Single Occurance',
+    'longdesc': '',
+    'low': 0.0,
+    'high': 1,
+  },
+  2: {
+    'description': '2 Occurances',
+    'longdesc': '',
+    'low': 1,
+    'high': 2,
+  },
+  3: {
+    'description': '3 - 4 Occurances',
+    'longdesc': '',
+    'low': 2,
+    'high': 5,
+  },
+  4: {
+    'description': '5 - 10 Occurances',
+    'longdesc': '',
+    'low': 5,
+    'high': 10,
+  },
+  5: {
+    'description': '11 - 20 Occurances',
+    'longdesc': '',
+    'low': 10,
+    'high': 20,
+  },
+  6: {
+    'description': '21 - 30 Occurances',
+    'longdesc': '',
+    'low': 20,
+    'high': 30,
+  },
+  7: {
+    'description': '31 - 40 Occurances',
+    'longdesc': '',
+    'low': 30,
+    'high': 40,
+  },
+  8: {
+    'description': '41 - 50 Occurances',
+    'longdesc': '',
+    'low': 40,
+    'high': 50,
+  },
+  9: {
+    'description': '51 - 60 Occurances',
+    'longdesc': '',
+    'low': 50,
+    'high': 60,
+  },
+  10: {
+    'description': 'More Than 60 Occurances',
+    'longdesc': '',
+    'low': 60,
+    'high': 9999999.0,
+  },
+};
+
+Map<int, Map<String, dynamic>> leadTimeRating = {
+  1: {
+    'description': 'Stock Item',
+    'longdesc': 'Items stocked by Vendor',
+    'low': 0.0,
+    'high': 1.0,
+  },
+  2: {
+    'description': '< 1 Week',
+    'longdesc': '1 week lead time',
+    'low': 1,
+    'high': 7,
+  },
+  3: {
+    'description': '1 to 2 Weeks',
+    'longdesc': '2 weeks lead time',
+    'low': 7,
+    'high': 14,
+  },
+  4: {
+    'description': '2 to 4 Weeks',
+    'longdesc': '4 weeks lead time',
+    'low': 14,
+    'high': 28,
+  },
+  5: {
+    'description': '1 to 2 Months',
+    'longdesc': '2 months lead time',
+    'low': 28,
+    'high': 60,
+  },
+  6: {
+    'description': '2 to 4 Months',
+    'longdesc': '4 months lead time',
+    'low': 60,
+    'high': 120,
+  },
+  7: {
+    'description': '4 to 6 Months',
+    'longdesc': '6 months lead time',
+    'low': 120,
+    'high': 182,
+  },
+  8: {
+    'description': '6 to 8 Months',
+    'longdesc': '8 months lead time',
+    'low': 180,
+    'high': 240,
+  },
+  9: {
+    'description': '8 to 12 Months',
+    'longdesc': '1 year lead time',
+    'low': 240,
+    'high': 365,
+  },
+  10: {
+    'description': '> 1 Year',
+    'likelihood': 'Very High',
+    'longdesc': 'more than 1 year lead time',
+    'low': 365,
+    'high': 9999999.0,
+  },
+};
+
+Map<int, Map<String, dynamic>> costRating = {
+  1: {
+    'description': '< \$10',
+    'longdesc': '',
+    'low': 0.0,
+    'high': 10,
+  },
+  2: {
+    'description': '\$10 - \$50',
+    'longdesc': '',
+    'low': 10,
+    'high': 50,
+  },
+  3: {
+    'description': '\$50 - \$100',
+    'longdesc': '',
+    'low': 50,
+    'high': 100,
+  },
+  4: {
+    'description': '\$100 - \$250',
+    'longdesc': '',
+    'low': 100,
+    'high': 250,
+  },
+  5: {
+    'description': '\$250 - \$500',
+    'longdesc': '',
+    'low': 250,
+    'high': 500,
+  },
+  6: {
+    'description': '\$500 - \$750',
+    'longdesc': '',
+    'low': 500,
+    'high': 750,
+  },
+  7: {
+    'description': '\$750 - \$1000',
+    'longdesc': '',
+    'low': 750,
+    'high': 1000,
+  },
+  8: {
+    'description': '\$1000 - \$5000',
+    'longdesc': '',
+    'low': 1000,
+    'high': 5000,
+  },
+  9: {
+    'description': '\$5000 - \$10000',
+    'longdesc': '',
+    'low': 5000,
+    'high': 10000,
+  },
+  10: {
+    'description': '> \$10000',
+    'longdesc': '',
+    'low': 10000,
+    'high': 9999999.0,
+  },
+};
+
 //For application settings (add with new settings)
 //keys hold the settings names while values are the datatypes they can be
 enum ApplicationSetting {

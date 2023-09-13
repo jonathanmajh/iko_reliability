@@ -3512,8 +3512,8 @@ class $PurchasesTable extends Purchases
   static const VerificationMeta _ponumMeta = const VerificationMeta('ponum');
   @override
   late final GeneratedColumn<String> ponum = GeneratedColumn<String>(
-      'ponum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'ponum', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _startDateMeta =
       const VerificationMeta('startDate');
   @override
@@ -3529,8 +3529,8 @@ class $PurchasesTable extends Purchases
       const VerificationMeta('endDate');
   @override
   late final GeneratedColumn<String> endDate = GeneratedColumn<String>(
-      'end_date', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'end_date', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _leadTimeMeta =
       const VerificationMeta('leadTime');
   @override
@@ -3546,15 +3546,18 @@ class $PurchasesTable extends Purchases
   static const VerificationMeta _unitCostMeta =
       const VerificationMeta('unitCost');
   @override
-  late final GeneratedColumn<String> unitCost = GeneratedColumn<String>(
+  late final GeneratedColumn<double> unitCost = GeneratedColumn<double>(
       'unit_cost', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.double, requiredDuringInsert: true);
   static const VerificationMeta _poStatusMeta =
       const VerificationMeta('poStatus');
   @override
-  late final GeneratedColumn<String> poStatus = GeneratedColumn<String>(
+  late final GeneratedColumn<bool> poStatus = GeneratedColumn<bool>(
       'po_status', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("po_status" IN (0, 1))'));
   static const VerificationMeta _prlineidMeta =
       const VerificationMeta('prlineid');
   @override
@@ -3610,8 +3613,6 @@ class $PurchasesTable extends Purchases
     if (data.containsKey('ponum')) {
       context.handle(
           _ponumMeta, ponum.isAcceptableOrUnknown(data['ponum']!, _ponumMeta));
-    } else if (isInserting) {
-      context.missing(_ponumMeta);
     }
     if (data.containsKey('start_date')) {
       context.handle(_startDateMeta,
@@ -3628,8 +3629,6 @@ class $PurchasesTable extends Purchases
     if (data.containsKey('end_date')) {
       context.handle(_endDateMeta,
           endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta));
-    } else if (isInserting) {
-      context.missing(_endDateMeta);
     }
     if (data.containsKey('lead_time')) {
       context.handle(_leadTimeMeta,
@@ -3675,21 +3674,21 @@ class $PurchasesTable extends Purchases
       poDescription: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}po_description'])!,
       ponum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}ponum'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}ponum']),
       startDate: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}start_date'])!,
       siteid: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
       endDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}end_date'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}end_date']),
       leadTime: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}lead_time'])!,
       itemnum: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
       unitCost: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}unit_cost'])!,
+          .read(DriftSqlType.double, data['${effectivePrefix}unit_cost'])!,
       poStatus: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}po_status'])!,
+          .read(DriftSqlType.bool, data['${effectivePrefix}po_status'])!,
       prlineid: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}prlineid'])!,
     );
@@ -3705,23 +3704,23 @@ class Purchase extends DataClass implements Insertable<Purchase> {
   final String prnum;
   final String prDescription;
   final String poDescription;
-  final String ponum;
+  final String? ponum;
   final String startDate;
   final String siteid;
-  final String endDate;
+  final String? endDate;
   final double leadTime;
   final String itemnum;
-  final String unitCost;
-  final String poStatus;
+  final double unitCost;
+  final bool poStatus;
   final int prlineid;
   const Purchase(
       {required this.prnum,
       required this.prDescription,
       required this.poDescription,
-      required this.ponum,
+      this.ponum,
       required this.startDate,
       required this.siteid,
-      required this.endDate,
+      this.endDate,
       required this.leadTime,
       required this.itemnum,
       required this.unitCost,
@@ -3733,14 +3732,18 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     map['prnum'] = Variable<String>(prnum);
     map['pr_description'] = Variable<String>(prDescription);
     map['po_description'] = Variable<String>(poDescription);
-    map['ponum'] = Variable<String>(ponum);
+    if (!nullToAbsent || ponum != null) {
+      map['ponum'] = Variable<String>(ponum);
+    }
     map['start_date'] = Variable<String>(startDate);
     map['siteid'] = Variable<String>(siteid);
-    map['end_date'] = Variable<String>(endDate);
+    if (!nullToAbsent || endDate != null) {
+      map['end_date'] = Variable<String>(endDate);
+    }
     map['lead_time'] = Variable<double>(leadTime);
     map['itemnum'] = Variable<String>(itemnum);
-    map['unit_cost'] = Variable<String>(unitCost);
-    map['po_status'] = Variable<String>(poStatus);
+    map['unit_cost'] = Variable<double>(unitCost);
+    map['po_status'] = Variable<bool>(poStatus);
     map['prlineid'] = Variable<int>(prlineid);
     return map;
   }
@@ -3750,10 +3753,13 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       prnum: Value(prnum),
       prDescription: Value(prDescription),
       poDescription: Value(poDescription),
-      ponum: Value(ponum),
+      ponum:
+          ponum == null && nullToAbsent ? const Value.absent() : Value(ponum),
       startDate: Value(startDate),
       siteid: Value(siteid),
-      endDate: Value(endDate),
+      endDate: endDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDate),
       leadTime: Value(leadTime),
       itemnum: Value(itemnum),
       unitCost: Value(unitCost),
@@ -3769,14 +3775,14 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       prnum: serializer.fromJson<String>(json['prnum']),
       prDescription: serializer.fromJson<String>(json['prDescription']),
       poDescription: serializer.fromJson<String>(json['poDescription']),
-      ponum: serializer.fromJson<String>(json['ponum']),
+      ponum: serializer.fromJson<String?>(json['ponum']),
       startDate: serializer.fromJson<String>(json['startDate']),
       siteid: serializer.fromJson<String>(json['siteid']),
-      endDate: serializer.fromJson<String>(json['endDate']),
+      endDate: serializer.fromJson<String?>(json['endDate']),
       leadTime: serializer.fromJson<double>(json['leadTime']),
       itemnum: serializer.fromJson<String>(json['itemnum']),
-      unitCost: serializer.fromJson<String>(json['unitCost']),
-      poStatus: serializer.fromJson<String>(json['poStatus']),
+      unitCost: serializer.fromJson<double>(json['unitCost']),
+      poStatus: serializer.fromJson<bool>(json['poStatus']),
       prlineid: serializer.fromJson<int>(json['prlineid']),
     );
   }
@@ -3787,14 +3793,14 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       'prnum': serializer.toJson<String>(prnum),
       'prDescription': serializer.toJson<String>(prDescription),
       'poDescription': serializer.toJson<String>(poDescription),
-      'ponum': serializer.toJson<String>(ponum),
+      'ponum': serializer.toJson<String?>(ponum),
       'startDate': serializer.toJson<String>(startDate),
       'siteid': serializer.toJson<String>(siteid),
-      'endDate': serializer.toJson<String>(endDate),
+      'endDate': serializer.toJson<String?>(endDate),
       'leadTime': serializer.toJson<double>(leadTime),
       'itemnum': serializer.toJson<String>(itemnum),
-      'unitCost': serializer.toJson<String>(unitCost),
-      'poStatus': serializer.toJson<String>(poStatus),
+      'unitCost': serializer.toJson<double>(unitCost),
+      'poStatus': serializer.toJson<bool>(poStatus),
       'prlineid': serializer.toJson<int>(prlineid),
     };
   }
@@ -3803,23 +3809,23 @@ class Purchase extends DataClass implements Insertable<Purchase> {
           {String? prnum,
           String? prDescription,
           String? poDescription,
-          String? ponum,
+          Value<String?> ponum = const Value.absent(),
           String? startDate,
           String? siteid,
-          String? endDate,
+          Value<String?> endDate = const Value.absent(),
           double? leadTime,
           String? itemnum,
-          String? unitCost,
-          String? poStatus,
+          double? unitCost,
+          bool? poStatus,
           int? prlineid}) =>
       Purchase(
         prnum: prnum ?? this.prnum,
         prDescription: prDescription ?? this.prDescription,
         poDescription: poDescription ?? this.poDescription,
-        ponum: ponum ?? this.ponum,
+        ponum: ponum.present ? ponum.value : this.ponum,
         startDate: startDate ?? this.startDate,
         siteid: siteid ?? this.siteid,
-        endDate: endDate ?? this.endDate,
+        endDate: endDate.present ? endDate.value : this.endDate,
         leadTime: leadTime ?? this.leadTime,
         itemnum: itemnum ?? this.itemnum,
         unitCost: unitCost ?? this.unitCost,
@@ -3881,14 +3887,14 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
   final Value<String> prnum;
   final Value<String> prDescription;
   final Value<String> poDescription;
-  final Value<String> ponum;
+  final Value<String?> ponum;
   final Value<String> startDate;
   final Value<String> siteid;
-  final Value<String> endDate;
+  final Value<String?> endDate;
   final Value<double> leadTime;
   final Value<String> itemnum;
-  final Value<String> unitCost;
-  final Value<String> poStatus;
+  final Value<double> unitCost;
+  final Value<bool> poStatus;
   final Value<int> prlineid;
   const PurchasesCompanion({
     this.prnum = const Value.absent(),
@@ -3908,22 +3914,20 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     required String prnum,
     required String prDescription,
     required String poDescription,
-    required String ponum,
+    this.ponum = const Value.absent(),
     required String startDate,
     required String siteid,
-    required String endDate,
+    this.endDate = const Value.absent(),
     required double leadTime,
     required String itemnum,
-    required String unitCost,
-    required String poStatus,
+    required double unitCost,
+    required bool poStatus,
     this.prlineid = const Value.absent(),
   })  : prnum = Value(prnum),
         prDescription = Value(prDescription),
         poDescription = Value(poDescription),
-        ponum = Value(ponum),
         startDate = Value(startDate),
         siteid = Value(siteid),
-        endDate = Value(endDate),
         leadTime = Value(leadTime),
         itemnum = Value(itemnum),
         unitCost = Value(unitCost),
@@ -3938,8 +3942,8 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     Expression<String>? endDate,
     Expression<double>? leadTime,
     Expression<String>? itemnum,
-    Expression<String>? unitCost,
-    Expression<String>? poStatus,
+    Expression<double>? unitCost,
+    Expression<bool>? poStatus,
     Expression<int>? prlineid,
   }) {
     return RawValuesInsertable({
@@ -3962,14 +3966,14 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
       {Value<String>? prnum,
       Value<String>? prDescription,
       Value<String>? poDescription,
-      Value<String>? ponum,
+      Value<String?>? ponum,
       Value<String>? startDate,
       Value<String>? siteid,
-      Value<String>? endDate,
+      Value<String?>? endDate,
       Value<double>? leadTime,
       Value<String>? itemnum,
-      Value<String>? unitCost,
-      Value<String>? poStatus,
+      Value<double>? unitCost,
+      Value<bool>? poStatus,
       Value<int>? prlineid}) {
     return PurchasesCompanion(
       prnum: prnum ?? this.prnum,
@@ -4018,10 +4022,10 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
       map['itemnum'] = Variable<String>(itemnum.value);
     }
     if (unitCost.present) {
-      map['unit_cost'] = Variable<String>(unitCost.value);
+      map['unit_cost'] = Variable<double>(unitCost.value);
     }
     if (poStatus.present) {
-      map['po_status'] = Variable<String>(poStatus.value);
+      map['po_status'] = Variable<bool>(poStatus.value);
     }
     if (prlineid.present) {
       map['prlineid'] = Variable<int>(prlineid.value);

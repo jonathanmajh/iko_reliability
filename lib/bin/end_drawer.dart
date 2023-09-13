@@ -9,7 +9,6 @@ import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
-import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import '../criticality/criticality_db_export_import.dart';
 import '../main.dart';
 import 'consts.dart';
@@ -352,17 +351,13 @@ class _EndDrawerState extends State<EndDrawer> {
   }
 
   Widget defaultEndDrawer(BuildContext context, ThemeManager themeManager) {
-    return Consumer<AssetCreationNotifier>(
-      builder: (context, assetCreationNotifier, child) {
-        return Drawer(
-          child: ListView(
-            children: const <Widget>[
-              ThemeToggle(),
-              SiteToggle(),
-            ],
-          ),
-        );
-      },
+    return Drawer(
+      child: ListView(
+        children: const <Widget>[
+          ThemeToggle(),
+          SiteToggle(),
+        ],
+      ),
     );
   }
 }

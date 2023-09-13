@@ -1,8 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
+import 'package:provider/provider.dart';
 
 import '../bin/drawer.dart';
 import '../bin/end_drawer.dart';
+import '../main.dart';
 
 @RoutePage()
 class SpareCriticalityPage extends StatefulWidget {
@@ -35,7 +38,18 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         ],
       ),
       endDrawer: const EndDrawer(),
-      body: const Placeholder(),
+      body: ElevatedButton(
+          child: const Text('Configure'),
+          onPressed: () {
+            // database!.getSpareParts(
+            //   siteid: context.read<SelectedSiteNotifier>().selectedSite,
+            //   env: context.read<MaximoServerNotifier>().maximoServerSelected,
+            // );
+            database!.getPurchases(
+              siteid: context.read<SelectedSiteNotifier>().selectedSite,
+              env: context.read<MaximoServerNotifier>().maximoServerSelected,
+            );
+          }),
     );
   }
 }

@@ -196,14 +196,14 @@ class Purchases extends Table {
   TextColumn get prnum => text()();
   TextColumn get prDescription => text()();
   TextColumn get poDescription => text()();
-  TextColumn get ponum => text()();
+  TextColumn get ponum => text().nullable()();
   TextColumn get startDate => text()();
   TextColumn get siteid => text()();
-  TextColumn get endDate => text()();
+  TextColumn get endDate => text().nullable()();
   RealColumn get leadTime => real()();
   TextColumn get itemnum => text()();
-  TextColumn get unitCost => text()();
-  TextColumn get poStatus => text()();
+  RealColumn get unitCost => real()();
+  BoolColumn get poStatus => boolean()();
   IntColumn get prlineid => integer()();
 
   @override
@@ -867,6 +867,78 @@ class MyDatabase extends _$MyDatabase {
     assetCache[siteid]![assetNum] = assetObj;
 
     return assetObj;
+  }
+
+  Future<void> getSpareParts(
+      {required String siteid, required String env}) async {
+    final url = 'IKO_API_ASSETSPAREPARTS?site=$siteid';
+    final result = await maximoRequest(url, 'api', env);
+    List<SparePartsCompanion> inserts = [];
+    if (!result.containsKey('info')) {
+      return;
+    }
+    for (final sparepart in result['info']) {
+      inserts.add(SparePartsCompanion.insert(
+        itemnum: sparepart['itemnum'],
+        assetnum: sparepart['assetnum'],
+        siteid: sparepart['siteid'],
+        quantity: sparepart['quantity'] * 1.0,
+        sparepartid: Value(sparepart['sparepartid']),
+      ));
+    }
+    try {
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(spareParts, inserts);
+      });
+    } catch (e) {
+      debugPrint('Error inserting System Criticality\n${e.toString()}');
+    }
+  }
+
+  Future<void> getPurchases(
+      {required String siteid, required String env}) async {
+    final url = 'IKO_API_ITEMPURCHASES?site=$siteid';
+    final result = await maximoRequest(url, 'api', env);
+    List<PurchasesCompanion> inserts = [];
+    if (!result.containsKey('info')) {
+      return;
+    }
+    for (final purchase in result['info']) {
+      final enterdate = DateTime.parse(purchase['enterdate']);
+      final endDate = DateTime.tryParse(purchase['transdate'] ?? '');
+      int leadTime = 0;
+      if (endDate != null) {
+        leadTime = endDate.difference(enterdate).inDays;
+      }
+      bool status = purchase['receiptscomplete'] == '1' ? true : false;
+      if (leadTime == 0) {
+        status = false;
+      }
+      if (purchase['currencyunitcost'] == null) {
+        status = false;
+      }
+      inserts.add(PurchasesCompanion.insert(
+        prnum: purchase['prnum'],
+        prDescription: '',
+        poDescription: '',
+        ponum: Value(purchase['ponum']),
+        startDate: purchase['enterdate'],
+        siteid: purchase['siteid'],
+        endDate: Value(purchase['transdate']),
+        leadTime: leadTime.toDouble(),
+        itemnum: purchase['itemnum'],
+        unitCost: (purchase['currencyunitcost'] ?? 0) * 1.0,
+        poStatus: status,
+        prlineid: Value(purchase['prlineid']),
+      ));
+    }
+    try {
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(purchases, inserts);
+      });
+    } catch (e) {
+      debugPrint('Error inserting System Criticality\n${e.toString()}');
+    }
   }
 }
 
