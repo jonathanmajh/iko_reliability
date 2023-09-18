@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 class ProcessStateNotifier extends ChangeNotifier {
   ///Map of the currently running processes where the index of the ProcessStates are the keys
   Map<int, bool> processStates = <int, bool>{};
+  List<String> dbWrites = [];
 
   ///If the processing dialog is currently open
   bool alertDialogShowing = false;
@@ -21,6 +22,23 @@ class ProcessStateNotifier extends ChangeNotifier {
     for (ProcessStates process in ProcessStates.values) {
       processStates[process.index] = false;
     }
+  }
+
+  bool isDbInUse() {
+    if (dbWrites.isNotEmpty) {
+      return true;
+    }
+    return false;
+  }
+
+  void addDbTask(String taskName) {
+    dbWrites.add(taskName);
+    notifyListeners();
+  }
+
+  void removeDbTask(String taskName) {
+    dbWrites.remove(taskName);
+    notifyListeners();
   }
 
   ///checks if an application process is running. Returns [true] if at least one process is running.

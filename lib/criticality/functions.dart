@@ -27,6 +27,9 @@ double systemScoreFunc(int safety, int regulatory, int economic, int throughput,
         5);
 
 int ratingFromValue(double value, Map<int, Map<String, dynamic>> definition) {
+  if (value == -1) {
+    return 0;
+  }
   for (var i = 1; i < 11; i++) {
     if (value < definition[i]!['high']!) {
       return i;

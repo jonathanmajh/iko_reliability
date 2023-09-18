@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:http/http.dart' as http;
+import 'package:iko_reliability_flutter/criticality/functions.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
@@ -262,6 +263,41 @@ WHERE line IN (
 ''',
     'maxSystemID': '''
 select max(id) from system_criticalitys
+''',
+    'spareCriticalityAutoCalculation': '''
+SELECT DISTINCT (sp.itemnum) itemnum
+	,(
+		SELECT sum(quantity)
+		FROM spare_parts s1
+		WHERE s1.itemnum = sp.itemnum
+			AND s1.siteid = sp.siteid
+		) quantity
+	,(
+		SELECT ifnull(avg(pr.unit_cost), -1)
+		FROM purchases pr
+		WHERE pr.itemnum = sp.itemnum
+			AND pr.siteid = sp.siteid
+			AND pr.po_status = 1
+		) unitCost
+	,(
+		SELECT ifnull(avg(pr.lead_time), -1)
+		FROM purchases pr
+		WHERE pr.itemnum = sp.itemnum
+			AND pr.siteid = sp.siteid
+			AND pr.po_status = 1
+		) leadTime
+	,(
+		SELECT max(new_r_p_n)
+		FROM asset_criticalitys
+		WHERE asset IN (
+				SELECT sp.siteid || s2.assetnum
+				FROM spare_parts s2
+				WHERE s2.itemnum = sp.itemnum
+					AND s2.siteid = sp.siteid
+				)
+		) assetRPN
+FROM spare_parts sp
+WHERE sp.siteid = :siteid
 ''',
   },
 )
@@ -869,7 +905,21 @@ class MyDatabase extends _$MyDatabase {
     return assetObj;
   }
 
-  Future<void> getSpareParts(
+  Future<bool> checkSpareParts({required String siteid}) async {
+    var result =
+        await (select(spareParts)..where((t) => t.siteid.equals(siteid))).get();
+    if (result.isEmpty) {
+      return false;
+    }
+    var result2 =
+        await (select(purchases)..where((t) => t.siteid.equals(siteid))).get();
+    if (result2.isEmpty) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> getSparePartsMaximo(
       {required String siteid, required String env}) async {
     final url = 'IKO_API_ASSETSPAREPARTS?site=$siteid';
     final result = await maximoRequest(url, 'api', env);
@@ -895,7 +945,7 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
-  Future<void> getPurchases(
+  Future<void> getPurchasesMaximo(
       {required String siteid, required String env}) async {
     final url = 'IKO_API_ITEMPURCHASES?site=$siteid';
     final result = await maximoRequest(url, 'api', env);
@@ -939,6 +989,33 @@ class MyDatabase extends _$MyDatabase {
     } catch (e) {
       debugPrint('Error inserting System Criticality\n${e.toString()}');
     }
+  }
+
+  Future<void> computeSparePartCriticality({required String siteid}) async {
+    final results = await spareCriticalityAutoCalculation(siteid).get();
+    List<SpareCriticalitysCompanion> results2 =
+        results.map<SpareCriticalitysCompanion>((e) {
+      final temp = [
+        ratingFromValue(e.quantity, usageRating),
+        ratingFromValue(e.leadTime, leadTimeRating),
+        ratingFromValue(e.unitCost, costRating),
+      ];
+      return SpareCriticalitysCompanion.insert(
+        id: '$siteid${e.itemnum}',
+        usage: temp[0],
+        leadTime: temp[1],
+        cost: temp[2],
+        assetRPN: e.assetRPN ?? 0,
+        manual: false,
+        newPriority: 0,
+        newRPN: (e.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
+      );
+    }).toList();
+    await batch((batch) {
+      batch.insertAll(spareCriticalitys, results2);
+    });
+    return;
+    // TODO add global lock of whether DB is about to be modified
   }
 }
 

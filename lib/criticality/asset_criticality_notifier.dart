@@ -24,8 +24,9 @@ class AssetCriticalityNotifier extends ChangeNotifier {
 
   Map<double, int> frequencyOfRPNs() {
     Map<double, int> temp = {};
-    rpnList
-        .forEach((x) => temp[x] = !temp.containsKey(x) ? (1) : (temp[x]! + 1));
+    for (var x in rpnList) {
+      temp[x] = !temp.containsKey(x) ? (1) : (temp[x]! + 1);
+    }
     return temp;
   }
 

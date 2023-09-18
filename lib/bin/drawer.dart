@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
+import '../criticality/spare_criticality.dart';
+
 class NavDrawer extends StatelessWidget {
   const NavDrawer({super.key});
 
@@ -65,8 +67,14 @@ class NavDrawer extends StatelessWidget {
               leading: const Icon(Icons.settings),
               title: const Text('Spare Part Criticality'),
               onTap: () {
-                context.router.pushNamed("/criticality/spare");
-                Navigator.pop(context); // close the drawer
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return const AlertDialog(
+                        title: Text('Loading...'),
+                        content: SparePartsLoadingIndicator(),
+                      );
+                    });
               },
             ),
           ],

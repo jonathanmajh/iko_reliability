@@ -4803,6 +4803,26 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.readNullable<int>('_c0'));
   }
 
+  Selectable<SpareCriticalityAutoCalculationResult>
+      spareCriticalityAutoCalculation(String siteid) {
+    return customSelect(
+        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1',
+        variables: [
+          Variable<String>(siteid)
+        ],
+        readsFrom: {
+          spareParts,
+          purchases,
+          assetCriticalitys,
+        }).map((QueryRow row) => SpareCriticalityAutoCalculationResult(
+          itemnum: row.read<String>('itemnum'),
+          quantity: row.read<double>('quantity'),
+          unitCost: row.read<double>('unitCost'),
+          leadTime: row.read<double>('leadTime'),
+          assetRPN: row.readNullable<double>('assetRPN'),
+        ));
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4822,4 +4842,19 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         items,
         spareCriticalitys
       ];
+}
+
+class SpareCriticalityAutoCalculationResult {
+  final String itemnum;
+  final double quantity;
+  final double unitCost;
+  final double leadTime;
+  final double? assetRPN;
+  SpareCriticalityAutoCalculationResult({
+    required this.itemnum,
+    required this.quantity,
+    required this.unitCost,
+    required this.leadTime,
+    this.assetRPN,
+  });
 }
