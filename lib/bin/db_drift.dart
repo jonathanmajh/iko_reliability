@@ -1,5 +1,4 @@
 //handling local database (drift)
-
 import 'dart:math';
 
 import 'package:drift/drift.dart';
@@ -231,9 +230,21 @@ class SpareCriticalitys extends Table {
   BoolColumn get manual => boolean()();
   IntColumn get newPriority => integer()();
   RealColumn get newRPN => real()();
+  TextColumn get siteid => text()();
+  TextColumn get itemnum => text()();
 
   @override
   Set<Column> get primaryKey => {id};
+}
+
+class SpareCriticalityWithItem {
+  SpareCriticalityWithItem(
+    this.spareCriticality,
+    this.item,
+  );
+
+  final SpareCriticality spareCriticality;
+  final Item? item;
 }
 
 @DriftDatabase(
@@ -472,6 +483,29 @@ class MyDatabase extends _$MyDatabase {
           5)),
     ));
     return row.first.id;
+  }
+
+  Future<void> updateSpareCriticality({
+    required String spareid,
+    int? usage,
+    int? leadTime,
+    int? cost,
+    int? newPriority,
+    double? newRPN,
+    bool? manual,
+    double? assetRpn,
+  }) async {
+    await (update(spareCriticalitys)..where((tbl) => tbl.id.equals(spareid)))
+        .writeReturning(SpareCriticalitysCompanion(
+      usage: usage != null ? Value(usage) : const Value.absent(),
+      leadTime: leadTime != null ? Value(leadTime) : const Value.absent(),
+      cost: cost != null ? Value(cost) : const Value.absent(),
+      newPriority:
+          newPriority != null ? Value(newPriority) : const Value.absent(),
+      newRPN: newRPN != null ? Value(newRPN) : const Value.absent(),
+      manual: manual != null ? Value(manual) : const Value.absent(),
+      assetRPN: assetRpn != null ? Value(assetRpn) : const Value.absent(),
+    ));
   }
 
   Future<void> updateAssetCriticality({
@@ -945,6 +979,32 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
+  Future<void> getItemDetailsMaximo(
+      {required String siteid, required String env}) async {
+    final url = 'IKO_API_SITE_ITEMS?site=$siteid';
+    final result = await maximoRequest(url, 'api', env);
+    List<ItemsCompanion> inserts = [];
+    if (!result.containsKey('info')) {
+      return;
+    }
+    for (final item in result['info']) {
+      inserts.add(ItemsCompanion.insert(
+        description: item['description'] ?? '',
+        glClass: item['glClass'] ?? '',
+        commodityGroup: item['commodityGroup'] ?? '',
+        status: item['status'] ?? '',
+        itemnum: item['itemnum'],
+      ));
+    }
+    try {
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(items, inserts);
+      });
+    } catch (e) {
+      debugPrint('Error inserting Item Details\n${e.toString()}');
+    }
+  }
+
   Future<void> getPurchasesMaximo(
       {required String siteid, required String env}) async {
     final url = 'IKO_API_ITEMPURCHASES?site=$siteid';
@@ -1009,13 +1069,47 @@ class MyDatabase extends _$MyDatabase {
         manual: false,
         newPriority: 0,
         newRPN: (e.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
+        siteid: siteid,
+        itemnum: e.itemnum,
       );
+      // TODO asset RPN needs to be updated when it's recaulcated
     }).toList();
     await batch((batch) {
       batch.insertAll(spareCriticalitys, results2);
     });
     return;
     // TODO add global lock of whether DB is about to be modified
+  }
+
+  Future<List<SpareCriticalityWithItem>> getSpareCriticalities(
+      {required String siteid}) async {
+    var criticalities = await (select(spareCriticalitys).join([
+      leftOuterJoin(items, items.itemnum.equalsExp(spareCriticalitys.itemnum)),
+    ])
+          ..where(spareCriticalitys.siteid.equals(siteid)))
+        .get();
+    return criticalities.map((row) {
+      return SpareCriticalityWithItem(
+        row.readTable(spareCriticalitys),
+        row.readTableOrNull(items),
+      );
+    }).toList();
+  }
+
+  Future<SpareCriticality> getSpareCriticality({required String id}) async {
+    var criticalities = await (select(spareCriticalitys)
+          ..where((tbl) => tbl.id.equals(id)))
+        .getSingle();
+    return criticalities;
+  }
+
+  Future<List<Purchase>> getItemPurchases(
+      {required String itemnum, required String siteId}) async {
+    var purchase = await (select(purchases)
+          ..where((tbl) => tbl.itemnum.equals(itemnum))
+          ..where((t) => t.siteid.equals(siteId)))
+        .get();
+    return purchase;
   }
 }
 

@@ -4408,9 +4408,30 @@ class $SpareCriticalitysTable extends SpareCriticalitys
   late final GeneratedColumn<double> newRPN = GeneratedColumn<double>(
       'new_r_p_n', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, usage, leadTime, cost, assetRPN, manual, newPriority, newRPN];
+  late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
+      'siteid', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _itemnumMeta =
+      const VerificationMeta('itemnum');
+  @override
+  late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
+      'itemnum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        usage,
+        leadTime,
+        cost,
+        assetRPN,
+        manual,
+        newPriority,
+        newRPN,
+        siteid,
+        itemnum
+      ];
   @override
   String get aliasedName => _alias ?? 'spare_criticalitys';
   @override
@@ -4469,6 +4490,18 @@ class $SpareCriticalitysTable extends SpareCriticalitys
     } else if (isInserting) {
       context.missing(_newRPNMeta);
     }
+    if (data.containsKey('siteid')) {
+      context.handle(_siteidMeta,
+          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+    } else if (isInserting) {
+      context.missing(_siteidMeta);
+    }
+    if (data.containsKey('itemnum')) {
+      context.handle(_itemnumMeta,
+          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+    } else if (isInserting) {
+      context.missing(_itemnumMeta);
+    }
     return context;
   }
 
@@ -4494,6 +4527,10 @@ class $SpareCriticalitysTable extends SpareCriticalitys
           .read(DriftSqlType.int, data['${effectivePrefix}new_priority'])!,
       newRPN: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}new_r_p_n'])!,
+      siteid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
+      itemnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
     );
   }
 
@@ -4513,6 +4550,8 @@ class SpareCriticality extends DataClass
   final bool manual;
   final int newPriority;
   final double newRPN;
+  final String siteid;
+  final String itemnum;
   const SpareCriticality(
       {required this.id,
       required this.usage,
@@ -4521,7 +4560,9 @@ class SpareCriticality extends DataClass
       required this.assetRPN,
       required this.manual,
       required this.newPriority,
-      required this.newRPN});
+      required this.newRPN,
+      required this.siteid,
+      required this.itemnum});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4533,6 +4574,8 @@ class SpareCriticality extends DataClass
     map['manual'] = Variable<bool>(manual);
     map['new_priority'] = Variable<int>(newPriority);
     map['new_r_p_n'] = Variable<double>(newRPN);
+    map['siteid'] = Variable<String>(siteid);
+    map['itemnum'] = Variable<String>(itemnum);
     return map;
   }
 
@@ -4546,6 +4589,8 @@ class SpareCriticality extends DataClass
       manual: Value(manual),
       newPriority: Value(newPriority),
       newRPN: Value(newRPN),
+      siteid: Value(siteid),
+      itemnum: Value(itemnum),
     );
   }
 
@@ -4561,6 +4606,8 @@ class SpareCriticality extends DataClass
       manual: serializer.fromJson<bool>(json['manual']),
       newPriority: serializer.fromJson<int>(json['newPriority']),
       newRPN: serializer.fromJson<double>(json['newRPN']),
+      siteid: serializer.fromJson<String>(json['siteid']),
+      itemnum: serializer.fromJson<String>(json['itemnum']),
     );
   }
   @override
@@ -4575,6 +4622,8 @@ class SpareCriticality extends DataClass
       'manual': serializer.toJson<bool>(manual),
       'newPriority': serializer.toJson<int>(newPriority),
       'newRPN': serializer.toJson<double>(newRPN),
+      'siteid': serializer.toJson<String>(siteid),
+      'itemnum': serializer.toJson<String>(itemnum),
     };
   }
 
@@ -4586,7 +4635,9 @@ class SpareCriticality extends DataClass
           double? assetRPN,
           bool? manual,
           int? newPriority,
-          double? newRPN}) =>
+          double? newRPN,
+          String? siteid,
+          String? itemnum}) =>
       SpareCriticality(
         id: id ?? this.id,
         usage: usage ?? this.usage,
@@ -4596,6 +4647,8 @@ class SpareCriticality extends DataClass
         manual: manual ?? this.manual,
         newPriority: newPriority ?? this.newPriority,
         newRPN: newRPN ?? this.newRPN,
+        siteid: siteid ?? this.siteid,
+        itemnum: itemnum ?? this.itemnum,
       );
   @override
   String toString() {
@@ -4607,14 +4660,16 @@ class SpareCriticality extends DataClass
           ..write('assetRPN: $assetRPN, ')
           ..write('manual: $manual, ')
           ..write('newPriority: $newPriority, ')
-          ..write('newRPN: $newRPN')
+          ..write('newRPN: $newRPN, ')
+          ..write('siteid: $siteid, ')
+          ..write('itemnum: $itemnum')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, usage, leadTime, cost, assetRPN, manual, newPriority, newRPN);
+  int get hashCode => Object.hash(id, usage, leadTime, cost, assetRPN, manual,
+      newPriority, newRPN, siteid, itemnum);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4626,7 +4681,9 @@ class SpareCriticality extends DataClass
           other.assetRPN == this.assetRPN &&
           other.manual == this.manual &&
           other.newPriority == this.newPriority &&
-          other.newRPN == this.newRPN);
+          other.newRPN == this.newRPN &&
+          other.siteid == this.siteid &&
+          other.itemnum == this.itemnum);
 }
 
 class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
@@ -4638,6 +4695,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
   final Value<bool> manual;
   final Value<int> newPriority;
   final Value<double> newRPN;
+  final Value<String> siteid;
+  final Value<String> itemnum;
   final Value<int> rowid;
   const SpareCriticalitysCompanion({
     this.id = const Value.absent(),
@@ -4648,6 +4707,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     this.manual = const Value.absent(),
     this.newPriority = const Value.absent(),
     this.newRPN = const Value.absent(),
+    this.siteid = const Value.absent(),
+    this.itemnum = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SpareCriticalitysCompanion.insert({
@@ -4659,6 +4720,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     required bool manual,
     required int newPriority,
     required double newRPN,
+    required String siteid,
+    required String itemnum,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         usage = Value(usage),
@@ -4667,7 +4730,9 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
         assetRPN = Value(assetRPN),
         manual = Value(manual),
         newPriority = Value(newPriority),
-        newRPN = Value(newRPN);
+        newRPN = Value(newRPN),
+        siteid = Value(siteid),
+        itemnum = Value(itemnum);
   static Insertable<SpareCriticality> custom({
     Expression<String>? id,
     Expression<int>? usage,
@@ -4677,6 +4742,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     Expression<bool>? manual,
     Expression<int>? newPriority,
     Expression<double>? newRPN,
+    Expression<String>? siteid,
+    Expression<String>? itemnum,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4688,6 +4755,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       if (manual != null) 'manual': manual,
       if (newPriority != null) 'new_priority': newPriority,
       if (newRPN != null) 'new_r_p_n': newRPN,
+      if (siteid != null) 'siteid': siteid,
+      if (itemnum != null) 'itemnum': itemnum,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4701,6 +4770,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       Value<bool>? manual,
       Value<int>? newPriority,
       Value<double>? newRPN,
+      Value<String>? siteid,
+      Value<String>? itemnum,
       Value<int>? rowid}) {
     return SpareCriticalitysCompanion(
       id: id ?? this.id,
@@ -4711,6 +4782,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       manual: manual ?? this.manual,
       newPriority: newPriority ?? this.newPriority,
       newRPN: newRPN ?? this.newRPN,
+      siteid: siteid ?? this.siteid,
+      itemnum: itemnum ?? this.itemnum,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4742,6 +4815,12 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     if (newRPN.present) {
       map['new_r_p_n'] = Variable<double>(newRPN.value);
     }
+    if (siteid.present) {
+      map['siteid'] = Variable<String>(siteid.value);
+    }
+    if (itemnum.present) {
+      map['itemnum'] = Variable<String>(itemnum.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4759,6 +4838,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
           ..write('manual: $manual, ')
           ..write('newPriority: $newPriority, ')
           ..write('newRPN: $newRPN, ')
+          ..write('siteid: $siteid, ')
+          ..write('itemnum: $itemnum, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4806,16 +4887,21 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   Selectable<SpareCriticalityAutoCalculationResult>
       spareCriticalityAutoCalculation(String siteid) {
     return customSelect(
-        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1',
+        'SELECT DISTINCT(sp.itemnum)AS itemnum, items.description, items.status, items.commodity_group, items.gl_class, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp LEFT JOIN items ON items.itemnum = sp.itemnum WHERE sp.siteid = ?1',
         variables: [
           Variable<String>(siteid)
         ],
         readsFrom: {
           spareParts,
+          items,
           purchases,
           assetCriticalitys,
         }).map((QueryRow row) => SpareCriticalityAutoCalculationResult(
           itemnum: row.read<String>('itemnum'),
+          description: row.readNullable<String>('description'),
+          status: row.readNullable<String>('status'),
+          commodityGroup: row.readNullable<String>('commodity_group'),
+          glClass: row.readNullable<String>('gl_class'),
           quantity: row.read<double>('quantity'),
           unitCost: row.read<double>('unitCost'),
           leadTime: row.read<double>('leadTime'),
@@ -4846,12 +4932,20 @@ abstract class _$MyDatabase extends GeneratedDatabase {
 
 class SpareCriticalityAutoCalculationResult {
   final String itemnum;
+  final String? description;
+  final String? status;
+  final String? commodityGroup;
+  final String? glClass;
   final double quantity;
   final double unitCost;
   final double leadTime;
   final double? assetRPN;
   SpareCriticalityAutoCalculationResult({
     required this.itemnum,
+    this.description,
+    this.status,
+    this.commodityGroup,
+    this.glClass,
     required this.quantity,
     required this.unitCost,
     required this.leadTime,

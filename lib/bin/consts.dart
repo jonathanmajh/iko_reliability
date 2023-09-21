@@ -12,6 +12,13 @@ final assetCriticality = {
   9: 'Very High',
 };
 
+final spareCriticality = {
+  0: 'N',
+  1: 'C',
+  2: 'B',
+  3: 'A',
+};
+
 List<String> criticalityStrings = [
   'Very Low',
   'Low',
@@ -591,7 +598,7 @@ Map<int, Map<String, dynamic>> usageRating = {
     'high': 60,
   },
   10: {
-    'description': 'More Than 60 Occurances',
+    'description': '> 60 Occurances',
     'longdesc': '',
     'low': 60,
     'high': 9999999.0,
