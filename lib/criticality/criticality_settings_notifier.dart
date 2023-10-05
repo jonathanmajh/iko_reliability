@@ -148,6 +148,9 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
       );
       this.percentVHigh = percentVHigh;
     }
+    frequencyPeriodYears =
+        workOrderCutoffEnd.difference(workOrderCutoffStart).inDays.toDouble() /
+            365;
     notifyListeners();
   }
 

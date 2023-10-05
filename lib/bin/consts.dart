@@ -27,6 +27,12 @@ List<String> criticalityStrings = [
   'Very High',
 ];
 
+List<String> abcStrings = [
+  'A',
+  'B',
+  'C',
+];
+
 enum CriticalityEnums {
   percentVL,
   percentL,

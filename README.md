@@ -24,7 +24,7 @@ flutter pub get
 flutter upgrade
 
 flutter build windows
-flutter pub run squirrel:installer_windows
+dart run squirrel:installer_windows
 
 git tag -a v1.0.0 -m "some message"
 git push --follow-tags

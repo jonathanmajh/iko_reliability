@@ -461,7 +461,7 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
   void execute({
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
-  }) {
+  }) async {
     debugPrint('Pressed add key.');
     if (stateManager.currentColumnField != 'usage' &&
         stateManager.currentColumnField != 'leadTime' &&
@@ -470,6 +470,26 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
     }
     if (stateManager.currentCell!.value == 10) {
       return;
+    }
+    switch (stateManager.currentColumnField) {
+      case 'usage':
+        await database!.updateSpareCriticality(
+          usage: stateManager.currentCell!.value + 1,
+          manual: true,
+          spareid: stateManager.currentRow!.cells['id']!.value,
+        );
+      case 'leadTime':
+        await database!.updateSpareCriticality(
+          leadTime: stateManager.currentCell!.value + 1,
+          manual: true,
+          spareid: stateManager.currentRow!.cells['id']!.value,
+        );
+      case 'cost':
+        await database!.updateSpareCriticality(
+          cost: stateManager.currentCell!.value + 1,
+          manual: true,
+          spareid: stateManager.currentRow!.cells['id']!.value,
+        );
     }
     stateManager.changeCellValue(
         stateManager.currentCell!, stateManager.currentCell!.value + 1);
@@ -481,7 +501,7 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
   void execute({
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
-  }) {
+  }) async {
     debugPrint('Pressed minus key.');
     if (stateManager.currentColumnField != 'usage' &&
         stateManager.currentColumnField != 'leadTime' &&
@@ -490,6 +510,26 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
     }
     if (stateManager.currentCell!.value == 0) {
       return;
+    }
+    switch (stateManager.currentColumnField) {
+      case 'usage':
+        await database!.updateSpareCriticality(
+          usage: stateManager.currentCell!.value - 1,
+          manual: true,
+          spareid: stateManager.currentRow!.cells['id']!.value,
+        );
+      case 'leadTime':
+        await database!.updateSpareCriticality(
+          leadTime: stateManager.currentCell!.value - 1,
+          manual: true,
+          spareid: stateManager.currentRow!.cells['id']!.value,
+        );
+      case 'cost':
+        await database!.updateSpareCriticality(
+          cost: stateManager.currentCell!.value - 1,
+          manual: true,
+          spareid: stateManager.currentRow!.cells['id']!.value,
+        );
     }
     stateManager.changeCellValue(
         stateManager.currentCell!, stateManager.currentCell!.value - 1);
