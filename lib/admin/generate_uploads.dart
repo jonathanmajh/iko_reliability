@@ -217,6 +217,7 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
         jobservice.itemNumber,
         '', //ITEMQTY
         'ITEMSET1',
+        jobservice.vendorId,
         jobservice.cost?.toString() ?? '',
       ]);
     }
