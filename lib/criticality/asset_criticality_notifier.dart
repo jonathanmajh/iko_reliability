@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/main.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../bin/consts.dart';
@@ -22,12 +23,13 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   List<double> get rpnList =>
       List<double>.of(rpnMap.values.where((element) => element > 0));
 
-  Map<double, int> frequencyOfRPNs() {
-    Map<double, int> temp = {};
-    for (var x in rpnList) {
-      temp[x] = !temp.containsKey(x) ? (1) : (temp[x]! + 1);
+  Future<Map<double, int>> frequencyOfRPNs(String siteid) async {
+    var temp = await database!.uniqueRpnNumbers('$siteid%').get();
+    Map<double, int> result = {};
+    for (var x in temp) {
+      result[x.newRPN] = x.countasset;
     }
-    return temp;
+    return result;
   }
 
   ///whether to reload the grid

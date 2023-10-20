@@ -107,6 +107,56 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         width: 600,
       ),
       PlutoColumn(
+          title: 'Status',
+          field: 'status',
+          width: 100,
+          type: PlutoColumnType.text(),
+          renderer: (rendererContext) {
+            return Row(
+              children: [
+                IconButton(
+                  tooltip: 'View assets associated with item',
+                  icon: const Icon(
+                    Icons.info,
+                  ),
+                  onPressed: () async {
+                    var siteid =
+                        context.read<SelectedSiteNotifier>().selectedSite;
+                    var assets = await database!
+                        .assetsAssociatedWithItem(
+                            siteid, rendererContext.row.cells['itemnum']!.value)
+                        .get();
+                    var data = assets
+                        .map((e) => DataRow(cells: [
+                              DataCell(Text(e.assetnum)),
+                              DataCell(Text(e.description ?? '')),
+                              DataCell(Text(e.quantity.toString())),
+                              DataCell(Text(e.newRPN.toString()))
+                            ]))
+                        .toList();
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            child: DataTable(columns: [
+                              const DataColumn(label: Text('Asset Number')),
+                              const DataColumn(
+                                  label: Text('Asset Description')),
+                              const DataColumn(label: Text('Quantity')),
+                              const DataColumn(label: Text('Asset RPN')),
+                            ], rows: data),
+                          );
+                        });
+                  },
+                  iconSize: 18,
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(0),
+                ),
+                SparePartStatusIcon(rendererContext: rendererContext),
+              ],
+            );
+          }),
+      PlutoColumn(
         title: 'Asset RPN',
         field: 'assetRpn',
         type: PlutoColumnType.text(),
@@ -263,6 +313,18 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
           );
         },
       ),
+      PlutoColumn(
+          width: 100,
+          title: 'Override',
+          field: 'override',
+          type: PlutoColumnType.text(),
+          renderer: (rendererContext) {
+            return Row(
+              children: [
+                OverrideSparePartStatusIcon(rendererContext: rendererContext),
+              ],
+            );
+          }),
     ]);
   }
 
@@ -341,10 +403,19 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
           if (snapshot.hasData) {
             if (snapshot.data!.isNotEmpty) {
               for (var row in snapshot.data!) {
+                AssetOverride overrideStatus = AssetOverride.none;
+                if (row.spareCriticality.newPriority != 0) {
+                  overrideStatus = AssetOverride.priority;
+                }
+                if (row.spareCriticality.manual) {
+                  overrideStatus = AssetOverride.breakdowns;
+                }
                 rows.add(PlutoRow(cells: {
                   'itemnum': PlutoCell(value: row.spareCriticality.itemnum),
                   'description': PlutoCell(value: row.item?.description ?? ''),
-                  'assetRpn': PlutoCell(value: row.spareCriticality.assetRPN),
+                  'assetRpn': PlutoCell(
+                      value:
+                          row.spareCriticality.assetRPN.toStringAsPrecision(3)),
                   'usage': PlutoCell(value: row.spareCriticality.usage),
                   'leadTime': PlutoCell(value: row.spareCriticality.leadTime),
                   'cost': PlutoCell(value: row.spareCriticality.cost),
@@ -352,6 +423,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                   'newPriority':
                       PlutoCell(value: row.spareCriticality.newPriority),
                   'id': PlutoCell(value: row.spareCriticality.id),
+                  'status': PlutoCell(value: ''),
+                  'override': PlutoCell(value: overrideStatus),
                 }));
               }
               stateManager.removeAllRows();
@@ -368,6 +441,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               'rpn': PlutoCell(value: 0),
               'newPriority': PlutoCell(value: 0),
               'id': PlutoCell(value: 0),
+              'status': PlutoCell(value: ''),
+              'override': PlutoCell(value: ''),
             }));
           } else {
             rows.add(PlutoRow(cells: {
@@ -380,6 +455,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               'rpn': PlutoCell(value: 0),
               'newPriority': PlutoCell(value: 0),
               'id': PlutoCell(value: 0),
+              'status': PlutoCell(value: ''),
+              'override': PlutoCell(value: ''),
             }));
           }
           return PlutoDualGrid(
@@ -631,5 +708,126 @@ double rpnFunc(SpareCriticality sparePart) {
         sparePart.cost;
   } catch (e) {
     return -1;
+  }
+}
+
+class SparePartStatusIcon extends StatefulWidget {
+  const SparePartStatusIcon({
+    super.key,
+    required this.rendererContext,
+  });
+
+  final PlutoColumnRendererContext rendererContext;
+
+  @override
+  State<SparePartStatusIcon> createState() => _StatusIconState();
+}
+
+class _StatusIconState extends State<SparePartStatusIcon> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
+    var sparePartRpn = widget.rendererContext.row.cells['rpn']!.value;
+    Color color = Colors.orange;
+    IconData icon = Icons.pending;
+    String statusText = 'Please check columns to generate RPN';
+    String searchText = 'pending';
+    if (sparePartRpn > 0) {
+      icon = Icons.check_circle;
+      color = Colors.green;
+      statusText = 'RPN generated';
+      searchText = 'complete';
+    }
+    stateManager.changeCellValue(
+      widget.rendererContext.cell,
+      searchText,
+    );
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: color,
+      ),
+      onPressed: () {},
+      tooltip: statusText,
+    );
+  }
+}
+
+class OverrideSparePartStatusIcon extends StatefulWidget {
+  const OverrideSparePartStatusIcon({
+    super.key,
+    required this.rendererContext,
+  });
+
+  final PlutoColumnRendererContext rendererContext;
+
+  @override
+  State<OverrideSparePartStatusIcon> createState() =>
+      _OverrideStatusIconState();
+}
+
+class _OverrideStatusIconState extends State<OverrideSparePartStatusIcon> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
+    Color color = Colors.green;
+    IconData icon = Icons.lock_open;
+    String statusText = '';
+    switch (widget.rendererContext.row.cells['override']!.value) {
+      case AssetOverride.none:
+        statusText = 'No Overrides';
+
+      case AssetOverride.priority:
+        icon = Icons.lock;
+        color = Colors.orange;
+        statusText = 'New Priority is overridden';
+
+      case AssetOverride.breakdowns:
+        icon = Icons.lock_clock;
+        color = Colors.orange;
+        statusText = 'Purchasing information overridden';
+    }
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: color,
+      ),
+      onPressed: () async {
+        stateManager.changeCellValue(
+          widget.rendererContext.cell,
+          AssetOverride.none,
+        );
+        await database!.removeSparePartOverride(
+            spareid: widget.rendererContext.row.cells['id']!.value);
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['cost']!,
+          0,
+        );
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['leadTime']!,
+          0,
+        );
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['usage']!,
+          0,
+        );
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['newPriority']!,
+          0,
+        );
+        // TODO toggle recalculation
+      },
+      tooltip: statusText,
+    );
   }
 }

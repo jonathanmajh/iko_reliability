@@ -4884,28 +4884,57 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.readNullable<int>('_c0'));
   }
 
+  Selectable<UniqueRpnNumbersResult> uniqueRpnNumbers(String siteid) {
+    return customSelect(
+        'SELECT new_r_p_n, count(asset) AS _c0 FROM asset_criticalitys WHERE new_r_p_n > 0 AND asset LIKE ?1 GROUP BY new_r_p_n',
+        variables: [
+          Variable<String>(siteid)
+        ],
+        readsFrom: {
+          assetCriticalitys,
+        }).map((QueryRow row) => UniqueRpnNumbersResult(
+          newRPN: row.read<double>('new_r_p_n'),
+          countasset: row.read<int>('_c0'),
+        ));
+  }
+
   Selectable<SpareCriticalityAutoCalculationResult>
       spareCriticalityAutoCalculation(String siteid) {
     return customSelect(
-        'SELECT DISTINCT(sp.itemnum)AS itemnum, items.description, items.status, items.commodity_group, items.gl_class, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp LEFT JOIN items ON items.itemnum = sp.itemnum WHERE sp.siteid = ?1',
+        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1',
         variables: [
           Variable<String>(siteid)
         ],
         readsFrom: {
           spareParts,
-          items,
           purchases,
           assetCriticalitys,
         }).map((QueryRow row) => SpareCriticalityAutoCalculationResult(
           itemnum: row.read<String>('itemnum'),
-          description: row.readNullable<String>('description'),
-          status: row.readNullable<String>('status'),
-          commodityGroup: row.readNullable<String>('commodity_group'),
-          glClass: row.readNullable<String>('gl_class'),
           quantity: row.read<double>('quantity'),
           unitCost: row.read<double>('unitCost'),
           leadTime: row.read<double>('leadTime'),
           assetRPN: row.readNullable<double>('assetRPN'),
+        ));
+  }
+
+  Selectable<AssetsAssociatedWithItemResult> assetsAssociatedWithItem(
+      String siteid, String itemnum) {
+    return customSelect(
+        'SELECT sp.assetnum, a.description, ac.new_r_p_n, sp.quantity FROM spare_parts AS sp LEFT JOIN assets AS a ON sp.assetnum = a.assetnum AND sp.siteid = a.siteid LEFT JOIN asset_criticalitys AS ac ON sp.siteid || sp.assetnum = ac.asset WHERE sp.siteid = ?1 AND sp.itemnum = ?2',
+        variables: [
+          Variable<String>(siteid),
+          Variable<String>(itemnum)
+        ],
+        readsFrom: {
+          spareParts,
+          assets,
+          assetCriticalitys,
+        }).map((QueryRow row) => AssetsAssociatedWithItemResult(
+          assetnum: row.read<String>('assetnum'),
+          description: row.readNullable<String>('description'),
+          newRPN: row.readNullable<double>('new_r_p_n'),
+          quantity: row.read<double>('quantity'),
         ));
   }
 
@@ -4930,25 +4959,39 @@ abstract class _$MyDatabase extends GeneratedDatabase {
       ];
 }
 
+class UniqueRpnNumbersResult {
+  final double newRPN;
+  final int countasset;
+  UniqueRpnNumbersResult({
+    required this.newRPN,
+    required this.countasset,
+  });
+}
+
 class SpareCriticalityAutoCalculationResult {
   final String itemnum;
-  final String? description;
-  final String? status;
-  final String? commodityGroup;
-  final String? glClass;
   final double quantity;
   final double unitCost;
   final double leadTime;
   final double? assetRPN;
   SpareCriticalityAutoCalculationResult({
     required this.itemnum,
-    this.description,
-    this.status,
-    this.commodityGroup,
-    this.glClass,
     required this.quantity,
     required this.unitCost,
     required this.leadTime,
     this.assetRPN,
+  });
+}
+
+class AssetsAssociatedWithItemResult {
+  final String assetnum;
+  final String? description;
+  final double? newRPN;
+  final double quantity;
+  AssetsAssociatedWithItemResult({
+    required this.assetnum,
+    this.description,
+    this.newRPN,
+    required this.quantity,
   });
 }

@@ -275,6 +275,14 @@ WHERE line IN (
     'maxSystemID': '''
 select max(id) from system_criticalitys
 ''',
+    'uniqueRpnNumbers': '''
+SELECT new_r_p_n
+	,count(asset)
+FROM asset_criticalitys
+WHERE new_r_p_n > 0
+	AND asset LIKE :siteid
+GROUP BY new_r_p_n
+''',
     'spareCriticalityAutoCalculation': '''
 SELECT DISTINCT (sp.itemnum) itemnum
 	,(
@@ -310,6 +318,18 @@ SELECT DISTINCT (sp.itemnum) itemnum
 FROM spare_parts sp
 WHERE sp.siteid = :siteid
 ''',
+    'assetsAssociatedWithItem': '''
+SELECT sp.assetnum
+	,a.description
+	,ac.new_r_p_n
+	,sp.quantity
+FROM spare_parts sp
+LEFT JOIN assets a ON sp.assetnum = a.assetnum
+	AND sp.siteid = a.siteid
+LEFT JOIN asset_criticalitys ac ON sp.siteid || sp.assetnum = ac.asset
+WHERE sp.siteid = :siteid
+	AND sp.itemnum = :itemnum
+'''
   },
 )
 class MyDatabase extends _$MyDatabase {
@@ -1101,6 +1121,20 @@ class MyDatabase extends _$MyDatabase {
           ..where((tbl) => tbl.id.equals(id)))
         .getSingle();
     return criticalities;
+  }
+
+  Future<void> removeSparePartOverride({
+    required String spareid,
+  }) async {
+    (update(spareCriticalitys)..where((tbl) => tbl.id.equals(spareid)))
+        .write(SpareCriticalitysCompanion(
+      id: Value(spareid),
+      manual: const Value(false),
+      newPriority: const Value(0),
+      usage: const Value(0),
+      cost: const Value(0),
+      leadTime: const Value(0),
+    ));
   }
 
   Future<List<Purchase>> getItemPurchases(

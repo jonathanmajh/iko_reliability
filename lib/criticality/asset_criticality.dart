@@ -657,6 +657,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               // or if grid is marked for update
               if (loadedSite != snapshot.data?.first.asset.siteid ||
                   context.watch<AssetCriticalityNotifier>().updateGrid) {
+                print('Reloading Grid');
                 siteAssets = {};
                 parentAssets = {};
                 for (var row in snapshot.data!) {
@@ -682,9 +683,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                         (row.cells['rpn']?.value ?? -1) + 0.0;
                   }
                 }
-                context
-                    .read<AssetCriticalityNotifier>()
-                    .setRpnMap(newRpnMap, notify: false);
                 stateManager.toggleExpandedRowGroup(
                     rowGroup: stateManager.rows.first);
                 stateManager.toggleExpandedRowGroup(
@@ -1061,13 +1059,14 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                         reloadTextControllers();
                       });
                     },
-                    onSliderUpdateEnd: (newPercentDists) {
+                    onSliderUpdateEnd: (newPercentDists) async {
+                      List<int> dists2 = List.from(newPercentDists);
+                      var temp =
+                          await calculateRPNDistribution(context, dists2);
                       setState(() {
-                        dists = List.from(newPercentDists);
-                        setState(() {
-                          calculationMessage =
-                              calculateRPNDistribution(context, dists!);
-                        });
+                        dists = dists2;
+
+                        calculationMessage = temp;
                       });
                     },
                     tooltip: criticalityStrings,
@@ -1101,14 +1100,14 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(2),
                         ],
-                        onChanged: (value) {
+                        onChanged: (value) async {
                           int? val = int.tryParse(value);
+                          dists![i] = val ?? 0;
+                          var temp =
+                              await calculateRPNDistribution(context, dists!);
                           setState(() {
                             dists![i] = val ?? 0;
-                            setState(() {
-                              calculationMessage =
-                                  calculateRPNDistribution(context, dists!);
-                            });
+                            calculationMessage = temp;
                           });
                         },
                       ),
@@ -1144,10 +1143,11 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                     padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
                     child: ElevatedButton(
                       child: const Text('Calculate'),
-                      onPressed: () {
+                      onPressed: () async {
+                        var temp =
+                            await calculateRPNDistribution(context, dists!);
                         setState(() {
-                          calculationMessage =
-                              calculateRPNDistribution(context, dists!);
+                          calculationMessage = temp;
                         });
                       },
                     ),
@@ -1386,7 +1386,8 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   }
 }
 
-String calculateRPNDistribution(BuildContext context, List<int> dists) {
+Future<String> calculateRPNDistribution(
+    BuildContext context, List<int> dists) async {
   if (calculateTotal(dists) != 100) {
     return 'Please make sure percentages add up to 100%';
   }
@@ -1406,7 +1407,8 @@ String calculateRPNDistribution(BuildContext context, List<int> dists) {
     //set rpn ranges
     List<double> newCutoffs = calculateRPNCutOffs(
       targetPercentages: assetCriticalitySettingsNotifier.fiveCriticality,
-      frequencyOfRPNs: assetCriticalityNotifier.frequencyOfRPNs(),
+      frequencyOfRPNs: await assetCriticalityNotifier
+          .frequencyOfRPNs(context.read<SelectedSiteNotifier>().selectedSite),
     ).ordered();
     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
     debugPrint('new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
