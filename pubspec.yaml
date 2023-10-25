@@ -28,7 +28,7 @@ dependencies:
     path_provider: ^2.1.0
     path: ^1.8.3
     package_info_plus: ^4.1.0
-    url_launcher: ^6.1.12
+    url_launcher: ^6.2.0
     flutter_window_close: ^0.2.2
     window_size:
         git:
