@@ -138,12 +138,11 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return Dialog(
-                            child: DataTable(columns: [
-                              const DataColumn(label: Text('Asset Number')),
-                              const DataColumn(
-                                  label: Text('Asset Description')),
-                              const DataColumn(label: Text('Quantity')),
-                              const DataColumn(label: Text('Asset RPN')),
+                            child: DataTable(columns: const [
+                              DataColumn(label: Text('Asset Number')),
+                              DataColumn(label: Text('Asset Description')),
+                              DataColumn(label: Text('Quantity')),
+                              DataColumn(label: Text('Asset RPN')),
                             ], rows: data),
                           );
                         });
@@ -647,7 +646,7 @@ class _SparePartsLoadingIndicatorState
     setState(() {
       loading = true;
     });
-    print('running');
+    debugPrint('running');
     setState(() {
       message = 'Checking spare parts information...';
     });

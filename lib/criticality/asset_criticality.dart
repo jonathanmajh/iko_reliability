@@ -1225,7 +1225,6 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    //TODO: make it look pretty ✧˖°🌷📎⋆ ˚｡⋆୨୧˚
     return Center(
       child: Padding(
         padding: const EdgeInsets.only(left: 8.0, right: 24.0),
