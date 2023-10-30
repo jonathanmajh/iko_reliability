@@ -184,7 +184,8 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
     jobplan.jpduration.toString(),
     'N', //downtime
     'N', //interruptible
-    jobplan.ikoPmpackage ?? ''
+    jobplan.ikoPmpackage ?? '',
+    'N', // include task in schedule
   ]);
   if (jobplan.jobmaterial.isNotEmpty) {
     for (final jobmaterial in jobplan.jobmaterial) {
@@ -303,7 +304,8 @@ Future<Map<String, List<List<String>>>> generateMeterJobplan(
         '1',
         'N',
         'N',
-        ''
+        '',
+        'N', // include task in schedule
       ]);
       generated['JobTask']!.add([
         '',

@@ -221,6 +221,7 @@ const tableHeaders = {
     'DOWNTIME',
     'INTERRUPTIBLE',
     'IKO_PMPACKAGE',
+    'INCTASKSINSCHED',
   ],
   'JobMaterial': [
     'JP_ORGID',
