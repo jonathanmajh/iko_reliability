@@ -4918,6 +4918,27 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         ));
   }
 
+  Selectable<SpareCriticalityAutoCalculationItemResult>
+      spareCriticalityAutoCalculationItem(String siteid, String itemnum) {
+    return customSelect(
+        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum = ?2',
+        variables: [
+          Variable<String>(siteid),
+          Variable<String>(itemnum)
+        ],
+        readsFrom: {
+          spareParts,
+          purchases,
+          assetCriticalitys,
+        }).map((QueryRow row) => SpareCriticalityAutoCalculationItemResult(
+          itemnum: row.read<String>('itemnum'),
+          quantity: row.read<double>('quantity'),
+          unitCost: row.read<double>('unitCost'),
+          leadTime: row.read<double>('leadTime'),
+          assetRPN: row.readNullable<double>('assetRPN'),
+        ));
+  }
+
   Selectable<AssetsAssociatedWithItemResult> assetsAssociatedWithItem(
       String siteid, String itemnum) {
     return customSelect(
@@ -4975,6 +4996,21 @@ class SpareCriticalityAutoCalculationResult {
   final double leadTime;
   final double? assetRPN;
   SpareCriticalityAutoCalculationResult({
+    required this.itemnum,
+    required this.quantity,
+    required this.unitCost,
+    required this.leadTime,
+    this.assetRPN,
+  });
+}
+
+class SpareCriticalityAutoCalculationItemResult {
+  final String itemnum;
+  final double quantity;
+  final double unitCost;
+  final double leadTime;
+  final double? assetRPN;
+  SpareCriticalityAutoCalculationItemResult({
     required this.itemnum,
     required this.quantity,
     required this.unitCost,

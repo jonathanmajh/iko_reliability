@@ -109,7 +109,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
       PlutoColumn(
           title: 'Status',
           field: 'status',
-          width: 100,
+          width: 150,
           type: PlutoColumnType.text(),
           renderer: (rendererContext) {
             return Row(
@@ -152,6 +152,34 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                   padding: const EdgeInsets.all(0),
                 ),
                 SparePartStatusIcon(rendererContext: rendererContext),
+                IconButton(
+                  tooltip: 'Refresh purchasing information from Maximo.',
+                  icon: const Icon(
+                    Icons.refresh,
+                  ),
+                  onPressed: () async {
+                    String itemnum =
+                        rendererContext.row.cells['itemnum']!.value;
+                    final result = await database!.updateSparePartCriticality(
+                      itemnum: itemnum,
+                      siteid: context.read<SelectedSiteNotifier>().selectedSite,
+                    );
+                    rendererContext.stateManager.changeCellValue(
+                        rendererContext.row.cells['cost']!, result.first.cost);
+                    rendererContext.stateManager.changeCellValue(
+                        rendererContext.row.cells['leadTime']!,
+                        result.first.leadTime);
+                    rendererContext.stateManager.changeCellValue(
+                        rendererContext.row.cells['usage']!,
+                        result.first.usage);
+                    rendererContext.stateManager.changeCellValue(
+                        rendererContext.row.cells['newPriority']!,
+                        result.first.newPriority);
+                  },
+                  iconSize: 18,
+                  color: Colors.green,
+                  padding: const EdgeInsets.all(0),
+                ),
               ],
             );
           }),
@@ -824,7 +852,6 @@ class _OverrideStatusIconState extends State<OverrideSparePartStatusIcon> {
           widget.rendererContext.row.cells['newPriority']!,
           0,
         );
-        // TODO toggle recalculation
       },
       tooltip: statusText,
     );

@@ -318,6 +318,42 @@ SELECT DISTINCT (sp.itemnum) itemnum
 FROM spare_parts sp
 WHERE sp.siteid = :siteid
 ''',
+    'spareCriticalityAutoCalculationItem': '''
+SELECT DISTINCT (sp.itemnum) itemnum
+	,(
+		SELECT sum(quantity)
+		FROM spare_parts s1
+		WHERE s1.itemnum = sp.itemnum
+			AND s1.siteid = sp.siteid
+		) quantity
+	,(
+		SELECT ifnull(avg(pr.unit_cost), -1)
+		FROM purchases pr
+		WHERE pr.itemnum = sp.itemnum
+			AND pr.siteid = sp.siteid
+			AND pr.po_status = 1
+		) unitCost
+	,(
+		SELECT ifnull(avg(pr.lead_time), -1)
+		FROM purchases pr
+		WHERE pr.itemnum = sp.itemnum
+			AND pr.siteid = sp.siteid
+			AND pr.po_status = 1
+		) leadTime
+	,(
+		SELECT max(new_r_p_n)
+		FROM asset_criticalitys
+		WHERE asset IN (
+				SELECT sp.siteid || s2.assetnum
+				FROM spare_parts s2
+				WHERE s2.itemnum = sp.itemnum
+					AND s2.siteid = sp.siteid
+				)
+		) assetRPN
+FROM spare_parts sp
+WHERE sp.siteid = :siteid
+AND sp.itemnum = :itemnum
+''',
     'assetsAssociatedWithItem': '''
 SELECT sp.assetnum
 	,a.description
@@ -1071,6 +1107,27 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
+  Future<List<SpareCriticality>> updateSparePartCriticality(
+      {required String siteid, required String itemnum}) async {
+    final result =
+        await spareCriticalityAutoCalculationItem(siteid, itemnum).getSingle();
+    final temp = [
+      ratingFromValue(result.quantity, usageRating),
+      ratingFromValue(result.leadTime, leadTimeRating),
+      ratingFromValue(result.unitCost, costRating),
+    ];
+    return await (update(spareCriticalitys)
+          ..where((tbl) => tbl.id.equals('$siteid$itemnum')))
+        .writeReturning(SpareCriticalitysCompanion(
+      id: Value('$siteid$itemnum'),
+      newPriority: const Value(0),
+      usage: Value(temp[0]),
+      leadTime: Value(temp[1]),
+      cost: Value(temp[2]),
+      newRPN: Value((result.assetRPN ?? 0) * temp[0] * temp[1] * temp[2]),
+    ));
+  }
+
   Future<void> computeSparePartCriticality({required String siteid}) async {
     final results = await spareCriticalityAutoCalculation(siteid).get();
     List<SpareCriticalitysCompanion> results2 =
@@ -1092,7 +1149,6 @@ class MyDatabase extends _$MyDatabase {
         siteid: siteid,
         itemnum: e.itemnum,
       );
-      // TODO asset RPN needs to be updated when it's recaulcated
     }).toList();
     await batch((batch) {
       batch.insertAll(spareCriticalitys, results2);
