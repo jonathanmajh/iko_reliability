@@ -10,6 +10,7 @@ import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import '../criticality/criticality_db_export_import.dart';
+import '../criticality/spare_criticality.dart';
 import '../main.dart';
 import 'consts.dart';
 import 'db_drift.dart';
@@ -43,6 +44,9 @@ class _EndDrawerState extends State<EndDrawer> {
       return assetCriticalityEndDrawer(context, themeManager);
     } else if (ModalRoute.of(context)!.settings.name == 'HomeRoute') {
       return homeRouteEndDrawer(context, themeManager);
+    } else if (ModalRoute.of(context)!.settings.name ==
+        'SpareCriticalityRoute') {
+      return spareCriticalityEndDrawer(context, themeManager);
     } else {
       return defaultEndDrawer(context, themeManager);
     }
@@ -264,6 +268,40 @@ class _EndDrawerState extends State<EndDrawer> {
           )),
         ],
       ),
+    );
+  }
+
+  Widget spareCriticalityEndDrawer(
+      BuildContext context, ThemeManager themeManager) {
+    return Drawer(
+      child: ListView(children: <Widget>[
+        const ThemeToggle(),
+        const SiteToggle(),
+        ListTile(
+          title: const Text('Recalculate Spare Criticality'),
+          trailing: ElevatedButton(
+            child: const Text('Refresh'),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text('Loading...'),
+                      content: SparePartsLoadingIndicator(forceUpdate: true),
+                    );
+                  });
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text('Risk Priority Distributions'),
+          trailing: ElevatedButton(
+            child: const Text('Configure'),
+            onPressed: () =>
+                calculateRPNDistributionSpares(context, [20, 30, 50]),
+          ),
+        ),
+      ]),
     );
   }
 

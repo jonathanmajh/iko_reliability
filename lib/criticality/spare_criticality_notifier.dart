@@ -28,10 +28,16 @@ class SpareOverrideNotifier extends ChangeNotifier {
   }
 }
 
-class SpareCritifcalitySettingNotifier extends ChangeNotifier {
+class SpareCriticalitySettingNotifier extends ChangeNotifier {
   int percentC = 60;
   int percentB = 30;
   int percentA = 10;
+
+  AbcCriticality get abcCriticality => AbcCriticality(
+        a: percentA.toDouble(),
+        b: percentB.toDouble(),
+        c: percentC.toDouble(),
+      );
 
   DateTime purchaseCutoffStart =
       DateTime.now().subtract(const Duration(days: 10 * 365));
@@ -163,7 +169,7 @@ class AbcCriticality {
   }
 }
 
-AbcCriticality calculateRPNCutOffs({
+AbcCriticality calculateRPNCutOffsSpares({
   required AbcCriticality targetPercentages,
   required Map<double, int> frequencyOfRPNs,
 }) {
@@ -179,7 +185,7 @@ AbcCriticality calculateRPNCutOffs({
   List<double> results2 = [];
   int cumulativePercentage = 0;
   // calculations
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 3; i++) {
     try {
       cumulativePercentage += targetPercentages.getOrdered(i).toInt();
       result = calculateSingleCutoff(
@@ -201,4 +207,30 @@ AbcCriticality calculateRPNCutOffs({
     b: results[1],
     a: results[2],
   );
+}
+
+class SpareCriticalityNotifier extends ChangeNotifier {
+  List<double> rpnCutoffs = [];
+  bool updateGrid = true;
+
+  ///sets the rpnCutoffs to the [newCutoffs] and notifies listeners
+  void setRpnCutoffs(List<double> newCutoffs) {
+    rpnCutoffs = List.of(newCutoffs);
+    notifyListeners();
+  }
+
+  int rpnFindDistribution(double rpn) {
+    try {
+      if (rpnCutoffs.length != 3) {
+        throw Exception('Unexpected format for List [rpnCutoffs]');
+      }
+      if (rpn <= 0) throw Exception('Negative RPN');
+      for (int i = 0; i < assetCriticality.length; i++) {
+        if (rpn <= rpnCutoffs[i]) return assetCriticality.keys.elementAt(i);
+      }
+      return assetCriticality.keys.last;
+    } catch (e) {
+      return 0;
+    }
+  }
 }

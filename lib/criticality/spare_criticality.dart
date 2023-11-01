@@ -12,6 +12,7 @@ import '../bin/end_drawer.dart';
 import '../main.dart';
 import '../settings/theme_manager.dart';
 import 'asset_criticality_notifier.dart';
+import 'functions.dart';
 import 'spare_criticality_notifier.dart';
 
 @RoutePage()
@@ -109,7 +110,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
       PlutoColumn(
           title: 'Status',
           field: 'status',
-          width: 150,
+          width: 140,
           type: PlutoColumnType.text(),
           renderer: (rendererContext) {
             return Row(
@@ -303,7 +304,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         field: 'rpn',
         type: PlutoColumnType.number(),
         readOnly: true,
-        width: 100,
+        width: 75,
       ),
       PlutoColumn(
         title: 'New Priority',
@@ -428,7 +429,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
             AsyncSnapshot<List<SpareCriticalityWithItem>> snapshot) {
           List<PlutoRow> rows = [];
           if (snapshot.hasData) {
-            if (snapshot.data!.isNotEmpty) {
+            if (snapshot.data!.isNotEmpty &&
+                context.watch<SpareCriticalityNotifier>().updateGrid) {
               for (var row in snapshot.data!) {
                 AssetOverride overrideStatus = AssetOverride.none;
                 if (row.spareCriticality.newPriority != 0) {
@@ -447,8 +449,13 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                   'leadTime': PlutoCell(value: row.spareCriticality.leadTime),
                   'cost': PlutoCell(value: row.spareCriticality.cost),
                   'rpn': PlutoCell(value: row.spareCriticality.newRPN),
-                  'newPriority':
-                      PlutoCell(value: row.spareCriticality.newPriority),
+                  'newPriority': PlutoCell(
+                      value: row.spareCriticality.newPriority > 0
+                          ? row.spareCriticality.newPriority
+                          : context
+                              .read<SpareCriticalityNotifier>()
+                              .rpnFindDistribution(
+                                  row.spareCriticality.newRPN)),
                   'id': PlutoCell(value: row.spareCriticality.id),
                   'status': PlutoCell(value: ''),
                   'override': PlutoCell(value: overrideStatus),
@@ -456,6 +463,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               }
               stateManager.removeAllRows();
               stateManager.appendRows(rows);
+              context.watch<SpareCriticalityNotifier>().updateGrid = false;
             }
           } else if (snapshot.hasError) {
             rows.add(PlutoRow(cells: {
@@ -641,7 +649,8 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
 }
 
 class SparePartsLoadingIndicator extends StatefulWidget {
-  const SparePartsLoadingIndicator({super.key});
+  const SparePartsLoadingIndicator({super.key, this.forceUpdate = false});
+  final bool forceUpdate;
 
   @override
   State<SparePartsLoadingIndicator> createState() =>
@@ -679,7 +688,7 @@ class _SparePartsLoadingIndicatorState
       message = 'Checking spare parts information...';
     });
     final dataCached = await database!.checkSpareParts(siteid: siteid);
-    if (!dataCached) {
+    if (!dataCached || widget.forceUpdate) {
       try {
         setState(() {
           message = 'Loading item information from Maximo...';
@@ -856,4 +865,40 @@ class _OverrideStatusIconState extends State<OverrideSparePartStatusIcon> {
       tooltip: statusText,
     );
   }
+}
+
+Future<String> calculateRPNDistributionSpares(
+    BuildContext context, List<int> dists) async {
+  if (calculateTotal(dists) != 100) {
+    return 'Please make sure percentages add up to 100%';
+  }
+  try {
+    SpareCriticalitySettingNotifier spareCritifcalitySettingNotifier =
+        context.read<SpareCriticalitySettingNotifier>();
+    SpareCriticalityNotifier spareCritifcalityNotifier =
+        context.read<SpareCriticalityNotifier>();
+    //spareCritifcalitySettingNotifier.setPrecentages
+    var result = await database!
+        .uniqueRpnNumbersSpare(
+            context.read<SelectedSiteNotifier>().selectedSite)
+        .get();
+    Map<double, int> frequencyOfRPNs = {};
+    for (var x in result) {
+      frequencyOfRPNs[x.newRPN] = x.countitemnum;
+    }
+    List<double> newCutoffs = calculateRPNCutOffsSpares(
+      targetPercentages: spareCritifcalitySettingNotifier.abcCriticality,
+      frequencyOfRPNs: frequencyOfRPNs,
+    ).ordered();
+    spareCritifcalityNotifier.setRpnCutoffs(newCutoffs);
+    debugPrint('new rpn cutoffs: ${spareCritifcalityNotifier.rpnCutoffs}');
+    if (newCutoffs.toSet().length != newCutoffs.length) {
+      return 'Duplicate values in RPN cutoffs\nIncrease percentage of duplicate value, Or ensure RPN values are more spread out';
+    }
+    spareCritifcalityNotifier.updateGrid = true;
+  } catch (e) {
+    debugPrint(e.toString());
+    return e.toString();
+  }
+  return 'RPN cutoffs successfully calculated';
 }

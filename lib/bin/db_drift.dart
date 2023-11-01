@@ -283,6 +283,14 @@ WHERE new_r_p_n > 0
 	AND asset LIKE :siteid
 GROUP BY new_r_p_n
 ''',
+    'uniqueRpnNumbersSpare': '''
+SELECT new_r_p_n
+	,count(itemnum)
+FROM spare_criticalitys
+WHERE new_r_p_n > 0
+	AND siteid = :siteid
+GROUP BY new_r_p_n
+''',
     'spareCriticalityAutoCalculation': '''
 SELECT DISTINCT (sp.itemnum) itemnum
 	,(
@@ -1130,31 +1138,39 @@ class MyDatabase extends _$MyDatabase {
 
   Future<void> computeSparePartCriticality({required String siteid}) async {
     final results = await spareCriticalityAutoCalculation(siteid).get();
-    List<SpareCriticalitysCompanion> results2 =
-        results.map<SpareCriticalitysCompanion>((e) {
+    final skips = await (select(spareCriticalitys)
+          ..where((tbl) =>
+              tbl.manual.equals(true) | tbl.newPriority.isBiggerThanValue(0)))
+        .get();
+    final skip = skips.map((e) {
+      return e.id;
+    }).toList();
+    List<SpareCriticalitysCompanion> results2 = [];
+    for (var e in results) {
       final temp = [
         ratingFromValue(e.quantity, usageRating),
         ratingFromValue(e.leadTime, leadTimeRating),
         ratingFromValue(e.unitCost, costRating),
       ];
-      return SpareCriticalitysCompanion.insert(
-        id: '$siteid${e.itemnum}',
-        usage: temp[0],
-        leadTime: temp[1],
-        cost: temp[2],
-        assetRPN: e.assetRPN ?? 0,
-        manual: false,
-        newPriority: 0,
-        newRPN: (e.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
-        siteid: siteid,
-        itemnum: e.itemnum,
-      );
-    }).toList();
+      if (!skip.contains('$siteid${e.itemnum}')) {
+        results2.add(SpareCriticalitysCompanion.insert(
+          id: '$siteid${e.itemnum}',
+          usage: temp[0],
+          leadTime: temp[1],
+          cost: temp[2],
+          assetRPN: e.assetRPN ?? 0,
+          manual: false,
+          newPriority: 0,
+          newRPN: (e.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
+          siteid: siteid,
+          itemnum: e.itemnum,
+        ));
+      }
+    }
     await batch((batch) {
-      batch.insertAll(spareCriticalitys, results2);
+      batch.insertAllOnConflictUpdate(spareCriticalitys, results2);
     });
     return;
-    // TODO add global lock of whether DB is about to be modified
   }
 
   Future<List<SpareCriticalityWithItem>> getSpareCriticalities(

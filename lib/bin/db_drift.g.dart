@@ -4898,6 +4898,20 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         ));
   }
 
+  Selectable<UniqueRpnNumbersSpareResult> uniqueRpnNumbersSpare(String siteid) {
+    return customSelect(
+        'SELECT new_r_p_n, count(itemnum) AS _c0 FROM spare_criticalitys WHERE new_r_p_n > 0 AND siteid = ?1 GROUP BY new_r_p_n',
+        variables: [
+          Variable<String>(siteid)
+        ],
+        readsFrom: {
+          spareCriticalitys,
+        }).map((QueryRow row) => UniqueRpnNumbersSpareResult(
+          newRPN: row.read<double>('new_r_p_n'),
+          countitemnum: row.read<int>('_c0'),
+        ));
+  }
+
   Selectable<SpareCriticalityAutoCalculationResult>
       spareCriticalityAutoCalculation(String siteid) {
     return customSelect(
@@ -4986,6 +5000,15 @@ class UniqueRpnNumbersResult {
   UniqueRpnNumbersResult({
     required this.newRPN,
     required this.countasset,
+  });
+}
+
+class UniqueRpnNumbersSpareResult {
+  final double newRPN;
+  final int countitemnum;
+  UniqueRpnNumbersSpareResult({
+    required this.newRPN,
+    required this.countitemnum,
   });
 }
 
