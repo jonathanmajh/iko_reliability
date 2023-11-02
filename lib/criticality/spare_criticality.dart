@@ -196,6 +196,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
       PlutoColumn(
         title: 'Usage',
         field: 'usage',
+        width: 210,
         type: PlutoColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
@@ -232,6 +233,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
       PlutoColumn(
         title: 'Lead Time',
         field: 'leadTime',
+        width: 180,
         type: PlutoColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
@@ -268,6 +270,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
       PlutoColumn(
         title: 'Cost',
         field: 'cost',
+        width: 180,
         type: PlutoColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
@@ -431,41 +434,45 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
             AsyncSnapshot<List<SpareCriticalityWithItem>> snapshot) {
           List<PlutoRow> rows = [];
           if (snapshot.hasData) {
-            if (snapshot.data!.isNotEmpty &&
-                context.watch<SpareCriticalityNotifier>().updateGrid) {
-              for (var row in snapshot.data!) {
-                AssetOverride overrideStatus = AssetOverride.none;
-                if (row.spareCriticality.newPriority != 0) {
-                  overrideStatus = AssetOverride.priority;
+            if (snapshot.data!.isNotEmpty) {
+              if (loadedSite != snapshot.data?.first.spareCriticality.siteid ||
+                  context.watch<AssetCriticalityNotifier>().updateGrid) {
+                loadedSite = snapshot.data!.first.spareCriticality.siteid;
+                for (var row in snapshot.data!) {
+                  AssetOverride overrideStatus = AssetOverride.none;
+                  if (row.spareCriticality.newPriority != 0) {
+                    overrideStatus = AssetOverride.priority;
+                  }
+                  if (row.spareCriticality.manual) {
+                    overrideStatus = AssetOverride.breakdowns;
+                  }
+                  rows.add(PlutoRow(cells: {
+                    'itemnum': PlutoCell(value: row.spareCriticality.itemnum),
+                    'description':
+                        PlutoCell(value: row.item?.description ?? ''),
+                    'assetRpn': PlutoCell(
+                        value: row.spareCriticality.assetRPN
+                            .toStringAsPrecision(3)),
+                    'usage': PlutoCell(value: row.spareCriticality.usage),
+                    'leadTime': PlutoCell(value: row.spareCriticality.leadTime),
+                    'cost': PlutoCell(value: row.spareCriticality.cost),
+                    'rpn': PlutoCell(value: row.spareCriticality.newRPN),
+                    'newPriority': PlutoCell(
+                        value: row.spareCriticality.newPriority > 0
+                            ? row.spareCriticality.newPriority
+                            : context
+                                .read<SpareCriticalityNotifier>()
+                                .rpnFindDistribution(
+                                    row.spareCriticality.newRPN)),
+                    'id': PlutoCell(value: row.spareCriticality.id),
+                    'status': PlutoCell(value: ''),
+                    'override': PlutoCell(value: overrideStatus),
+                  }));
                 }
-                if (row.spareCriticality.manual) {
-                  overrideStatus = AssetOverride.breakdowns;
-                }
-                rows.add(PlutoRow(cells: {
-                  'itemnum': PlutoCell(value: row.spareCriticality.itemnum),
-                  'description': PlutoCell(value: row.item?.description ?? ''),
-                  'assetRpn': PlutoCell(
-                      value:
-                          row.spareCriticality.assetRPN.toStringAsPrecision(3)),
-                  'usage': PlutoCell(value: row.spareCriticality.usage),
-                  'leadTime': PlutoCell(value: row.spareCriticality.leadTime),
-                  'cost': PlutoCell(value: row.spareCriticality.cost),
-                  'rpn': PlutoCell(value: row.spareCriticality.newRPN),
-                  'newPriority': PlutoCell(
-                      value: row.spareCriticality.newPriority > 0
-                          ? row.spareCriticality.newPriority
-                          : context
-                              .read<SpareCriticalityNotifier>()
-                              .rpnFindDistribution(
-                                  row.spareCriticality.newRPN)),
-                  'id': PlutoCell(value: row.spareCriticality.id),
-                  'status': PlutoCell(value: ''),
-                  'override': PlutoCell(value: overrideStatus),
-                }));
+                stateManager.removeAllRows();
+                stateManager.appendRows(rows);
+                context.watch<SpareCriticalityNotifier>().updateGrid = false;
               }
-              stateManager.removeAllRows();
-              stateManager.appendRows(rows);
-              context.watch<SpareCriticalityNotifier>().updateGrid = false;
             }
           } else if (snapshot.hasError) {
             rows.add(PlutoRow(cells: {
