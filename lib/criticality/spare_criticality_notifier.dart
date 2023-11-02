@@ -227,10 +227,10 @@ class SpareCriticalityNotifier extends ChangeNotifier {
         throw Exception('Unexpected format for List [rpnCutoffs]');
       }
       if (rpn <= 0) throw Exception('Negative RPN');
-      for (int i = 0; i < assetCriticality.length; i++) {
-        if (rpn <= rpnCutoffs[i]) return assetCriticality.keys.elementAt(i);
+      for (int i = 0; i < spareCriticality.length; i++) {
+        if (rpn <= rpnCutoffs[i]) return spareCriticality.keys.elementAt(i);
       }
-      return assetCriticality.keys.last;
+      return spareCriticality.keys.last;
     } catch (e) {
       return 0;
     }

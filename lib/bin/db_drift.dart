@@ -424,6 +424,8 @@ class MyDatabase extends _$MyDatabase {
     required List<Setting> setting,
     required List<AssetCriticality> criticality,
     required List<SystemCriticality> system,
+    required List<SparePart> spare,
+    required List<SpareCriticality> spareCrit,
     required String siteid,
   }) async {
     await batch((batch) {
@@ -436,6 +438,12 @@ class MyDatabase extends _$MyDatabase {
     });
     await batch((batch) {
       batch.insertAllOnConflictUpdate(assetCriticalitys, criticality);
+    });
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(spareParts, spare);
+    });
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(spareCriticalitys, spareCrit);
     });
   }
 
@@ -852,6 +860,19 @@ class MyDatabase extends _$MyDatabase {
     return criticalities;
   }
 
+  Future<List<SparePart>> getSpareParts(String siteid) async {
+    var systems =
+        await (select(spareParts)..where((t) => t.siteid.equals(siteid))).get();
+    return systems;
+  }
+
+  Future<List<SpareCriticality>> getAllSpareCriticality(String siteid) async {
+    var systems = await (select(spareCriticalitys)
+          ..where((t) => t.siteid.equals(siteid)))
+        .get();
+    return systems;
+  }
+
   Future<List<SystemCriticality>> getSystemCriticality(int id) async {
     var systems =
         await (select(systemCriticalitys)..where((t) => t.id.equals(id))).get();
@@ -1009,8 +1030,9 @@ class MyDatabase extends _$MyDatabase {
     if (result.isEmpty) {
       return false;
     }
-    var result2 =
-        await (select(purchases)..where((t) => t.siteid.equals(siteid))).get();
+    var result2 = await (select(spareCriticalitys)
+          ..where((t) => t.siteid.equals(siteid)))
+        .get();
     if (result2.isEmpty) {
       return false;
     }

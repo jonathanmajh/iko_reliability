@@ -174,6 +174,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                         rendererContext.row.cells['usage']!,
                         result.first.usage);
                     rendererContext.stateManager.changeCellValue(
+                        rendererContext.row.cells['rpn']!, result.first.newRPN);
+                    rendererContext.stateManager.changeCellValue(
                         rendererContext.row.cells['newPriority']!,
                         result.first.newPriority);
                   },
@@ -509,22 +511,20 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               },
               onChanged: (PlutoGridOnChangedEvent event) async {
                 // recalculate rpn number > nre priority if not overwritten
-                if (![3, 4, 5].contains(event.columnIdx)) {
+                if (![4, 5, 6].contains(event.columnIdx)) {
                   // only need to update if changes made to these columns
                   return;
                 }
                 debugPrint('running grid A on change event');
                 final newRpn = rpnFunc(await database!
                     .getSpareCriticality(id: event.row.cells['id']!.value));
-                if (newRpn > -1) {
+                debugPrint(newRpn.toString());
+                if (newRpn > 0) {
                   await database!.updateSpareCriticality(
                     newRPN: newRpn,
                     spareid: event.row.cells['id']!.value,
                   );
-                  setState(() {
-                    stateManager.changeCellValue(
-                        event.row.cells['rpn']!, newRpn);
-                  });
+                  event.row.cells['rpn']!.value = newRpn;
                 }
               },
               configuration: PlutoGridConfiguration(

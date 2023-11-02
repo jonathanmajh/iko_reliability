@@ -13,10 +13,10 @@ final assetCriticality = {
 };
 
 final spareCriticality = {
-  0: 'N',
   1: 'C',
   2: 'B',
   3: 'A',
+  0: 'N',
 };
 
 List<String> criticalityStrings = [
