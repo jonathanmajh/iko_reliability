@@ -502,6 +502,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               rows: rows,
               onLoaded: (PlutoGridOnLoadedEvent event) {
                 stateManager = event.stateManager;
+                context.read<SpareCriticalityNotifier>().stateManager =
+                    stateManager;
                 event.stateManager.addListener(gridAHandler);
                 stateManager.setShowColumnFilter(true);
               },

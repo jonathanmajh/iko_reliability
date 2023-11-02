@@ -11,6 +11,7 @@ import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 import '../criticality/criticality_db_export_import.dart';
 import '../criticality/spare_criticality.dart';
+import '../criticality/spare_criticality_notifier.dart';
 import '../main.dart';
 import 'consts.dart';
 import 'db_drift.dart';
@@ -299,6 +300,22 @@ class _EndDrawerState extends State<EndDrawer> {
             child: const Text('Configure'),
             onPressed: () =>
                 calculateRPNDistributionSpares(context, [20, 30, 50]),
+          ),
+        ),
+        ListTile(
+          title: const Text('Export to CSV'),
+          trailing: ElevatedButton(
+            child: const Text('Export'),
+            onPressed: () async {
+              PlutoGridStateManager? stateManager =
+                  context.read<SpareCriticalityNotifier>().stateManager;
+              //export as csv
+              if (stateManager != null) {
+                exportAssetCriticalityAsCSV(
+                    stateManager: stateManager,
+                    context: navigatorKey.currentContext!);
+              }
+            },
           ),
         ),
       ]),

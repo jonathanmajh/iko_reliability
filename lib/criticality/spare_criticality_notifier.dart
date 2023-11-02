@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:collection/collection.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 import '../bin/consts.dart';
 import '../bin/db_drift.dart';
@@ -212,6 +213,7 @@ AbcCriticality calculateRPNCutOffsSpares({
 class SpareCriticalityNotifier extends ChangeNotifier {
   List<double> rpnCutoffs = [];
   bool updateGrid = true;
+  PlutoGridStateManager? stateManager;
 
   ///sets the rpnCutoffs to the [newCutoffs] and notifies listeners
   void setRpnCutoffs(List<double> newCutoffs) {
