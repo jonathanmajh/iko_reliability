@@ -1155,6 +1155,7 @@ class MyDatabase extends _$MyDatabase {
       leadTime: Value(temp[1]),
       cost: Value(temp[2]),
       newRPN: Value((result.assetRPN ?? 0) * temp[0] * temp[1] * temp[2]),
+      assetRPN: Value(result.assetRPN ?? 0),
     ));
   }
 

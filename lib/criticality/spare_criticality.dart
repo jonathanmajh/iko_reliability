@@ -165,6 +165,10 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                       itemnum: itemnum,
                       siteid: context.read<SelectedSiteNotifier>().selectedSite,
                     );
+                    setState(() {
+                      rendererContext.row.cells['assetRpn']!.value =
+                          result.first.assetRPN.toStringAsPrecision(3);
+                    });
                     rendererContext.stateManager.changeCellValue(
                         rendererContext.row.cells['cost']!, result.first.cost);
                     rendererContext.stateManager.changeCellValue(
