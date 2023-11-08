@@ -1229,6 +1229,7 @@ class MyDatabase extends _$MyDatabase {
       usage: const Value(0),
       cost: const Value(0),
       leadTime: const Value(0),
+      newRPN: const Value(0),
     ));
   }
 

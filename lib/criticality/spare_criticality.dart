@@ -338,6 +338,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               );
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
+                rendererContext.row.cells['override']!.value =
+                    AssetOverride.priority;
               });
             },
             items:
@@ -437,10 +439,11 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         builder: (BuildContext context,
             AsyncSnapshot<List<SpareCriticalityWithItem>> snapshot) {
           List<PlutoRow> rows = [];
+          debugPrint('SPC - builder');
           if (snapshot.hasData) {
             if (snapshot.data!.isNotEmpty) {
               if (loadedSite != snapshot.data?.first.spareCriticality.siteid ||
-                  context.watch<AssetCriticalityNotifier>().updateGrid) {
+                  context.watch<SpareCriticalityNotifier>().updateGrid) {
                 loadedSite = snapshot.data!.first.spareCriticality.siteid;
                 for (var row in snapshot.data!) {
                   AssetOverride overrideStatus = AssetOverride.none;
@@ -536,6 +539,15 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                     spareid: event.row.cells['id']!.value,
                   );
                   event.row.cells['rpn']!.value = newRpn;
+                  final newPriority = context
+                      .read<SpareCriticalityNotifier>()
+                      .rpnFindDistribution(newRpn);
+                  if (event.row.cells['override']!.value !=
+                      AssetOverride.priority) {
+                    event.row.cells['newPriority']!.value = newPriority;
+                    event.row.cells['override']!.value =
+                        AssetOverride.breakdowns;
+                  }
                 }
               },
               configuration: PlutoGridConfiguration(
@@ -874,23 +886,21 @@ class _OverrideStatusIconState extends State<OverrideSparePartStatusIcon> {
           widget.rendererContext.row.cells['newPriority']!,
           0,
         );
+        setState(() {
+          widget.rendererContext.row.cells['rpn']!.value = 0;
+        });
       },
       tooltip: statusText,
     );
   }
 }
 
-Future<String> calculateRPNDistributionSpares(
-    BuildContext context, List<int> dists) async {
-  if (calculateTotal(dists) != 100) {
-    return 'Please make sure percentages add up to 100%';
-  }
+Future<String> calculateRPNDistributionSpares(BuildContext context) async {
   try {
     SpareCriticalitySettingNotifier spareCritifcalitySettingNotifier =
         context.read<SpareCriticalitySettingNotifier>();
     SpareCriticalityNotifier spareCritifcalityNotifier =
         context.read<SpareCriticalityNotifier>();
-    //spareCritifcalitySettingNotifier.setPrecentages
     var result = await database!
         .uniqueRpnNumbersSpare(
             context.read<SelectedSiteNotifier>().selectedSite)
@@ -914,4 +924,62 @@ Future<String> calculateRPNDistributionSpares(
     return e.toString();
   }
   return 'RPN cutoffs successfully calculated';
+}
+
+class SpareCriticalityConfig extends StatefulWidget {
+  const SpareCriticalityConfig({super.key});
+
+  @override
+  State<SpareCriticalityConfig> createState() => _SpareCriticalityConfigState();
+}
+
+class _SpareCriticalityConfigState extends State<SpareCriticalityConfig> {
+  TextEditingController percentAController = TextEditingController();
+  TextEditingController percentBController = TextEditingController();
+  TextEditingController percentCController = TextEditingController();
+
+  @override
+  void dispose() {
+    percentAController.dispose();
+    percentBController.dispose();
+    percentCController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SpareCriticalitySettingNotifier>(
+      builder: (context, notifier, child) {
+        percentAController.text = notifier.percentA.toString();
+        percentBController.text = notifier.percentB.toString();
+        percentCController.text = notifier.percentC.toString();
+        return Column(children: [
+          TextField(
+            controller: percentAController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: 'A%'),
+            onChanged: (value) {
+              notifier.setPercentages(percentA: int.parse(value));
+            },
+          ),
+          TextField(
+            controller: percentBController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: 'B%'),
+            onChanged: (value) {
+              notifier.setPercentages(percentB: int.parse(value));
+            },
+          ),
+          TextField(
+            controller: percentCController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: 'C%'),
+            onChanged: (value) {
+              notifier.setPercentages(percentC: int.parse(value));
+            },
+          ),
+        ]);
+      },
+    );
+  }
 }

@@ -279,9 +279,22 @@ class _EndDrawerState extends State<EndDrawer> {
         const ThemeToggle(),
         const SiteToggle(),
         ListTile(
-          title: const Text('Recalculate Spare Criticality'),
+          title: const Text('Configure ABC Percentages'),
           trailing: ElevatedButton(
-            child: const Text('Refresh'),
+            child: const Icon(Icons.settings),
+            onPressed: () {
+              showDataAlert(
+                [],
+                'Enter Desired Precentages',
+                [SpareCriticalityConfig()],
+              );
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text('Refresh Data from Maximo'),
+          trailing: ElevatedButton(
+            child: const Icon(Icons.refresh),
             onPressed: () {
               showDialog(
                   context: context,
@@ -295,11 +308,10 @@ class _EndDrawerState extends State<EndDrawer> {
           ),
         ),
         ListTile(
-          title: const Text('Risk Priority Distributions'),
+          title: const Text('Calculate ABC from RPN'),
           trailing: ElevatedButton(
-            child: const Text('Configure'),
-            onPressed: () =>
-                calculateRPNDistributionSpares(context, [20, 30, 50]),
+            child: const Icon(Icons.calculate),
+            onPressed: () => calculateRPNDistributionSpares(context),
           ),
         ),
         ListTile(
@@ -318,6 +330,33 @@ class _EndDrawerState extends State<EndDrawer> {
             },
           ),
         ),
+        ListTile(
+          title: const Text('Export Settings'),
+          trailing: ElevatedButton(
+              child: const Text('Export'),
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(await exportCriticalityDB(
+                    database!,
+                    context.read<SelectedSiteNotifier>().selectedSite,
+                  )),
+                ));
+                Navigator.of(context).pop();
+              }),
+        ),
+        ListTile(
+          title: const Text('Import Settings'),
+          trailing: ElevatedButton(
+              child: const Text('Import'),
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(await importCriticalityDB(
+                    database!,
+                  )),
+                ));
+                Navigator.of(context).pop();
+              }),
+        ),
       ]),
     );
   }
@@ -333,10 +372,17 @@ class _EndDrawerState extends State<EndDrawer> {
             const ThemeToggle(),
             const SiteToggle(),
             ListTile(
-              title: const Text('Risk Priority Distributions'),
+              title: const Text('Configure Priority Percentages'),
               trailing: ElevatedButton(
-                child: const Text('Configure'),
+                child: const Icon(Icons.settings),
                 onPressed: () => showRpnDistDialog(context),
+              ),
+            ),
+            ListTile(
+              title: const Text('Work Order Filter Settings'),
+              trailing: ElevatedButton(
+                child: const Icon(Icons.settings),
+                onPressed: () => showWOSettingsDialog(context),
               ),
             ),
             ListTile(
@@ -363,13 +409,6 @@ class _EndDrawerState extends State<EndDrawer> {
                         context: navigatorKey.currentContext!);
                   }
                 },
-              ),
-            ),
-            ListTile(
-              title: const Text('Work Order View Settings'),
-              trailing: ElevatedButton(
-                child: const Text('Configure'),
-                onPressed: () => showWOSettingsDialog(context),
               ),
             ),
             ListTile(
