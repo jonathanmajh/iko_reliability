@@ -163,9 +163,8 @@ class _TimesheetPageState extends State<TimesheetPage>
             ),
           ],
         ),
-        Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const []),
+        const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround, children: []),
         ElevatedButton(
           onPressed: () async {
             labors = await laborFromClipboard();

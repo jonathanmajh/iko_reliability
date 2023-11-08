@@ -30,7 +30,7 @@ class AppRouter extends _$AppRouter {
         AutoRoute(path: "/contractor", page: ContractorRoute.page),
         AutoRoute(path: "/pm/check", page: PmCheckRoute.page),
         AutoRoute(path: "/pm/update-meter", page: PmMeterUpdateRoute.page),
-        AutoRoute(path: '/criticality/spare', page: SpareCriticalityRoute.page)
+        AutoRoute(path: '/criticality/spare', page: SpareCriticalityRoute.page),
         AutoRoute(path: "/timesheet", page: TimesheetRoute.page),
       ];
 }

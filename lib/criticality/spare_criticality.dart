@@ -12,7 +12,6 @@ import '../bin/end_drawer.dart';
 import '../main.dart';
 import '../settings/theme_manager.dart';
 import 'asset_criticality_notifier.dart';
-import 'functions.dart';
 import 'spare_criticality_notifier.dart';
 
 @RoutePage()
@@ -957,7 +956,7 @@ class _SpareCriticalityConfigState extends State<SpareCriticalityConfig> {
           TextField(
             controller: percentAController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: 'A%'),
+            decoration: const InputDecoration(labelText: 'A%'),
             onChanged: (value) {
               notifier.setPercentages(percentA: int.parse(value));
             },
@@ -965,7 +964,7 @@ class _SpareCriticalityConfigState extends State<SpareCriticalityConfig> {
           TextField(
             controller: percentBController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: 'B%'),
+            decoration: const InputDecoration(labelText: 'B%'),
             onChanged: (value) {
               notifier.setPercentages(percentB: int.parse(value));
             },
@@ -973,7 +972,7 @@ class _SpareCriticalityConfigState extends State<SpareCriticalityConfig> {
           TextField(
             controller: percentCController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: 'C%'),
+            decoration: const InputDecoration(labelText: 'C%'),
             onChanged: (value) {
               notifier.setPercentages(percentC: int.parse(value));
             },

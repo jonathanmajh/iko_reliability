@@ -286,7 +286,7 @@ class _EndDrawerState extends State<EndDrawer> {
               showDataAlert(
                 [],
                 'Enter Desired Precentages',
-                [SpareCriticalityConfig()],
+                [const SpareCriticalityConfig()],
               );
             },
           ),
