@@ -13,8 +13,8 @@ import '../bin/drawer.dart';
 import 'criticality_settings_notifier.dart';
 import 'percent_slider.dart';
 
-import '../admin/consts.dart';
-import '../admin/db_drift.dart';
+import '../bin/consts.dart';
+import '../bin/db_drift.dart';
 import '../main.dart';
 import '../settings/theme_manager.dart';
 import 'functions.dart';
@@ -124,6 +124,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       PlutoColumn(
         title: 'Hierarchy',
         field: 'hierarchy',
+        width: 250,
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
@@ -163,9 +164,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   color: Colors.green,
                   padding: const EdgeInsets.all(0),
                 ),
-                StatusIcon(
-                  rendererContext: rendererContext,
-                ),
+                StatusIcon(rendererContext: rendererContext),
               ],
             );
           }),
@@ -212,19 +211,40 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       ));
                     }
                   }
-                  return DropdownButton(
+                  return DropdownButton<int>(
                     value: rendererContext.cell.value,
                     icon: const Icon(Icons.arrow_downward),
                     elevation: 16,
                     isExpanded: true,
-                    onChanged: (newValue) {
+                    onChanged: (int? newValue) async {
+                      //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
+                      String assetnum =
+                          rendererContext.row.cells['assetnum']!.value;
+                      //refresh children assets
+                      Set<String> childAssetnums = getChildAssetnums(assetnum);
+                      for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
+                        String tempAssetnum = row.cells['assetnum']!.value;
+                        if (childAssetnums.contains(tempAssetnum)) {
+                          PlutoCell? tempCellRef = row.cells['system'];
+                          if (tempCellRef != null) {
+                            await database!.updateAssetCriticality(
+                              assetid: row.cells['id']!.value,
+                              downtime: row.cells['downtime']!.value,
+                              system: newValue,
+                              frequency: row.cells['frequency']!.value,
+                            );
+                          }
+                        }
+                        await database!.updateAssetCriticality(
+                          assetid: rendererContext.row.cells['id']!.value,
+                          downtime:
+                              rendererContext.row.cells['downtime']!.value,
+                          system: newValue,
+                          frequency:
+                              rendererContext.row.cells['frequency']!.value,
+                        );
+                      }
                       setState(() {
-                        //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
-                        String assetnum =
-                            rendererContext.row.cells['assetnum']!.value;
-                        //refresh children assets
-                        Set<String> childAssetnums =
-                            getChildAssetnums(assetnum);
                         for (PlutoRow row
                             in stateManager.iterateAllRowAndGroup) {
                           String tempAssetnum = row.cells['assetnum']!.value;
@@ -235,9 +255,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                                   tempCellRef, newValue);
                             }
                           }
-                          stateManager.changeCellValue(
-                              rendererContext.cell, newValue);
                         }
+                        stateManager.changeCellValue(
+                            rendererContext.cell, newValue);
                       });
                     },
                     items: items,
@@ -259,7 +279,18 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             icon: const Icon(Icons.arrow_downward),
             elevation: 16,
             isExpanded: true,
-            onChanged: (int? value) {
+            onChanged: (int? value) async {
+              await database!.updateAssetCriticality(
+                assetid: rendererContext.row.cells['id']!.value,
+                frequency: value,
+                manual: true,
+                downtime: rendererContext.row.cells['downtime']!.value,
+                system: rendererContext.row.cells['system']!.value,
+              );
+              context.read<AssetOverrideNotifier>().updateAssetOverride(
+                assets: [rendererContext.row.cells['assetnum']!.value],
+                status: AssetOverride.breakdowns,
+              );
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
@@ -287,7 +318,18 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             icon: const Icon(Icons.arrow_downward),
             elevation: 16,
             isExpanded: true,
-            onChanged: (int? value) {
+            onChanged: (int? value) async {
+              await database!.updateAssetCriticality(
+                assetid: rendererContext.row.cells['id']!.value,
+                downtime: value,
+                manual: true,
+                frequency: rendererContext.row.cells['frequency']!.value,
+                system: rendererContext.row.cells['system']!.value,
+              );
+              context.read<AssetOverrideNotifier>().updateAssetOverride(
+                assets: [rendererContext.row.cells['assetnum']!.value],
+                status: AssetOverride.breakdowns,
+              );
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
@@ -306,19 +348,62 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         },
       ),
       PlutoColumn(
-        width: 50,
+        width: 75,
         title: 'RPN',
         field: 'rpn',
         readOnly: true,
         type: PlutoColumnType.number(),
       ),
       PlutoColumn(
-        width: 100,
+        width: 150,
         title: 'New Priority',
         field: 'newPriority',
-        readOnly: true,
-        type: PlutoColumnType.text(defaultValue: '---'),
+        type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<int>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (int? value) async {
+              await database!.updateAssetCriticality(
+                assetid: rendererContext.row.cells['id']!.value,
+                newPriority: value,
+                downtime: rendererContext.row.cells['downtime']!.value,
+                system: rendererContext.row.cells['system']!.value,
+                frequency: rendererContext.row.cells['frequency']!.value,
+              );
+              context.read<AssetOverrideNotifier>().updateAssetOverride(
+                assets: [rendererContext.row.cells['assetnum']!.value],
+                status: AssetOverride.priority,
+              );
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: [0, ...assetCriticality.keys]
+                .map<DropdownMenuItem<int>>((int value) {
+              return DropdownMenuItem<int>(
+                value: value,
+                child: Text('$value: ${assetCriticality[value] ?? ""}'),
+              );
+            }).toList(),
+          );
+        },
       ),
+      PlutoColumn(
+          width: 100,
+          title: 'Override',
+          field: 'override',
+          type: PlutoColumnType.text(),
+          renderer: (rendererContext) {
+            return Row(
+              children: [
+                OverrideStatusIcon(rendererContext: rendererContext),
+              ],
+            );
+          }),
     ]);
   }
 
@@ -399,15 +484,22 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     List<PlutoRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
-        double calculatedRPN = rpnFunc(child) ?? -1;
-        String priorityText = context
-            .read<AssetCriticalityNotifier>()
-            .rpnFindDistribution(calculatedRPN);
+        double calculatedRPN = child.assetCriticality?.newRPN ?? -1;
+        int priorityText = child.assetCriticality?.newPriority ??
+            context
+                .read<AssetCriticalityNotifier>()
+                .rpnFindDistribution(calculatedRPN);
+        if (child.assetCriticality?.newPriority != null) {
+          context.read<AssetOverrideNotifier>().assets[child.asset.assetnum] =
+              AssetOverride.priority;
+        }
+        if (child.assetCriticality?.manual ?? false) {
+          context.read<AssetOverrideNotifier>().assets[child.asset.assetnum] =
+              AssetOverride.breakdowns;
+        }
         if (calculatedRPN > 0) {
-          context.read<AssetStatusNotifier>().updateAssetStatus(
-            assets: [child.asset.assetnum],
-            status: AssetStatus.complete,
-          );
+          context.read<AssetStatusNotifier>().assets[child.asset.assetnum] =
+              AssetStatus.complete;
         }
         rows.add(PlutoRow(
           cells: {
@@ -424,6 +516,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'newPriority': PlutoCell(value: priorityText),
             'rpn': PlutoCell(value: calculatedRPN),
             'id': PlutoCell(value: child.asset.id),
+            'override': PlutoCell(value: ''),
           },
           type: PlutoRowType.group(
               expanded: true,
@@ -436,8 +529,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   }
 
   void refreshAsset(String assetnum) async {
-    // add list asset to list of assets being updated by system
-    systemUpdate.addAll([assetnum, assetnum]);
+    // if asset has been locked dont refresh
+    if (navigatorKey.currentContext!
+            .read<AssetOverrideNotifier>()
+            .getAssetStatus(assetnum) !=
+        AssetOverride.none) {
+      return;
+    }
     // change status icon
     AssetStatus previousStatus =
         context.read<AssetStatusNotifier>().getAssetStatus(assetnum);
@@ -480,11 +578,17 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     dtEvents = dtEvents / assetCriticalitySettings.frequencyPeriodYears;
     for (var row in stateManager.iterateRowAndGroup) {
       if (row.cells['assetnum']!.value == assetnum) {
+        // update values in db
+        await database!.updateAssetCriticality(
+          assetid: row.cells['id']!.value,
+          frequency: ratingFromValue(dtEvents, frequencyRating),
+          downtime: ratingFromValue(downtime, impactRating),
+          system: row.cells['system']!.value,
+        );
         stateManager.changeCellValue(
             row.cells['downtime']!, ratingFromValue(downtime, impactRating));
         stateManager.changeCellValue(row.cells['frequency']!,
             ratingFromValue(dtEvents, frequencyRating));
-        // stateManager.notifyListeners();
       }
     }
   }
@@ -553,6 +657,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               // or if grid is marked for update
               if (loadedSite != snapshot.data?.first.asset.siteid ||
                   context.watch<AssetCriticalityNotifier>().updateGrid) {
+                print('Reloading Grid');
                 siteAssets = {};
                 parentAssets = {};
                 for (var row in snapshot.data!) {
@@ -566,7 +671,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 context
                     .read<AssetStatusNotifier>()
                     .updateParentAssets(parentAssets.keys.toList());
-
                 loadedSite = snapshot.data!.first.asset.siteid;
                 rows = getChilds('Top');
                 stateManager.removeAllRows();
@@ -579,9 +683,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                         (row.cells['rpn']?.value ?? -1) + 0.0;
                   }
                 }
-                context
-                    .read<AssetCriticalityNotifier>()
-                    .setRpnMap(newRpnMap, notify: false);
                 stateManager.toggleExpandedRowGroup(
                     rowGroup: stateManager.rows.first);
                 stateManager.toggleExpandedRowGroup(
@@ -604,6 +705,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 'newPriority': PlutoCell(value: 0),
                 'rpn': PlutoCell(value: 0),
                 'id': PlutoCell(value: ''),
+                'override': PlutoCell(value: ''),
               },
             ));
           } else {
@@ -621,6 +723,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 'newPriority': PlutoCell(value: 0),
                 'rpn': PlutoCell(value: 0),
                 'id': PlutoCell(value: ''),
+                'override': PlutoCell(value: ''),
               },
             ));
           }
@@ -645,52 +748,56 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 ));
               },
               onChanged: (PlutoGridOnChangedEvent event) async {
+                // recalculate rpn number > nre priority if not overwritten
+                if (![5, 6, 7].contains(event.columnIdx)) {
+                  // only need to update if changes made to these columns
+                  return;
+                }
                 debugPrint('running grid A on change event');
                 AssetCriticalityNotifier assetCriticalityNotifier =
                     context.read<AssetCriticalityNotifier>();
+                AssetStatusNotifier assetStatusNotifier =
+                    context.read<AssetStatusNotifier>();
                 assetCriticalityNotifier.priorityRangesUpToDate = false;
-                String rowId = event.row.cells['id']?.value ?? 'N/A';
-                AssetCriticalityWithAsset asset =
-                    siteAssets[event.row.cells['assetnum']!.value]!;
+                String rowId = event.row.cells['id']!.value;
+                // get data from db and update cache while we are at it
+                AssetCriticalityWithAsset assetCrit =
+                    await database!.getAssetCriticality(assetid: rowId);
+                siteAssets[event.row.cells['assetnum']!.value] = assetCrit;
                 // Create an new ACWA object for rpn calculation
                 try {
-                  asset = AssetCriticalityWithAsset(
-                    asset.asset,
-                    AssetCriticality(
-                      asset: '',
-                      system: 0,
-                      frequency: event.row.cells['frequency']!.value,
-                      downtime: event.row.cells['downtime']!.value,
-                      type: '',
-                      manual: false,
-                    ),
-                    // TODO this causes an error when reloading asset with no system selected
-                    (await database!.getSystemCriticality(
-                            event.row.cells['system']!.value))
-                        .first,
+                  double newRpn = rpnFunc(assetCrit) ?? -1;
+                  await database!.updateAssetCriticality(
+                    assetid: event.row.cells['id']!.value,
+                    downtime: event.row.cells['downtime']!.value,
+                    system: event.row.cells['system']!.value,
+                    frequency: event.row.cells['frequency']!.value,
+                    newRPN: newRpn,
                   );
-                  double newRpn = rpnFunc(asset) ?? -1;
                   event.row.cells['rpn']!.value = newRpn;
-                  if (rowId != 'N/A') {
-                    assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
-                  }
-                  String criticalityText = context
-                      .read<AssetCriticalityNotifier>()
-                      .rpnFindDistribution(newRpn);
-                  event.row.cells['newPriority']!.value = criticalityText;
+                  assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
+                  event.row.cells['newPriority']!.value =
+                      assetCrit.assetCriticality?.newPriority ??
+                          assetCriticalityNotifier.rpnFindDistribution(newRpn);
                   if (newRpn > 0) {
-                    context.read<AssetStatusNotifier>().updateAssetStatus(
+                    assetStatusNotifier.updateAssetStatus(
                       assets: [event.row.cells['assetnum']!.value],
                       status: AssetStatus.complete,
+                    );
+                  } else if (assetStatusNotifier.getAssetStatus(
+                              event.row.cells['assetnum']!.value) ==
+                          AssetStatus.complete &&
+                      event.row.cells['newPriority']!.value < 1) {
+                    assetStatusNotifier.updateAssetStatus(
+                      assets: [event.row.cells['assetnum']!.value],
+                      status: AssetStatus.incomplete,
                     );
                   }
                 } catch (e) {
                   debugPrint('Failed to calculate RPN number ${e.toString()}');
                 }
-                updateAsset(
-                    event.row, !systemUpdate.remove(asset.asset.assetnum));
-                debugPrint('$event');
-                systemUpdate.remove(asset.asset.assetnum);
+                // debugPrint('$event');
+                // systemUpdate.remove(assetCrit.asset.assetnum);
               },
               configuration: PlutoGridConfiguration(
                   style: themeManager.isDark
@@ -733,22 +840,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       ),
     );
   }
-}
-
-Future<void> updateAsset(PlutoRow row, bool manual) async {
-  if (!row.cells.containsKey('id')) {
-    return;
-    //this shouldnt happen
-  }
-  debugPrint('event is for manual update? $manual');
-  await database!.updateAssetCriticality(
-    row.cells['id']!.value,
-    row.cells['system']!.value,
-    row.cells['frequency']!.value,
-    row.cells['downtime']!.value,
-    'type', //row.cells['type']!.value,
-    manual,
-  );
 }
 
 class CustomAddKeyAction extends PlutoGridShortcutAction {
@@ -828,7 +919,6 @@ void showRpnDistDialog(BuildContext context) {
 ///Shows a dialog alerting users that they haven't updated the 'new priority'calculations yet.
 ///Returns [true] if user decides to continue export, returns [false] or [null] otherwise
 Future<bool> assetCriticalityCSVExportWarning(BuildContext context) async {
-  //TODO: make the dialog look nicer
   return await showDialog(
           context: context,
           builder: (context) {
@@ -968,13 +1058,14 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                         reloadTextControllers();
                       });
                     },
-                    onSliderUpdateEnd: (newPercentDists) {
+                    onSliderUpdateEnd: (newPercentDists) async {
+                      List<int> dists2 = List.from(newPercentDists);
+                      var temp =
+                          await calculateRPNDistribution(context, dists2);
                       setState(() {
-                        dists = List.from(newPercentDists);
-                        setState(() {
-                          calculationMessage =
-                              calculateRPNDistribution(context, dists!);
-                        });
+                        dists = dists2;
+
+                        calculationMessage = temp;
                       });
                     },
                     tooltip: criticalityStrings,
@@ -1008,14 +1099,14 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(2),
                         ],
-                        onChanged: (value) {
+                        onChanged: (value) async {
                           int? val = int.tryParse(value);
+                          dists![i] = val ?? 0;
+                          var temp =
+                              await calculateRPNDistribution(context, dists!);
                           setState(() {
                             dists![i] = val ?? 0;
-                            setState(() {
-                              calculationMessage =
-                                  calculateRPNDistribution(context, dists!);
-                            });
+                            calculationMessage = temp;
                           });
                         },
                       ),
@@ -1051,10 +1142,11 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                     padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
                     child: ElevatedButton(
                       child: const Text('Calculate'),
-                      onPressed: () {
+                      onPressed: () async {
+                        var temp =
+                            await calculateRPNDistribution(context, dists!);
                         setState(() {
-                          calculationMessage =
-                              calculateRPNDistribution(context, dists!);
+                          calculationMessage = temp;
                         });
                       },
                     ),
@@ -1132,7 +1224,6 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    //TODO: make it look pretty ✧˖°🌷📎⋆ ˚｡⋆୨୧˚
     return Center(
       child: Padding(
         padding: const EdgeInsets.only(left: 8.0, right: 24.0),
@@ -1293,7 +1384,8 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   }
 }
 
-String calculateRPNDistribution(BuildContext context, List<int> dists) {
+Future<String> calculateRPNDistribution(
+    BuildContext context, List<int> dists) async {
   if (calculateTotal(dists) != 100) {
     return 'Please make sure percentages add up to 100%';
   }
@@ -1310,20 +1402,17 @@ String calculateRPNDistribution(BuildContext context, List<int> dists) {
       percentHigh: dists[3],
       percentVHigh: dists[4],
     );
-    //exclude -1 and 0 values from the rpnlist before calculating rpn ranges
-    List<double> rpnList = List.from(assetCriticalityNotifier.rpnList);
-    rpnList.removeWhere((rpn) => (rpn <= 0));
-
     //set rpn ranges
-    List<double> newCutoffs = calculateRPNDistRange(rpnList, [
-      assetCriticalitySettingsNotifier.percentVLow,
-      assetCriticalitySettingsNotifier.percentLow,
-      assetCriticalitySettingsNotifier.percentMedium,
-      assetCriticalitySettingsNotifier.percentHigh,
-      assetCriticalitySettingsNotifier.percentVHigh,
-    ]);
+    List<double> newCutoffs = calculateRPNCutOffs(
+      targetPercentages: assetCriticalitySettingsNotifier.fiveCriticality,
+      frequencyOfRPNs: await assetCriticalityNotifier
+          .frequencyOfRPNs(context.read<SelectedSiteNotifier>().selectedSite),
+    ).ordered();
     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
     debugPrint('new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
+    if (newCutoffs.toSet().length != newCutoffs.length) {
+      return 'Duplicate values in RPN cutoffs\nIncrease percentage of duplicate value, Or ensure RPN values are more spread out';
+    }
     assetCriticalityNotifier.priorityRangesUpToDate = true;
     assetCriticalityNotifier.updateGrid = true;
   } catch (e) {
@@ -1371,7 +1460,10 @@ Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
 }
 
 class StatusIcon extends StatefulWidget {
-  const StatusIcon({super.key, required this.rendererContext});
+  const StatusIcon({
+    super.key,
+    required this.rendererContext,
+  });
 
   final PlutoColumnRendererContext rendererContext;
 
@@ -1387,44 +1479,134 @@ class _StatusIconState extends State<StatusIcon> {
 
   @override
   Widget build(BuildContext context) {
+    PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
     AssetStatus status = context
         .watch<AssetStatusNotifier>()
         .getAssetStatus(widget.rendererContext.row.cells['assetnum']!.value);
     Color color = Colors.grey;
     IconData icon = Icons.pending;
     String statusText = '';
+    String searchText = '';
     switch (status) {
       case AssetStatus.complete:
         icon = Icons.check_circle;
         color = Colors.green;
         statusText = 'RPN generated';
+        searchText = 'complete-child';
 
       case AssetStatus.incomplete:
         icon = Icons.pending;
         color = Colors.orange;
         statusText = 'Please check columns to generate RPN';
+        searchText = 'pending-child';
 
       case AssetStatus.parentAsset:
         icon = Icons.hide_source;
         color = Colors.grey;
         statusText = 'Parent asset: Not ranked';
+        searchText = 'parent';
 
       case AssetStatus.refreshingWorkOrders:
         icon = Icons.downloading;
         color = Colors.blue;
         statusText = 'Loading...';
+        searchText = 'loading-child';
 
       case AssetStatus.refreshError:
         icon = Icons.error;
         color = Colors.red;
         statusText = 'Error refreshing WOs';
+        searchText = 'error-child';
     }
+    stateManager.changeCellValue(
+      widget.rendererContext.cell,
+      searchText,
+    );
     return IconButton(
       icon: Icon(
         icon,
         color: color,
       ),
       onPressed: () {},
+      tooltip: statusText,
+    );
+  }
+}
+
+class OverrideStatusIcon extends StatefulWidget {
+  const OverrideStatusIcon({
+    super.key,
+    required this.rendererContext,
+  });
+
+  final PlutoColumnRendererContext rendererContext;
+
+  @override
+  State<OverrideStatusIcon> createState() => _OverrideStatusIconState();
+}
+
+class _OverrideStatusIconState extends State<OverrideStatusIcon> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
+    AssetOverride status = context
+        .watch<AssetOverrideNotifier>()
+        .getAssetStatus(widget.rendererContext.row.cells['assetnum']!.value);
+    Color color = Colors.green;
+    IconData icon = Icons.lock_open;
+    String statusText = '';
+    String searchText = '';
+    switch (status) {
+      case AssetOverride.none:
+        statusText = 'No Overrides';
+        searchText = 'none';
+
+      case AssetOverride.priority:
+        icon = Icons.lock;
+        color = Colors.orange;
+        statusText = 'New Priority is overridden';
+        searchText = 'priority';
+
+      case AssetOverride.breakdowns:
+        icon = Icons.lock_clock;
+        color = Colors.orange;
+        statusText = 'Breakdown information overridden';
+        searchText = 'breakdowns';
+    }
+    stateManager.changeCellValue(
+      widget.rendererContext.cell,
+      searchText,
+    );
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: color,
+      ),
+      onPressed: () async {
+        context.read<AssetOverrideNotifier>().updateAssetOverride(
+          assets: [widget.rendererContext.row.cells['assetnum']!.value],
+          status: AssetOverride.none,
+        );
+        await database!.removeAssetOverride(
+            assetid: widget.rendererContext.row.cells['id']!.value);
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['frequency']!,
+          0,
+        );
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['downtime']!,
+          0,
+        );
+        widget.rendererContext.stateManager.changeCellValue(
+          widget.rendererContext.row.cells['newPriority']!,
+          0,
+        );
+      },
       tooltip: statusText,
     );
   }

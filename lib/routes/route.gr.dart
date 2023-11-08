@@ -51,6 +51,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const PmMeterUpdatePage(),
       );
     },
+    SpareCriticalityRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SpareCriticalityPage(),
+      );
+    },
     SystemCriticalityRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -146,6 +152,20 @@ class PmMeterUpdateRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'PmMeterUpdateRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SpareCriticalityPage]
+class SpareCriticalityRoute extends PageRouteInfo<void> {
+  const SpareCriticalityRoute({List<PageRouteInfo>? children})
+      : super(
+          SpareCriticalityRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SpareCriticalityRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

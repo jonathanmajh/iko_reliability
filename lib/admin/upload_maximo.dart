@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:flutter/widgets.dart';
-import 'package:iko_reliability_flutter/admin/db_drift.dart';
+import 'package:iko_reliability_flutter/bin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
 import '../creation/asset_creation_notifier.dart';
-import 'consts.dart';
+import '../bin/consts.dart';
 import 'package:http/http.dart' as http;
 
 Future<Map<String, List<List<String>>>> uploadPMToMaximo(
@@ -346,10 +346,10 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     }
 
     if (postResult['status'] == 'uploaded') {
-      print('$object upload success');
+      debugPrint('$object upload success');
       setResultValue('success');
     } else if (postResult['status'] == 'failed') {
-      print('$object upload failed');
+      debugPrint('$object upload failed');
       setResultValue('fail');
       result['result'] = 'fail';
       result['failReason'] = 'Invalid Request';
@@ -362,7 +362,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       result['postResponse'] = 'null';
       throw ['Preview mode on', result];
     } else {
-      print('$object upload failed');
+      debugPrint('$object upload failed');
       setResultValue('fail');
       result['result'] = 'fail';
       result['failReason'] = 'An error has occured';
@@ -371,9 +371,9 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     }
   }
 
-  print('checking if location exists');
+  debugPrint('checking if location exists');
   if (!(await isNewLocation('L-${asset.asset.assetnum}', selectedSite, env))) {
-    print('location already exists');
+    debugPrint('location already exists');
     result['location'] = 'duplicate';
     numDuplicates++;
   } else {
@@ -402,14 +402,14 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     handlePostResult(locationResult, 'location', ['location']);
   }
 
-  print('checking if asset exists');
+  debugPrint('checking if asset exists');
   // check if asset already exists
   if (!(await isNewAsset(asset.asset.assetnum, selectedSite, env))) {
-    print('Asset already exists');
+    debugPrint('Asset already exists');
     result['asset'] = 'duplicate';
     numDuplicates++;
   } else {
-    print('asset does not exist, uploading');
+    debugPrint('asset does not exist, uploading');
     var assetResult = await maximoRequest(
         assetUrl,
         'post',
@@ -487,7 +487,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   for (var entry in assetWorkType.entries) {
     List<String> jobPlanBody = [];
     if (!(await isNewJobPlan('${asset.asset.assetnum}${entry.key}', env))) {
-      print('${asset.asset.assetnum}${entry.key} jobplan exists');
+      debugPrint('${asset.asset.assetnum}${entry.key} jobplan exists');
       result['jobplan']['${asset.asset.assetnum}${entry.key}'] = 'duplicate';
       numDuplicates++;
       continue;
@@ -531,7 +531,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
         craftCode[entry.key[entry.key.length - 1]]!,
         "1",
         env))) {
-      print('${asset.asset.assetnum}${entry.key} joblabor exists');
+      debugPrint('${asset.asset.assetnum}${entry.key} joblabor exists');
       result['joblabor']['${asset.asset.assetnum}${entry.key}'] = 'duplicate';
       numDuplicates++;
       continue;
@@ -568,7 +568,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   for (var entry in assetWorkType.entries) {
     if (!(await isNewJobAsset('${asset.asset.assetnum}${entry.key}',
         selectedSite, asset.asset.assetnum, env))) {
-      print('${asset.asset.assetnum}${entry.key} jpasset exists');
+      debugPrint('${asset.asset.assetnum}${entry.key} jpasset exists');
       result['jpassetlink']['${asset.asset.assetnum}${entry.key}'] =
           'duplicate';
       numDuplicates++;
@@ -611,7 +611,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     result['result'] = 'success';
   }
 
-  print(result);
+  debugPrint(result.toString());
   return result;
 }
 
@@ -706,14 +706,14 @@ Future<bool> isNewLocation(
       'iko_location?oslc.where=siteid="$siteId" and location="$location"&oslc.select=location,siteid';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
 
-  print(result);
+  debugPrint(result.toString());
 
   if (result["member"] == null) {
     throw Exception('Invalid Response from Maximo');
   }
 
   if (result['status']! == 'empty') {
-    print('not new location');
+    debugPrint('not new location');
     return true;
   } else {
     return false;
@@ -726,7 +726,7 @@ Future<bool> isNewAsset(
       'iko_asset?oslc.where=siteid="$siteId" and assetnum="$assetNum"&oslc.select=assetnum,siteid';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
 
-  print(result);
+  debugPrint(result.toString());
 
   if (result["member"] == null) {
     throw Exception('Invalid Response from Maximo');

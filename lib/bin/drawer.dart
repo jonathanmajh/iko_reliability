@@ -1,8 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../admin/cache_notifier.dart';
+import '../criticality/spare_criticality.dart';
 
 class NavDrawer extends StatelessWidget {
   const NavDrawer({super.key});
@@ -45,24 +44,14 @@ class NavDrawer extends StatelessWidget {
             Navigator.pop(context); // close the drawer
           },
         ),
-        ListTile(
-          leading: const Icon(Icons.account_circle),
-          title: const Text('Test'),
-          onTap: () {
-            context.router.pushNamed("/test");
-            // change app state...
-            Navigator.pop(context); // close the drawer
-          },
-        ),
         ExpansionTile(
-          title: const Text("Assets"),
+          title: const Text("Criticality"),
           children: <Widget>[
             ListTile(
               leading: const Icon(Icons.settings),
-              title: const Text('Create Assets'),
+              title: const Text('System Criticality'),
               onTap: () {
-                context.router.pushNamed("/asset");
-                // change app state...
+                context.router.pushNamed("/criticality/system");
                 Navigator.pop(context); // close the drawer
               },
             ),
@@ -70,25 +59,22 @@ class NavDrawer extends StatelessWidget {
               leading: const Icon(Icons.settings),
               title: const Text('Asset Criticality'),
               onTap: () {
-                context.router.pushNamed("/asset/criticality");
-                try {
-                  context
-                      .read<Cache>()
-                      .calculateSystemScores(); //load system score data
-                } catch (e) {
-                  debugPrint('Could not load system scores from cache \n$e');
-                }
-                // change app state...
+                context.router.pushNamed("/criticality/asset");
                 Navigator.pop(context); // close the drawer
               },
             ),
             ListTile(
               leading: const Icon(Icons.settings),
-              title: const Text('System Criticality'),
+              title: const Text('Spare Part Criticality'),
               onTap: () {
-                context.router.pushNamed("/asset/system-criticality");
-                // change app state...
-                Navigator.pop(context); // close the drawer
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return const AlertDialog(
+                        title: Text('Loading...'),
+                        content: SparePartsLoadingIndicator(),
+                      );
+                    });
               },
             ),
           ],
@@ -101,7 +87,6 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Validate PMs'),
               onTap: () {
                 context.router.pushNamed("/pm/check");
-                // change app state...
                 Navigator.pop(context); // close the drawer
               },
             ),
@@ -110,7 +95,6 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Update PM Meters'),
               onTap: () {
                 context.router.pushNamed("/pm/update-meter");
-                // change app state...
                 Navigator.pop(context); // close the drawer
               },
             ),
@@ -119,7 +103,6 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Create Assets'),
               onTap: () {
                 context.router.pushNamed("/asset");
-                // change app state...
                 Navigator.pop(context); // close the drawer
               },
             ),
@@ -128,7 +111,6 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Create Contractors'),
               onTap: () {
                 context.router.pushNamed("/contractor");
-                // change app state...
                 Navigator.pop(context); // close the drawer
               },
             ),

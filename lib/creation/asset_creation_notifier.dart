@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../admin/upload_maximo.dart';
 
-import '../admin/db_drift.dart';
+import '../bin/db_drift.dart';
 import '../main.dart';
 
 class AssetCreationNotifier extends ChangeNotifier {
@@ -58,7 +58,7 @@ class AssetCreationNotifier extends ChangeNotifier {
       throw ('Upload Fail! Asset $assetNum already exists');
     }
 
-    print('adding asset');
+    debugPrint('adding asset');
     var id = await database!.addNewAsset(
       assetNum,
       site,
@@ -83,7 +83,7 @@ class AssetCreationNotifier extends ChangeNotifier {
 
     parentAssets[parent]!.add(newAsset);
 
-    print('done adding asset');
+    debugPrint('done adding asset');
     notifyListeners();
     return id.asset.assetnum;
   }
@@ -146,11 +146,10 @@ class AssetCreationNotifier extends ChangeNotifier {
       try {
         pendingAssets[assetNum] = 'pending';
         notifyListeners();
-        print('something');
         var result = await uploadAssetToMaximo(
             siteAssets[assetNum]!, env, this, selectedSite);
         var assetcheck = await database!.getAsset(selectedSite, assetNum);
-        print(assetcheck.toString());
+        debugPrint(assetcheck.toString());
         if (result['result'] == 'success') {
           pendingAssets[assetNum] = 'success';
           await database!.setAssetStatus(assetNum, selectedSite, 0);
@@ -159,13 +158,13 @@ class AssetCreationNotifier extends ChangeNotifier {
           await database!.setAssetStatus(assetNum, selectedSite, 0);
         }
         assetcheck = await database!.getAsset(selectedSite, assetNum);
-        print(assetcheck.toString());
+        debugPrint(assetcheck.toString());
         failedAssets.remove(assetNum);
         notifyListeners();
         continue;
       } on List catch (e) {
         //e[0] is the error message (e.g. invalid request) while e[1] is a map which allows you to see exactly which part of the upload failed
-        print(e[0]); //Print warning msg
+        debugPrint(e[0]); //Print warning msg
 
         var result = e[1];
         var error = result['postResponse'] == 'null'
@@ -174,12 +173,12 @@ class AssetCreationNotifier extends ChangeNotifier {
         failedAssets[assetNum] = error;
         pendingAssets[assetNum] = 'warning';
         await database!.setAssetStatus(assetNum, selectedSite, -1);
-        print(error);
+        debugPrint(error);
 
         notifyListeners();
         continue;
       } catch (e) {
-        print(e);
+        debugPrint(e.toString());
         pendingAssets[assetNum] = 'fail';
         notifyListeners();
         continue;

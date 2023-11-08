@@ -1,10 +1,10 @@
 import 'package:csv/csv.dart';
-import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/admin/generate_job_plans.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../main.dart';
-import 'db_drift.dart';
+import '../bin/db_drift.dart';
 
 Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
   Map<String, List<List<String>>> generated = {};
@@ -184,7 +184,8 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
     jobplan.jpduration.toString(),
     'N', //downtime
     'N', //interruptible
-    jobplan.ikoPmpackage ?? ''
+    jobplan.ikoPmpackage ?? '',
+    'N', // include task in schedule
   ]);
   if (jobplan.jobmaterial.isNotEmpty) {
     for (final jobmaterial in jobplan.jobmaterial) {
@@ -217,6 +218,7 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
         jobservice.itemNumber,
         '', //ITEMQTY
         'ITEMSET1',
+        jobservice.vendorId,
         jobservice.cost?.toString() ?? '',
       ]);
     }
@@ -302,7 +304,8 @@ Future<Map<String, List<List<String>>>> generateMeterJobplan(
         '1',
         'N',
         'N',
-        ''
+        '',
+        'N', // include task in schedule
       ]);
       generated['JobTask']!.add([
         '',

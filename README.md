@@ -18,13 +18,13 @@ samples, guidance on mobile development, and a full API reference.
 ## Notes on common commands
 flutter pub upgrade --major-versions
 flutter pub outdated
-flutter packages pub run build_runner build --delete-conflicting-outputs
-flutter packages pub run build_runner watch / build
+dart run build_runner build --delete-conflicting-outputs
+dart run build_runner watch / build
 flutter pub get
 flutter upgrade
 
 flutter build windows
-flutter pub run squirrel:installer_windows
+dart run squirrel:installer_windows
 
 git tag -a v1.0.0 -m "some message"
 git push --follow-tags

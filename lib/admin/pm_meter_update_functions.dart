@@ -1,6 +1,6 @@
 import 'package:iko_reliability_flutter/admin/generate_uploads.dart';
 
-import 'db_drift.dart';
+import '../bin/db_drift.dart';
 import 'upload_maximo.dart';
 
 class AssetMeterMaximo {

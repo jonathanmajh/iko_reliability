@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/main.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../admin/consts.dart';
+import '../bin/consts.dart';
 
 ///ChangeNotifier for data in AssetCriticalityPage
 class AssetCriticalityNotifier extends ChangeNotifier {
@@ -18,7 +19,18 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   PlutoGridStateManager? stateManager;
 
   ///list of rpns. Not ordered
-  List<double> get rpnList => List<double>.of(rpnMap.values);
+  ///exclude -1 and 0 values from the rpnlist
+  List<double> get rpnList =>
+      List<double>.of(rpnMap.values.where((element) => element > 0));
+
+  Future<Map<double, int>> frequencyOfRPNs(String siteid) async {
+    var temp = await database!.uniqueRpnNumbers('$siteid%').get();
+    Map<double, int> result = {};
+    for (var x in temp) {
+      result[x.newRPN] = x.countasset;
+    }
+    return result;
+  }
 
   ///whether to reload the grid
   bool updateGrid = false;
@@ -42,18 +54,18 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   }
 
   ///finds the risk priority for a given rpn
-  String rpnFindDistribution(double rpn) {
+  int rpnFindDistribution(double rpn) {
     try {
       if (rpnCutoffs.length != 5) {
         throw Exception('Unexpected format for List [rpnCutoffs]');
       }
       if (rpn <= 0) throw Exception('Negative RPN');
-      for (int i = 0; i < criticalityStrings.length; i++) {
-        if (rpn <= rpnCutoffs[i]) return criticalityStrings[i];
+      for (int i = 0; i < assetCriticality.length; i++) {
+        if (rpn <= rpnCutoffs[i]) return assetCriticality.keys.elementAt(i);
       }
-      return criticalityStrings[4];
+      return assetCriticality.keys.last;
     } catch (e) {
-      return '---';
+      return 0;
     }
   }
 }
@@ -94,4 +106,31 @@ enum AssetStatus {
   refreshingWorkOrders,
   incomplete,
   refreshError,
+}
+
+class AssetOverrideNotifier extends ChangeNotifier {
+  Map<String, AssetOverride> assets = {};
+
+  void updateAssetOverride({
+    required List<String> assets,
+    required AssetOverride status,
+  }) {
+    for (var asset in assets) {
+      this.assets[asset] = status;
+    }
+    notifyListeners();
+  }
+
+  AssetOverride getAssetStatus(String assetNum) {
+    if (assets.containsKey(assetNum)) {
+      return assets[assetNum]!;
+    }
+    return AssetOverride.none;
+  }
+}
+
+enum AssetOverride {
+  none, //lock open
+  priority, //lock
+  breakdowns, //lock clock
 }

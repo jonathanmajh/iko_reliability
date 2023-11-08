@@ -230,11 +230,13 @@ class ParsedTemplate {
           //check if current row has materials/mapics # header for PM. If so, read the data next iteration(s)
           readCraft = false;
           readMaterials = true;
+          readService = false;
           continue;
         }
         if (row[0] == 'Services (Mapics Number)') {
           //check if current row has services/mapics # header for PM. If so, read the data next iteration(s)
           readCraft = false;
+          readMaterials = false;
           readService = true;
           continue;
         }
@@ -272,13 +274,15 @@ class ParsedTemplate {
           pmTemplates[filename][pmNumber].services.add(JobService(
               itemNumber: row[0].toString(),
               vendorId: row[2],
-              cost: row[1].toDouble()));
+              cost: row[1]?.toDouble()));
         }
         if (row[0] == 'Craft @ (Optional) Labour Code' ||
             row[0] == 'Craft (Labour Code(Optional))') {
           //check if current row has craft info header for PM. If so, read the data next iteration
           readTasks = true;
           readCraft = true;
+          readMaterials = false;
+          readService = false;
           continue;
         }
 

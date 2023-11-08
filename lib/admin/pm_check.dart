@@ -6,11 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
-import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
+import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
 import 'package:provider/provider.dart';
 
 import '../bin/drawer.dart';
-import 'consts.dart';
+import '../bin/consts.dart';
 import '../main.dart';
 import '../bin/end_drawer.dart';
 import 'generate_job_plans.dart';

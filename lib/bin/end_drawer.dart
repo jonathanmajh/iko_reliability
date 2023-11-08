@@ -1,8 +1,7 @@
 //for widgets in the right-side drawer
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
-import 'package:iko_reliability_flutter/admin/file_export.dart';
-import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
+import 'package:iko_reliability_flutter/criticality/file_export.dart';
+import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
@@ -10,11 +9,12 @@ import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
-import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import '../criticality/criticality_db_export_import.dart';
+import '../criticality/spare_criticality.dart';
+import '../criticality/spare_criticality_notifier.dart';
 import '../main.dart';
-import '../admin/consts.dart';
-import '../admin/db_drift.dart';
+import 'consts.dart';
+import 'db_drift.dart';
 
 ///Widget for the right-side drawer of the app
 class EndDrawer extends StatefulWidget {
@@ -45,6 +45,9 @@ class _EndDrawerState extends State<EndDrawer> {
       return assetCriticalityEndDrawer(context, themeManager);
     } else if (ModalRoute.of(context)!.settings.name == 'HomeRoute') {
       return homeRouteEndDrawer(context, themeManager);
+    } else if (ModalRoute.of(context)!.settings.name ==
+        'SpareCriticalityRoute') {
+      return spareCriticalityEndDrawer(context, themeManager);
     } else {
       return defaultEndDrawer(context, themeManager);
     }
@@ -223,9 +226,6 @@ class _EndDrawerState extends State<EndDrawer> {
                           ));
                           List<String> messages = await maximoAssetCaller(
                               siteid, maximo.maximoServerSelected, context);
-                          context
-                              .read<Cache>()
-                              .calculateSystemScores(); //reload system scores
                           processNotifier.popProcessingDialog(context);
                           if (messages.isNotEmpty) {
                             showDataAlert(messages, 'Site Assets Loaded');
@@ -272,6 +272,95 @@ class _EndDrawerState extends State<EndDrawer> {
     );
   }
 
+  Widget spareCriticalityEndDrawer(
+      BuildContext context, ThemeManager themeManager) {
+    return Drawer(
+      child: ListView(children: <Widget>[
+        const ThemeToggle(),
+        const SiteToggle(),
+        ListTile(
+          title: const Text('Configure ABC Percentages'),
+          trailing: ElevatedButton(
+            child: const Icon(Icons.settings),
+            onPressed: () {
+              showDataAlert(
+                [],
+                'Enter Desired Precentages',
+                [SpareCriticalityConfig()],
+              );
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text('Refresh Data from Maximo'),
+          trailing: ElevatedButton(
+            child: const Icon(Icons.refresh),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text('Loading...'),
+                      content: SparePartsLoadingIndicator(forceUpdate: true),
+                    );
+                  });
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text('Calculate ABC from RPN'),
+          trailing: ElevatedButton(
+            child: const Icon(Icons.calculate),
+            onPressed: () => calculateRPNDistributionSpares(context),
+          ),
+        ),
+        ListTile(
+          title: const Text('Export to CSV'),
+          trailing: ElevatedButton(
+            child: const Text('Export'),
+            onPressed: () async {
+              PlutoGridStateManager? stateManager =
+                  context.read<SpareCriticalityNotifier>().stateManager;
+              //export as csv
+              if (stateManager != null) {
+                exportAssetCriticalityAsCSV(
+                    stateManager: stateManager,
+                    context: navigatorKey.currentContext!);
+              }
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text('Export Settings'),
+          trailing: ElevatedButton(
+              child: const Text('Export'),
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(await exportCriticalityDB(
+                    database!,
+                    context.read<SelectedSiteNotifier>().selectedSite,
+                  )),
+                ));
+                Navigator.of(context).pop();
+              }),
+        ),
+        ListTile(
+          title: const Text('Import Settings'),
+          trailing: ElevatedButton(
+              child: const Text('Import'),
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(await importCriticalityDB(
+                    database!,
+                  )),
+                ));
+                Navigator.of(context).pop();
+              }),
+        ),
+      ]),
+    );
+  }
+
   ///Widget for asset criticality end drawer
   Widget assetCriticalityEndDrawer(
       BuildContext context, ThemeManager themeManager) {
@@ -283,10 +372,17 @@ class _EndDrawerState extends State<EndDrawer> {
             const ThemeToggle(),
             const SiteToggle(),
             ListTile(
-              title: const Text('Risk Priority Distributions'),
+              title: const Text('Configure Priority Percentages'),
               trailing: ElevatedButton(
-                child: const Text('Configure'),
+                child: const Icon(Icons.settings),
                 onPressed: () => showRpnDistDialog(context),
+              ),
+            ),
+            ListTile(
+              title: const Text('Work Order Filter Settings'),
+              trailing: ElevatedButton(
+                child: const Icon(Icons.settings),
+                onPressed: () => showWOSettingsDialog(context),
               ),
             ),
             ListTile(
@@ -313,13 +409,6 @@ class _EndDrawerState extends State<EndDrawer> {
                         context: navigatorKey.currentContext!);
                   }
                 },
-              ),
-            ),
-            ListTile(
-              title: const Text('Work Order View Settings'),
-              trailing: ElevatedButton(
-                child: const Text('Configure'),
-                onPressed: () => showWOSettingsDialog(context),
               ),
             ),
             ListTile(
@@ -356,17 +445,13 @@ class _EndDrawerState extends State<EndDrawer> {
   }
 
   Widget defaultEndDrawer(BuildContext context, ThemeManager themeManager) {
-    return Consumer<AssetCreationNotifier>(
-      builder: (context, assetCreationNotifier, child) {
-        return Drawer(
-          child: ListView(
-            children: const <Widget>[
-              ThemeToggle(),
-              SiteToggle(),
-            ],
-          ),
-        );
-      },
+    return Drawer(
+      child: ListView(
+        children: const <Widget>[
+          ThemeToggle(),
+          SiteToggle(),
+        ],
+      ),
     );
   }
 }

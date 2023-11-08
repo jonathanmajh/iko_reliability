@@ -1,17 +1,19 @@
 //handling local database (drift)
+import 'dart:math';
 
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:http/http.dart' as http;
+import 'package:iko_reliability_flutter/criticality/functions.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
-import './connections/connection.dart' as impl;
+import '../admin/connections/connection.dart' as impl;
 import '../main.dart';
 import 'consts.dart';
-import 'upload_maximo.dart';
+import '../admin/upload_maximo.dart';
 
 part 'db_drift.g.dart';
 
@@ -134,6 +136,7 @@ class SystemCriticalitys extends Table {
   IntColumn get throughput => integer().withDefault(const Constant(0))();
   IntColumn get quality => integer().withDefault(const Constant(0))();
   TextColumn get line => text()();
+  RealColumn get score => real().withDefault(const Constant(0))();
 }
 
 class AssetCriticalitys extends Table {
@@ -143,6 +146,8 @@ class AssetCriticalitys extends Table {
   IntColumn get frequency => integer()();
   IntColumn get downtime => integer()();
   BoolColumn get manual => boolean().withDefault(const Constant(false))();
+  IntColumn get newPriority => integer().nullable()();
+  RealColumn get newRPN => real().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {asset};
@@ -176,6 +181,72 @@ class AssetCriticalityWithAsset {
   final SystemCriticality? systemCriticality;
 }
 
+class SpareParts extends Table {
+  TextColumn get itemnum => text()();
+  TextColumn get assetnum => text()();
+  TextColumn get siteid => text()();
+  RealColumn get quantity => real()();
+  IntColumn get sparepartid => integer()();
+
+  @override
+  Set<Column> get primaryKey => {sparepartid};
+}
+
+class Purchases extends Table {
+  TextColumn get prnum => text()();
+  TextColumn get prDescription => text()();
+  TextColumn get poDescription => text()();
+  TextColumn get ponum => text().nullable()();
+  TextColumn get startDate => text()();
+  TextColumn get siteid => text()();
+  TextColumn get endDate => text().nullable()();
+  RealColumn get leadTime => real()();
+  TextColumn get itemnum => text()();
+  RealColumn get unitCost => real()();
+  BoolColumn get poStatus => boolean()();
+  IntColumn get prlineid => integer()();
+
+  @override
+  Set<Column> get primaryKey => {prlineid};
+}
+
+class Items extends Table {
+  TextColumn get itemnum => text()();
+  TextColumn get description => text()();
+  TextColumn get status => text()();
+  TextColumn get commodityGroup => text()();
+  TextColumn get glClass => text()();
+
+  @override
+  Set<Column> get primaryKey => {itemnum};
+}
+
+class SpareCriticalitys extends Table {
+  TextColumn get id => text()();
+  IntColumn get usage => integer()();
+  IntColumn get leadTime => integer()();
+  IntColumn get cost => integer()();
+  RealColumn get assetRPN => real()();
+  BoolColumn get manual => boolean()();
+  IntColumn get newPriority => integer()();
+  RealColumn get newRPN => real()();
+  TextColumn get siteid => text()();
+  TextColumn get itemnum => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class SpareCriticalityWithItem {
+  SpareCriticalityWithItem(
+    this.spareCriticality,
+    this.item,
+  );
+
+  final SpareCriticality spareCriticality;
+  final Item? item;
+}
+
 @DriftDatabase(
   tables: [
     Settings,
@@ -187,6 +258,10 @@ class AssetCriticalityWithAsset {
     SystemCriticalitys,
     AssetCriticalitys,
     AssetUploads,
+    SpareParts,
+    Purchases,
+    Items,
+    SpareCriticalitys,
   ],
   queries: {
     'systemsFilteredBySite': '''
@@ -200,6 +275,105 @@ WHERE line IN (
     'maxSystemID': '''
 select max(id) from system_criticalitys
 ''',
+    'uniqueRpnNumbers': '''
+SELECT new_r_p_n
+	,count(asset)
+FROM asset_criticalitys
+WHERE new_r_p_n > 0
+	AND asset LIKE :siteid
+GROUP BY new_r_p_n
+''',
+    'uniqueRpnNumbersSpare': '''
+SELECT new_r_p_n
+	,count(itemnum)
+FROM spare_criticalitys
+WHERE new_r_p_n > 0
+	AND siteid = :siteid
+GROUP BY new_r_p_n
+''',
+    'spareCriticalityAutoCalculation': '''
+SELECT DISTINCT (sp.itemnum) itemnum
+	,(
+		SELECT sum(quantity)
+		FROM spare_parts s1
+		WHERE s1.itemnum = sp.itemnum
+			AND s1.siteid = sp.siteid
+		) quantity
+	,(
+		SELECT ifnull(avg(pr.unit_cost), -1)
+		FROM purchases pr
+		WHERE pr.itemnum = sp.itemnum
+			AND pr.siteid = sp.siteid
+			AND pr.po_status = 1
+		) unitCost
+	,(
+		SELECT ifnull(avg(pr.lead_time), -1)
+		FROM purchases pr
+		WHERE pr.itemnum = sp.itemnum
+			AND pr.siteid = sp.siteid
+			AND pr.po_status = 1
+		) leadTime
+	,(
+		SELECT max(new_r_p_n)
+		FROM asset_criticalitys
+		WHERE asset IN (
+				SELECT sp.siteid || s2.assetnum
+				FROM spare_parts s2
+				WHERE s2.itemnum = sp.itemnum
+					AND s2.siteid = sp.siteid
+				)
+		) assetRPN
+FROM spare_parts sp
+WHERE sp.siteid = :siteid
+''',
+    'spareCriticalityAutoCalculationItem': '''
+SELECT DISTINCT (sp.itemnum) itemnum
+	,(
+		SELECT sum(quantity)
+		FROM spare_parts s1
+		WHERE s1.itemnum = sp.itemnum
+			AND s1.siteid = sp.siteid
+		) quantity
+	,(
+		SELECT ifnull(avg(pr.unit_cost), -1)
+		FROM purchases pr
+		WHERE pr.itemnum = sp.itemnum
+			AND pr.siteid = sp.siteid
+			AND pr.po_status = 1
+		) unitCost
+	,(
+		SELECT ifnull(avg(pr.lead_time), -1)
+		FROM purchases pr
+		WHERE pr.itemnum = sp.itemnum
+			AND pr.siteid = sp.siteid
+			AND pr.po_status = 1
+		) leadTime
+	,(
+		SELECT max(new_r_p_n)
+		FROM asset_criticalitys
+		WHERE asset IN (
+				SELECT sp.siteid || s2.assetnum
+				FROM spare_parts s2
+				WHERE s2.itemnum = sp.itemnum
+					AND s2.siteid = sp.siteid
+				)
+		) assetRPN
+FROM spare_parts sp
+WHERE sp.siteid = :siteid
+AND sp.itemnum = :itemnum
+''',
+    'assetsAssociatedWithItem': '''
+SELECT sp.assetnum
+	,a.description
+	,ac.new_r_p_n
+	,sp.quantity
+FROM spare_parts sp
+LEFT JOIN assets a ON sp.assetnum = a.assetnum
+	AND sp.siteid = a.siteid
+LEFT JOIN asset_criticalitys ac ON sp.siteid || sp.assetnum = ac.asset
+WHERE sp.siteid = :siteid
+	AND sp.itemnum = :itemnum
+'''
   },
 )
 class MyDatabase extends _$MyDatabase {
@@ -238,9 +412,11 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<int> addSystemCriticalitys(String description) async {
-    final row = await into(systemCriticalitys).insertReturning(
-        SystemCriticalitysCompanion.insert(
-            description: description, line: 'C'));
+    final row = await into(systemCriticalitys)
+        .insertReturning(SystemCriticalitysCompanion.insert(
+      description: description,
+      line: 'C',
+    ));
     return row.id;
   }
 
@@ -248,6 +424,8 @@ class MyDatabase extends _$MyDatabase {
     required List<Setting> setting,
     required List<AssetCriticality> criticality,
     required List<SystemCriticality> system,
+    required List<SparePart> spare,
+    required List<SpareCriticality> spareCrit,
     required String siteid,
   }) async {
     await batch((batch) {
@@ -260,6 +438,12 @@ class MyDatabase extends _$MyDatabase {
     });
     await batch((batch) {
       batch.insertAllOnConflictUpdate(assetCriticalitys, criticality);
+    });
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(spareParts, spare);
+    });
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(spareCriticalitys, spareCrit);
     });
   }
 
@@ -342,16 +526,17 @@ class MyDatabase extends _$MyDatabase {
     return row.first.id;
   }
 
-  Future<int> updateSystemCriticalitys(
-    int key,
-    String description,
-    int safety,
-    int regulatory,
-    int economic,
-    int throughput,
-    int quality,
-    String line,
-  ) async {
+  Future<int> updateSystemCriticalitys({
+    required int key,
+    required String description,
+    required int safety,
+    required int regulatory,
+    required int economic,
+    required int throughput,
+    required int quality,
+    required String line,
+    required double score,
+  }) async {
     final row = await (update(systemCriticalitys)
           ..where((tbl) => tbl.id.equals(key)))
         .writeReturning(SystemCriticalitysCompanion(
@@ -362,21 +547,92 @@ class MyDatabase extends _$MyDatabase {
       throughput: Value(throughput),
       quality: Value(quality),
       line: Value(line),
+      score: Value(sqrt((pow(safety, 2) +
+              pow(regulatory, 2) +
+              pow(economic, 2) +
+              pow(throughput, 2) +
+              pow(quality, 2)) /
+          5)),
     ));
     return row.first.id;
   }
 
-  Future<void> updateAssetCriticality(
-      String assetid, int system, int frequency, int downtime, String type,
-      [bool manual = false]) async {
-    await (into(assetCriticalitys).insertOnConflictUpdate(AssetCriticality(
-      asset: assetid,
-      system: system,
-      type: type,
-      frequency: frequency,
-      downtime: downtime,
-      manual: manual,
+  Future<void> updateSpareCriticality({
+    required String spareid,
+    int? usage,
+    int? leadTime,
+    int? cost,
+    int? newPriority,
+    double? newRPN,
+    bool? manual,
+    double? assetRpn,
+  }) async {
+    await (update(spareCriticalitys)..where((tbl) => tbl.id.equals(spareid)))
+        .writeReturning(SpareCriticalitysCompanion(
+      usage: usage != null ? Value(usage) : const Value.absent(),
+      leadTime: leadTime != null ? Value(leadTime) : const Value.absent(),
+      cost: cost != null ? Value(cost) : const Value.absent(),
+      newPriority:
+          newPriority != null ? Value(newPriority) : const Value.absent(),
+      newRPN: newRPN != null ? Value(newRPN) : const Value.absent(),
+      manual: manual != null ? Value(manual) : const Value.absent(),
+      assetRPN: assetRpn != null ? Value(assetRpn) : const Value.absent(),
+    ));
+  }
+
+  Future<void> updateAssetCriticality({
+    required String assetid,
+    int? system,
+    int? frequency,
+    int? downtime,
+    bool? manual,
+    int? newPriority,
+    double? newRPN,
+  }) async {
+    String type = 'type';
+    await (into(assetCriticalitys)
+        .insertOnConflictUpdate(AssetCriticalitysCompanion(
+      asset: Value(assetid),
+      system: system != null ? Value(system) : const Value.absent(),
+      type: Value(type),
+      frequency: frequency != null ? Value(frequency) : const Value.absent(),
+      downtime: downtime != null ? Value(downtime) : const Value.absent(),
+      manual: manual != null ? Value(manual) : const Value.absent(),
+      newPriority:
+          newPriority != null ? Value(newPriority) : const Value.absent(),
+      newRPN: newRPN != null ? Value(newRPN) : const Value.absent(),
     )));
+  }
+
+  Future<void> removeAssetOverride({
+    required String assetid,
+  }) async {
+    (update(assetCriticalitys)..where((tbl) => tbl.asset.equals(assetid)))
+        .write(AssetCriticalitysCompanion(
+      asset: Value(assetid),
+      manual: const Value(false),
+      newPriority: const Value(null),
+      frequency: const Value(0),
+      downtime: const Value(0),
+    ));
+  }
+
+  Future<AssetCriticalityWithAsset> getAssetCriticality({
+    required String assetid,
+  }) async {
+    var stuff = await (select(assets).join([
+      leftOuterJoin(
+          assetCriticalitys, assetCriticalitys.asset.equalsExp(assets.id)),
+      leftOuterJoin(systemCriticalitys,
+          systemCriticalitys.id.equalsExp(assetCriticalitys.system))
+    ])
+          ..where(assets.id.equals(assetid)))
+        .getSingle();
+    return AssetCriticalityWithAsset(
+      stuff.readTable(assets),
+      stuff.readTableOrNull(assetCriticalitys),
+      stuff.readTableOrNull(systemCriticalitys),
+    );
   }
 
   Future<LoginSetting> getLoginSettings(String key) async {
@@ -402,15 +658,22 @@ class MyDatabase extends _$MyDatabase {
     for (var i = 2; i < sheet.maxRows; i++) {
       var row = sheet.rows[i];
       if (row[1] != null) {
-        inserts.add(SystemCriticalitysCompanion.insert(
-          description: row[1],
-          safety: Value(row[2]),
-          regulatory: Value(row[3]),
-          economic: Value(row[4]),
-          throughput: Value(row[5]),
-          quality: Value(row[6]),
-          line: row[0],
-        ));
+        inserts.add(
+          SystemCriticalitysCompanion.insert(
+              description: row[1],
+              safety: Value(row[2]),
+              regulatory: Value(row[3]),
+              economic: Value(row[4]),
+              throughput: Value(row[5]),
+              quality: Value(row[6]),
+              line: row[0],
+              score: Value(sqrt((pow(row[2], 2) +
+                      pow(row[3], 2) +
+                      pow(row[4], 2) +
+                      pow(row[5], 2) +
+                      pow(row[6], 2)) /
+                  5))),
+        );
       }
     }
     try {
@@ -597,6 +860,19 @@ class MyDatabase extends _$MyDatabase {
     return criticalities;
   }
 
+  Future<List<SparePart>> getSpareParts(String siteid) async {
+    var systems =
+        await (select(spareParts)..where((t) => t.siteid.equals(siteid))).get();
+    return systems;
+  }
+
+  Future<List<SpareCriticality>> getAllSpareCriticality(String siteid) async {
+    var systems = await (select(spareCriticalitys)
+          ..where((t) => t.siteid.equals(siteid)))
+        .get();
+    return systems;
+  }
+
   Future<List<SystemCriticality>> getSystemCriticality(int id) async {
     var systems =
         await (select(systemCriticalitys)..where((t) => t.id.equals(id))).get();
@@ -746,6 +1022,224 @@ class MyDatabase extends _$MyDatabase {
     assetCache[siteid]![assetNum] = assetObj;
 
     return assetObj;
+  }
+
+  Future<bool> checkSpareParts({required String siteid}) async {
+    var result =
+        await (select(spareParts)..where((t) => t.siteid.equals(siteid))).get();
+    if (result.isEmpty) {
+      return false;
+    }
+    var result2 = await (select(spareCriticalitys)
+          ..where((t) => t.siteid.equals(siteid)))
+        .get();
+    if (result2.isEmpty) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> getSparePartsMaximo(
+      {required String siteid, required String env}) async {
+    final url = 'IKO_API_ASSETSPAREPARTS?site=$siteid';
+    final result = await maximoRequest(url, 'api', env);
+    List<SparePartsCompanion> inserts = [];
+    if (!result.containsKey('info')) {
+      return;
+    }
+    for (final sparepart in result['info']) {
+      inserts.add(SparePartsCompanion.insert(
+        itemnum: sparepart['itemnum'],
+        assetnum: sparepart['assetnum'],
+        siteid: sparepart['siteid'],
+        quantity: sparepart['quantity'] * 1.0,
+        sparepartid: Value(sparepart['sparepartid']),
+      ));
+    }
+    try {
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(spareParts, inserts);
+      });
+    } catch (e) {
+      debugPrint('Error inserting System Criticality\n${e.toString()}');
+    }
+  }
+
+  Future<void> getItemDetailsMaximo(
+      {required String siteid, required String env}) async {
+    final url = 'IKO_API_SITE_ITEMS?site=$siteid';
+    final result = await maximoRequest(url, 'api', env);
+    List<ItemsCompanion> inserts = [];
+    if (!result.containsKey('info')) {
+      return;
+    }
+    for (final item in result['info']) {
+      inserts.add(ItemsCompanion.insert(
+        description: item['description'] ?? '',
+        glClass: item['glClass'] ?? '',
+        commodityGroup: item['commodityGroup'] ?? '',
+        status: item['status'] ?? '',
+        itemnum: item['itemnum'],
+      ));
+    }
+    try {
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(items, inserts);
+      });
+    } catch (e) {
+      debugPrint('Error inserting Item Details\n${e.toString()}');
+    }
+  }
+
+  Future<void> getPurchasesMaximo(
+      {required String siteid, required String env}) async {
+    final url = 'IKO_API_ITEMPURCHASES?site=$siteid';
+    final result = await maximoRequest(url, 'api', env);
+    List<PurchasesCompanion> inserts = [];
+    if (!result.containsKey('info')) {
+      return;
+    }
+    for (final purchase in result['info']) {
+      final enterdate = DateTime.parse(purchase['enterdate']);
+      final endDate = DateTime.tryParse(purchase['transdate'] ?? '');
+      int leadTime = 0;
+      if (endDate != null) {
+        leadTime = endDate.difference(enterdate).inDays;
+      }
+      bool status = purchase['receiptscomplete'] == '1' ? true : false;
+      if (leadTime == 0) {
+        status = false;
+      }
+      if (purchase['currencyunitcost'] == null) {
+        status = false;
+      }
+      inserts.add(PurchasesCompanion.insert(
+        prnum: purchase['prnum'],
+        prDescription: '',
+        poDescription: '',
+        ponum: Value(purchase['ponum']),
+        startDate: purchase['enterdate'],
+        siteid: purchase['siteid'],
+        endDate: Value(purchase['transdate']),
+        leadTime: leadTime.toDouble(),
+        itemnum: purchase['itemnum'],
+        unitCost: (purchase['currencyunitcost'] ?? 0) * 1.0,
+        poStatus: status,
+        prlineid: Value(purchase['prlineid']),
+      ));
+    }
+    try {
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(purchases, inserts);
+      });
+    } catch (e) {
+      debugPrint('Error inserting System Criticality\n${e.toString()}');
+    }
+  }
+
+  Future<List<SpareCriticality>> updateSparePartCriticality(
+      {required String siteid, required String itemnum}) async {
+    final result =
+        await spareCriticalityAutoCalculationItem(siteid, itemnum).getSingle();
+    final temp = [
+      ratingFromValue(result.quantity, usageRating),
+      ratingFromValue(result.leadTime, leadTimeRating),
+      ratingFromValue(result.unitCost, costRating),
+    ];
+    return await (update(spareCriticalitys)
+          ..where((tbl) => tbl.id.equals('$siteid$itemnum')))
+        .writeReturning(SpareCriticalitysCompanion(
+      id: Value('$siteid$itemnum'),
+      newPriority: const Value(0),
+      usage: Value(temp[0]),
+      leadTime: Value(temp[1]),
+      cost: Value(temp[2]),
+      newRPN: Value((result.assetRPN ?? 0) * temp[0] * temp[1] * temp[2]),
+      assetRPN: Value(result.assetRPN ?? 0),
+    ));
+  }
+
+  Future<void> computeSparePartCriticality({required String siteid}) async {
+    final results = await spareCriticalityAutoCalculation(siteid).get();
+    final skips = await (select(spareCriticalitys)
+          ..where((tbl) =>
+              tbl.manual.equals(true) | tbl.newPriority.isBiggerThanValue(0)))
+        .get();
+    final skip = skips.map((e) {
+      return e.id;
+    }).toList();
+    List<SpareCriticalitysCompanion> results2 = [];
+    for (var e in results) {
+      final temp = [
+        ratingFromValue(e.quantity, usageRating),
+        ratingFromValue(e.leadTime, leadTimeRating),
+        ratingFromValue(e.unitCost, costRating),
+      ];
+      if (!skip.contains('$siteid${e.itemnum}')) {
+        results2.add(SpareCriticalitysCompanion.insert(
+          id: '$siteid${e.itemnum}',
+          usage: temp[0],
+          leadTime: temp[1],
+          cost: temp[2],
+          assetRPN: e.assetRPN ?? 0,
+          manual: false,
+          newPriority: 0,
+          newRPN: (e.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
+          siteid: siteid,
+          itemnum: e.itemnum,
+        ));
+      }
+    }
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(spareCriticalitys, results2);
+    });
+    return;
+  }
+
+  Future<List<SpareCriticalityWithItem>> getSpareCriticalities(
+      {required String siteid}) async {
+    var criticalities = await (select(spareCriticalitys).join([
+      leftOuterJoin(items, items.itemnum.equalsExp(spareCriticalitys.itemnum)),
+    ])
+          ..where(spareCriticalitys.siteid.equals(siteid)))
+        .get();
+    return criticalities.map((row) {
+      return SpareCriticalityWithItem(
+        row.readTable(spareCriticalitys),
+        row.readTableOrNull(items),
+      );
+    }).toList();
+  }
+
+  Future<SpareCriticality> getSpareCriticality({required String id}) async {
+    var criticalities = await (select(spareCriticalitys)
+          ..where((tbl) => tbl.id.equals(id)))
+        .getSingle();
+    return criticalities;
+  }
+
+  Future<void> removeSparePartOverride({
+    required String spareid,
+  }) async {
+    (update(spareCriticalitys)..where((tbl) => tbl.id.equals(spareid)))
+        .write(SpareCriticalitysCompanion(
+      id: Value(spareid),
+      manual: const Value(false),
+      newPriority: const Value(0),
+      usage: const Value(0),
+      cost: const Value(0),
+      leadTime: const Value(0),
+      newRPN: const Value(0),
+    ));
+  }
+
+  Future<List<Purchase>> getItemPurchases(
+      {required String itemnum, required String siteId}) async {
+    var purchase = await (select(purchases)
+          ..where((tbl) => tbl.itemnum.equals(itemnum))
+          ..where((t) => t.siteid.equals(siteId)))
+        .get();
+    return purchase;
   }
 }
 

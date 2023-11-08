@@ -3,13 +3,13 @@ import 'dart:math';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:iko_reliability_flutter/admin/consts.dart';
+import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
-import '../admin/db_drift.dart';
+import '../bin/db_drift.dart';
 import '../bin/drawer.dart';
 import '../bin/end_drawer.dart';
 import '../main.dart';
@@ -285,23 +285,8 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
   }
 
   Future<void> addRow() async {
-    // final newRows = stateManager.getNewRows();
-    final id = await database!.addSystemCriticalitys('New!');
-    // newRows.first.cells['id'] = PlutoCell(value: id);
-    // //cells with ID -1 are new,
-    // //once they are added to DB they are assigned a proper ID
-    // //TODO read only scores when new
-    // stateManager.appendRows(newRows);
-    // stateManager.setCurrentCell(
-    //   newRows.first.cells.entries.first.value,
-    //   stateManager.refRows.length - 1,
-    // );
-    // stateManager.moveScrollByRow(
-    //   PlutoMoveDirection.down,
-    //   stateManager.refRows.length - 2,
-    // );
-
-    // stateManager.setKeepFocus(true);
+    await database!.addSystemCriticalitys('New!');
+    // whole table gets reloaded when row is added no extra work needed
   }
 
   void deleteRow() async {
@@ -363,13 +348,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                     'economic': PlutoCell(value: row.economic),
                     'throughput': PlutoCell(value: row.throughput),
                     'quality': PlutoCell(value: row.quality),
-                    'score': PlutoCell(
-                        value: sqrt((row.safety * row.safety +
-                                row.regulatory * row.regulatory +
-                                row.economic * row.economic +
-                                row.throughput * row.throughput +
-                                row.quality * row.quality) /
-                            5)),
+                    'score': PlutoCell(value: row.score),
                   }));
                   stateManager.removeAllRows();
                   stateManager.appendRows(rows);
@@ -462,14 +441,15 @@ Future<int> updateSystem(PlutoRow row) async {
           .addSystemCriticalitys(row.cells['description']!.value);
     } else {
       id = await database!.updateSystemCriticalitys(
-        row.cells['id']!.value,
-        row.cells['description']!.value,
-        row.cells['safety']!.value,
-        row.cells['regulatory']!.value,
-        row.cells['economic']!.value,
-        row.cells['throughput']!.value,
-        row.cells['quality']!.value,
-        row.cells['line']!.value,
+        key: row.cells['id']!.value,
+        description: row.cells['description']!.value,
+        safety: row.cells['safety']!.value,
+        regulatory: row.cells['regulatory']!.value,
+        economic: row.cells['economic']!.value,
+        throughput: row.cells['throughput']!.value,
+        quality: row.cells['quality']!.value,
+        line: row.cells['line']!.value,
+        score: row.cells['score']!.value,
       );
     }
   }
