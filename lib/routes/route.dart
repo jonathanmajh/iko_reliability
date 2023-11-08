@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 
+import '../admin/timesheet.dart';
 import '../creation/asset.dart';
 import '../admin/contractor.dart';
 import '../admin/pm_check.dart';
@@ -30,5 +31,6 @@ class AppRouter extends _$AppRouter {
         AutoRoute(path: "/pm/check", page: PmCheckRoute.page),
         AutoRoute(path: "/pm/update-meter", page: PmMeterUpdateRoute.page),
         AutoRoute(path: '/criticality/spare', page: SpareCriticalityRoute.page)
+        AutoRoute(path: "/timesheet", page: TimesheetRoute.page),
       ];
 }
