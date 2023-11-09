@@ -13,7 +13,7 @@ import 'template_notifier.dart';
 import 'upload_maximo.dart';
 
 class PMDetailView extends StatefulWidget {
-  const PMDetailView({Key? key}) : super(key: key);
+  const PMDetailView({super.key});
 
   @override
   State<PMDetailView> createState() => _PMDetailViewState();
@@ -309,7 +309,7 @@ const status = {
 };
 
 class PMDetails extends StatefulWidget {
-  const PMDetails({Key? key}) : super(key: key);
+  const PMDetails({super.key});
 
   @override
   State<PMDetails> createState() => _PMDetailsState();

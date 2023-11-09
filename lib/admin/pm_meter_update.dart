@@ -9,7 +9,7 @@ import 'pm_meter_update_functions.dart';
 
 @RoutePage()
 class PmMeterUpdatePage extends StatefulWidget {
-  const PmMeterUpdatePage({Key? key}) : super(key: key);
+  const PmMeterUpdatePage({super.key});
 
   @override
   State<PmMeterUpdatePage> createState() => _PmMeterUpdatePageState();

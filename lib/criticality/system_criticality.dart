@@ -16,7 +16,7 @@ import '../main.dart';
 
 @RoutePage()
 class SystemCriticalityPage extends StatefulWidget {
-  const SystemCriticalityPage({Key? key}) : super(key: key);
+  const SystemCriticalityPage({super.key});
 
   @override
   State<SystemCriticalityPage> createState() => _SystemCriticalityPageState();

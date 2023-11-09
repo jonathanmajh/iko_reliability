@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 @RoutePage()
 class ContractorPage extends StatelessWidget {
-  const ContractorPage({Key? key}) : super(key: key);
+  const ContractorPage({super.key});
 
   @override
   Widget build(BuildContext context) {

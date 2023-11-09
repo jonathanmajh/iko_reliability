@@ -10,6 +10,9 @@ class SelectedSiteNotifier extends ChangeNotifier {
 
   void setSite(String siteid) {
     selectedSite = siteid;
+    database!.setSettings(
+      newSetting: Setting(key: 'selectedSite', value: selectedSite),
+    );
     notifyListeners();
   }
 }

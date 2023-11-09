@@ -21,7 +21,7 @@ import 'functions.dart';
 
 @RoutePage()
 class AssetCriticalityPage extends StatefulWidget {
-  const AssetCriticalityPage({Key? key}) : super(key: key);
+  const AssetCriticalityPage({super.key});
 
   @override
   State<AssetCriticalityPage> createState() => _AssetCriticalityPageState();

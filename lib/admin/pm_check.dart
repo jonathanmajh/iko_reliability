@@ -29,7 +29,7 @@ class NextPMIntent extends Intent {
 
 @RoutePage()
 class PmCheckPage extends StatefulWidget {
-  const PmCheckPage({Key? key}) : super(key: key);
+  const PmCheckPage({super.key});
 
   @override
   State<PmCheckPage> createState() => _PmCheckPageState();

@@ -28,7 +28,7 @@ void toast(context, msg, [int? time]) {
 
 @RoutePage()
 class AssetPage extends StatefulWidget {
-  const AssetPage({Key? key}) : super(key: key);
+  const AssetPage({super.key});
 
   @override
   State<AssetPage> createState() => _AssetPageState();
@@ -140,7 +140,7 @@ class _AssetPageState extends State<AssetPage>
 }
 
 class AssetCreationGrid extends StatefulWidget {
-  const AssetCreationGrid({Key? key}) : super(key: key);
+  const AssetCreationGrid({super.key});
 
   @override
   State<AssetCreationGrid> createState() => _AssetCreationGridState();
@@ -350,7 +350,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
 }
 
 class AssetCreationDialog extends StatefulWidget {
-  const AssetCreationDialog({Key? key}) : super(key: key);
+  const AssetCreationDialog({super.key});
 
   @override
   State<AssetCreationDialog> createState() => _AssetCreationDialogState();
@@ -619,7 +619,7 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
 }
 
 class AssetUploadGrid extends StatefulWidget {
-  const AssetUploadGrid({Key? key}) : super(key: key);
+  const AssetUploadGrid({super.key});
 
   @override
   State<AssetUploadGrid> createState() => _AssetUploadGridState();
@@ -875,7 +875,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
 }
 
 class AssetUploadDialog extends StatefulWidget {
-  const AssetUploadDialog({Key? key}) : super(key: key);
+  const AssetUploadDialog({super.key});
 
   @override
   State<AssetUploadDialog> createState() => _AssetUploadDialogState();
@@ -919,8 +919,7 @@ class _AssetUploadDialogState extends State<AssetUploadDialog> {
 }
 
 class AssetErrorMessageDialog extends StatefulWidget {
-  const AssetErrorMessageDialog({Key? key, required this.assetNum})
-      : super(key: key);
+  const AssetErrorMessageDialog({super.key, required this.assetNum});
 
   final String assetNum;
 

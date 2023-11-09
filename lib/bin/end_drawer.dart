@@ -18,7 +18,7 @@ import 'db_drift.dart';
 
 ///Widget for the right-side drawer of the app
 class EndDrawer extends StatefulWidget {
-  const EndDrawer({Key? key}) : super(key: key);
+  const EndDrawer({super.key});
 
   @override
   State<EndDrawer> createState() => _EndDrawerState();

@@ -63,7 +63,7 @@ class MaximoServerNotifier extends ChangeNotifier {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp(this.settingsNotifier, {Key? key}) : super(key: key);
+  MyApp(this.settingsNotifier, {super.key});
   final _appRouter = AppRouter(navigatorKey: navigatorKey);
   final SettingsNotifier settingsNotifier;
   // This widget is the root of your application.
@@ -119,7 +119,7 @@ class MyApp extends StatelessWidget {
 ///Homepage widget (Stateful)
 @RoutePage()
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -182,11 +182,18 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     SettingsNotifier settings = Provider.of<SettingsNotifier>(context);
     hideUpdateWindow = settings.getSetting(ApplicationSetting.updateWindowOff);
-
     return Scaffold(
       //Update prompt
       onDrawerChanged: (isOpened) async {
         final update = await checkUpdate();
+        final settings2 = await database!.getSettings();
+        final selectedSite = settings2
+            .firstWhere(
+              (element) => element.key == 'selectedSite',
+              orElse: () => const Setting(key: '', value: ''),
+            )
+            .value;
+        context.read<SelectedSiteNotifier>().selectedSite = selectedSite;
         if (!hideUpdateWindow && update) {
           showDataAlert(
               ['Update available'],
