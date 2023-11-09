@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:async';
+import 'package:intl/intl.dart';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -10,8 +12,19 @@ import 'package:path/path.dart' as p;
 Future<File> get databaseFile async {
   // We use `path_provider` to find a suitable path to store our data in.
   final appDir = await getApplicationDocumentsDirectory();
-  final dbPath = p.join(appDir.path, 'ReliabilityApp', 'iko_reliability.db');
-  return File(dbPath);
+  final dbPath = p.join(appDir.path, 'ReliabilityApp', 'iko_reliability');
+  // auto-backup function, runs every 10 minutes
+  Timer.periodic(const Duration(minutes: 5), (arg) async {
+    (File('$dbPath.db')).copy(
+        '$dbPath-${DateFormat('yyyyMMddHHmmSS').format(DateTime.now())}.db');
+    // remove backups past 100
+    final myDir = Directory(p.join(appDir.path, 'ReliabilityApp'));
+    final files = myDir.listSync();
+    if (files.length > 101) {
+      files[1].delete();
+    }
+  });
+  return File('$dbPath.db');
 }
 
 /// Obtains a database connection for running drift in a Dart VM.

@@ -379,7 +379,7 @@ WHERE sp.siteid = :siteid
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(impl.connect());
 
-  MyDatabase.forTesting(DatabaseConnection connection) : super(connection);
+  MyDatabase.forTesting(DatabaseConnection super.connection);
   // you should bump this number whenever you change or add a table definition.
   @override
   int get schemaVersion => 1;
