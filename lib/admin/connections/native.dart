@@ -10,7 +10,7 @@ import 'package:path/path.dart' as p;
 Future<File> get databaseFile async {
   // We use `path_provider` to find a suitable path to store our data in.
   final appDir = await getApplicationDocumentsDirectory();
-  final dbPath = p.join(appDir.path, 'iko_reliability.db');
+  final dbPath = p.join(appDir.path, 'ReliabilityApp', 'iko_reliability.db');
   return File(dbPath);
 }
 
