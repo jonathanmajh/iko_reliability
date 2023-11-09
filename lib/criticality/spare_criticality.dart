@@ -936,6 +936,7 @@ class _SpareCriticalityConfigState extends State<SpareCriticalityConfig> {
   TextEditingController percentAController = TextEditingController();
   TextEditingController percentBController = TextEditingController();
   TextEditingController percentCController = TextEditingController();
+  TextEditingController sumController = TextEditingController();
 
   @override
   void dispose() {
@@ -952,30 +953,52 @@ class _SpareCriticalityConfigState extends State<SpareCriticalityConfig> {
         percentAController.text = notifier.percentA.toString();
         percentBController.text = notifier.percentB.toString();
         percentCController.text = notifier.percentC.toString();
+        sumController.text =
+            (notifier.percentA + notifier.percentB + notifier.percentC)
+                .toString();
+        final selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
         return Column(children: [
           TextField(
             controller: percentAController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'A%'),
-            onChanged: (value) {
-              notifier.setPercentages(percentA: int.parse(value));
+            onChanged: (value) async {
+              await notifier.setPercentages(
+                  percentA: int.parse(value), selectedSite: selectedSite);
+              sumController.text =
+                  (notifier.percentA + notifier.percentB + notifier.percentC)
+                      .toString();
             },
           ),
           TextField(
             controller: percentBController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'B%'),
-            onChanged: (value) {
-              notifier.setPercentages(percentB: int.parse(value));
+            onChanged: (value) async {
+              await notifier.setPercentages(
+                  percentB: int.parse(value), selectedSite: selectedSite);
+              sumController.text =
+                  (notifier.percentA + notifier.percentB + notifier.percentC)
+                      .toString();
             },
           ),
           TextField(
             controller: percentCController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'C%'),
-            onChanged: (value) {
-              notifier.setPercentages(percentC: int.parse(value));
+            onChanged: (value) async {
+              await notifier.setPercentages(
+                  percentC: int.parse(value), selectedSite: selectedSite);
+              sumController.text =
+                  (notifier.percentA + notifier.percentB + notifier.percentC)
+                      .toString();
             },
+          ),
+          TextField(
+            controller: sumController,
+            decoration: const InputDecoration(
+                labelText: 'Ensure Percentages add to 100%'),
+            readOnly: true,
           ),
         ]);
       },

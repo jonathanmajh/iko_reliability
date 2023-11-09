@@ -50,16 +50,31 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
 
   double frequencyPeriodYears = 10;
 
-  void setPercentages(
-      {int percentA = -1, int percentB = -1, int percentC = -1}) {
+  Future<void> setPercentages(
+      {int percentA = -1,
+      int percentB = -1,
+      int percentC = -1,
+      required String selectedSite}) async {
     if (percentA > 0) {
       this.percentA = percentA;
+      await database!.setSettings(
+        newSetting:
+            Setting(key: '$selectedSite-percentA', value: percentA.toString()),
+      );
     }
     if (percentB > 0) {
       this.percentB = percentB;
+      await database!.setSettings(
+        newSetting:
+            Setting(key: '$selectedSite-percentB', value: percentA.toString()),
+      );
     }
     if (percentC > 0) {
       this.percentC = percentC;
+      await database!.setSettings(
+        newSetting:
+            Setting(key: '$selectedSite-percentC', value: percentA.toString()),
+      );
     }
   }
 
