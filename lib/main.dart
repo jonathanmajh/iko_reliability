@@ -96,6 +96,7 @@ class MyApp extends StatelessWidget {
         ],
         child: Builder(
           builder: (context) {
+            loadAppSettings(context);
             return MaterialApp.router(
               routerConfig: _appRouter.config(),
               title: 'IKO Flutter Reliability',
@@ -113,6 +114,73 @@ class MyApp extends StatelessWidget {
             );
           },
         ));
+  }
+}
+
+Future<void> loadAppSettings(BuildContext context) async {
+  final settings = await database!.getSettings();
+  final selectedSite = settings
+      .firstWhere(
+        (element) => element.key == 'selectedSite',
+        orElse: () => const Setting(key: '', value: ''),
+      )
+      .value;
+  context.read<SelectedSiteNotifier>().selectedSite = selectedSite;
+  final darkMode = bool.parse(settings
+      .firstWhere(
+        (element) => element.key == 'darkMode',
+        orElse: () => const Setting(key: '', value: 'false'),
+      )
+      .value);
+  context.read<ThemeManager>().toggleTheme(darkMode);
+  final settings2 = Provider.of<SettingsNotifier>(context);
+  bool hideUpdateWindow =
+      settings2.getSetting(ApplicationSetting.updateWindowOff);
+
+  if (!hideUpdateWindow) {
+    final update = await checkUpdate();
+    if (update) {
+      showDataAlert(
+          ['Update available'],
+          'Update Checker',
+          [
+            StatefulBuilder(builder: (context, setState) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      launchUrl(Uri.parse(
+                          'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
+                    },
+                    child: const Text('Download Update'),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Checkbox(
+                          value: hideUpdateWindow,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              settings2.changeSettings(
+                                  {ApplicationSetting.updateWindowOff: value!},
+                                  notify: false);
+                              hideUpdateWindow = settings2.getSetting(
+                                  ApplicationSetting.updateWindowOff);
+                            });
+                          }),
+                      const Text(
+                        'Don\'t show again',
+                        textAlign: TextAlign.left,
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            }),
+          ]);
+    }
   }
 }
 
@@ -180,63 +248,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    SettingsNotifier settings = Provider.of<SettingsNotifier>(context);
-    hideUpdateWindow = settings.getSetting(ApplicationSetting.updateWindowOff);
     return Scaffold(
       //Update prompt
-      onDrawerChanged: (isOpened) async {
-        final update = await checkUpdate();
-        final settings2 = await database!.getSettings();
-        final selectedSite = settings2
-            .firstWhere(
-              (element) => element.key == 'selectedSite',
-              orElse: () => const Setting(key: '', value: ''),
-            )
-            .value;
-        context.read<SelectedSiteNotifier>().selectedSite = selectedSite;
-        if (!hideUpdateWindow && update) {
-          showDataAlert(
-              ['Update available'],
-              'Update Checker',
-              [
-                StatefulBuilder(builder: (context, setState) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          launchUrl(Uri.parse(
-                              'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
-                        },
-                        child: const Text('Download Update'),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Checkbox(
-                              value: hideUpdateWindow,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  settings.changeSettings({
-                                    ApplicationSetting.updateWindowOff: value!
-                                  }, notify: false);
-                                  hideUpdateWindow = settings.getSetting(
-                                      ApplicationSetting.updateWindowOff);
-                                });
-                              }),
-                          const Text(
-                            'Don\'t show again',
-                            textAlign: TextAlign.left,
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                }),
-              ]);
-        }
-      },
       appBar: AppBar(
         title: const Text("IKO Reliability Maximo Tool (beta)"),
       ),
