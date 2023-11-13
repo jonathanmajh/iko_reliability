@@ -229,61 +229,42 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         field: 'site',
         type: PlutoColumnType.text(),
         readOnly: true,
+        hide: true,
       ),
+      PlutoColumn(
+          width: 75,
+          title: 'Delete?',
+          field: 'delete',
+          type: PlutoColumnType.text(),
+          renderer: (rendererContext) {
+            return Row(
+              children: [
+                SystemDeleteIcon(rendererContext: rendererContext),
+              ],
+            );
+          }),
     ]);
   }
 
-  void _updateFab([bool show = false]) {
+  void _updateFab() {
     // populate floating action button
     List<Widget> temp = [];
-    if (show) {
-      temp = [
-        Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-            child: FloatingActionButton.extended(
-              heroTag: UniqueKey(),
-              onPressed: () async {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return const NewSystemForm();
-                    });
-                _updateFab();
-              },
-              label: const Text('Add Row'),
-              icon: const Icon(Icons.playlist_add),
-            )),
-        Padding(
+    temp = [
+      Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-          child: FloatingActionButton.extended(
+          child: FloatingActionButton(
             heroTag: UniqueKey(),
             onPressed: () async {
-              deleteRow();
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const NewSystemForm();
+                  });
               _updateFab();
             },
-            label: const Text('Delete Row'),
-            icon: const Icon(Icons.playlist_remove),
-          ),
-        ),
-        FloatingActionButton(
-          heroTag: UniqueKey(),
-          onPressed: () {
-            _updateFab();
-          },
-          child: const Icon(Icons.close),
-        ),
-      ];
-    } else {
-      temp.add(
-        FloatingActionButton(
-          heroTag: UniqueKey(),
-          onPressed: () {
-            _updateFab(true);
-          },
-          child: const Icon(Icons.add),
-        ),
-      );
-    }
+            child: const Icon(Icons.add),
+          )),
+    ];
 
     setState(() {
       fabList = temp;
@@ -355,11 +336,10 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                   'throughput': PlutoCell(value: row.throughput),
                   'quality': PlutoCell(value: row.quality),
                   'score': PlutoCell(value: row.score),
+                  'delete': PlutoCell(value: ''),
                 }));
                 stateManager.removeAllRows();
                 stateManager.appendRows(rows);
-                context.read<SystemCriticalityNotifier>().stateManager =
-                    stateManager;
               }
             }
           } else if (snapshot.hasError) {
@@ -374,6 +354,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
               'throughput': PlutoCell(value: 0),
               'quality': PlutoCell(value: 0),
               'score': PlutoCell(value: 0),
+              'delete': PlutoCell(value: ''),
             }));
           } else {
             rows.add(PlutoRow(cells: {
@@ -387,6 +368,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
               'throughput': PlutoCell(value: 0),
               'quality': PlutoCell(value: 0),
               'score': PlutoCell(value: 0),
+              'delete': PlutoCell(value: ''),
             }));
           }
           return PlutoGrid(
@@ -427,8 +409,9 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             },
             onLoaded: (PlutoGridOnLoadedEvent event) {
               event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
-
               stateManager = event.stateManager;
+              context.read<SystemCriticalityNotifier>().stateManager =
+                  stateManager;
             },
           );
         },
@@ -599,5 +582,32 @@ class _NewSystemFormState extends State<NewSystemForm> {
             ),
           ),
         ));
+  }
+}
+
+class SystemDeleteIcon extends StatefulWidget {
+  const SystemDeleteIcon({super.key, required this.rendererContext});
+
+  final PlutoColumnRendererContext rendererContext;
+
+  @override
+  State<SystemDeleteIcon> createState() => _SystemDeleteIconState();
+}
+
+class _SystemDeleteIconState extends State<SystemDeleteIcon> {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(
+        Icons.delete,
+        color: Colors.red,
+      ),
+      onPressed: () async {
+        final id = widget.rendererContext.row.cells['id']!.value;
+        widget.rendererContext.stateManager
+            .removeRows([widget.rendererContext.row]);
+        await database!.deleteSystemCriticalitys(id);
+      },
+    );
   }
 }
