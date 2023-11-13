@@ -433,7 +433,7 @@ class _PMDetailsState extends State<PMDetails> {
                             suffixIcon: IconButton(
                               onPressed: () {
                                 templateNotifier.setRouteName(
-                                  pmNameFieldController.text,
+                                  routeNameFieldController.text,
                                   selected.selectedFile!,
                                   selected.selectedTemplate!,
                                   // hasRouteCode,
@@ -520,10 +520,20 @@ class _PMDetailsState extends State<PMDetails> {
                               if (suggestNameFieldController.text != '') {
                                 pmNameFieldController.text =
                                     suggestNameFieldController.text;
+                                if (routeNameFieldController.text.isNotEmpty) {
+                                  routeNameFieldController.text =
+                                      suggestNameFieldController.text;
+                                }
                                 templateNotifier.setPMName(
                                     pmNameFieldController.text,
                                     selected.selectedFile!,
                                     selected.selectedTemplate!);
+                                templateNotifier.setRouteName(
+                                  routeNameFieldController.text,
+                                  selected.selectedFile!,
+                                  selected.selectedTemplate!,
+                                  // hasRouteCode,
+                                );
                               }
                             },
                             icon: const Icon(Icons.eject),
