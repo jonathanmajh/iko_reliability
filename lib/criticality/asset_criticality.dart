@@ -222,40 +222,37 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                           rendererContext.row.cells['assetnum']!.value;
                       //refresh children assets
                       Set<String> childAssetnums = getChildAssetnums(assetnum);
+                      // update child assets
                       for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
                         String tempAssetnum = row.cells['assetnum']!.value;
                         if (childAssetnums.contains(tempAssetnum)) {
                           PlutoCell? tempCellRef = row.cells['system'];
-                          if (tempCellRef != null) {
+                          // only update child assets if they don't already have a system
+                          if (tempCellRef!.value == 0) {
+                            debugPrint('caller A');
                             await database!.updateAssetCriticality(
                               assetid: row.cells['id']!.value,
                               downtime: row.cells['downtime']!.value,
                               system: newValue,
                               frequency: row.cells['frequency']!.value,
                             );
-                          }
-                        }
-                        await database!.updateAssetCriticality(
-                          assetid: rendererContext.row.cells['id']!.value,
-                          downtime:
-                              rendererContext.row.cells['downtime']!.value,
-                          system: newValue,
-                          frequency:
-                              rendererContext.row.cells['frequency']!.value,
-                        );
-                      }
-                      setState(() {
-                        for (PlutoRow row
-                            in stateManager.iterateAllRowAndGroup) {
-                          String tempAssetnum = row.cells['assetnum']!.value;
-                          if (childAssetnums.contains(tempAssetnum)) {
-                            PlutoCell? tempCellRef = row.cells['system'];
-                            if (tempCellRef != null) {
+                            setState(() {
                               stateManager.changeCellValue(
                                   tempCellRef, newValue);
-                            }
+                            });
                           }
                         }
+                      }
+                      // update parent asset
+                      debugPrint('caller B');
+                      await database!.updateAssetCriticality(
+                        assetid: rendererContext.row.cells['id']!.value,
+                        downtime: rendererContext.row.cells['downtime']!.value,
+                        system: newValue,
+                        frequency:
+                            rendererContext.row.cells['frequency']!.value,
+                      );
+                      setState(() {
                         stateManager.changeCellValue(
                             rendererContext.cell, newValue);
                       });
@@ -280,6 +277,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             elevation: 16,
             isExpanded: true,
             onChanged: (int? value) async {
+              debugPrint('caller C');
               await database!.updateAssetCriticality(
                 assetid: rendererContext.row.cells['id']!.value,
                 frequency: value,
@@ -319,6 +317,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             elevation: 16,
             isExpanded: true,
             onChanged: (int? value) async {
+              debugPrint('caller D');
               await database!.updateAssetCriticality(
                 assetid: rendererContext.row.cells['id']!.value,
                 downtime: value,
@@ -367,6 +366,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             elevation: 16,
             isExpanded: true,
             onChanged: (int? value) async {
+              debugPrint('caller E');
               await database!.updateAssetCriticality(
                 assetid: rendererContext.row.cells['id']!.value,
                 newPriority: value,
@@ -579,6 +579,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     for (var row in stateManager.iterateRowAndGroup) {
       if (row.cells['assetnum']!.value == assetnum) {
         // update values in db
+        debugPrint('caller F');
         await database!.updateAssetCriticality(
           assetid: row.cells['id']!.value,
           frequency: ratingFromValue(dtEvents, frequencyRating),
@@ -767,6 +768,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 // Create an new ACWA object for rpn calculation
                 try {
                   double newRpn = rpnFunc(assetCrit) ?? -1;
+                  debugPrint('caller C');
                   await database!.updateAssetCriticality(
                     assetid: event.row.cells['id']!.value,
                     downtime: event.row.cells['downtime']!.value,

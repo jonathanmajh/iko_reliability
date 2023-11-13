@@ -590,6 +590,7 @@ class MyDatabase extends _$MyDatabase {
     int? newPriority,
     double? newRPN,
   }) async {
+    debugPrint('updating asset criticality');
     String type = 'type';
     await (into(assetCriticalitys)
         .insertOnConflictUpdate(AssetCriticalitysCompanion(
