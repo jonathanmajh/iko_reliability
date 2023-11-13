@@ -411,13 +411,14 @@ class MyDatabase extends _$MyDatabase {
     ));
   }
 
-  Future<int> addSystemCriticalitys(String description) async {
+  Future<SystemCriticality> addSystemCriticalitys(
+      String description, String line) async {
     final row = await into(systemCriticalitys)
         .insertReturning(SystemCriticalitysCompanion.insert(
       description: description,
-      line: 'C',
+      line: line,
     ));
-    return row.id;
+    return row;
   }
 
   Future<void> importCriticality({

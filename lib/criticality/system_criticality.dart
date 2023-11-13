@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
+import 'package:iko_reliability_flutter/criticality/system_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -242,7 +243,11 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             child: FloatingActionButton.extended(
               heroTag: UniqueKey(),
               onPressed: () async {
-                NewSystemForm();
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return const NewSystemForm();
+                    });
                 _updateFab();
               },
               label: const Text('Add Row'),
@@ -285,10 +290,10 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     });
   }
 
-  Future<void> addRow() async {
-    await database!.addSystemCriticalitys('New!');
-    // whole table gets reloaded when row is added no extra work needed
-  }
+  // Future<void> addRow() async {
+  //   await database!.addSystemCriticalitys('New!');
+  //   // whole table gets reloaded when row is added no extra work needed
+  // }
 
   void deleteRow() async {
     if (stateManager.currentRow != null) {
@@ -337,23 +342,24 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           List<PlutoRow> rows = [];
           if (snapshot.hasData) {
             if (snapshot.data!.isNotEmpty) {
-              if (loadedSite != snapshot.data?.first.siteid) {
-                for (var row in snapshot.data!) {
-                  rows.add(PlutoRow(cells: {
-                    'id': PlutoCell(value: row.id),
-                    'line': PlutoCell(value: row.line),
-                    'site': PlutoCell(value: row.siteid ?? ''),
-                    'description': PlutoCell(value: row.description),
-                    'safety': PlutoCell(value: row.safety),
-                    'regulatory': PlutoCell(value: row.regulatory),
-                    'economic': PlutoCell(value: row.economic),
-                    'throughput': PlutoCell(value: row.throughput),
-                    'quality': PlutoCell(value: row.quality),
-                    'score': PlutoCell(value: row.score),
-                  }));
-                  stateManager.removeAllRows();
-                  stateManager.appendRows(rows);
-                }
+              debugPrint('Reloading Grid');
+              for (var row in snapshot.data!) {
+                rows.add(PlutoRow(cells: {
+                  'id': PlutoCell(value: row.id),
+                  'line': PlutoCell(value: row.line),
+                  'site': PlutoCell(value: row.siteid ?? ''),
+                  'description': PlutoCell(value: row.description),
+                  'safety': PlutoCell(value: row.safety),
+                  'regulatory': PlutoCell(value: row.regulatory),
+                  'economic': PlutoCell(value: row.economic),
+                  'throughput': PlutoCell(value: row.throughput),
+                  'quality': PlutoCell(value: row.quality),
+                  'score': PlutoCell(value: row.score),
+                }));
+                stateManager.removeAllRows();
+                stateManager.appendRows(rows);
+                context.read<SystemCriticalityNotifier>().stateManager =
+                    stateManager;
               }
             }
           } else if (snapshot.hasError) {
@@ -438,8 +444,9 @@ Future<int> updateSystem(PlutoRow row) async {
     //this shouldnt happen
   } else {
     if (row.cells['id']!.value == -1) {
-      id = await database!
-          .addSystemCriticalitys(row.cells['description']!.value);
+      id = (await database!.addSystemCriticalitys(
+              row.cells['description']!.value, row.cells['line']!.value))
+          .id;
     } else {
       id = await database!.updateSystemCriticalitys(
         key: row.cells['id']!.value,
@@ -514,63 +521,83 @@ class NewSystemForm extends StatefulWidget {
 
 class _NewSystemFormState extends State<NewSystemForm> {
   final _formKey = GlobalKey<FormState>();
+  String selectedSystem = 'C';
+  final descriptionTextController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          DropdownSearch<String>(
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please select a Production Line';
-              }
-              return null;
-            },
-            selectedItem: 'C',
-            popupProps: const PopupProps.menu(
-              showSearchBox: true,
-              showSelectedItems: true,
-              searchFieldProps: TextFieldProps(
-                autofocus: true,
-              ),
-            ),
-            items: productionLines.keys.toList(),
-            dropdownDecoratorProps: const DropDownDecoratorProps(
-              dropdownSearchDecoration: InputDecoration(
-                labelText: "Production Line",
-              ),
+    return AlertDialog(
+        title: const Text('Add New System'),
+        content: SizedBox(
+          height: 400,
+          width: 400,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField(
+                  decoration:
+                      const InputDecoration(labelText: 'Production Line'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a Production Line';
+                    }
+                    return null;
+                  },
+                  value: selectedSystem,
+                  items: productionLines.keys
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(productionLines[value] ?? ''));
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedSystem = newValue!;
+                    });
+                  },
+                ),
+                TextFormField(
+                  controller: descriptionTextController,
+                  decoration: const InputDecoration(labelText: 'System Name'),
+                  // The validator receives the text that the user has entered.
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a system name';
+                    }
+                    return null;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Validate returns true if the form is valid, or false otherwise.
+                      if (_formKey.currentState!.validate()) {
+                        // If the form is valid, display a snackbar. In the real world,
+                        // you'd often call a server or save the information in a database.
+                        final stateManager = context
+                            .read<SystemCriticalityNotifier>()
+                            .stateManager;
+                        final row = await database!.addSystemCriticalitys(
+                            descriptionTextController.text, selectedSystem);
+                        final newRow = stateManager!.getNewRow();
+                        newRow.cells['id'] = PlutoCell(value: row.id);
+                        newRow.cells['line']!.value = row.line;
+                        newRow.cells['description']!.value = row.description;
+                        stateManager.appendRows([newRow]);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Adding New System')),
+                        );
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    child: const Text('Submit'),
+                  ),
+                ),
+              ],
             ),
           ),
-          TextFormField(
-            decoration: InputDecoration(labelText: 'System Name'),
-            // The validator receives the text that the user has entered.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter some text';
-              }
-              return null;
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: ElevatedButton(
-              onPressed: () {
-                // Validate returns true if the form is valid, or false otherwise.
-                if (_formKey.currentState!.validate()) {
-                  // If the form is valid, display a snackbar. In the real world,
-                  // you'd often call a server or save the information in a database.
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Processing Data')),
-                  );
-                }
-              },
-              child: const Text('Submit'),
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }

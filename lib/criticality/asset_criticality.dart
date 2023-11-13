@@ -657,7 +657,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               // or if grid is marked for update
               if (loadedSite != snapshot.data?.first.asset.siteid ||
                   context.watch<AssetCriticalityNotifier>().updateGrid) {
-                print('Reloading Grid');
+                debugPrint('Reloading Grid');
                 siteAssets = {};
                 parentAssets = {};
                 for (var row in snapshot.data!) {
