@@ -10,11 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:iko_reliability_flutter/main.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
+import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp(SettingsNotifier()));
+    await tester.pumpWidget(
+        MyApp(SettingsNotifier(), SelectedSiteNotifier(), ThemeManager()));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
