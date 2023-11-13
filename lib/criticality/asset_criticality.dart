@@ -285,10 +285,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 downtime: rendererContext.row.cells['downtime']!.value,
                 system: rendererContext.row.cells['system']!.value,
               );
-              context.read<AssetOverrideNotifier>().updateAssetOverride(
-                assets: [rendererContext.row.cells['assetnum']!.value],
-                status: AssetOverride.breakdowns,
-              );
+
+              if (context.mounted) {
+                context.read<AssetOverrideNotifier>().updateAssetOverride(
+                  assets: [rendererContext.row.cells['assetnum']!.value],
+                  status: AssetOverride.breakdowns,
+                );
+              }
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
@@ -325,10 +328,12 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 frequency: rendererContext.row.cells['frequency']!.value,
                 system: rendererContext.row.cells['system']!.value,
               );
-              context.read<AssetOverrideNotifier>().updateAssetOverride(
-                assets: [rendererContext.row.cells['assetnum']!.value],
-                status: AssetOverride.breakdowns,
-              );
+              if (context.mounted) {
+                context.read<AssetOverrideNotifier>().updateAssetOverride(
+                  assets: [rendererContext.row.cells['assetnum']!.value],
+                  status: AssetOverride.breakdowns,
+                );
+              }
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
@@ -374,10 +379,12 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 system: rendererContext.row.cells['system']!.value,
                 frequency: rendererContext.row.cells['frequency']!.value,
               );
-              context.read<AssetOverrideNotifier>().updateAssetOverride(
-                assets: [rendererContext.row.cells['assetnum']!.value],
-                status: AssetOverride.priority,
-              );
+              if (context.mounted) {
+                context.read<AssetOverrideNotifier>().updateAssetOverride(
+                  assets: [rendererContext.row.cells['assetnum']!.value],
+                  status: AssetOverride.priority,
+                );
+              }
               setState(() {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
@@ -543,6 +550,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       assets: [assetnum],
       status: AssetStatus.refreshingWorkOrders,
     );
+    AssetCriticalitySettingsNotifier assetCriticalitySettings =
+        context.read<AssetCriticalitySettingsNotifier>();
     // get all WOs from Maximo
     try {
       await database!.getWorkOrderMaximo(
@@ -551,22 +560,23 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       );
     } catch (e) {
       previousStatus = AssetStatus.refreshError;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
         content: Text(
             'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}'),
       ));
       return;
     }
     // bring back previous status Icon
-    context.read<AssetStatusNotifier>().updateAssetStatus(
-      assets: [assetnum],
-      status: previousStatus,
-    );
+    if (context.mounted) {
+      context.read<AssetStatusNotifier>().updateAssetStatus(
+        assets: [assetnum],
+        status: previousStatus,
+      );
+    }
     var wos = await database!.getAssetWorkorders(assetnum);
     double downtime = 0;
     double dtEvents = 0;
-    AssetCriticalitySettingsNotifier assetCriticalitySettings =
-        context.read<AssetCriticalitySettingsNotifier>();
+
     for (var wo in wos) {
       if (!isWorkOrderInRange(wo)) {
         continue;

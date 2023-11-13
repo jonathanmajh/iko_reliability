@@ -1,6 +1,3 @@
-import 'package:iko_reliability_flutter/admin/generate_uploads.dart';
-
-import '../bin/db_drift.dart';
 import 'upload_maximo.dart';
 
 class AssetMeterMaximo {
@@ -70,23 +67,5 @@ List<String> assetMeterPairs(
     final pair = '${jobplan.assetnum}$meterName$meterCount';
     result.add(pair);
   }
-  return result;
-}
-
-List<JobPlanMeterCheckMaximo> jobTaskUpdates(
-    List<JobPlanMeterCheckMaximo> jobplans, Meter meterDetails) {
-  List<JobPlanMeterCheckMaximo> result = [];
-  final details = jobTaskFormat(meterDetails.description);
-  for (final jobplan in jobplans) {
-    if (details != jobplan.details) {
-      result.add(jobplan);
-      continue;
-    }
-    // TODO more comparisons
-    // description
-    // metercode
-    // ignore CBM for now
-  }
-
   return result;
 }

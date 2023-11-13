@@ -128,7 +128,7 @@ class MyApp extends StatelessWidget {
 
 Future<void> loadAppSettings(SelectedSiteNotifier selectedSiteNotifier,
     ThemeManager themeManager, SettingsNotifier settingsNotifier) async {
-  print('running load app');
+  debugPrint('running load app');
   final settings = await database!.getSettings();
   final selectedSite = settings
       .firstWhere(

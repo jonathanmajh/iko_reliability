@@ -103,7 +103,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     pendingAssets.remove(assetNum);
 
     var parent = siteAssets[assetNum]!.asset.parent;
-    parentAssets[parent]!.remove(siteAssets[assetNum]!);
+    parentAssets[parent]!.remove(siteAssets[assetNum]!.asset);
     if (parentAssets[parent]!.isEmpty) {
       parentAssets.remove(parent);
     }

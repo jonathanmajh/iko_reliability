@@ -9,6 +9,8 @@ import 'package:pluto_grid/pluto_grid.dart';
 import '../admin/generate_uploads.dart';
 import 'package:csv/csv.dart';
 
+import '../main.dart';
+
 ///Saves string contents into a file selected by the user. Shows a file picker dialog.
 ///Returns [true] if file is saved, [false] if canceled, and an exception object if there was an error.
 ///Saves file in utf-8 with BOM encoding
@@ -45,7 +47,7 @@ Future<dynamic> saveFileFromString(String contents,
             debugPrint('File type not supported');
             if (context != null) {
               await showDialog(
-                  context: context,
+                  context: navigatorKey.currentContext!,
                   builder: (context) => AlertDialog(
                         title: const Text('Unsupported File Type'),
                         content: Text(

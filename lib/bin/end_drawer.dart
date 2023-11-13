@@ -168,7 +168,7 @@ class _EndDrawerState extends State<EndDrawer> {
                                 passwordController.text,
                                 maximo.maximoServerSelected);
                           } finally {
-                            ScaffoldMessenger.of(context)
+                            ScaffoldMessenger.of(navigatorKey.currentContext!)
                                 .hideCurrentSnackBar(); //hide snackbar once process is complete
                             processNotifier.setProcessState(
                                 ProcessStates.loginState, false);
@@ -226,7 +226,8 @@ class _EndDrawerState extends State<EndDrawer> {
                           ));
                           List<String> messages = await maximoAssetCaller(
                               siteid, maximo.maximoServerSelected, context);
-                          processNotifier.popProcessingDialog(context);
+                          processNotifier.popProcessingDialog(
+                              navigatorKey.currentContext!);
                           if (messages.isNotEmpty) {
                             showDataAlert(messages, 'Site Assets Loaded');
                           }
@@ -341,7 +342,7 @@ class _EndDrawerState extends State<EndDrawer> {
                     context.read<SelectedSiteNotifier>().selectedSite,
                   )),
                 ));
-                Navigator.of(context).pop();
+                Navigator.of(navigatorKey.currentContext!).pop();
               }),
         ),
         ListTile(
@@ -354,7 +355,7 @@ class _EndDrawerState extends State<EndDrawer> {
                     database!,
                   )),
                 ));
-                Navigator.of(context).pop();
+                Navigator.of(navigatorKey.currentContext!).pop();
               }),
         ),
       ]),
@@ -390,6 +391,8 @@ class _EndDrawerState extends State<EndDrawer> {
               trailing: ElevatedButton(
                 child: const Text('Export'),
                 onPressed: () async {
+                  PlutoGridStateManager? stateManager =
+                      context.read<AssetCriticalityNotifier>().stateManager;
                   if (!context
                       .read<AssetCriticalityNotifier>()
                       .priorityRangesUpToDate) {
@@ -399,9 +402,6 @@ class _EndDrawerState extends State<EndDrawer> {
                       return;
                     }
                   }
-                  PlutoGridStateManager? stateManager =
-                      context.read<AssetCriticalityNotifier>().stateManager;
-
                   //export as csv
                   if (stateManager != null) {
                     exportAssetCriticalityAsCSV(
@@ -422,7 +422,7 @@ class _EndDrawerState extends State<EndDrawer> {
                         context.read<SelectedSiteNotifier>().selectedSite,
                       )),
                     ));
-                    Navigator.of(context).pop();
+                    Navigator.of(navigatorKey.currentContext!).pop();
                   }),
             ),
             ListTile(
@@ -435,7 +435,7 @@ class _EndDrawerState extends State<EndDrawer> {
                         database!,
                       )),
                     ));
-                    Navigator.of(context).pop();
+                    Navigator.of(navigatorKey.currentContext!).pop();
                   }),
             ),
           ],

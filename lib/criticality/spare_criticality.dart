@@ -135,7 +135,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                             ]))
                         .toList();
                     showDialog(
-                        context: context,
+                        context: navigatorKey.currentContext!,
                         builder: (BuildContext context) {
                           return Dialog(
                             child: DataTable(columns: const [
@@ -538,14 +538,16 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                     spareid: event.row.cells['id']!.value,
                   );
                   event.row.cells['rpn']!.value = newRpn;
-                  final newPriority = context
-                      .read<SpareCriticalityNotifier>()
-                      .rpnFindDistribution(newRpn);
-                  if (event.row.cells['override']!.value !=
-                      AssetOverride.priority) {
-                    event.row.cells['newPriority']!.value = newPriority;
-                    event.row.cells['override']!.value =
-                        AssetOverride.breakdowns;
+                  if (context.mounted) {
+                    final newPriority = context
+                        .read<SpareCriticalityNotifier>()
+                        .rpnFindDistribution(newRpn);
+                    if (event.row.cells['override']!.value !=
+                        AssetOverride.priority) {
+                      event.row.cells['newPriority']!.value = newPriority;
+                      event.row.cells['override']!.value =
+                          AssetOverride.breakdowns;
+                    }
                   }
                 }
               },
@@ -756,9 +758,9 @@ class _SparePartsLoadingIndicatorState
         return;
       }
     }
-    Navigator.pop(context);
-    context.router.pushNamed("/criticality/spare");
-    Navigator.pop(context); // close the drawer
+    Navigator.pop(navigatorKey.currentContext!);
+    navigatorKey.currentContext!.router.pushNamed("/criticality/spare");
+    Navigator.pop(navigatorKey.currentContext!); // close the drawer
   }
 }
 
@@ -920,6 +922,7 @@ Future<String> calculateRPNDistributionSpares(BuildContext context) async {
       return 'Duplicate values in RPN cutoffs\nIncrease percentage of duplicate value, Or ensure RPN values are more spread out';
     }
     spareCritifcalityNotifier.updateGrid = true;
+    debugPrint(spareCritifcalityNotifier.updateGrid.toString());
   } catch (e) {
     debugPrint(e.toString());
     return e.toString();

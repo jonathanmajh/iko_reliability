@@ -285,6 +285,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
   }
 
   Future<void> pickTemplates(BuildContext context) async {
+    final template = context.read<TemplateNotifier>();
+    final maximo = context.read<MaximoServerNotifier>();
     Stopwatch stopwatch = Stopwatch()..start();
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
@@ -309,8 +311,6 @@ class _PmCheckPageState extends State<PmCheckPage> {
       setState(() {
         debugPrint('Processing files...');
       });
-      final template = context.read<TemplateNotifier>();
-      final maximo = context.read<MaximoServerNotifier>();
       processAllTemplates(template, files, maximo.maximoServerSelected);
     }
   }

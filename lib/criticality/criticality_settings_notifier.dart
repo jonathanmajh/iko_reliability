@@ -295,9 +295,9 @@ List<double> calculateSingleCutoff({
   int i = 1;
   double currentPercent = 0;
   double previousPercent = 0;
+  int sumRPNs = 0;
   // calculation for very low
   while (i <= sortedUniqueRPNs.length) {
-    int sumRPNs = 0;
     sortedUniqueRPNs.sublist(0, i).forEach((element) {
       sumRPNs = sumRPNs + frequencyOfRPNs[element]!;
     });

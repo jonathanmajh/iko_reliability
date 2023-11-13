@@ -569,10 +569,11 @@ class _NewSystemFormState extends State<NewSystemForm> {
                         newRow.cells['line']!.value = row.line;
                         newRow.cells['description']!.value = row.description;
                         stateManager.appendRows([newRow]);
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        ScaffoldMessenger.of(navigatorKey.currentContext!)
+                            .showSnackBar(
                           const SnackBar(content: Text('Adding New System')),
                         );
-                        Navigator.of(context).pop();
+                        Navigator.of(navigatorKey.currentContext!).pop();
                       }
                     },
                     child: const Text('Submit'),

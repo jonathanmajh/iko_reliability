@@ -209,9 +209,10 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
                         context.read<SelectedSiteNotifier>().selectedSite);
                     stateManager
                         .removeRows([rendererContext.row], notify: true);
-                    toast(context, 'Deleted Asset $assetNum');
+                    toast(navigatorKey.currentContext!,
+                        'Deleted Asset $assetNum');
                   } catch (err) {
-                    toast(context, '$err');
+                    toast(navigatorKey.currentContext!, '$err');
                   }
                 },
                 iconSize: 18,
@@ -257,12 +258,12 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
   }
 
   Future<void> _loadGrid(String site) async {
+    final assetCreationNotifier =
+        Provider.of<AssetCreationNotifier>(context, listen: false);
     await context
         .read<AssetCreationNotifier>()
         .setSite(context.read<SelectedSiteNotifier>().selectedSite);
-    print('load grid');
-    final assetCreationNotifier =
-        Provider.of<AssetCreationNotifier>(context, listen: false);
+    debugPrint('load grid');
 
     var fetchedRows = _getChildRows('Top', assetCreationNotifier.parentAssets);
     var value =
@@ -604,12 +605,13 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
               context
                   .read<SelectedSiteNotifier>()
                   .setSite(context.read<SelectedSiteNotifier>().selectedSite);
-              toast(context, 'Created Asset $assetNum, id: $id');
+              toast(navigatorKey.currentContext!,
+                  'Created Asset $assetNum, id: $id');
             } catch (err) {
-              toast(context, '$err');
+              toast(navigatorKey.currentContext!, '$err');
             }
 
-            Navigator.pop(context, 'OK');
+            Navigator.pop(navigatorKey.currentContext!, 'OK');
           },
           child: const Text('OK'),
         ),
@@ -665,9 +667,10 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
                         context.read<SelectedSiteNotifier>().selectedSite);
                     stateManager
                         .removeRows([rendererContext.row], notify: true);
-                    toast(context, 'Deleted Asset $assetNum');
+                    toast(navigatorKey.currentContext!,
+                        'Deleted Asset $assetNum');
                   } catch (err) {
-                    toast(context, '$err');
+                    toast(navigatorKey.currentContext!, '$err');
                   }
                 },
                 iconSize: 18,
