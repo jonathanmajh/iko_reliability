@@ -216,7 +216,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         },
       ),
       PlutoColumn(
-        width: 100,
+        width: 80,
         title: 'Score',
         field: 'score',
         type: PlutoColumnType.number(
@@ -232,7 +232,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         hide: true,
       ),
       PlutoColumn(
-          width: 75,
+          width: 85,
           title: 'Delete?',
           field: 'delete',
           type: PlutoColumnType.text(),
