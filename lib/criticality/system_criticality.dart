@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
@@ -241,7 +242,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             child: FloatingActionButton.extended(
               heroTag: UniqueKey(),
               onPressed: () async {
-                addRow();
+                NewSystemForm();
                 _updateFab();
               },
               label: const Text('Add Row'),
@@ -396,7 +397,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                 LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
                     CustomMinusKeyAction(),
               }),
-              style: context.watch<ThemeManager>().isDark
+              style: context.watch<ThemeManager>().theme == ThemeMode.dark
                   ? const PlutoGridStyleConfig.dark()
                   : const PlutoGridStyleConfig(),
             ),
@@ -501,5 +502,75 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
     }
     stateManager.changeCellValue(
         stateManager.currentCell!, stateManager.currentCell!.value - 1);
+  }
+}
+
+class NewSystemForm extends StatefulWidget {
+  const NewSystemForm({super.key});
+
+  @override
+  State<NewSystemForm> createState() => _NewSystemFormState();
+}
+
+class _NewSystemFormState extends State<NewSystemForm> {
+  final _formKey = GlobalKey<FormState>();
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DropdownSearch<String>(
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select a Production Line';
+              }
+              return null;
+            },
+            selectedItem: 'C',
+            popupProps: const PopupProps.menu(
+              showSearchBox: true,
+              showSelectedItems: true,
+              searchFieldProps: TextFieldProps(
+                autofocus: true,
+              ),
+            ),
+            items: productionLines.keys.toList(),
+            dropdownDecoratorProps: const DropDownDecoratorProps(
+              dropdownSearchDecoration: InputDecoration(
+                labelText: "Production Line",
+              ),
+            ),
+          ),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'System Name'),
+            // The validator receives the text that the user has entered.
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter some text';
+              }
+              return null;
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: ElevatedButton(
+              onPressed: () {
+                // Validate returns true if the form is valid, or false otherwise.
+                if (_formKey.currentState!.validate()) {
+                  // If the form is valid, display a snackbar. In the real world,
+                  // you'd often call a server or save the information in a database.
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Processing Data')),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

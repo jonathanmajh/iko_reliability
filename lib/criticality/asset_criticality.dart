@@ -800,7 +800,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 // systemUpdate.remove(assetCrit.asset.assetnum);
               },
               configuration: PlutoGridConfiguration(
-                  style: themeManager.isDark
+                  style: themeManager.theme == ThemeMode.dark
                       ? const PlutoGridStyleConfig.dark()
                       : const PlutoGridStyleConfig(),
                   shortcut: PlutoGridShortcut(actions: {
@@ -816,7 +816,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             ),
             gridPropsB: PlutoDualGridProps(
               configuration: PlutoGridConfiguration(
-                  style: themeManager.isDark
+                  style: themeManager.theme == ThemeMode.dark
                       ? const PlutoGridStyleConfig.dark()
                       : const PlutoGridStyleConfig()),
               columns: detailColumns,
@@ -828,10 +828,12 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 if (rowColorContext.row.cells['included']!.value != 'Yes') {
                   return Colors.grey;
                 }
-                return themeManager.isDark ? Colors.black : Colors.white;
+                return themeManager.theme == ThemeMode.dark
+                    ? Colors.black
+                    : Colors.white;
               },
             ),
-            divider: themeManager.isDark
+            divider: themeManager.theme == ThemeMode.dark
                 ? PlutoDualGridDivider.dark(
                     indicatorColor: Theme.of(context).colorScheme.onBackground)
                 : const PlutoDualGridDivider(),

@@ -470,13 +470,13 @@ class ThemeToggle extends StatelessWidget {
       ),
       trailing: Switch(
           //true => darkmode on
-          value: (themeManager.themeMode == ThemeMode.dark),
+          value: (themeManager.theme == ThemeMode.dark),
           onChanged: (value) {
-            themeManager.toggleTheme(value);
+            themeManager.setDarkTheme(value);
           },
           thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
               (Set<MaterialState> states) {
-            return (themeManager.themeMode == ThemeMode.dark)
+            return (themeManager.theme == ThemeMode.dark)
                 ? const Icon(Icons.dark_mode_rounded)
                 : const Icon(Icons.light_mode_rounded);
           })),

@@ -45,16 +45,22 @@ void main() async {
     setWindowMinSize(const Size(640, 360));
   }
   SettingsNotifier settingsNotifier = SettingsNotifier();
-
+  SelectedSiteNotifier selectedSiteNotifier = SelectedSiteNotifier();
+  ThemeManager themeManager = ThemeManager();
   await settingsNotifier.initialize();
+  await loadAppSettings(selectedSiteNotifier, themeManager, settingsNotifier);
   runApp(
-    MyApp(settingsNotifier),
+    MyApp(
+      settingsNotifier,
+      selectedSiteNotifier,
+      themeManager,
+    ),
   );
 }
 
 ///ChangeNotifier for current maximo server/environment
 class MaximoServerNotifier extends ChangeNotifier {
-  String maximoServerSelected = 'MASTEST';
+  String maximoServerSelected = 'MASPROD';
 
   void setServer(String server) {
     maximoServerSelected = server;
@@ -63,9 +69,12 @@ class MaximoServerNotifier extends ChangeNotifier {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp(this.settingsNotifier, {super.key});
+  MyApp(this.settingsNotifier, this.selectedSiteNotifier, this.themeManager,
+      {super.key});
   final _appRouter = AppRouter(navigatorKey: navigatorKey);
   final SettingsNotifier settingsNotifier;
+  final SelectedSiteNotifier selectedSiteNotifier;
+  final ThemeManager themeManager;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -75,9 +84,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => UploadNotifier()),
           ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
           ChangeNotifierProvider(create: (context) => settingsNotifier),
-          ChangeNotifierProvider(
-              create: (context) => ThemeManager(
-                  settingsNotifier.getSetting(ApplicationSetting.darkmodeOn))),
+          ChangeNotifierProvider(create: (context) => themeManager),
           //set initial brightness according to system settings
           ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
           ChangeNotifierProvider(
@@ -90,13 +97,12 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) => SpareCriticalityNotifier()),
           ChangeNotifierProvider(create: (context) => AssetStatusNotifier()),
-          ChangeNotifierProvider(create: (context) => SelectedSiteNotifier()),
+          ChangeNotifierProvider(create: (context) => selectedSiteNotifier),
           ChangeNotifierProvider(create: (context) => AssetOverrideNotifier()),
           ChangeNotifierProvider(create: (context) => SpareOverrideNotifier()),
         ],
         child: Builder(
           builder: (context) {
-            loadAppSettings(context);
             return MaterialApp.router(
               routerConfig: _appRouter.config(),
               title: 'IKO Flutter Reliability',
@@ -110,14 +116,16 @@ class MyApp extends StatelessWidget {
                 colorSchemeSeed: const Color(0xFFFF0000),
                 brightness: Brightness.dark,
               ),
-              themeMode: Provider.of<ThemeManager>(context).themeMode,
+              themeMode: Provider.of<ThemeManager>(context).theme,
             );
           },
         ));
   }
 }
 
-Future<void> loadAppSettings(BuildContext context) async {
+Future<void> loadAppSettings(SelectedSiteNotifier selectedSiteNotifier,
+    ThemeManager themeManager, SettingsNotifier settingsNotifier) async {
+  print('running load app');
   final settings = await database!.getSettings();
   final selectedSite = settings
       .firstWhere(
@@ -125,17 +133,20 @@ Future<void> loadAppSettings(BuildContext context) async {
         orElse: () => const Setting(key: '', value: ''),
       )
       .value;
-  context.read<SelectedSiteNotifier>().selectedSite = selectedSite;
+  selectedSiteNotifier.selectedSite = selectedSite;
   final darkMode = bool.parse(settings
       .firstWhere(
         (element) => element.key == 'darkMode',
         orElse: () => const Setting(key: '', value: 'false'),
       )
       .value);
-  context.read<ThemeManager>().toggleTheme(darkMode);
-  final settings2 = Provider.of<SettingsNotifier>(context);
-  bool hideUpdateWindow =
-      settings2.getSetting(ApplicationSetting.updateWindowOff);
+  themeManager.setDarkTheme(darkMode);
+  bool hideUpdateWindow = bool.parse(settings
+      .firstWhere(
+        (element) => element.key == 'update window off',
+        orElse: () => const Setting(key: '', value: 'false'),
+      )
+      .value);
 
   if (!hideUpdateWindow) {
     final update = await checkUpdate();
@@ -163,10 +174,10 @@ Future<void> loadAppSettings(BuildContext context) async {
                           value: hideUpdateWindow,
                           onChanged: (bool? value) {
                             setState(() {
-                              settings2.changeSettings(
+                              settingsNotifier.changeSettings(
                                   {ApplicationSetting.updateWindowOff: value!},
                                   notify: false);
-                              hideUpdateWindow = settings2.getSetting(
+                              hideUpdateWindow = settingsNotifier.getSetting(
                                   ApplicationSetting.updateWindowOff);
                             });
                           }),

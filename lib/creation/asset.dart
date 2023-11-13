@@ -315,15 +315,15 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
               .read<AssetCreationNotifier>()
               .pendingAssets[rowColorContext.row.cells['hierarchy']!.value];
           if (assetStatus == 'new') {
-            return (themeManager.isDark
+            return (themeManager.theme == ThemeMode.dark
                 ? const Color.fromARGB(255, 18, 92, 3)
                 : const Color.fromARGB(255, 133, 252, 133));
           } else if (assetStatus == 'warning' || assetStatus == 'fail') {
-            return (themeManager.isDark
+            return (themeManager.theme == ThemeMode.dark
                 ? const Color.fromARGB(255, 94, 15, 15)
                 : const Color.fromARGB(255, 221, 93, 93));
           } else {
-            return (themeManager.isDark
+            return (themeManager.theme == ThemeMode.dark
                 ? const Color.fromARGB(255, 17, 17, 17)
                 : Colors.white);
           }
@@ -341,7 +341,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
           ));
         },
         configuration: PlutoGridConfiguration(
-            style: themeManager.isDark
+            style: themeManager.theme == ThemeMode.dark
                 ? const PlutoGridStyleConfig.dark()
                 : const PlutoGridStyleConfig()),
       );
@@ -866,7 +866,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
           stateManager.setShowColumnFilter(true);
         },
         configuration: PlutoGridConfiguration(
-            style: themeManager.isDark
+            style: themeManager.theme == ThemeMode.dark
                 ? const PlutoGridStyleConfig.dark()
                 : const PlutoGridStyleConfig()),
       );
