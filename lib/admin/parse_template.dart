@@ -108,6 +108,7 @@ class ParsedTemplate {
   String? pmAsset; // the parent asset specified for the PM
   String? suggestedPmNumber;
   String? suggestedPmName;
+  String? replacement;
 
   ParsedTemplate({
     List<String>? assets,
@@ -124,6 +125,7 @@ class ParsedTemplate {
     this.pmPackageNumber,
     this.routeCode,
     this.routeName,
+    this.replacement,
     this.suggestedPmName,
     this.pmAsset,
     this.suggestedPmNumber,
@@ -283,6 +285,7 @@ class ParsedTemplate {
           readCraft = true;
           readMaterials = false;
           readService = false;
+          pmTemplates[filename][pmNumber].replacement = row[3];
           continue;
         }
 

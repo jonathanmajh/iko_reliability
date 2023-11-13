@@ -89,7 +89,9 @@ Future<PMName> generateName(
     replaceable[0] = '${replaceable[0]}LC!!!';
     replaceable[1] = '${replaceable[1]} - LC-!!!';
     // properly assign letter after number has been determined
-    // TODO add the replaced component to the end of the name
+    if (pmdetails.replacement != null) {
+      replaceable[1] = '${replaceable[1]} ${pmdetails.replacement}';
+    }
   }
   // add craft
   if (pmdetails.crafts.isEmpty) {
@@ -112,10 +114,16 @@ Future<PMName> generateName(
       number =
           '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
       name = '$name${numberToLetter(counter)}';
+      if (pmdetails.replacement != null) {
+        name = '$name ${pmdetails.replacement}';
+      }
     }
   } else {
     if (wotype == 'LIF') {
       name = '${name}A';
+      if (pmdetails.replacement != null) {
+        name = '$name ${pmdetails.replacement}';
+      }
     }
   }
 

@@ -46,7 +46,6 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         readOnly: true,
         hide: true,
       ),
-      // TODO implement site selection for systems
       PlutoColumn(
         width: 150,
         title: 'Production Line',
