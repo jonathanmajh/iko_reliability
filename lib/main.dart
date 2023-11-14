@@ -1,12 +1,15 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show PlatformDispatcher, kIsWeb;
 import 'dart:io' show Platform;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:iko_reliability_flutter/bin/logger_web.dart';
+import 'package:iko_reliability_flutter/bin/logger_windows.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
@@ -27,8 +30,55 @@ import 'routes/route.dart';
 
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
+Logger? logger;
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    logger = Logger(
+      filter: ProductionFilter(),
+      printer: PrettyPrinter(
+        methodCount: 1,
+        errorMethodCount: 6,
+        lineLength: 80,
+        colors: false,
+        printEmojis: false,
+        printTime: true,
+      ),
+      output: AppConsoleOutput(),
+    );
+  } else if (Platform.isWindows) {
+    setWindowMinSize(const Size(640, 360));
+    logger = Logger(
+      filter: ProductionFilter(),
+      printer: PrettyPrinter(
+        methodCount: 1,
+        errorMethodCount: 6,
+        lineLength: 80,
+        colors: false,
+        printEmojis: false,
+        printTime: true,
+      ),
+      output: AppFileOutput(),
+    );
+  }
+  // put flutter errors in the logger
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    logger?.f(
+      details.exceptionAsString(),
+      error: (details.toDiagnosticsNode().toStringDeep()),
+      stackTrace: details.stack,
+    );
+  };
+  PlatformDispatcher.instance.onError = (exception, stackTrace) {
+    logger?.f(
+      "Unhandled Exception",
+      error: exception,
+      stackTrace: stackTrace,
+    );
+    return false;
+  };
   await Hive.initFlutter();
   await Hive.openBox('pmNumber');
   await Hive.openBox('jpNumber');
@@ -40,11 +90,6 @@ void main() async {
   box = Hive.box('routeNumber');
   box.clear();
   database = MyDatabase();
-  WidgetsFlutterBinding.ensureInitialized();
-  if (kIsWeb) {
-  } else if (Platform.isWindows) {
-    setWindowMinSize(const Size(640, 360));
-  }
   SettingsNotifier settingsNotifier = SettingsNotifier();
   SelectedSiteNotifier selectedSiteNotifier = SelectedSiteNotifier();
   ThemeManager themeManager = ThemeManager();
@@ -128,7 +173,7 @@ class MyApp extends StatelessWidget {
 
 Future<void> loadAppSettings(SelectedSiteNotifier selectedSiteNotifier,
     ThemeManager themeManager, SettingsNotifier settingsNotifier) async {
-  debugPrint('running load app');
+  logger?.d('Loading App Settings Before Start');
   final settings = await database!.getSettings();
   final selectedSite = settings
       .firstWhere(
