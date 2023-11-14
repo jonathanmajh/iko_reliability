@@ -102,6 +102,7 @@ void main() async {
       themeManager,
     ),
   );
+  await checkForUpdate();
 }
 
 ///ChangeNotifier for current maximo server/environment
@@ -189,57 +190,31 @@ Future<void> loadAppSettings(SelectedSiteNotifier selectedSiteNotifier,
       )
       .value);
   themeManager.setDarkTheme(darkMode);
-  bool hideUpdateWindow = bool.parse(settings
-      .firstWhere(
-        (element) => element.key == 'update window off',
-        orElse: () => const Setting(key: '', value: 'false'),
-      )
-      .value);
+}
 
-  if (!hideUpdateWindow) {
-    final update = await checkUpdate();
-    if (update) {
-      showDataAlert(
-          ['Update available'],
-          'Update Checker',
-          [
-            StatefulBuilder(builder: (context, setState) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      launchUrl(Uri.parse(
-                          'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
-                    },
-                    child: const Text('Download Update'),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Checkbox(
-                          value: hideUpdateWindow,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              settingsNotifier.changeSettings(
-                                  {ApplicationSetting.updateWindowOff: value!},
-                                  notify: false);
-                              hideUpdateWindow = settingsNotifier.getSetting(
-                                  ApplicationSetting.updateWindowOff);
-                            });
-                          }),
-                      const Text(
-                        'Don\'t show again',
-                        textAlign: TextAlign.left,
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            }),
-          ]);
-    }
+Future<void> checkForUpdate() async {
+  final update = await checkUpdate();
+  if (update) {
+    showDataAlert(
+        ['Update available'],
+        'Update Checker',
+        [
+          StatefulBuilder(builder: (context, setState) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    launchUrl(Uri.parse(
+                        'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
+                  },
+                  child: const Text('Download Update'),
+                ),
+              ],
+            );
+          }),
+        ]);
   }
 }
 
