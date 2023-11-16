@@ -843,8 +843,8 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "985ba60fe584e14ee03826449e99d570372b5ca3"
-      url: "https://github.com/RustamG/squirrel-flutter.git"
+      resolved-ref: f3dea7548fb847cee43ae9ef8593c16202c57072
+      url: "https://github.com/jonathanmajh/squirrel-flutter"
     source: git
     version: "0.2.0"
   stack_trace:

@@ -3,7 +3,7 @@ description: IKO Reliability Tool
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.2.8
+version: 1.2.9
 
 environment:
     sdk: '>=3.0.0 <=4.0.0'
@@ -49,7 +49,7 @@ dev_dependencies:
     drift_dev: ^2.3.3
     build_runner: ^2.2.0
     squirrel:
-        git: https://github.com/RustamG/squirrel-flutter.git
+        git: https://github.com/jonathanmajh/squirrel-flutter
 
 
 flutter:
