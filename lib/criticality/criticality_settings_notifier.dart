@@ -296,17 +296,21 @@ List<double> calculateSingleCutoff({
   double currentPercent = 0;
   double previousPercent = 0;
   int sumRPNs = 0;
+  int previousSumRpn = 0;
   // calculation for very low
   while (i <= sortedUniqueRPNs.length) {
-    sortedUniqueRPNs.sublist(0, i).forEach((element) {
-      sumRPNs = sumRPNs + frequencyOfRPNs[element]!;
-    });
+    sumRPNs = sumRPNs + frequencyOfRPNs[sortedUniqueRPNs[i]]!;
     currentPercent = sumRPNs / totalRPNCount * 100;
     // keep going to the next value until the new percentage is larger than previous percentage
     if ((currentPercent - target).abs() > (previousPercent - target).abs()) {
-      return [previousPercent, sortedUniqueRPNs[i - 1], sumRPNs.toDouble()];
+      return [
+        previousPercent,
+        sortedUniqueRPNs[i - 1],
+        previousSumRpn.toDouble()
+      ];
     } else {
       previousPercent = currentPercent;
+      previousSumRpn = sumRPNs;
       i++;
     }
   }

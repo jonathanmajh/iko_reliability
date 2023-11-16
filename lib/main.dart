@@ -3,7 +3,6 @@ import 'dart:io' show Platform;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iko_reliability_flutter/bin/logger_web.dart';
 import 'package:iko_reliability_flutter/bin/logger_windows.dart';

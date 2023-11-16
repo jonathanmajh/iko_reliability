@@ -828,7 +828,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             ),
             gridPropsB: PlutoDualGridProps(
               configuration: PlutoGridConfiguration(
-                  columnFilter: PlutoGridColumnFilterConfig(),
+                  // columnFilter: PlutoGridColumnFilterConfig(),
                   style: themeManager.theme == ThemeMode.dark
                       ? const PlutoGridStyleConfig.dark()
                       : const PlutoGridStyleConfig()),
