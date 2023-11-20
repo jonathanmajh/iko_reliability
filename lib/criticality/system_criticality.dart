@@ -259,7 +259,6 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                   builder: (context) {
                     return const NewSystemForm();
                   });
-              _updateFab();
             },
             child: const Icon(Icons.add),
           )),
