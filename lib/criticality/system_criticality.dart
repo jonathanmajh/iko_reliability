@@ -560,6 +560,21 @@ class _NewSystemFormState extends State<NewSystemForm> {
                         final stateManager = context
                             .read<SystemCriticalityNotifier>()
                             .stateManager;
+                        for (var row in stateManager!.iterateAllRow) {
+                          if (row.cells['description']!.value ==
+                              descriptionTextController.text) {
+                            ScaffoldMessenger.of(navigatorKey.currentContext!)
+                                .showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    '"${descriptionTextController.text}" already exists'),
+                                duration: const Duration(seconds: 10),
+                              ),
+                            );
+                            Navigator.of(navigatorKey.currentContext!).pop();
+                            return;
+                          }
+                        }
                         final row = await database!.addSystemCriticalitys(
                             descriptionTextController.text, selectedSystem);
                         final newRow = stateManager!.getNewRow();
