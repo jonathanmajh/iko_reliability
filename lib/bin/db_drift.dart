@@ -521,6 +521,14 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<int> deleteSystemCriticalitys(int value) async {
+    final assets = (await (select(assetCriticalitys)
+              ..where((tbl) => tbl.system.equals(value)))
+            .get())
+        .length;
+    if (assets > 0) {
+      throw Exception(
+          'System is in used by $assets assets, Please reassign assets before deleting');
+    }
     final row = await (delete(systemCriticalitys)
           ..where((t) => t.id.equals(value)))
         .goAndReturn();

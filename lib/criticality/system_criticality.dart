@@ -618,9 +618,15 @@ class _SystemDeleteIconState extends State<SystemDeleteIcon> {
       ),
       onPressed: () async {
         final id = widget.rendererContext.row.cells['id']!.value;
-        widget.rendererContext.stateManager
-            .removeRows([widget.rendererContext.row]);
-        await database!.deleteSystemCriticalitys(id);
+        try {
+          await database!.deleteSystemCriticalitys(id);
+          widget.rendererContext.stateManager
+              .removeRows([widget.rendererContext.row]);
+        } catch (e) {
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
       },
     );
   }
