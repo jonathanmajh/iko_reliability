@@ -226,7 +226,9 @@ class ParsedTemplate {
         }
         if (row[3] != null && readRouteAsset) {
           //reading task rout asset data of current PM and write it to [ParsedTemplate] object
-          pmTemplates[filename][pmNumber].assets.add(row[3]);
+          pmTemplates[filename][pmNumber]
+              .assets
+              .add(row[3].toString().toUpperCase());
         }
         if (row[0] == 'Materials (Mapics Number)') {
           //check if current row has materials/mapics # header for PM. If so, read the data next iteration(s)
