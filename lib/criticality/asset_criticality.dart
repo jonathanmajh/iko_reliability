@@ -122,7 +122,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         hide: true,
       ),
       PlutoColumn(
-          title: 'Hierarchy',
+          title: 'Hierarchy (Parent Filter)',
           field: 'hierarchy',
           width: 250,
           type: PlutoColumnType.text(),
