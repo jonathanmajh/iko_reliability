@@ -378,6 +378,8 @@ class _EndDrawerState extends State<EndDrawer> {
                         children: [
                           Text('Total Items: ${snapshot.data!.total}'),
                           Text('Completed Items: ${snapshot.data!.complete}'),
+                          Text(
+                              'Completed: ${(snapshot.data!.complete * 100 / (snapshot.data!.total)).toStringAsPrecision(3)}%')
                         ],
                       ));
                 }
