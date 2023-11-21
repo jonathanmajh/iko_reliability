@@ -577,7 +577,7 @@ class _NewSystemFormState extends State<NewSystemForm> {
                         }
                         final row = await database!.addSystemCriticalitys(
                             descriptionTextController.text, selectedSystem);
-                        final newRow = stateManager!.getNewRow();
+                        final newRow = stateManager.getNewRow();
                         newRow.cells['id'] = PlutoCell(value: row.id);
                         newRow.cells['line']!.value = row.line;
                         newRow.cells['description']!.value = row.description;

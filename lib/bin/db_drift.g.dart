@@ -21,9 +21,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   @override
   List<GeneratedColumn> get $columns => [key, value];
   @override
-  String get aliasedName => _alias ?? 'settings';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'settings';
+  String get actualTableName => $name;
+  static const String $name = 'settings';
   @override
   VerificationContext validateIntegrity(Insertable<Setting> instance,
       {bool isInserting = false}) {
@@ -201,9 +202,10 @@ class $LoginSettingsTable extends LoginSettings
   @override
   List<GeneratedColumn> get $columns => [key, value];
   @override
-  String get aliasedName => _alias ?? 'login_settings';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'login_settings';
+  String get actualTableName => $name;
+  static const String $name = 'login_settings';
   @override
   VerificationContext validateIntegrity(Insertable<LoginSetting> instance,
       {bool isInserting = false}) {
@@ -413,9 +415,10 @@ class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
   List<GeneratedColumn> get $columns =>
       [meter, inspect, description, frequency, freqUnit, condition, craft];
   @override
-  String get aliasedName => _alias ?? 'meter_d_bs';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'meter_d_bs';
+  String get actualTableName => $name;
+  static const String $name = 'meter_d_bs';
   @override
   VerificationContext validateIntegrity(Insertable<MeterDB> instance,
       {bool isInserting = false}) {
@@ -766,9 +769,10 @@ class $ObservationsTable extends Observations
   @override
   List<GeneratedColumn> get $columns => [meter, code, description, action];
   @override
-  String get aliasedName => _alias ?? 'observations';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'observations';
+  String get actualTableName => $name;
+  static const String $name = 'observations';
   @override
   VerificationContext validateIntegrity(Insertable<Observation> instance,
       {bool isInserting = false}) {
@@ -1075,9 +1079,10 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         newAsset
       ];
   @override
-  String get aliasedName => _alias ?? 'assets';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'assets';
+  String get actualTableName => $name;
+  static const String $name = 'assets';
   @override
   VerificationContext validateIntegrity(Insertable<Asset> instance,
       {bool isInserting = false}) {
@@ -1553,9 +1558,10 @@ class $WorkordersTable extends Workorders
         assetnum
       ];
   @override
-  String get aliasedName => _alias ?? 'workorders';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'workorders';
+  String get actualTableName => $name;
+  static const String $name = 'workorders';
   @override
   VerificationContext validateIntegrity(Insertable<Workorder> instance,
       {bool isInserting = false}) {
@@ -1999,9 +2005,10 @@ class $SystemCriticalitysTable extends SystemCriticalitys
         score
       ];
   @override
-  String get aliasedName => _alias ?? 'system_criticalitys';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'system_criticalitys';
+  String get actualTableName => $name;
+  static const String $name = 'system_criticalitys';
   @override
   VerificationContext validateIntegrity(Insertable<SystemCriticality> instance,
       {bool isInserting = false}) {
@@ -2449,9 +2456,10 @@ class $AssetCriticalitysTable extends AssetCriticalitys
   List<GeneratedColumn> get $columns =>
       [asset, system, type, frequency, downtime, manual, newPriority, newRPN];
   @override
-  String get aliasedName => _alias ?? 'asset_criticalitys';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'asset_criticalitys';
+  String get actualTableName => $name;
+  static const String $name = 'asset_criticalitys';
   @override
   VerificationContext validateIntegrity(Insertable<AssetCriticality> instance,
       {bool isInserting = false}) {
@@ -2858,9 +2866,10 @@ class $AssetUploadsTable extends AssetUploads
         assetCriticality
       ];
   @override
-  String get aliasedName => _alias ?? 'asset_uploads';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'asset_uploads';
+  String get actualTableName => $name;
+  static const String $name = 'asset_uploads';
   @override
   VerificationContext validateIntegrity(Insertable<AssetUpload> instance,
       {bool isInserting = false}) {
@@ -3237,9 +3246,10 @@ class $SparePartsTable extends SpareParts
   List<GeneratedColumn> get $columns =>
       [itemnum, assetnum, siteid, quantity, sparepartid];
   @override
-  String get aliasedName => _alias ?? 'spare_parts';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'spare_parts';
+  String get actualTableName => $name;
+  static const String $name = 'spare_parts';
   @override
   VerificationContext validateIntegrity(Insertable<SparePart> instance,
       {bool isInserting = false}) {
@@ -3580,9 +3590,10 @@ class $PurchasesTable extends Purchases
         prlineid
       ];
   @override
-  String get aliasedName => _alias ?? 'purchases';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'purchases';
+  String get actualTableName => $name;
+  static const String $name = 'purchases';
   @override
   VerificationContext validateIntegrity(Insertable<Purchase> instance,
       {bool isInserting = false}) {
@@ -4091,9 +4102,10 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
   List<GeneratedColumn> get $columns =>
       [itemnum, description, status, commodityGroup, glClass];
   @override
-  String get aliasedName => _alias ?? 'items';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'items';
+  String get actualTableName => $name;
+  static const String $name = 'items';
   @override
   VerificationContext validateIntegrity(Insertable<Item> instance,
       {bool isInserting = false}) {
@@ -4433,9 +4445,10 @@ class $SpareCriticalitysTable extends SpareCriticalitys
         itemnum
       ];
   @override
-  String get aliasedName => _alias ?? 'spare_criticalitys';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'spare_criticalitys';
+  String get actualTableName => $name;
+  static const String $name = 'spare_criticalitys';
   @override
   VerificationContext validateIntegrity(Insertable<SpareCriticality> instance,
       {bool isInserting = false}) {
@@ -4925,7 +4938,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
           assetCriticalitys,
         }).map((QueryRow row) => SpareCriticalityAutoCalculationResult(
           itemnum: row.read<String>('itemnum'),
-          quantity: row.read<double>('quantity'),
+          quantity: row.readNullable<double>('quantity'),
           unitCost: row.read<double>('unitCost'),
           leadTime: row.read<double>('leadTime'),
           assetRPN: row.readNullable<double>('assetRPN'),
@@ -4946,7 +4959,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
           assetCriticalitys,
         }).map((QueryRow row) => SpareCriticalityAutoCalculationItemResult(
           itemnum: row.read<String>('itemnum'),
-          quantity: row.read<double>('quantity'),
+          quantity: row.readNullable<double>('quantity'),
           unitCost: row.read<double>('unitCost'),
           leadTime: row.read<double>('leadTime'),
           assetRPN: row.readNullable<double>('assetRPN'),
@@ -4970,6 +4983,22 @@ abstract class _$MyDatabase extends GeneratedDatabase {
           description: row.readNullable<String>('description'),
           newRPN: row.readNullable<double>('new_r_p_n'),
           quantity: row.read<double>('quantity'),
+        ));
+  }
+
+  Selectable<CompletedAssetRpnResult> completedAssetRpn(String siteid) {
+    return customSelect(
+        'SELECT count(assetnum) AS totalAssets, count(DISTINCT parent) AS parentAssets, (SELECT count(asset) FROM asset_criticalitys WHERE new_r_p_n > 0 AND asset LIKE ?1 || \'%\' AND asset NOT IN (SELECT DISTINCT ?1 || parent FROM assets WHERE siteid = ?1 AND parent IS NOT NULL)) AS completeChilds FROM assets WHERE siteid = ?1',
+        variables: [
+          Variable<String>(siteid)
+        ],
+        readsFrom: {
+          assets,
+          assetCriticalitys,
+        }).map((QueryRow row) => CompletedAssetRpnResult(
+          totalAssets: row.read<int>('totalAssets'),
+          parentAssets: row.read<int>('parentAssets'),
+          completeChilds: row.read<int>('completeChilds'),
         ));
   }
 
@@ -5014,13 +5043,13 @@ class UniqueRpnNumbersSpareResult {
 
 class SpareCriticalityAutoCalculationResult {
   final String itemnum;
-  final double quantity;
+  final double? quantity;
   final double unitCost;
   final double leadTime;
   final double? assetRPN;
   SpareCriticalityAutoCalculationResult({
     required this.itemnum,
-    required this.quantity,
+    this.quantity,
     required this.unitCost,
     required this.leadTime,
     this.assetRPN,
@@ -5029,13 +5058,13 @@ class SpareCriticalityAutoCalculationResult {
 
 class SpareCriticalityAutoCalculationItemResult {
   final String itemnum;
-  final double quantity;
+  final double? quantity;
   final double unitCost;
   final double leadTime;
   final double? assetRPN;
   SpareCriticalityAutoCalculationItemResult({
     required this.itemnum,
-    required this.quantity,
+    this.quantity,
     required this.unitCost,
     required this.leadTime,
     this.assetRPN,
@@ -5052,5 +5081,16 @@ class AssetsAssociatedWithItemResult {
     this.description,
     this.newRPN,
     required this.quantity,
+  });
+}
+
+class CompletedAssetRpnResult {
+  final int totalAssets;
+  final int parentAssets;
+  final int completeChilds;
+  CompletedAssetRpnResult({
+    required this.totalAssets,
+    required this.parentAssets,
+    required this.completeChilds,
   });
 }

@@ -276,114 +276,48 @@ class _EndDrawerState extends State<EndDrawer> {
   Widget spareCriticalityEndDrawer(
       BuildContext context, ThemeManager themeManager) {
     return Drawer(
-      child: ListView(children: <Widget>[
-        const ThemeToggle(),
-        const SiteToggle(),
-        ListTile(
-          title: const Text('Configure ABC Percentages'),
-          trailing: ElevatedButton(
-            child: const Icon(Icons.settings),
-            onPressed: () {
-              showDataAlert(
-                [],
-                'Enter Desired Precentages',
-                [const SpareCriticalityConfig()],
-              );
-            },
-          ),
-        ),
-        ListTile(
-          title: const Text('Refresh Data from Maximo'),
-          trailing: ElevatedButton(
-            child: const Icon(Icons.refresh),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return const AlertDialog(
-                      title: Text('Loading...'),
-                      content: SparePartsLoadingIndicator(forceUpdate: true),
-                    );
-                  });
-            },
-          ),
-        ),
-        ListTile(
-          title: const Text('Calculate ABC from RPN'),
-          trailing: ElevatedButton(
-            child: const Icon(Icons.calculate),
-            onPressed: () => calculateRPNDistributionSpares(context),
-          ),
-        ),
-        ListTile(
-          title: const Text('Export to CSV'),
-          trailing: ElevatedButton(
-            child: const Text('Export'),
-            onPressed: () async {
-              PlutoGridStateManager? stateManager =
-                  context.read<SpareCriticalityNotifier>().stateManager;
-              //export as csv
-              if (stateManager != null) {
-                exportAssetCriticalityAsCSV(
-                    stateManager: stateManager,
-                    context: navigatorKey.currentContext!);
-              }
-            },
-          ),
-        ),
-        ListTile(
-          title: const Text('Export Settings'),
-          trailing: ElevatedButton(
-              child: const Text('Export'),
-              onPressed: () async {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(await exportCriticalityDB(
-                    database!,
-                    context.read<SelectedSiteNotifier>().selectedSite,
-                  )),
-                ));
-                Navigator.of(navigatorKey.currentContext!).pop();
-              }),
-        ),
-        ListTile(
-          title: const Text('Import Settings'),
-          trailing: ElevatedButton(
-              child: const Text('Import'),
-              onPressed: () async {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(await importCriticalityDB(
-                    database!,
-                  )),
-                ));
-                Navigator.of(navigatorKey.currentContext!).pop();
-              }),
-        ),
-      ]),
-    );
-  }
-
-  ///Widget for asset criticality end drawer
-  Widget assetCriticalityEndDrawer(
-      BuildContext context, ThemeManager themeManager) {
-    return Consumer<AssetCriticalityNotifier>(
-        builder: (context, assetCriticalityNotifier, child) {
-      return Drawer(
-        child: ListView(
+      child: Column(children: <Widget>[
+        // force everything outside of this Expanded to bottom
+        Expanded(
+            child: Column(
           children: <Widget>[
             const ThemeToggle(),
             const SiteToggle(),
             ListTile(
-              title: const Text('Configure Priority Percentages'),
+              title: const Text('Configure ABC Percentages'),
               trailing: ElevatedButton(
                 child: const Icon(Icons.settings),
-                onPressed: () => showRpnDistDialog(context),
+                onPressed: () {
+                  showDataAlert(
+                    [],
+                    'Enter Desired Precentages',
+                    [const SpareCriticalityConfig()],
+                  );
+                },
               ),
             ),
             ListTile(
-              title: const Text('Work Order Filter Settings'),
+              title: const Text('Refresh Data from Maximo'),
               trailing: ElevatedButton(
-                child: const Icon(Icons.settings),
-                onPressed: () => showWOSettingsDialog(context),
+                child: const Icon(Icons.refresh),
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const AlertDialog(
+                          title: Text('Loading...'),
+                          content:
+                              SparePartsLoadingIndicator(forceUpdate: true),
+                        );
+                      });
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text('Calculate ABC from RPN'),
+              trailing: ElevatedButton(
+                child: const Icon(Icons.calculate),
+                onPressed: () => calculateRPNDistributionSpares(context),
               ),
             ),
             ListTile(
@@ -392,16 +326,7 @@ class _EndDrawerState extends State<EndDrawer> {
                 child: const Text('Export'),
                 onPressed: () async {
                   PlutoGridStateManager? stateManager =
-                      context.read<AssetCriticalityNotifier>().stateManager;
-                  if (!context
-                      .read<AssetCriticalityNotifier>()
-                      .priorityRangesUpToDate) {
-                    bool value =
-                        await assetCriticalityCSVExportWarning(context);
-                    if (value != true) {
-                      return;
-                    }
-                  }
+                      context.read<SpareCriticalityNotifier>().stateManager;
                   //export as csv
                   if (stateManager != null) {
                     exportAssetCriticalityAsCSV(
@@ -439,7 +364,141 @@ class _EndDrawerState extends State<EndDrawer> {
                   }),
             ),
           ],
-        ),
+        )),
+        Consumer<SelectedSiteNotifier>(builder: (context, selectedSite, child) {
+          return FutureBuilder<CriticalityCompletion>(
+              future: database!
+                  .getSpareCompletion(siteid: selectedSite.selectedSite),
+              builder: ((context, snapshot) {
+                if (snapshot.hasData) {
+                  return ListTile(
+                      title: const Text('Completion Percentage'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Total Items: ${snapshot.data!.total}'),
+                          Text('Completed Items: ${snapshot.data!.complete}'),
+                        ],
+                      ));
+                }
+                return const ListTile(
+                  title: Text('Completion Percentage'),
+                  subtitle: Text('Calculating...'),
+                );
+              }));
+        }),
+      ]),
+    );
+  }
+
+  ///Widget for asset criticality end drawer
+  Widget assetCriticalityEndDrawer(
+      BuildContext context, ThemeManager themeManager) {
+    return Consumer<AssetCriticalityNotifier>(
+        builder: (context, assetCriticalityNotifier, child) {
+      return Drawer(
+        child: Column(children: <Widget>[
+          Expanded(
+              child: Column(
+            children: <Widget>[
+              const ThemeToggle(),
+              const SiteToggle(),
+              ListTile(
+                title: const Text('Configure Priority Percentages'),
+                trailing: ElevatedButton(
+                  child: const Icon(Icons.settings),
+                  onPressed: () => showRpnDistDialog(context),
+                ),
+              ),
+              ListTile(
+                title: const Text('Work Order Filter Settings'),
+                trailing: ElevatedButton(
+                  child: const Icon(Icons.settings),
+                  onPressed: () => showWOSettingsDialog(context),
+                ),
+              ),
+              ListTile(
+                title: const Text('Export to CSV'),
+                trailing: ElevatedButton(
+                  child: const Text('Export'),
+                  onPressed: () async {
+                    PlutoGridStateManager? stateManager =
+                        context.read<AssetCriticalityNotifier>().stateManager;
+                    if (!context
+                        .read<AssetCriticalityNotifier>()
+                        .priorityRangesUpToDate) {
+                      bool value =
+                          await assetCriticalityCSVExportWarning(context);
+                      if (value != true) {
+                        return;
+                      }
+                    }
+                    //export as csv
+                    if (stateManager != null) {
+                      exportAssetCriticalityAsCSV(
+                          stateManager: stateManager,
+                          context: navigatorKey.currentContext!);
+                    }
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('Export Settings'),
+                trailing: ElevatedButton(
+                    child: const Text('Export'),
+                    onPressed: () async {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(await exportCriticalityDB(
+                          database!,
+                          context.read<SelectedSiteNotifier>().selectedSite,
+                        )),
+                      ));
+                      Navigator.of(navigatorKey.currentContext!).pop();
+                    }),
+              ),
+              ListTile(
+                title: const Text('Import Settings'),
+                trailing: ElevatedButton(
+                    child: const Text('Import'),
+                    onPressed: () async {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(await importCriticalityDB(
+                          database!,
+                        )),
+                      ));
+                      Navigator.of(navigatorKey.currentContext!).pop();
+                    }),
+              ),
+            ],
+          )),
+          Consumer<SelectedSiteNotifier>(
+              builder: (context, selectedSite, child) {
+            return FutureBuilder<CriticalityCompletion>(
+                future: database!
+                    .getAssetCompletion(siteid: selectedSite.selectedSite),
+                builder: ((context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListTile(
+                        title: const Text('Completion Percentage'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Total Assets: ${snapshot.data!.total}'),
+                            Text('Parent Assets: ${snapshot.data!.ignore}'),
+                            Text(
+                                'Completed Assets: ${snapshot.data!.complete}'),
+                            Text(
+                                'Completed: ${(snapshot.data!.complete * 100 / (snapshot.data!.total - snapshot.data!.ignore)).toStringAsPrecision(3)}%')
+                          ],
+                        ));
+                  }
+                  return const ListTile(
+                    title: Text('Completion Percentage'),
+                    subtitle: Text('Calculating...'),
+                  );
+                }));
+          }),
+        ]),
       );
     });
   }

@@ -373,6 +373,24 @@ LEFT JOIN assets a ON sp.assetnum = a.assetnum
 LEFT JOIN asset_criticalitys ac ON sp.siteid || sp.assetnum = ac.asset
 WHERE sp.siteid = :siteid
 	AND sp.itemnum = :itemnum
+''',
+    'completedAssetRpn': '''
+SELECT count(assetnum) AS totalAssets
+	,count(DISTINCT parent) AS parentAssets
+	,(
+		SELECT count(asset)
+		FROM asset_criticalitys
+		WHERE new_r_p_n > 0
+			AND asset LIKE :siteid || '%'
+			AND asset NOT IN (
+				SELECT DISTINCT :siteid || parent
+				FROM assets
+				WHERE siteid = :siteid
+					AND parent IS NOT NULL
+				)
+		) AS completeChilds
+FROM assets
+WHERE siteid = :siteid
 '''
   },
 )
@@ -1152,7 +1170,7 @@ class MyDatabase extends _$MyDatabase {
     final result =
         await spareCriticalityAutoCalculationItem(siteid, itemnum).getSingle();
     final temp = [
-      ratingFromValue(result.quantity, usageRating),
+      ratingFromValue(result.quantity!, usageRating),
       ratingFromValue(result.leadTime, leadTimeRating),
       ratingFromValue(result.unitCost, costRating),
     ];
@@ -1181,7 +1199,7 @@ class MyDatabase extends _$MyDatabase {
     List<SpareCriticalitysCompanion> results2 = [];
     for (var e in results) {
       final temp = [
-        ratingFromValue(e.quantity, usageRating),
+        ratingFromValue(e.quantity!, usageRating),
         ratingFromValue(e.leadTime, leadTimeRating),
         ratingFromValue(e.unitCost, costRating),
       ];
@@ -1250,6 +1268,29 @@ class MyDatabase extends _$MyDatabase {
           ..where((t) => t.siteid.equals(siteId)))
         .get();
     return purchase;
+  }
+
+  Future<CriticalityCompletion> getAssetCompletion(
+      {required String siteid}) async {
+    final result = await completedAssetRpn(siteid).getSingle();
+    return CriticalityCompletion(
+      total: result.totalAssets,
+      complete: result.completeChilds,
+      ignore: result.parentAssets,
+    );
+  }
+
+  Future<CriticalityCompletion> getSpareCompletion(
+      {required String siteid}) async {
+    final complete = await (select(spareCriticalitys)
+          ..where((tbl) => tbl.siteid.equals(siteid))
+          ..where((tbl) => tbl.newRPN.isBiggerThanValue(0)))
+        .get();
+    final total = await (select(spareCriticalitys)
+          ..where((tbl) => tbl.siteid.equals(siteid)))
+        .get();
+    return CriticalityCompletion(
+        total: total.length, complete: complete.length);
   }
 }
 

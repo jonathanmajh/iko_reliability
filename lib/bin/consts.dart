@@ -836,3 +836,15 @@ class AssetWorkType {
 
   get description => _description;
 }
+
+class CriticalityCompletion {
+  final int total;
+  final int complete;
+  int ignore;
+
+  CriticalityCompletion({
+    required this.total,
+    required this.complete,
+    this.ignore = 0,
+  });
+}
