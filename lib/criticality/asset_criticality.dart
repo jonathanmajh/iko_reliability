@@ -729,7 +729,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 // Create an new ACWA object for rpn calculation
                 try {
                   double newRpn = rpnFunc(assetCrit) ?? -1;
-                  debugPrint('caller C');
+                  debugPrint('caller G');
                   await database!.updateAssetCriticality(
                     assetid: event.row.cells['id']!.value,
                     downtime: event.row.cells['downtime']!.value,
@@ -813,7 +813,7 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
   void execute({
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
-  }) {
+  }) async {
     debugPrint('Pressed add key.');
     if (stateManager.currentColumnField != 'frequency' &&
         stateManager.currentColumnField != 'downtime') {
@@ -822,6 +822,18 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
     if (stateManager.currentCell!.value == 10) {
       return;
     }
+    debugPrint('caller H');
+    await database!.updateAssetCriticality(
+      assetid: stateManager.currentRow!.cells['id']!.value,
+      downtime: stateManager.currentColumnField == 'downtime'
+          ? stateManager.currentCell!.value + 1
+          : stateManager.currentRow!.cells['downtime']!.value,
+      manual: true,
+      frequency: stateManager.currentColumnField == 'frequency'
+          ? stateManager.currentCell!.value + 1
+          : stateManager.currentRow!.cells['frequency']!.value,
+      system: stateManager.currentRow!.cells['system']!.value,
+    );
     stateManager.changeCellValue(
         stateManager.currentCell!, stateManager.currentCell!.value + 1);
   }
@@ -832,7 +844,7 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
   void execute({
     required PlutoKeyManagerEvent keyEvent,
     required PlutoGridStateManager stateManager,
-  }) {
+  }) async {
     debugPrint('Pressed minus key.');
     if (stateManager.currentColumnField != 'frequency' &&
         stateManager.currentColumnField != 'downtime') {
@@ -841,6 +853,18 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
     if (stateManager.currentCell!.value == 0) {
       return;
     }
+    debugPrint('caller I');
+    await database!.updateAssetCriticality(
+      assetid: stateManager.currentRow!.cells['id']!.value,
+      downtime: stateManager.currentColumnField == 'downtime'
+          ? stateManager.currentCell!.value - 1
+          : stateManager.currentRow!.cells['downtime']!.value,
+      manual: true,
+      frequency: stateManager.currentColumnField == 'frequency'
+          ? stateManager.currentCell!.value - 1
+          : stateManager.currentRow!.cells['frequency']!.value,
+      system: stateManager.currentRow!.cells['system']!.value,
+    );
     stateManager.changeCellValue(
         stateManager.currentCell!, stateManager.currentCell!.value - 1);
   }
