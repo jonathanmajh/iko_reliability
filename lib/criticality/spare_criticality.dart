@@ -837,11 +837,6 @@ class OverrideSparePartStatusIcon extends StatefulWidget {
 
 class _OverrideStatusIconState extends State<OverrideSparePartStatusIcon> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
     Color color = Colors.green;

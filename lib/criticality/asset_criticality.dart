@@ -18,6 +18,7 @@ import '../bin/db_drift.dart';
 import '../main.dart';
 import '../settings/theme_manager.dart';
 import 'functions.dart';
+import 'system_criticality_notifier.dart';
 
 @RoutePage()
 class AssetCriticalityPage extends StatefulWidget {
@@ -154,7 +155,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                         rendererContext.row.cells['assetnum']!.value;
                     refreshAsset(assetnum);
                     //refresh children assets
-                    Set<String> childAssetnums = getChildAssetnums(assetnum);
+                    Set<String> childAssetnums =
+                        getChildAssetnums(assetnum, parentAssets);
                     for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
                       String tempAssetnum = row.cells['assetnum']!.value;
                       if (childAssetnums.contains(tempAssetnum)) {
@@ -191,80 +193,44 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         renderer: (rendererContext) {
           // change cell to dropdown button
           return Consumer<SelectedSiteNotifier>(
-            builder: (context, site, child) {
-              return FutureBuilder(
-                future:
-                    database!.getSystemCriticalitiesFiltered(site.selectedSite),
-                builder: (BuildContext context,
-                    AsyncSnapshot<List<SystemCriticality>> snapshot) {
-                  List<DropdownMenuItem<int>> items = [];
-                  if (snapshot.hasData) {
-                    if (snapshot.data?.isNotEmpty ?? false) {
-                      items =
-                          snapshot.data!.map<DropdownMenuItem<int>>((value) {
-                        return DropdownMenuItem<int>(
-                          value: value.id,
-                          child: Text(value.description),
-                        );
-                      }).toList();
-                      items.add(const DropdownMenuItem<int>(
-                        value: 0,
-                        child: Text(''),
-                      ));
-                    }
-                  }
-                  return DropdownButton<int>(
-                    value: rendererContext.cell.value,
-                    icon: const Icon(Icons.arrow_downward),
-                    elevation: 16,
-                    isExpanded: true,
-                    onChanged: (int? newValue) async {
-                      //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
-                      String assetnum =
-                          rendererContext.row.cells['assetnum']!.value;
-                      //refresh children assets
-                      Set<String> childAssetnums = getChildAssetnums(assetnum);
-                      // update child assets
-                      for (PlutoRow row in stateManager.iterateAllRowAndGroup) {
-                        String tempAssetnum = row.cells['assetnum']!.value;
-                        if (childAssetnums.contains(tempAssetnum)) {
-                          PlutoCell? tempCellRef = row.cells['system'];
-                          // only update child assets if they don't already have a system
-                          if (tempCellRef!.value == 0) {
-                            debugPrint('caller A');
-                            await database!.updateAssetCriticality(
-                              assetid: row.cells['id']!.value,
-                              downtime: row.cells['downtime']!.value,
-                              system: newValue,
-                              frequency: row.cells['frequency']!.value,
-                            );
-                            setState(() {
-                              stateManager.changeCellValue(
-                                  tempCellRef, newValue);
-                            });
-                          }
-                        }
-                      }
-                      // update parent asset
-                      debugPrint('caller B');
-                      await database!.updateAssetCriticality(
-                        assetid: rendererContext.row.cells['id']!.value,
-                        downtime: rendererContext.row.cells['downtime']!.value,
-                        system: newValue,
-                        frequency:
-                            rendererContext.row.cells['frequency']!.value,
+              builder: (context, site, child) {
+            return FutureBuilder(
+              future: () async {
+                if (context.read<SystemCriticalityNotifier>().selectedSite ==
+                    site.selectedSite) {
+                  return context.read<SystemCriticalityNotifier>().systems;
+                }
+                return database!
+                    .getSystemCriticalitiesFiltered(site.selectedSite);
+              }(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<SystemCriticality>> snapshot) {
+                List<DropdownMenuItem<int>> items = [];
+                if (snapshot.hasData) {
+                  if (snapshot.data?.isNotEmpty ?? false) {
+                    items = snapshot.data!.map<DropdownMenuItem<int>>((value) {
+                      return DropdownMenuItem<int>(
+                        value: value.id,
+                        child: Text(value.description),
                       );
-                      setState(() {
-                        stateManager.changeCellValue(
-                            rendererContext.cell, newValue);
-                      });
-                    },
+                    }).toList();
+                    items.add(const DropdownMenuItem<int>(
+                      value: 0,
+                      child: Text(''),
+                    ));
+                    context.read<SystemCriticalityNotifier>().selectedSite =
+                        site.selectedSite;
+                    context.read<SystemCriticalityNotifier>().systems =
+                        snapshot.data!;
+                  }
+                }
+                return SystemDropdown(
+                    rendererContext: rendererContext,
                     items: items,
-                  );
-                },
-              );
-            },
-          );
+                    parentAssets: parentAssets);
+              },
+            );
+          });
         },
       ),
       PlutoColumn(
@@ -470,23 +436,6 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     detailStateManager.appendRows([...rows, ...excludedRows]);
 
     detailStateManager.setShowLoading(false);
-  }
-
-  ///Gets a set of assetnums that have [assetnum] as a parent or ancestor.
-  ///Recursive method
-  Set<String> getChildAssetnums(String assetnum) {
-    List<AssetCriticalityWithAsset>? directChilds = parentAssets[assetnum];
-    //exit condition
-    if (directChilds == null || directChilds.isEmpty) {
-      return <String>{};
-    }
-
-    Set<String> childSet = {};
-    for (AssetCriticalityWithAsset child in directChilds) {
-      childSet.add(child.asset.assetnum);
-      childSet.addAll(getChildAssetnums(child.asset.assetnum));
-    }
-    return childSet;
   }
 
   List<PlutoRow> getChilds(String parent) {
@@ -1627,4 +1576,92 @@ class _OverrideStatusIconState extends State<OverrideStatusIcon> {
       tooltip: statusText,
     );
   }
+}
+
+class SystemDropdown extends StatefulWidget {
+  const SystemDropdown({
+    super.key,
+    required this.rendererContext,
+    required this.items,
+    required this.parentAssets,
+  });
+
+  final PlutoColumnRendererContext rendererContext;
+  final List<DropdownMenuItem<int>> items;
+  final Map<String, List<AssetCriticalityWithAsset>> parentAssets;
+
+  @override
+  State<SystemDropdown> createState() => _SystemDropdownState();
+}
+
+class _SystemDropdownState extends State<SystemDropdown> {
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<int>(
+      value: widget.rendererContext.cell.value,
+      icon: const Icon(Icons.arrow_downward),
+      elevation: 16,
+      isExpanded: true,
+      onChanged: (int? newValue) async {
+        //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
+        String assetnum = widget.rendererContext.row.cells['assetnum']!.value;
+        //refresh children assets
+        Set<String> childAssetnums =
+            getChildAssetnums(assetnum, widget.parentAssets);
+        // update child assets
+        for (PlutoRow row
+            in widget.rendererContext.stateManager.iterateAllRowAndGroup) {
+          String tempAssetnum = row.cells['assetnum']!.value;
+          if (childAssetnums.contains(tempAssetnum)) {
+            PlutoCell? tempCellRef = row.cells['system'];
+            // only update child assets if they don't already have a system
+            if (tempCellRef!.value == 0) {
+              debugPrint('caller A');
+              await database!.updateAssetCriticality(
+                assetid: row.cells['id']!.value,
+                downtime: row.cells['downtime']!.value,
+                system: newValue,
+                frequency: row.cells['frequency']!.value,
+              );
+              setState(() {
+                widget.rendererContext.stateManager
+                    .changeCellValue(tempCellRef, newValue);
+              });
+            }
+          }
+        }
+        // update parent asset
+        debugPrint('caller B');
+        await database!.updateAssetCriticality(
+          assetid: widget.rendererContext.row.cells['id']!.value,
+          downtime: widget.rendererContext.row.cells['downtime']!.value,
+          system: newValue,
+          frequency: widget.rendererContext.row.cells['frequency']!.value,
+        );
+        setState(() {
+          widget.rendererContext.stateManager
+              .changeCellValue(widget.rendererContext.cell, newValue);
+        });
+      },
+      items: widget.items,
+    );
+  }
+}
+
+///Gets a set of assetnums that have [assetnum] as a parent or ancestor.
+///Recursive method
+Set<String> getChildAssetnums(String assetnum,
+    Map<String, List<AssetCriticalityWithAsset>> parentAssets) {
+  List<AssetCriticalityWithAsset>? directChilds = parentAssets[assetnum];
+  //exit condition
+  if (directChilds == null || directChilds.isEmpty) {
+    return <String>{};
+  }
+
+  Set<String> childSet = {};
+  for (AssetCriticalityWithAsset child in directChilds) {
+    childSet.add(child.asset.assetnum);
+    childSet.addAll(getChildAssetnums(child.asset.assetnum, parentAssets));
+  }
+  return childSet;
 }
