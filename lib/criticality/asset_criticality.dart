@@ -122,11 +122,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         hide: true,
       ),
       PlutoColumn(
-        title: 'Hierarchy',
-        field: 'hierarchy',
-        width: 250,
-        type: PlutoColumnType.text(),
-      ),
+          title: 'Hierarchy',
+          field: 'hierarchy',
+          width: 250,
+          type: PlutoColumnType.text(),
+          renderer: (rendererContext) {
+            return Container();
+          }),
       PlutoColumn(
         width: 100,
         title: 'Asset Number',
@@ -519,7 +521,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'frequency':
                 PlutoCell(value: child.assetCriticality?.frequency ?? 0),
             'downtime': PlutoCell(value: child.assetCriticality?.downtime ?? 0),
-            'hierarchy': PlutoCell(value: ''),
+            'hierarchy': PlutoCell(value: child.asset.hierarchy ?? ''),
             'newPriority': PlutoCell(value: priorityText),
             'rpn': PlutoCell(value: calculatedRPN),
             'id': PlutoCell(value: child.asset.id),
