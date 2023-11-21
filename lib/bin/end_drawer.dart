@@ -45,6 +45,8 @@ class _EndDrawerState extends State<EndDrawer> {
       return assetCriticalityEndDrawer(context, themeManager);
     } else if (ModalRoute.of(context)!.settings.name == 'HomeRoute') {
       return homeRouteEndDrawer(context, themeManager);
+    } else if (ModalRoute.of(context)!.settings.name == 'PmCheckRoute') {
+      return pmCheckRouteEndDrawer(context, themeManager);
     } else if (ModalRoute.of(context)!.settings.name ==
         'SpareCriticalityRoute') {
       return spareCriticalityEndDrawer(context, themeManager);
@@ -53,6 +55,30 @@ class _EndDrawerState extends State<EndDrawer> {
     }
   }
   // Add HomeRoute
+
+  Widget pmCheckRouteEndDrawer(
+      BuildContext context, ThemeManager themeManager) {
+    return Drawer(
+        child: ListView(
+      children: <Widget>[
+        const ThemeToggle(),
+        ListTile(
+          //load observation from spreadsheet/excel
+          title: const Text('Load Observation'),
+          subtitle:
+              const Text('Clear and Load Observation list from spreadsheet'),
+          trailing: IconButton(
+            //load button
+            onPressed: () {
+              database!.clearMeters();
+              database!.addMeters();
+            },
+            icon: const Icon(Icons.input),
+          ),
+        ),
+      ],
+    ));
+  }
 
   ///Widget for default end drawer. Could not extract widget due to _passVisibility error
   Widget homeRouteEndDrawer(BuildContext context, ThemeManager themeManager) {
@@ -244,20 +270,6 @@ class _EndDrawerState extends State<EndDrawer> {
                   );
                 },
               )),
-          ListTile(
-            //load observation from spreadsheet/excel
-            title: const Text('Load Observation'),
-            subtitle:
-                const Text('Clear and Load Observation list from spreadsheet'),
-            trailing: IconButton(
-              //load button
-              onPressed: () {
-                database!.clearMeters();
-                database!.addMeters();
-              },
-              icon: const Icon(Icons.input),
-            ),
-          ),
           const ListTile(
             // a spacer
             title: Text(''),

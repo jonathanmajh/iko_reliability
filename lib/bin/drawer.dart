@@ -11,40 +11,31 @@ class NavDrawer extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.zero,
       children: <Widget>[
-        const DrawerHeader(
+        DrawerHeader(
             child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'IKO Reliability Maximo',
               style: TextStyle(
                 // color: Colors.white,
                 fontSize: 24,
               ),
             ),
-            Text(
-              'display name...',
-              style: TextStyle(
-                // color: Colors.white,
-                fontSize: 18,
-              ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Home'),
+              onTap: () {
+                context.router.pushNamed("/");
+                // change app state...
+                Navigator.pop(context); // close the drawer
+              },
             ),
-            Text('userid'),
-            Text('Status'),
-            // update notifier when the menu is opened
           ],
         )),
-        ListTile(
-          leading: const Icon(Icons.message),
-          title: const Text('Home'),
-          onTap: () {
-            context.router.pushNamed("/");
-            // change app state...
-            Navigator.pop(context); // close the drawer
-          },
-        ),
         ExpansionTile(
+          initiallyExpanded: true,
           title: const Text("Criticality"),
           children: <Widget>[
             ListTile(
@@ -80,6 +71,7 @@ class NavDrawer extends StatelessWidget {
           ],
         ),
         ExpansionTile(
+          initiallyExpanded: true,
           title: const Text("Maximo Admin"),
           children: <Widget>[
             ListTile(
