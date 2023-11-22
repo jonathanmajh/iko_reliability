@@ -93,7 +93,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       PlutoColumn(
         width: 100,
         readOnly: true,
-        title: 'Downtime',
+        title: 'Downtime Per Event',
         field: 'downtime',
         type: PlutoColumnType.text(),
       ),
@@ -401,13 +401,12 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
       detailStateManager.setShowLoading(true);
 
-      fetchWoHistory(stateManager.currentRow!.cells['assetnum']!.value,
-          context.read<SelectedSiteNotifier>().selectedSite);
+      fetchWoHistory(stateManager.currentRow!.cells['assetnum']!.value);
     }
   }
 
-  void fetchWoHistory(String assetnum, String siteid) async {
-    var wos = await database!.getAssetWorkorders(assetnum, siteid);
+  void fetchWoHistory(String assetnum) async {
+    var wos = await database!.getAssetWorkorders(assetnum);
     List<PlutoRow> rows = [];
     List<PlutoRow> excludedRows = [];
     for (var wo in wos) {
@@ -548,7 +547,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       downtime = downtime + wo.downtime;
       dtEvents++;
     }
-    downtime = downtime / assetCriticalitySettings.frequencyPeriodYears;
+    downtime = downtime / dtEvents;
     dtEvents = dtEvents / assetCriticalitySettings.frequencyPeriodYears;
     for (var row in stateManager.iterateRowAndGroup) {
       if (row.cells['assetnum']!.value == assetnum) {
@@ -572,6 +571,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     String selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
     AssetCriticalitySettingsNotifier assetCriticalitySettings =
         context.read<AssetCriticalitySettingsNotifier>();
+    if (workorder.status != 'CLOSE') {
+      return false;
+    }
     DateTime reportedDate = DateTime.parse(workorder.reportdate);
     if (reportedDate.compareTo(assetCriticalitySettings.workOrderCutoffStart) <
         0) {
