@@ -11,6 +11,7 @@ import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 import '../admin/connections/connection.dart' as impl;
+import '../criticality/spare_criticality.dart';
 import '../main.dart';
 import 'consts.dart';
 import '../admin/upload_maximo.dart';
@@ -291,6 +292,28 @@ WHERE new_r_p_n > 0
 	AND siteid = :siteid
 GROUP BY new_r_p_n
 ''',
+    'spareCriticalityAssetInfo': '''
+SELECT DISTINCT (sp.itemnum) itemnum
+	,(
+		SELECT sum(quantity)
+		FROM spare_parts s1
+		WHERE s1.itemnum = sp.itemnum
+			AND s1.siteid = sp.siteid
+		) quantity
+	,(
+		SELECT max(new_r_p_n)
+		FROM asset_criticalitys
+		WHERE asset IN (
+				SELECT sp.siteid || s2.assetnum
+				FROM spare_parts s2
+				WHERE s2.itemnum = sp.itemnum
+					AND s2.siteid = sp.siteid
+				)
+		) assetRPN
+FROM spare_parts sp
+WHERE sp.siteid = :siteid
+AND sp.itemnum like :itemnum
+''',
     'spareCriticalityAutoCalculation': '''
 SELECT DISTINCT (sp.itemnum) itemnum
 	,(
@@ -325,42 +348,7 @@ SELECT DISTINCT (sp.itemnum) itemnum
 		) assetRPN
 FROM spare_parts sp
 WHERE sp.siteid = :siteid
-''',
-    'spareCriticalityAutoCalculationItem': '''
-SELECT DISTINCT (sp.itemnum) itemnum
-	,(
-		SELECT sum(quantity)
-		FROM spare_parts s1
-		WHERE s1.itemnum = sp.itemnum
-			AND s1.siteid = sp.siteid
-		) quantity
-	,(
-		SELECT ifnull(avg(pr.unit_cost), -1)
-		FROM purchases pr
-		WHERE pr.itemnum = sp.itemnum
-			AND pr.siteid = sp.siteid
-			AND pr.po_status = 1
-		) unitCost
-	,(
-		SELECT ifnull(avg(pr.lead_time), -1)
-		FROM purchases pr
-		WHERE pr.itemnum = sp.itemnum
-			AND pr.siteid = sp.siteid
-			AND pr.po_status = 1
-		) leadTime
-	,(
-		SELECT max(new_r_p_n)
-		FROM asset_criticalitys
-		WHERE asset IN (
-				SELECT sp.siteid || s2.assetnum
-				FROM spare_parts s2
-				WHERE s2.itemnum = sp.itemnum
-					AND s2.siteid = sp.siteid
-				)
-		) assetRPN
-FROM spare_parts sp
-WHERE sp.siteid = :siteid
-AND sp.itemnum = :itemnum
+AND sp.itemnum like :itemnum
 ''',
     'assetsAssociatedWithItem': '''
 SELECT sp.assetnum
@@ -1167,12 +1155,29 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<SpareCriticality>> updateSparePartCriticality(
       {required String siteid, required String itemnum}) async {
-    final result =
-        await spareCriticalityAutoCalculationItem(siteid, itemnum).getSingle();
+    final spareAssetInfo =
+        await spareCriticalityAssetInfo(siteid, itemnum).getSingle();
+    final sparePurchases = await (select(purchases)
+          ..where((tbl) => tbl.itemnum.equals(itemnum)))
+        .get();
+    double leadTime = 0;
+    double unitCost = 0;
+    int numPurchases = 0;
+
+    for (var purchase in sparePurchases) {
+      if (!isPurchaseOrderInRange(purchase, siteid)) {
+        continue;
+      }
+      leadTime = leadTime + purchase.leadTime;
+      unitCost = unitCost + purchase.unitCost;
+      numPurchases++;
+    }
+    leadTime = leadTime / numPurchases;
+    unitCost = unitCost / numPurchases;
     final temp = [
-      ratingFromValue(result.quantity!, usageRating),
-      ratingFromValue(result.leadTime, leadTimeRating),
-      ratingFromValue(result.unitCost, costRating),
+      ratingFromValue(spareAssetInfo.quantity!, usageRating),
+      ratingFromValue(leadTime, leadTimeRating),
+      ratingFromValue(unitCost, costRating),
     ];
     return await (update(spareCriticalitys)
           ..where((tbl) => tbl.id.equals('$siteid$itemnum')))
@@ -1182,13 +1187,14 @@ class MyDatabase extends _$MyDatabase {
       usage: Value(temp[0]),
       leadTime: Value(temp[1]),
       cost: Value(temp[2]),
-      newRPN: Value((result.assetRPN ?? 0) * temp[0] * temp[1] * temp[2]),
-      assetRPN: Value(result.assetRPN ?? 0),
+      newRPN:
+          Value((spareAssetInfo.assetRPN ?? 0) * temp[0] * temp[1] * temp[2]),
+      assetRPN: Value(spareAssetInfo.assetRPN ?? 0),
     ));
   }
 
   Future<void> computeSparePartCriticality({required String siteid}) async {
-    final results = await spareCriticalityAutoCalculation(siteid).get();
+    final spareAssetInfos = await spareCriticalityAssetInfo(siteid, '%').get();
     final skips = await (select(spareCriticalitys)
           ..where((tbl) =>
               tbl.manual.equals(true) | tbl.newPriority.isBiggerThanValue(0)))
@@ -1197,26 +1203,44 @@ class MyDatabase extends _$MyDatabase {
       return e.id;
     }).toList();
     List<SpareCriticalitysCompanion> results2 = [];
-    for (var e in results) {
-      final temp = [
-        ratingFromValue(e.quantity!, usageRating),
-        ratingFromValue(e.leadTime, leadTimeRating),
-        ratingFromValue(e.unitCost, costRating),
-      ];
-      if (!skip.contains('$siteid${e.itemnum}')) {
-        results2.add(SpareCriticalitysCompanion.insert(
-          id: '$siteid${e.itemnum}',
-          usage: temp[0],
-          leadTime: temp[1],
-          cost: temp[2],
-          assetRPN: e.assetRPN ?? 0,
-          manual: false,
-          newPriority: 0,
-          newRPN: (e.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
-          siteid: siteid,
-          itemnum: e.itemnum,
-        ));
+    for (var spareAssetInfo in spareAssetInfos) {
+      if (skip.contains('$siteid${spareAssetInfo.itemnum}')) {
+        continue;
       }
+      final sparePurchases = await (select(purchases)
+            ..where((tbl) => tbl.itemnum.equals(spareAssetInfo.itemnum)))
+          .get();
+      double leadTime = 0;
+      double unitCost = 0;
+      int numPurchases = 0;
+
+      for (var purchase in sparePurchases) {
+        if (!isPurchaseOrderInRange(purchase, siteid)) {
+          continue;
+        }
+        leadTime = leadTime + purchase.leadTime;
+        unitCost = unitCost + purchase.unitCost;
+        numPurchases++;
+      }
+      leadTime = leadTime / numPurchases;
+      unitCost = unitCost / numPurchases;
+      final temp = [
+        ratingFromValue(spareAssetInfo.quantity!, usageRating),
+        ratingFromValue(leadTime, leadTimeRating),
+        ratingFromValue(unitCost, costRating),
+      ];
+      results2.add(SpareCriticalitysCompanion.insert(
+        id: '$siteid${spareAssetInfo.itemnum}',
+        usage: temp[0],
+        leadTime: temp[1],
+        cost: temp[2],
+        assetRPN: spareAssetInfo.assetRPN ?? 0,
+        manual: false,
+        newPriority: 0,
+        newRPN: (spareAssetInfo.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
+        siteid: siteid,
+        itemnum: spareAssetInfo.itemnum,
+      ));
     }
     await batch((batch) {
       batch.insertAllOnConflictUpdate(spareCriticalitys, results2);
@@ -1261,11 +1285,9 @@ class MyDatabase extends _$MyDatabase {
     ));
   }
 
-  Future<List<Purchase>> getItemPurchases(
-      {required String itemnum, required String siteId}) async {
+  Future<List<Purchase>> getItemPurchases({required String itemnum}) async {
     var purchase = await (select(purchases)
-          ..where((tbl) => tbl.itemnum.equals(itemnum))
-          ..where((t) => t.siteid.equals(siteId)))
+          ..where((tbl) => tbl.itemnum.equals(itemnum)))
         .get();
     return purchase;
   }

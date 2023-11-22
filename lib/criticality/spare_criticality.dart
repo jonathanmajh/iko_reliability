@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:iko_reliability_flutter/criticality/criticality_settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
+import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
 
@@ -377,32 +379,41 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
       detailStateManager.setShowLoading(true);
 
       fetchPurchaseHistory(
-          itemnum: stateManager.currentRow!.cells['itemnum']!.value,
-          siteid: context.read<SelectedSiteNotifier>().selectedSite);
+          itemnum: stateManager.currentRow!.cells['itemnum']!.value);
     }
   }
 
-  void fetchPurchaseHistory({
-    required String itemnum,
-    required String siteid,
-  }) async {
-    var itemPurchases =
-        await database!.getItemPurchases(itemnum: itemnum, siteId: siteid);
+  void fetchPurchaseHistory({required String itemnum}) async {
+    final selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
+    var itemPurchases = await database!.getItemPurchases(itemnum: itemnum);
     List<PlutoRow> rows = [];
+    List<PlutoRow> excludeRows = [];
     for (var itemPurchase in itemPurchases) {
-      rows.add(PlutoRow(cells: {
-        'prnum': PlutoCell(value: itemPurchase.prnum),
-        'ponum': PlutoCell(value: itemPurchase.ponum),
-        'startDate': PlutoCell(value: itemPurchase.startDate),
-        'endDate': PlutoCell(value: itemPurchase.endDate),
-        'leadTime': PlutoCell(value: itemPurchase.leadTime),
-        'unitCost': PlutoCell(value: itemPurchase.unitCost),
-        'included': PlutoCell(value: 'Yes'),
-      }));
+      if (isPurchaseOrderInRange(itemPurchase, selectedSite)) {
+        rows.add(PlutoRow(cells: {
+          'prnum': PlutoCell(value: itemPurchase.prnum),
+          'ponum': PlutoCell(value: itemPurchase.ponum),
+          'startDate': PlutoCell(value: itemPurchase.startDate),
+          'endDate': PlutoCell(value: itemPurchase.endDate),
+          'leadTime': PlutoCell(value: itemPurchase.leadTime),
+          'unitCost': PlutoCell(value: itemPurchase.unitCost),
+          'included': PlutoCell(value: 'Yes'),
+        }));
+      } else {
+        excludeRows.add(PlutoRow(cells: {
+          'prnum': PlutoCell(value: itemPurchase.prnum),
+          'ponum': PlutoCell(value: itemPurchase.ponum),
+          'startDate': PlutoCell(value: itemPurchase.startDate),
+          'endDate': PlutoCell(value: itemPurchase.endDate),
+          'leadTime': PlutoCell(value: itemPurchase.leadTime),
+          'unitCost': PlutoCell(value: itemPurchase.unitCost),
+          'included': PlutoCell(value: 'No'),
+        }));
+      }
     }
     detailStateManager.removeRows(detailStateManager.rows);
     detailStateManager.resetCurrentState();
-    detailStateManager.appendRows(rows);
+    detailStateManager.appendRows([...rows, ...excludeRows]);
 
     detailStateManager.setShowLoading(false);
   }
@@ -745,22 +756,32 @@ class _SparePartsLoadingIndicatorState
         });
         return;
       }
-      try {
-        setState(() {
-          message =
-              'Calculating spare part criticality...\nThis step can take significant time';
-        });
-        await database!.computeSparePartCriticality(siteid: siteid);
-      } catch (e) {
-        setState(() {
-          message = e.toString();
-        });
-        return;
-      }
+      showDataAlert(
+        [],
+        'Purchase History Calculation Settings',
+        [const PurchaseHistorySettingDialog()],
+      ).then((value) async {
+        try {
+          setState(() {
+            message =
+                'Calculating spare part criticality...\nThis step can take significant time';
+          });
+          await database!.computeSparePartCriticality(siteid: siteid);
+          Navigator.pop(navigatorKey.currentContext!);
+          navigatorKey.currentContext!.router.pushNamed("/criticality/spare");
+          Navigator.pop(navigatorKey.currentContext!); // close the drawer
+        } catch (e) {
+          setState(() {
+            message = e.toString();
+          });
+          return;
+        }
+      });
+    } else {
+      Navigator.pop(navigatorKey.currentContext!);
+      navigatorKey.currentContext!.router.pushNamed("/criticality/spare");
+      Navigator.pop(navigatorKey.currentContext!); // close the drawer
     }
-    Navigator.pop(navigatorKey.currentContext!);
-    navigatorKey.currentContext!.router.pushNamed("/criticality/spare");
-    Navigator.pop(navigatorKey.currentContext!); // close the drawer
   }
 }
 
@@ -1004,4 +1025,160 @@ class _SpareCriticalityConfigState extends State<SpareCriticalityConfig> {
       },
     );
   }
+}
+
+class PurchaseHistorySettingDialog extends StatefulWidget {
+  const PurchaseHistorySettingDialog({super.key});
+
+  @override
+  State<PurchaseHistorySettingDialog> createState() =>
+      _PurchaseHistorySettingDialogState();
+}
+
+class _PurchaseHistorySettingDialogState
+    extends State<PurchaseHistorySettingDialog> {
+  DateTime? startDate;
+
+  DateTime? endDate;
+
+  WorkOrderFilterBy? siteFilterBy;
+
+  TextEditingController startDateController = TextEditingController();
+  TextEditingController endDateController = TextEditingController();
+  TextEditingController siteFilterController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    SpareCriticalitySettingNotifier spareCriticalitySettingsNotifier =
+        context.read<SpareCriticalitySettingNotifier>();
+    startDate = spareCriticalitySettingsNotifier.purchaseCutoffStart;
+    endDate = spareCriticalitySettingsNotifier.purchaseCutoffEnd;
+    siteFilterBy = spareCriticalitySettingsNotifier.purchaseFilterBy;
+    startDateController.text = DateFormat('yyyy-MM-dd').format(startDate!);
+    endDateController.text = DateFormat('yyyy-MM-dd').format(endDate!);
+    siteFilterController.text = siteFilterBy.toString();
+  }
+
+  @override
+  void dispose() {
+    startDateController.dispose();
+    endDateController.dispose();
+    siteFilterController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SpareCriticalitySettingNotifier>(
+        builder: (context, notifier, child) {
+      return Column(
+        children: [
+          TextField(
+            controller: startDateController,
+            decoration: const InputDecoration(
+                icon: Icon(Icons.calendar_month),
+                labelText: 'Ignore Purchases Before'),
+            readOnly: true,
+            onTap: () async {
+              DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: startDate,
+                  firstDate: DateTime(1951),
+                  //DateTime.now() - not to allow to choose before today.
+                  lastDate: DateTime.now());
+              if (pickedDate != null) {
+                setState(() {
+                  startDateController.text =
+                      DateFormat('yyyy-MM-dd').format(pickedDate);
+                  //set output date to TextField value.
+                  context
+                      .read<SpareCriticalitySettingNotifier>()
+                      .setPurchaseSettings(
+                          selectedSite:
+                              context.read<SelectedSiteNotifier>().selectedSite,
+                          purchaseCutoffStart: pickedDate);
+                });
+              }
+            },
+          ),
+          TextField(
+            controller: endDateController,
+            decoration: const InputDecoration(
+                icon: Icon(Icons.calendar_month),
+                labelText: 'Ignore Purchases After'),
+            readOnly: true,
+            onTap: () async {
+              DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: endDate,
+                  firstDate: DateTime(1951),
+                  //DateTime.now() - not to allow to choose before today.
+                  lastDate: DateTime.now());
+              if (pickedDate != null) {
+                setState(() {
+                  endDateController.text =
+                      DateFormat('yyyy-MM-dd').format(pickedDate);
+                  //set output date to TextField value.
+                  context
+                      .read<SpareCriticalitySettingNotifier>()
+                      .setPurchaseSettings(
+                          selectedSite:
+                              context.read<SelectedSiteNotifier>().selectedSite,
+                          purchaseCutoffEnd: pickedDate);
+                });
+              }
+            },
+          ),
+          ListTile(
+              title: const Text('Purchases Site Filter'),
+              leading: const Icon(Icons.map),
+              subtitle: DropdownButton(
+                  isExpanded: true,
+                  value: siteFilterBy,
+                  items: WorkOrderFilterBy.values.map((filter) {
+                    return DropdownMenuItem(
+                        value: filter, child: Text(filter.description));
+                  }).toList(),
+                  onChanged: (WorkOrderFilterBy? newValue) {
+                    setState(() {
+                      siteFilterBy = newValue!;
+                      context
+                          .read<SpareCriticalitySettingNotifier>()
+                          .setPurchaseSettings(
+                              selectedSite: context
+                                  .read<SelectedSiteNotifier>()
+                                  .selectedSite,
+                              purchaseFilterBy: newValue);
+                    });
+                  })),
+        ],
+      );
+    });
+  }
+}
+
+bool isPurchaseOrderInRange(
+  Purchase purchase,
+  String selectedSite,
+) {
+  final spareCriticalitySetting =
+      navigatorKey.currentContext!.read<SpareCriticalitySettingNotifier>();
+  if (purchase.endDate == null) {
+    return false;
+  }
+  DateTime startDate = DateTime.parse(purchase.startDate);
+  if (startDate.compareTo(spareCriticalitySetting.purchaseCutoffStart) < 0) {
+    return false;
+  }
+  if (startDate.compareTo(spareCriticalitySetting.purchaseCutoffEnd) > 0) {
+    return false;
+  }
+  if (spareCriticalitySetting.purchaseFilterBy ==
+      WorkOrderFilterBy.currentSite) {
+    if (purchase.siteid != selectedSite) {
+      return false;
+    }
+  }
+  return true;
 }

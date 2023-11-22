@@ -309,6 +309,19 @@ class _EndDrawerState extends State<EndDrawer> {
               ),
             ),
             ListTile(
+              title: const Text('Configure Purchases Filter Settings'),
+              trailing: ElevatedButton(
+                child: const Icon(Icons.settings),
+                onPressed: () {
+                  showDataAlert(
+                    [],
+                    'Purchase History Calculation Settings',
+                    [const PurchaseHistorySettingDialog()],
+                  );
+                },
+              ),
+            ),
+            ListTile(
               title: const Text('Refresh Data from Maximo'),
               trailing: ElevatedButton(
                 child: const Icon(Icons.refresh),

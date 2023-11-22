@@ -4925,30 +4925,28 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         ));
   }
 
-  Selectable<SpareCriticalityAutoCalculationResult>
-      spareCriticalityAutoCalculation(String siteid) {
+  Selectable<SpareCriticalityAssetInfoResult> spareCriticalityAssetInfo(
+      String siteid, String itemnum) {
     return customSelect(
-        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1',
+        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum LIKE ?2',
         variables: [
-          Variable<String>(siteid)
+          Variable<String>(siteid),
+          Variable<String>(itemnum)
         ],
         readsFrom: {
           spareParts,
-          purchases,
           assetCriticalitys,
-        }).map((QueryRow row) => SpareCriticalityAutoCalculationResult(
+        }).map((QueryRow row) => SpareCriticalityAssetInfoResult(
           itemnum: row.read<String>('itemnum'),
           quantity: row.readNullable<double>('quantity'),
-          unitCost: row.read<double>('unitCost'),
-          leadTime: row.read<double>('leadTime'),
           assetRPN: row.readNullable<double>('assetRPN'),
         ));
   }
 
-  Selectable<SpareCriticalityAutoCalculationItemResult>
-      spareCriticalityAutoCalculationItem(String siteid, String itemnum) {
+  Selectable<SpareCriticalityAutoCalculationResult>
+      spareCriticalityAutoCalculation(String siteid, String itemnum) {
     return customSelect(
-        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum = ?2',
+        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum LIKE ?2',
         variables: [
           Variable<String>(siteid),
           Variable<String>(itemnum)
@@ -4957,7 +4955,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
           spareParts,
           purchases,
           assetCriticalitys,
-        }).map((QueryRow row) => SpareCriticalityAutoCalculationItemResult(
+        }).map((QueryRow row) => SpareCriticalityAutoCalculationResult(
           itemnum: row.read<String>('itemnum'),
           quantity: row.readNullable<double>('quantity'),
           unitCost: row.read<double>('unitCost'),
@@ -5041,6 +5039,17 @@ class UniqueRpnNumbersSpareResult {
   });
 }
 
+class SpareCriticalityAssetInfoResult {
+  final String itemnum;
+  final double? quantity;
+  final double? assetRPN;
+  SpareCriticalityAssetInfoResult({
+    required this.itemnum,
+    this.quantity,
+    this.assetRPN,
+  });
+}
+
 class SpareCriticalityAutoCalculationResult {
   final String itemnum;
   final double? quantity;
@@ -5048,21 +5057,6 @@ class SpareCriticalityAutoCalculationResult {
   final double leadTime;
   final double? assetRPN;
   SpareCriticalityAutoCalculationResult({
-    required this.itemnum,
-    this.quantity,
-    required this.unitCost,
-    required this.leadTime,
-    this.assetRPN,
-  });
-}
-
-class SpareCriticalityAutoCalculationItemResult {
-  final String itemnum;
-  final double? quantity;
-  final double unitCost;
-  final double leadTime;
-  final double? assetRPN;
-  SpareCriticalityAutoCalculationItemResult({
     required this.itemnum,
     this.quantity,
     required this.unitCost,

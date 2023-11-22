@@ -309,9 +309,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 ///shows an alert dialog with [title] as the title and [messages] as the description rows
-showDataAlert(List<String> messages, String title,
+Future<T?> showDataAlert<T>(List<String> messages, String title,
     [List<Widget> widgets = const []]) {
-  showDialog(
+  return showDialog(
     context: navigatorKey.currentContext!,
     builder: (context) {
       return AlertDialog(
