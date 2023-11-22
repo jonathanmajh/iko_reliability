@@ -243,27 +243,30 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             value: rendererContext.cell.value,
             icon: const Icon(Icons.arrow_downward),
             elevation: 16,
+            disabledHint: const Text('Parent Asset'),
             isExpanded: true,
-            onChanged: (int? value) async {
-              debugPrint('caller C');
-              await database!.updateAssetCriticality(
-                assetid: rendererContext.row.cells['id']!.value,
-                frequency: value,
-                manual: true,
-                downtime: rendererContext.row.cells['downtime']!.value,
-                system: rendererContext.row.cells['system']!.value,
-              );
+            onChanged: rendererContext.row.cells['action']!.value == 'parent'
+                ? null
+                : (int? value) async {
+                    debugPrint('caller C');
+                    await database!.updateAssetCriticality(
+                      assetid: rendererContext.row.cells['id']!.value,
+                      frequency: value,
+                      manual: true,
+                      downtime: rendererContext.row.cells['downtime']!.value,
+                      system: rendererContext.row.cells['system']!.value,
+                    );
 
-              if (context.mounted) {
-                context.read<AssetOverrideNotifier>().updateAssetOverride(
-                  assets: [rendererContext.row.cells['assetnum']!.value],
-                  status: AssetOverride.breakdowns,
-                );
-              }
-              setState(() {
-                stateManager.changeCellValue(rendererContext.cell, value);
-              });
-            },
+                    if (context.mounted) {
+                      context.read<AssetOverrideNotifier>().updateAssetOverride(
+                        assets: [rendererContext.row.cells['assetnum']!.value],
+                        status: AssetOverride.breakdowns,
+                      );
+                    }
+                    setState(() {
+                      stateManager.changeCellValue(rendererContext.cell, value);
+                    });
+                  },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
               return DropdownMenuItem<int>(
@@ -285,27 +288,30 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           return DropdownButton<int>(
             value: rendererContext.cell.value,
             icon: const Icon(Icons.arrow_downward),
+            disabledHint: const Text('Parent Asset'),
             elevation: 16,
             isExpanded: true,
-            onChanged: (int? value) async {
-              debugPrint('caller D');
-              await database!.updateAssetCriticality(
-                assetid: rendererContext.row.cells['id']!.value,
-                downtime: value,
-                manual: true,
-                frequency: rendererContext.row.cells['frequency']!.value,
-                system: rendererContext.row.cells['system']!.value,
-              );
-              if (context.mounted) {
-                context.read<AssetOverrideNotifier>().updateAssetOverride(
-                  assets: [rendererContext.row.cells['assetnum']!.value],
-                  status: AssetOverride.breakdowns,
-                );
-              }
-              setState(() {
-                stateManager.changeCellValue(rendererContext.cell, value);
-              });
-            },
+            onChanged: rendererContext.row.cells['action']!.value == 'parent'
+                ? null
+                : (int? value) async {
+                    debugPrint('caller D');
+                    await database!.updateAssetCriticality(
+                      assetid: rendererContext.row.cells['id']!.value,
+                      downtime: value,
+                      manual: true,
+                      frequency: rendererContext.row.cells['frequency']!.value,
+                      system: rendererContext.row.cells['system']!.value,
+                    );
+                    if (context.mounted) {
+                      context.read<AssetOverrideNotifier>().updateAssetOverride(
+                        assets: [rendererContext.row.cells['assetnum']!.value],
+                        status: AssetOverride.breakdowns,
+                      );
+                    }
+                    setState(() {
+                      stateManager.changeCellValue(rendererContext.cell, value);
+                    });
+                  },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
               return DropdownMenuItem<int>(
@@ -337,26 +343,29 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             value: rendererContext.cell.value,
             icon: const Icon(Icons.arrow_downward),
             elevation: 16,
+            disabledHint: const Text('Parent Asset'),
             isExpanded: true,
-            onChanged: (int? value) async {
-              debugPrint('caller E');
-              await database!.updateAssetCriticality(
-                assetid: rendererContext.row.cells['id']!.value,
-                newPriority: value,
-                downtime: rendererContext.row.cells['downtime']!.value,
-                system: rendererContext.row.cells['system']!.value,
-                frequency: rendererContext.row.cells['frequency']!.value,
-              );
-              if (context.mounted) {
-                context.read<AssetOverrideNotifier>().updateAssetOverride(
-                  assets: [rendererContext.row.cells['assetnum']!.value],
-                  status: AssetOverride.priority,
-                );
-              }
-              setState(() {
-                stateManager.changeCellValue(rendererContext.cell, value);
-              });
-            },
+            onChanged: rendererContext.row.cells['action']!.value == 'parent'
+                ? null
+                : (int? value) async {
+                    debugPrint('caller E');
+                    await database!.updateAssetCriticality(
+                      assetid: rendererContext.row.cells['id']!.value,
+                      newPriority: value,
+                      downtime: rendererContext.row.cells['downtime']!.value,
+                      system: rendererContext.row.cells['system']!.value,
+                      frequency: rendererContext.row.cells['frequency']!.value,
+                    );
+                    if (context.mounted) {
+                      context.read<AssetOverrideNotifier>().updateAssetOverride(
+                        assets: [rendererContext.row.cells['assetnum']!.value],
+                        status: AssetOverride.priority,
+                      );
+                    }
+                    setState(() {
+                      stateManager.changeCellValue(rendererContext.cell, value);
+                    });
+                  },
             items: [0, ...assetCriticality.keys]
                 .map<DropdownMenuItem<int>>((int value) {
               return DropdownMenuItem<int>(
@@ -497,6 +506,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     // change status icon
     AssetStatus previousStatus =
         context.read<AssetStatusNotifier>().getAssetStatus(assetnum);
+    // don't update for parent assets
+    if (previousStatus == AssetStatus.parentAsset) {
+      return;
+    }
     context.read<AssetStatusNotifier>().updateAssetStatus(
       assets: [assetnum],
       status: AssetStatus.refreshingWorkOrders,

@@ -407,14 +407,14 @@ Map<int, Map<String, dynamic>> impactRating = {
     'longdesc':
         'No reason to expect failure to have any effect on safety, health, environmental or system production. ',
     'low': 0.0,
-    'high': 0.0,
+    'high': 0.1,
   },
   2: {
     'description': '0 to 2 Hours',
     'likelihood': 'Very Low',
     'longdesc':
         'Minor disruption to system function. Repair of failure can be accomplished during trouble call. (25% rate reduction)',
-    'low': 0.0,
+    'low': 0.1,
     'high': 2.0,
   },
   3: {
