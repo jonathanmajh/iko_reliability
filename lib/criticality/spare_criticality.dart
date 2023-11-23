@@ -79,6 +79,13 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         readOnly: true,
       ),
       PlutoColumn(
+        width: 100,
+        readOnly: true,
+        title: 'Site',
+        field: 'site',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
         title: 'Included?',
         field: 'included',
         type: PlutoColumnType.text(),
@@ -397,6 +404,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
           'endDate': PlutoCell(value: itemPurchase.endDate),
           'leadTime': PlutoCell(value: itemPurchase.leadTime),
           'unitCost': PlutoCell(value: itemPurchase.unitCost),
+          'site': PlutoCell(value: siteIDAndDescription[itemPurchase.siteid]),
           'included': PlutoCell(value: 'Yes'),
         }));
       } else {
@@ -407,6 +415,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
           'endDate': PlutoCell(value: itemPurchase.endDate),
           'leadTime': PlutoCell(value: itemPurchase.leadTime),
           'unitCost': PlutoCell(value: itemPurchase.unitCost),
+          'site': PlutoCell(value: siteIDAndDescription[itemPurchase.siteid]),
           'included': PlutoCell(value: 'No'),
         }));
       }
@@ -757,7 +766,9 @@ class _SparePartsLoadingIndicatorState
         return;
       }
       showDataAlert(
-        [],
+        [
+          'Please use the "Refresh Data from Maximo" button in the side bar after changing settings',
+        ],
         'Purchase History Calculation Settings',
         [const PurchaseHistorySettingDialog()],
       ).then((value) async {

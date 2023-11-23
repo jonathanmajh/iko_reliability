@@ -314,7 +314,9 @@ class _EndDrawerState extends State<EndDrawer> {
                 child: const Icon(Icons.settings),
                 onPressed: () {
                   showDataAlert(
-                    [],
+                    [
+                      'Please use the "Refresh Data from Maximo" button in the side bar after changing settings',
+                    ],
                     'Purchase History Calculation Settings',
                     [const PurchaseHistorySettingDialog()],
                   );
