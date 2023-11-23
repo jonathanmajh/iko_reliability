@@ -161,6 +161,10 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
             .inDays
             .toDouble() /
         365;
+    if (this.purchaseCutoffEnd.compareTo(this.purchaseCutoffStart) < 0) {
+      throw Exception(
+          'End Date is before Start Date! Please review purchase history cutoff dates');
+    }
     notifyListeners();
   }
 }

@@ -1181,17 +1181,13 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
 
 ///shows the dialog for changing work order settings
 void showWOSettingsDialog(BuildContext context) {
-  showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.7,
-              width: MediaQuery.of(context).size.width * 0.7,
-              child: const WorkOrderSettingsDialog()),
-        );
-      });
+  showDataAlert(
+    [
+      'Please use the "Refresh" button for each asset after changing settings',
+    ],
+    'Work Order History Calculation Settings',
+    [const WorkOrderSettingsDialog()],
+  );
 }
 
 class WorkOrderSettingsDialog extends StatefulWidget {
@@ -1211,6 +1207,10 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   ///whether to show all sites' work orders or not
   WorkOrderFilterBy? siteFilterBy;
 
+  TextEditingController startDateController = TextEditingController();
+  TextEditingController endDateController = TextEditingController();
+  TextEditingController siteFilterController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -1218,150 +1218,100 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
         context.read<AssetCriticalitySettingsNotifier>();
     startDate = assetCriticalitySettingsNotifier.workOrderCutoffStart;
     endDate = assetCriticalitySettingsNotifier.workOrderCutoffEnd;
-
     siteFilterBy = assetCriticalitySettingsNotifier.workOrderFilterBy;
+    startDateController.text = DateFormat('yyyy-MM-dd').format(startDate!);
+    endDateController.text = DateFormat('yyyy-MM-dd').format(endDate!);
+    siteFilterController.text = siteFilterBy.toString();
   }
 
   @override
   void dispose() {
+    startDateController.dispose();
+    endDateController.dispose();
+    siteFilterController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8.0, right: 24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-                flex: 3,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, bottom: 40),
-                      child: Text(
-                        'Breakdown Calculation Settings',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    )
-                  ],
-                )),
-            Expanded(
-                flex: 6,
-                child: ListView(
-                  children: [
-                    buildSettingRow(
-                        checkbox: Checkbox(
-                            value: true, onChanged: (value) => setState(() {})),
-                        title: const Text('Ignore Work Orders Before'),
-                        valueDisplay:
-                            Text(DateFormat('yyyy-MM-dd').format(startDate!)),
-                        inputWidget: Builder(
-                            builder: (context) => ElevatedButton(
-                                onPressed: () async {
-                                  DateTime? newDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: startDate ?? DateTime.now(),
-                                      firstDate: DateTime(1951),
-                                      lastDate: DateTime.now());
-                                  if (newDate != null) {
-                                    setState(() {
-                                      startDate = newDate;
-                                      context
-                                          .read<
-                                              AssetCriticalitySettingsNotifier>()
-                                          .setWOSettings(
-                                              selectedSite: context
-                                                  .read<SelectedSiteNotifier>()
-                                                  .selectedSite,
-                                              workOrderCutoffStart: newDate);
-                                    });
-                                  }
-                                },
-                                child: const Text('Select Date')))),
-                    buildSettingRow(
-                        checkbox: Checkbox(
-                            value: true, onChanged: (value) => setState(() {})),
-                        title: const Text('Ignore Work Orders After'),
-                        valueDisplay:
-                            Text(DateFormat('yyyy-MM-dd').format(endDate!)),
-                        inputWidget: Builder(
-                            builder: (context) => ElevatedButton(
-                                onPressed: () async {
-                                  DateTime? newDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: endDate ?? DateTime.now(),
-                                      firstDate: DateTime(1951),
-                                      lastDate: DateTime.now());
-                                  if (newDate != null) {
-                                    setState(() {
-                                      endDate = newDate;
-                                      context
-                                          .read<
-                                              AssetCriticalitySettingsNotifier>()
-                                          .setWOSettings(
-                                              selectedSite: context
-                                                  .read<SelectedSiteNotifier>()
-                                                  .selectedSite,
-                                              workOrderCutoffEnd: newDate);
-                                    });
-                                  }
-                                },
-                                child: const Text('Select Date')))),
-                    ListTile(
-                      title: const Text('Consider Work Orders from:'),
-                      subtitle: Consumer<AssetCriticalitySettingsNotifier>(
-                        builder: (context, value, child) {
-                          return DropdownButton(
-                              isExpanded: true,
-                              value: value.workOrderFilterBy,
-                              items: WorkOrderFilterBy.values.map((filter) {
-                                return DropdownMenuItem(
-                                    value: filter,
-                                    child: Text(filter.description));
-                              }).toList(),
-                              onChanged: (WorkOrderFilterBy? newValue) {
-                                setState(() {
-                                  siteFilterBy = newValue!;
-                                  value.setWOSettings(
-                                      selectedSite: context
-                                          .read<SelectedSiteNotifier>()
-                                          .selectedSite,
-                                      workOrderFilterBy: newValue);
-                                });
-                              });
-                        },
-                      ),
-                    )
-                  ],
-                )),
-            Expanded(
-              flex: 1,
-              child: Row(
-                children: [
-                  ElevatedButton(
-                      onPressed: () {
-                        if (endDate!.compareTo(startDate!) < 0) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                            content: Text(
-                                'End date is before Start date! Please correct dates'),
-                          ));
-                        }
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Confirm')),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+    return Consumer<AssetCriticalitySettingsNotifier>(
+        builder: (context, notifier, child) {
+      return Column(
+        children: [
+          TextField(
+            controller: startDateController,
+            decoration: const InputDecoration(
+                icon: Icon(Icons.calendar_month),
+                labelText: 'Ignore Work Orders Before'),
+            readOnly: true,
+            onTap: () async {
+              DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: startDate,
+                  firstDate: DateTime(1951),
+                  //DateTime.now() - not to allow to choose before today.
+                  lastDate: DateTime.now());
+              if (pickedDate != null) {
+                setState(() {
+                  startDateController.text =
+                      DateFormat('yyyy-MM-dd').format(pickedDate);
+                  //set output date to TextField value.
+                  notifier.setWOSettings(
+                      selectedSite:
+                          context.read<SelectedSiteNotifier>().selectedSite,
+                      workOrderCutoffStart: pickedDate);
+                });
+              }
+            },
+          ),
+          TextField(
+            controller: endDateController,
+            decoration: const InputDecoration(
+                icon: Icon(Icons.calendar_month),
+                labelText: 'Ignore Work Orders After'),
+            readOnly: true,
+            onTap: () async {
+              DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: endDate,
+                  firstDate: DateTime(1951),
+                  //DateTime.now() - not to allow to choose before today.
+                  lastDate: DateTime.now());
+              if (pickedDate != null) {
+                setState(() {
+                  endDateController.text =
+                      DateFormat('yyyy-MM-dd').format(pickedDate);
+                  //set output date to TextField value.
+                  notifier.setWOSettings(
+                      selectedSite:
+                          context.read<SelectedSiteNotifier>().selectedSite,
+                      workOrderCutoffEnd: pickedDate);
+                });
+              }
+            },
+          ),
+          ListTile(
+              title: const Text('Work Order Site Filter'),
+              leading: const Icon(Icons.map),
+              subtitle: DropdownButton(
+                  isExpanded: true,
+                  value: siteFilterBy,
+                  items: WorkOrderFilterBy.values.map((filter) {
+                    return DropdownMenuItem(
+                        value: filter, child: Text(filter.description));
+                  }).toList(),
+                  onChanged: (WorkOrderFilterBy? newValue) {
+                    setState(() {
+                      siteFilterBy = newValue!;
+                      notifier.setWOSettings(
+                          selectedSite:
+                              context.read<SelectedSiteNotifier>().selectedSite,
+                          workOrderFilterBy: newValue);
+                    });
+                  })),
+        ],
+      );
+    });
   }
 
   Widget buildSettingRow(

@@ -191,6 +191,10 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
             .inDays
             .toDouble() /
         365;
+    if (this.workOrderCutoffEnd.compareTo(this.workOrderCutoffStart) < 0) {
+      throw Exception(
+          'End Date is before Start Date! Please review work order history cutoff dates');
+    }
     notifyListeners();
   }
 }
