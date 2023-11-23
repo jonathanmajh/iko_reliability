@@ -50,6 +50,10 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
 
   double frequencyPeriodYears = 10;
 
+  PlutoColumnSort? sortType;
+
+  PlutoColumn? sortColumn;
+
   Future<void> setPercentages(
       {int percentA = -1,
       int percentB = -1,

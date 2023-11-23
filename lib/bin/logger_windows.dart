@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/main.dart';
 import 'package:logger/logger.dart';

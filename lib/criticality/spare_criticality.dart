@@ -497,6 +497,20 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                 }
                 stateManager.removeAllRows();
                 stateManager.appendRows(rows);
+                final settings =
+                    context.watch<SpareCriticalitySettingNotifier>();
+                if (settings.sortType != null) {
+                  switch (settings.sortType) {
+                    case PlutoColumnSort.ascending:
+                      stateManager.sortAscending(settings.sortColumn!);
+                      break;
+                    case PlutoColumnSort.descending:
+                      stateManager.sortDescending(settings.sortColumn!);
+                      break;
+                    default:
+                  }
+                  stateManager.notifyListeners();
+                }
                 context.watch<SpareCriticalityNotifier>().updateGrid = false;
               }
             }
@@ -541,6 +555,12 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                     stateManager;
                 event.stateManager.addListener(gridAHandler);
                 stateManager.setShowColumnFilter(true);
+              },
+              onSorted: (PlutoGridOnSortedEvent event) {
+                context.read<SpareCriticalitySettingNotifier>().sortColumn =
+                    event.column;
+                context.read<SpareCriticalitySettingNotifier>().sortType =
+                    event.column.sort;
               },
               onChanged: (PlutoGridOnChangedEvent event) async {
                 // recalculate rpn number > nre priority if not overwritten
