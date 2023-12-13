@@ -26,5 +26,5 @@ flutter upgrade
 flutter build windows
 dart run squirrel:installer_windows
 
-git tag -a v1.2.6 -m "some message"
+git tag -a v1.3.1 -m "."
 git push --follow-tags

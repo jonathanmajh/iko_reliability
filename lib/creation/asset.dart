@@ -470,7 +470,9 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
               },
               inputFormatters: [
                 LengthLimitingTextInputFormatter(
-                    55), // to limit total description to 55 characters
+                  55,
+                  maxLengthEnforcement: MaxLengthEnforcement.none,
+                ), // to limit total description to 55 characters
               ],
             ),
             TextFormField(
