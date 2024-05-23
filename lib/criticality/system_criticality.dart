@@ -387,7 +387,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                   ? const PlutoGridStyleConfig.dark()
                   : const PlutoGridStyleConfig(),
             ),
-            onChanged: (PlutoGridOnChangedEvent event) {
+            onChanged: (PlutoGridOnChangedEvent event) async {
               // score should auto calcualte when values change
               event.row.cells['score']!.value = sqrt(
                   (event.row.cells['safety']?.value *
@@ -403,6 +403,9 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                       5);
               updateSystem(event.row)
                   .then((value) => event.row.cells['id']!.value = value);
+              context.read<SystemCriticalityNotifier>().systems =
+                  await database!.getSystemCriticalitiesFiltered(
+                      context.read<SelectedSiteNotifier>().selectedSite);
               debugPrint('$event');
             },
             onLoaded: (PlutoGridOnLoadedEvent event) {

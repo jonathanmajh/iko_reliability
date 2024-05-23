@@ -165,6 +165,7 @@ class Workorders extends Table {
   RealColumn get downtime => real()();
   TextColumn get type => text()();
   TextColumn get assetnum => text()();
+  TextColumn get details => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {siteid, wonum};
@@ -388,7 +389,23 @@ class MyDatabase extends _$MyDatabase {
   MyDatabase.forTesting(DatabaseConnection super.connection);
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          // we added the details property in the change from version 1 to
+          // version 2
+          await m.addColumn(workorders, workorders.details);
+        }
+      },
+    );
+  }
 
   void clearMeters() {
     delete(meterDBs).go();
@@ -792,7 +809,7 @@ class MyDatabase extends _$MyDatabase {
   Future getWorkOrderMaximo(String assetnum, String env) async {
     // maybe a return to indicate completion
     final result = await maximoRequest(
-        'iko_wo?oslc.select=wonum,siteid,description,status,reportdate,IKO_DOWNTIME,WORKTYPE,assetnum&oslc.where=assetnum="$assetnum" and IKO_DOWNTIME>0',
+        'iko_wo?oslc.select=wonum,siteid,description,status,reportdate,IKO_DOWNTIME,WORKTYPE,assetnum,DESCRIPTION_LONGDESCRIPTION&oslc.where=assetnum="$assetnum" and IKO_DOWNTIME>0',
         'get',
         env);
     if (result['member'].length > 0) {
@@ -809,6 +826,9 @@ class MyDatabase extends _$MyDatabase {
             type: row['worktype'],
             reportdate: row['reportdate'],
             assetnum: row['assetnum'],
+            details: Value(row['description_longdescription']
+                .toString()
+                .replaceAll(RegExp(r'<[^>]+>'), '')),
           ),
         );
       }

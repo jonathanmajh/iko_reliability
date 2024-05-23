@@ -127,7 +127,6 @@ final siteIDAndOrgID = {
   'GE': 'IKO-CAD',
   'GH': 'IKO-CAD',
   'GI': 'IKO-CAD',
-  'GJ': 'IKO-CAD',
   'GK': 'IKO-CAD',
   'GM': 'IKO-CAD',
   'GP': 'IKO-CAD',
@@ -162,7 +161,6 @@ final siteIDAndDescription = {
   'PBM': 'Senica',
   'GC': 'Sumas',
   'GS': 'Sylacauga',
-  'GJ': 'CRC Toronto',
 };
 
 const tableHeaders = {
@@ -308,13 +306,16 @@ const tableHeaders = {
 Map<String, String> maximoServerDomains = {
   'MASDEV': 'https://dev.manage.dev.iko.max-it-eam.com/maximo/api/os/',
   'MASTEST': 'https://test.manage.test.iko.max-it-eam.com/maximo/api/os/',
-  'MASPROD': 'https://prod.manage.prod.iko.max-it-eam.com/maximo/api/os/'
+  'MASPROD': 'https://prod.manage.prod.iko.max-it-eam.com/maximo/api/os/',
+  'DEV 8.11':
+      'https://development.manage.development.iko.max-it-eam.com/maximo/api/os/',
 };
 
 Map<String, String> apiKeys = {
   'MASDEV': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
   'MASTEST': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
   'MASPROD': '',
+  'DEV 8.11': '',
 };
 
 Map<int, Map<String, dynamic>> frequencyRating = {

@@ -30,6 +30,7 @@ import 'routes/route.dart';
 MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
 Logger? logger;
+int connectionPool = 0;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -111,6 +111,13 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         field: 'included',
         type: PlutoColumnType.text(),
       ),
+      PlutoColumn(
+        width: 400,
+        readOnly: true,
+        title: 'Details',
+        field: 'details',
+        type: PlutoColumnType.text(),
+      ),
     ]);
 
 // Columns for Assets
@@ -421,6 +428,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'downtime': PlutoCell(value: wo.downtime),
             'site': PlutoCell(value: siteIDAndDescription[wo.siteid]),
             'included': PlutoCell(value: ('Yes')),
+            'details': PlutoCell(value: wo.details),
           },
         ));
       } else {
@@ -434,6 +442,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'downtime': PlutoCell(value: wo.downtime),
             'site': PlutoCell(value: siteIDAndDescription[wo.siteid]),
             'included': PlutoCell(value: ('No')),
+            'details': PlutoCell(value: wo.details),
           },
         ));
       }
@@ -523,11 +532,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       );
     } catch (e) {
       previousStatus = AssetStatus.refreshError;
-      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
-        content: Text(
-            'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}'),
-      ));
-      return;
+      throw Exception(
+          'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}');
     }
     // bring back previous status Icon
     if (context.mounted) {

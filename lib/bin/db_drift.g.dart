@@ -1546,6 +1546,12 @@ class $WorkordersTable extends Workorders
   late final GeneratedColumn<String> assetnum = GeneratedColumn<String>(
       'assetnum', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _detailsMeta =
+      const VerificationMeta('details');
+  @override
+  late final GeneratedColumn<String> details = GeneratedColumn<String>(
+      'details', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         wonum,
@@ -1555,7 +1561,8 @@ class $WorkordersTable extends Workorders
         reportdate,
         downtime,
         type,
-        assetnum
+        assetnum,
+        details
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1619,6 +1626,10 @@ class $WorkordersTable extends Workorders
     } else if (isInserting) {
       context.missing(_assetnumMeta);
     }
+    if (data.containsKey('details')) {
+      context.handle(_detailsMeta,
+          details.isAcceptableOrUnknown(data['details']!, _detailsMeta));
+    }
     return context;
   }
 
@@ -1644,6 +1655,8 @@ class $WorkordersTable extends Workorders
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       assetnum: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}assetnum'])!,
+      details: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}details']),
     );
   }
 
@@ -1662,6 +1675,7 @@ class Workorder extends DataClass implements Insertable<Workorder> {
   final double downtime;
   final String type;
   final String assetnum;
+  final String? details;
   const Workorder(
       {required this.wonum,
       required this.description,
@@ -1670,7 +1684,8 @@ class Workorder extends DataClass implements Insertable<Workorder> {
       required this.reportdate,
       required this.downtime,
       required this.type,
-      required this.assetnum});
+      required this.assetnum,
+      this.details});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1682,6 +1697,9 @@ class Workorder extends DataClass implements Insertable<Workorder> {
     map['downtime'] = Variable<double>(downtime);
     map['type'] = Variable<String>(type);
     map['assetnum'] = Variable<String>(assetnum);
+    if (!nullToAbsent || details != null) {
+      map['details'] = Variable<String>(details);
+    }
     return map;
   }
 
@@ -1695,6 +1713,9 @@ class Workorder extends DataClass implements Insertable<Workorder> {
       downtime: Value(downtime),
       type: Value(type),
       assetnum: Value(assetnum),
+      details: details == null && nullToAbsent
+          ? const Value.absent()
+          : Value(details),
     );
   }
 
@@ -1710,6 +1731,7 @@ class Workorder extends DataClass implements Insertable<Workorder> {
       downtime: serializer.fromJson<double>(json['downtime']),
       type: serializer.fromJson<String>(json['type']),
       assetnum: serializer.fromJson<String>(json['assetnum']),
+      details: serializer.fromJson<String?>(json['details']),
     );
   }
   @override
@@ -1724,6 +1746,7 @@ class Workorder extends DataClass implements Insertable<Workorder> {
       'downtime': serializer.toJson<double>(downtime),
       'type': serializer.toJson<String>(type),
       'assetnum': serializer.toJson<String>(assetnum),
+      'details': serializer.toJson<String?>(details),
     };
   }
 
@@ -1735,7 +1758,8 @@ class Workorder extends DataClass implements Insertable<Workorder> {
           String? reportdate,
           double? downtime,
           String? type,
-          String? assetnum}) =>
+          String? assetnum,
+          Value<String?> details = const Value.absent()}) =>
       Workorder(
         wonum: wonum ?? this.wonum,
         description: description ?? this.description,
@@ -1745,6 +1769,7 @@ class Workorder extends DataClass implements Insertable<Workorder> {
         downtime: downtime ?? this.downtime,
         type: type ?? this.type,
         assetnum: assetnum ?? this.assetnum,
+        details: details.present ? details.value : this.details,
       );
   @override
   String toString() {
@@ -1756,14 +1781,15 @@ class Workorder extends DataClass implements Insertable<Workorder> {
           ..write('reportdate: $reportdate, ')
           ..write('downtime: $downtime, ')
           ..write('type: $type, ')
-          ..write('assetnum: $assetnum')
+          ..write('assetnum: $assetnum, ')
+          ..write('details: $details')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      wonum, description, status, siteid, reportdate, downtime, type, assetnum);
+  int get hashCode => Object.hash(wonum, description, status, siteid,
+      reportdate, downtime, type, assetnum, details);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1775,7 +1801,8 @@ class Workorder extends DataClass implements Insertable<Workorder> {
           other.reportdate == this.reportdate &&
           other.downtime == this.downtime &&
           other.type == this.type &&
-          other.assetnum == this.assetnum);
+          other.assetnum == this.assetnum &&
+          other.details == this.details);
 }
 
 class WorkordersCompanion extends UpdateCompanion<Workorder> {
@@ -1787,6 +1814,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
   final Value<double> downtime;
   final Value<String> type;
   final Value<String> assetnum;
+  final Value<String?> details;
   final Value<int> rowid;
   const WorkordersCompanion({
     this.wonum = const Value.absent(),
@@ -1797,6 +1825,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     this.downtime = const Value.absent(),
     this.type = const Value.absent(),
     this.assetnum = const Value.absent(),
+    this.details = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WorkordersCompanion.insert({
@@ -1808,6 +1837,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     required double downtime,
     required String type,
     required String assetnum,
+    this.details = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : wonum = Value(wonum),
         description = Value(description),
@@ -1826,6 +1856,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     Expression<double>? downtime,
     Expression<String>? type,
     Expression<String>? assetnum,
+    Expression<String>? details,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1837,6 +1868,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       if (downtime != null) 'downtime': downtime,
       if (type != null) 'type': type,
       if (assetnum != null) 'assetnum': assetnum,
+      if (details != null) 'details': details,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1850,6 +1882,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       Value<double>? downtime,
       Value<String>? type,
       Value<String>? assetnum,
+      Value<String?>? details,
       Value<int>? rowid}) {
     return WorkordersCompanion(
       wonum: wonum ?? this.wonum,
@@ -1860,6 +1893,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       downtime: downtime ?? this.downtime,
       type: type ?? this.type,
       assetnum: assetnum ?? this.assetnum,
+      details: details ?? this.details,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1891,6 +1925,9 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     if (assetnum.present) {
       map['assetnum'] = Variable<String>(assetnum.value);
     }
+    if (details.present) {
+      map['details'] = Variable<String>(details.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1908,6 +1945,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
           ..write('downtime: $downtime, ')
           ..write('type: $type, ')
           ..write('assetnum: $assetnum, ')
+          ..write('details: $details, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

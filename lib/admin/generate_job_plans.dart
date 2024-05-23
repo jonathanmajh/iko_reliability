@@ -373,7 +373,9 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
   if (!frequencyUnits.contains(pmDetails.frequencyUnit)) {
     throw Exception('Frequency Unit "${pmDetails.frequency}" is invalid');
   }
-  if ((pmDetails.frequency ?? 0) < 1 && pmDetails.frequencyUnit != 'J') {
+  if ((pmDetails.frequency ?? 0) < 1 &&
+      pmDetails.frequencyUnit != 'J' &&
+      pmDetails.frequencyUnit != 'D') {
     throw Exception('Frequency "${pmDetails.frequency}" is invalid');
   }
   if (pmDetails.frequencyUnit == 'J') {

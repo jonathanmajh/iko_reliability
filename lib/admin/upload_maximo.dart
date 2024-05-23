@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:iko_reliability_flutter/bin/db_drift.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/admin/template_notifier.dart';
+import 'package:iko_reliability_flutter/main.dart';
 import '../creation/asset_creation_notifier.dart';
 import '../bin/consts.dart';
 import 'package:http/http.dart' as http;
@@ -770,6 +771,10 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
   } else {
     header['apikey'] = login.password;
   }
+  while (connectionPool > 1) {
+    await Future.delayed(const Duration(milliseconds: 100));
+  }
+  connectionPool++;
   http.Response response;
   if (type == 'get' || type == 'api') {
     if (type == 'api') {
@@ -781,6 +786,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
       return {'status': 'Failed to Connect'};
     }
     debugPrint('get response received');
+    connectionPool--;
     var parsed = jsonDecode(response.body);
     if (response.statusCode == 200) {
       if (parsed['member'] != null) {
