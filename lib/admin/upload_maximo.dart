@@ -820,6 +820,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
       return {'status': 'Failed to Connect'};
     }
     debugPrint('post preview response');
+    connectionPool--;
     debugPrint(response.body);
     var parsed = jsonDecode(response.body);
     if (parsed['Error'] != null) {
