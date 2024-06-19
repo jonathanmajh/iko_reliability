@@ -287,7 +287,7 @@ class ParsedTemplate {
           readCraft = true;
           readMaterials = false;
           readService = false;
-          pmTemplates[filename][pmNumber].replacement = row[3];
+          pmTemplates[filename][pmNumber].replacement = row[3].toString();
           continue;
         }
 

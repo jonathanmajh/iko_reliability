@@ -137,6 +137,7 @@ final siteIDAndOrgID = {
   'PBM': 'IKO-EU',
   'RAM': 'IKO-UK',
   'KLU': 'IKO-EU',
+  'CORP': 'IKO-CAD',
 };
 
 final siteIDAndDescription = {
@@ -161,6 +162,7 @@ final siteIDAndDescription = {
   'PBM': 'Senica',
   'GC': 'Sumas',
   'GS': 'Sylacauga',
+  'CORP': 'Corporate',
 };
 
 const tableHeaders = {
