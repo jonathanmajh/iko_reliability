@@ -146,6 +146,7 @@ class AssetCriticalitys extends Table {
   TextColumn get type => text()(); // production / non-production
   IntColumn get frequency => integer()();
   IntColumn get downtime => integer()();
+  RealColumn get earlyDetection => real().withDefault(const Constant(0.0))();
   BoolColumn get manual => boolean().withDefault(const Constant(false))();
   IntColumn get newPriority => integer().nullable()();
   RealColumn get newRPN => real().withDefault(const Constant(0))();
@@ -389,7 +390,7 @@ class MyDatabase extends _$MyDatabase {
   MyDatabase.forTesting(DatabaseConnection super.connection);
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -402,6 +403,11 @@ class MyDatabase extends _$MyDatabase {
           // we added the details property in the change from version 1 to
           // version 2
           await m.addColumn(workorders, workorders.details);
+        }
+        if (from < 3) {
+          // add earlyDetection property going to version 3
+          await m.addColumn(
+              assetCriticalitys, assetCriticalitys.earlyDetection);
         }
       },
     );
@@ -620,20 +626,23 @@ class MyDatabase extends _$MyDatabase {
     bool? manual,
     int? newPriority,
     double? newRPN,
+    double? earlyDetection,
   }) async {
     debugPrint('updating asset criticality');
     String type = 'type';
     await (into(assetCriticalitys)
         .insertOnConflictUpdate(AssetCriticalitysCompanion(
       asset: Value(assetid),
-      system: system != null ? Value(system) : const Value.absent(),
+      system: Value(system ?? 0),
       type: Value(type),
-      frequency: frequency != null ? Value(frequency) : const Value.absent(),
-      downtime: downtime != null ? Value(downtime) : const Value.absent(),
+      frequency: Value(frequency ?? 0),
+      downtime: Value(downtime ?? 0),
       manual: manual != null ? Value(manual) : const Value.absent(),
       newPriority:
           newPriority != null ? Value(newPriority) : const Value.absent(),
       newRPN: newRPN != null ? Value(newRPN) : const Value.absent(),
+      earlyDetection:
+          earlyDetection != null ? Value(earlyDetection) : const Value.absent(),
     )));
   }
 
@@ -646,6 +655,7 @@ class MyDatabase extends _$MyDatabase {
       manual: const Value(false),
       newPriority: const Value(null),
       frequency: const Value(0),
+      earlyDetection: const Value(0.0),
       downtime: const Value(0),
     ));
   }

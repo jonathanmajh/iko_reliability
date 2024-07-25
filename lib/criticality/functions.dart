@@ -9,6 +9,7 @@ double? rpnFunc(AssetCriticalityWithAsset asset) {
   try {
     return asset.systemCriticality!.score *
         asset.assetCriticality!.frequency *
+        (1 - asset.assetCriticality!.earlyDetection) *
         asset.assetCriticality!.downtime;
   } catch (e) {
     return -1;

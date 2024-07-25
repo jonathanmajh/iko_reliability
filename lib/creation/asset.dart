@@ -11,20 +11,13 @@ import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
+import '../bin/common.dart';
 import '../bin/drawer.dart';
 import '../settings/settings_notifier.dart';
 import '../settings/theme_manager.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../main.dart';
-
-void toast(context, msg, [int? time]) {
-  ScaffoldMessenger.of(context).clearSnackBars();
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    content: Text(msg),
-    duration: Duration(seconds: (time ?? 2)),
-  ));
-}
 
 @RoutePage()
 class AssetPage extends StatefulWidget {

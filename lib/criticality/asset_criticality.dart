@@ -9,6 +9,7 @@ import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:provider/provider.dart';
+import '../bin/common.dart';
 import '../bin/drawer.dart';
 import 'criticality_settings_notifier.dart';
 import 'percent_slider.dart';
@@ -241,7 +242,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         },
       ),
       PlutoColumn(
-        title: 'Frequency of Breakdown',
+        title: 'Functional Failure Frequency',
         field: 'frequency',
         type: PlutoColumnType.number(),
         renderer: (rendererContext) {
@@ -287,7 +288,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       ),
       PlutoColumn(
         width: 250,
-        title: 'Downtime',
+        title: 'Downtime Impact',
         field: 'downtime',
         type: PlutoColumnType.number(),
         renderer: (rendererContext) {
@@ -331,6 +332,12 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             }).toList(),
           );
         },
+      ),
+      PlutoColumn(
+        width: 250,
+        title: 'Early Detection Effectiveness',
+        field: 'earlyDetection',
+        type: PlutoColumnType.text(),
       ),
       PlutoColumn(
         width: 75,
@@ -487,6 +494,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'frequency':
                 PlutoCell(value: child.assetCriticality?.frequency ?? 0),
             'downtime': PlutoCell(value: child.assetCriticality?.downtime ?? 0),
+            'earlyDetection': PlutoCell(
+                value: '${child.assetCriticality?.earlyDetection ?? 0}%'),
             'hierarchy': PlutoCell(value: child.asset.hierarchy ?? ''),
             'newPriority': PlutoCell(value: priorityText),
             'rpn': PlutoCell(value: calculatedRPN),
@@ -683,6 +692,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 'system': PlutoCell(value: 0),
                 'action': PlutoCell(value: ''),
                 'frequency': PlutoCell(value: 0),
+                'earlyDetection': PlutoCell(value: "0%"),
                 'downtime': PlutoCell(value: 0),
                 'hierarchy': PlutoCell(value: ''),
                 'newPriority': PlutoCell(value: 0),
@@ -701,6 +711,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 'system': PlutoCell(value: 0),
                 'action': PlutoCell(value: ''),
                 'frequency': PlutoCell(value: 0),
+                'earlyDetection': PlutoCell(value: "0%"),
                 'downtime': PlutoCell(value: 0),
                 'hierarchy': PlutoCell(value: ''),
                 'newPriority': PlutoCell(value: 0),
@@ -732,9 +743,39 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               },
               onChanged: (PlutoGridOnChangedEvent event) async {
                 // recalculate rpn number > nre priority if not overwritten
-                if (![5, 6, 7].contains(event.columnIdx)) {
+                if (![5, 6, 7, 8].contains(event.columnIdx)) {
                   // only need to update if changes made to these columns
                   return;
+                }
+                double? earlyDetection =
+                    double.tryParse(event.value.toString().split('%')[0]);
+                if (event.column.field == 'earlyDetection') {
+                  if (earlyDetection == null) {
+                    event.row.cells['earlyDetection']!.value = event.oldValue;
+                    earlyDetection = double.tryParse(
+                        event.oldValue.toString().split('%')[0]);
+                    toast(context,
+                        'Invalid value entered for Early Detection Effectiveness, reverted to previous value.');
+                  } else {
+                    if (earlyDetection < 0) {
+                      earlyDetection = 0;
+                    } else if (earlyDetection < 0.99) {
+                    } else if (earlyDetection < 100) {
+                      earlyDetection = earlyDetection / 100;
+                    } else {
+                      earlyDetection = 0.99;
+                    }
+                    var f = NumberFormat('##0.0%');
+                    event.row.cells['earlyDetection']!.value =
+                        f.format(earlyDetection);
+                    await database!.updateAssetCriticality(
+                      assetid: event.row.cells['id']!.value,
+                      downtime: event.row.cells['downtime']!.value,
+                      system: event.row.cells['system']!.value,
+                      frequency: event.row.cells['frequency']!.value,
+                      earlyDetection: earlyDetection,
+                    );
+                  }
                 }
                 debugPrint('running grid A on change event');
                 AssetCriticalityNotifier assetCriticalityNotifier =
