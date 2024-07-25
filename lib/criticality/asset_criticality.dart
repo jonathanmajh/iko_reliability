@@ -337,6 +337,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         width: 250,
         title: 'Early Detection Effectiveness',
         field: 'earlyDetection',
+        enableAutoEditing: true,
         type: PlutoColumnType.text(),
       ),
       PlutoColumn(
@@ -464,6 +465,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
 
   List<PlutoRow> getChilds(String parent) {
     List<PlutoRow> rows = [];
+    var f = NumberFormat('##0.0%');
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
         double calculatedRPN = child.assetCriticality?.newRPN ?? -1;
@@ -495,7 +497,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 PlutoCell(value: child.assetCriticality?.frequency ?? 0),
             'downtime': PlutoCell(value: child.assetCriticality?.downtime ?? 0),
             'earlyDetection': PlutoCell(
-                value: '${child.assetCriticality?.earlyDetection ?? 0}%'),
+                value: f.format(child.assetCriticality?.earlyDetection ?? 0)),
             'hierarchy': PlutoCell(value: child.asset.hierarchy ?? ''),
             'newPriority': PlutoCell(value: priorityText),
             'rpn': PlutoCell(value: calculatedRPN),
@@ -542,7 +544,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     } catch (e) {
       previousStatus = AssetStatus.refreshError;
       throw Exception(
-          'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}');
+          'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}}');
     }
     // bring back previous status Icon
     if (context.mounted) {
@@ -554,6 +556,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     var wos = await database!.getAssetWorkorders(assetnum);
     double downtime = 0;
     double dtEvents = 0;
+    double followUps = 0;
 
     for (var wo in wos) {
       if (!isWorkOrderInRange(wo)) {
@@ -561,8 +564,15 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       }
       downtime = downtime + wo.downtime;
       dtEvents++;
+      if (wo.recordType == 'FollowUp') {
+        followUps++;
+      }
     }
-    downtime = downtime / dtEvents;
+    downtime = downtime;
+    followUps = followUps / dtEvents;
+    if (!followUps.isFinite) {
+      followUps = 0;
+    }
     dtEvents = dtEvents / assetCriticalitySettings.frequencyPeriodYears;
     for (var row in stateManager.iterateRowAndGroup) {
       if (row.cells['assetnum']!.value == assetnum) {
@@ -572,12 +582,16 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           assetid: row.cells['id']!.value,
           frequency: ratingFromValue(dtEvents, frequencyRating),
           downtime: ratingFromValue(downtime, impactRating),
+          earlyDetection: followUps,
           system: row.cells['system']!.value,
         );
         stateManager.changeCellValue(
             row.cells['downtime']!, ratingFromValue(downtime, impactRating));
         stateManager.changeCellValue(row.cells['frequency']!,
             ratingFromValue(dtEvents, frequencyRating));
+        var f = NumberFormat('##0.0%');
+        stateManager.changeCellValue(
+            row.cells['earlyDetection']!, f.format(followUps));
       }
     }
   }

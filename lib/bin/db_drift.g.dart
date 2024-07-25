@@ -1552,6 +1552,12 @@ class $WorkordersTable extends Workorders
   late final GeneratedColumn<String> details = GeneratedColumn<String>(
       'details', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _recordTypeMeta =
+      const VerificationMeta('recordType');
+  @override
+  late final GeneratedColumn<String> recordType = GeneratedColumn<String>(
+      'record_type', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         wonum,
@@ -1562,7 +1568,8 @@ class $WorkordersTable extends Workorders
         downtime,
         type,
         assetnum,
-        details
+        details,
+        recordType
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1630,6 +1637,12 @@ class $WorkordersTable extends Workorders
       context.handle(_detailsMeta,
           details.isAcceptableOrUnknown(data['details']!, _detailsMeta));
     }
+    if (data.containsKey('record_type')) {
+      context.handle(
+          _recordTypeMeta,
+          recordType.isAcceptableOrUnknown(
+              data['record_type']!, _recordTypeMeta));
+    }
     return context;
   }
 
@@ -1657,6 +1670,8 @@ class $WorkordersTable extends Workorders
           .read(DriftSqlType.string, data['${effectivePrefix}assetnum'])!,
       details: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}details']),
+      recordType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}record_type']),
     );
   }
 
@@ -1676,6 +1691,7 @@ class Workorder extends DataClass implements Insertable<Workorder> {
   final String type;
   final String assetnum;
   final String? details;
+  final String? recordType;
   const Workorder(
       {required this.wonum,
       required this.description,
@@ -1685,7 +1701,8 @@ class Workorder extends DataClass implements Insertable<Workorder> {
       required this.downtime,
       required this.type,
       required this.assetnum,
-      this.details});
+      this.details,
+      this.recordType});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1699,6 +1716,9 @@ class Workorder extends DataClass implements Insertable<Workorder> {
     map['assetnum'] = Variable<String>(assetnum);
     if (!nullToAbsent || details != null) {
       map['details'] = Variable<String>(details);
+    }
+    if (!nullToAbsent || recordType != null) {
+      map['record_type'] = Variable<String>(recordType);
     }
     return map;
   }
@@ -1716,6 +1736,9 @@ class Workorder extends DataClass implements Insertable<Workorder> {
       details: details == null && nullToAbsent
           ? const Value.absent()
           : Value(details),
+      recordType: recordType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recordType),
     );
   }
 
@@ -1732,6 +1755,7 @@ class Workorder extends DataClass implements Insertable<Workorder> {
       type: serializer.fromJson<String>(json['type']),
       assetnum: serializer.fromJson<String>(json['assetnum']),
       details: serializer.fromJson<String?>(json['details']),
+      recordType: serializer.fromJson<String?>(json['recordType']),
     );
   }
   @override
@@ -1747,6 +1771,7 @@ class Workorder extends DataClass implements Insertable<Workorder> {
       'type': serializer.toJson<String>(type),
       'assetnum': serializer.toJson<String>(assetnum),
       'details': serializer.toJson<String?>(details),
+      'recordType': serializer.toJson<String?>(recordType),
     };
   }
 
@@ -1759,7 +1784,8 @@ class Workorder extends DataClass implements Insertable<Workorder> {
           double? downtime,
           String? type,
           String? assetnum,
-          Value<String?> details = const Value.absent()}) =>
+          Value<String?> details = const Value.absent(),
+          Value<String?> recordType = const Value.absent()}) =>
       Workorder(
         wonum: wonum ?? this.wonum,
         description: description ?? this.description,
@@ -1770,6 +1796,7 @@ class Workorder extends DataClass implements Insertable<Workorder> {
         type: type ?? this.type,
         assetnum: assetnum ?? this.assetnum,
         details: details.present ? details.value : this.details,
+        recordType: recordType.present ? recordType.value : this.recordType,
       );
   @override
   String toString() {
@@ -1782,14 +1809,15 @@ class Workorder extends DataClass implements Insertable<Workorder> {
           ..write('downtime: $downtime, ')
           ..write('type: $type, ')
           ..write('assetnum: $assetnum, ')
-          ..write('details: $details')
+          ..write('details: $details, ')
+          ..write('recordType: $recordType')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(wonum, description, status, siteid,
-      reportdate, downtime, type, assetnum, details);
+      reportdate, downtime, type, assetnum, details, recordType);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1802,7 +1830,8 @@ class Workorder extends DataClass implements Insertable<Workorder> {
           other.downtime == this.downtime &&
           other.type == this.type &&
           other.assetnum == this.assetnum &&
-          other.details == this.details);
+          other.details == this.details &&
+          other.recordType == this.recordType);
 }
 
 class WorkordersCompanion extends UpdateCompanion<Workorder> {
@@ -1815,6 +1844,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
   final Value<String> type;
   final Value<String> assetnum;
   final Value<String?> details;
+  final Value<String?> recordType;
   final Value<int> rowid;
   const WorkordersCompanion({
     this.wonum = const Value.absent(),
@@ -1826,6 +1856,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     this.type = const Value.absent(),
     this.assetnum = const Value.absent(),
     this.details = const Value.absent(),
+    this.recordType = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WorkordersCompanion.insert({
@@ -1838,6 +1869,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     required String type,
     required String assetnum,
     this.details = const Value.absent(),
+    this.recordType = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : wonum = Value(wonum),
         description = Value(description),
@@ -1857,6 +1889,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     Expression<String>? type,
     Expression<String>? assetnum,
     Expression<String>? details,
+    Expression<String>? recordType,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1869,6 +1902,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       if (type != null) 'type': type,
       if (assetnum != null) 'assetnum': assetnum,
       if (details != null) 'details': details,
+      if (recordType != null) 'record_type': recordType,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1883,6 +1917,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       Value<String>? type,
       Value<String>? assetnum,
       Value<String?>? details,
+      Value<String?>? recordType,
       Value<int>? rowid}) {
     return WorkordersCompanion(
       wonum: wonum ?? this.wonum,
@@ -1894,6 +1929,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
       type: type ?? this.type,
       assetnum: assetnum ?? this.assetnum,
       details: details ?? this.details,
+      recordType: recordType ?? this.recordType,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1928,6 +1964,9 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     if (details.present) {
       map['details'] = Variable<String>(details.value);
     }
+    if (recordType.present) {
+      map['record_type'] = Variable<String>(recordType.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1946,6 +1985,7 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
           ..write('type: $type, ')
           ..write('assetnum: $assetnum, ')
           ..write('details: $details, ')
+          ..write('recordType: $recordType, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5854,6 +5894,7 @@ typedef $$WorkordersTableInsertCompanionBuilder = WorkordersCompanion Function({
   required String type,
   required String assetnum,
   Value<String?> details,
+  Value<String?> recordType,
   Value<int> rowid,
 });
 typedef $$WorkordersTableUpdateCompanionBuilder = WorkordersCompanion Function({
@@ -5866,6 +5907,7 @@ typedef $$WorkordersTableUpdateCompanionBuilder = WorkordersCompanion Function({
   Value<String> type,
   Value<String> assetnum,
   Value<String?> details,
+  Value<String?> recordType,
   Value<int> rowid,
 });
 
@@ -5898,6 +5940,7 @@ class $$WorkordersTableTableManager extends RootTableManager<
             Value<String> type = const Value.absent(),
             Value<String> assetnum = const Value.absent(),
             Value<String?> details = const Value.absent(),
+            Value<String?> recordType = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               WorkordersCompanion(
@@ -5910,6 +5953,7 @@ class $$WorkordersTableTableManager extends RootTableManager<
             type: type,
             assetnum: assetnum,
             details: details,
+            recordType: recordType,
             rowid: rowid,
           ),
           getInsertCompanionBuilder: ({
@@ -5922,6 +5966,7 @@ class $$WorkordersTableTableManager extends RootTableManager<
             required String type,
             required String assetnum,
             Value<String?> details = const Value.absent(),
+            Value<String?> recordType = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               WorkordersCompanion.insert(
@@ -5934,6 +5979,7 @@ class $$WorkordersTableTableManager extends RootTableManager<
             type: type,
             assetnum: assetnum,
             details: details,
+            recordType: recordType,
             rowid: rowid,
           ),
         ));
@@ -5998,6 +6044,11 @@ class $$WorkordersTableFilterComposer
       column: $state.table.details,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get recordType => $state.composableBuilder(
+      column: $state.table.recordType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 }
 
 class $$WorkordersTableOrderingComposer
@@ -6045,6 +6096,11 @@ class $$WorkordersTableOrderingComposer
 
   ColumnOrderings<String> get details => $state.composableBuilder(
       column: $state.table.details,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get recordType => $state.composableBuilder(
+      column: $state.table.recordType,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }

@@ -167,6 +167,7 @@ class Workorders extends Table {
   TextColumn get type => text()();
   TextColumn get assetnum => text()();
   TextColumn get details => text().nullable()();
+  TextColumn get recordType => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {siteid, wonum};
@@ -408,6 +409,7 @@ class MyDatabase extends _$MyDatabase {
           // add earlyDetection property going to version 3
           await m.addColumn(
               assetCriticalitys, assetCriticalitys.earlyDetection);
+          await m.addColumn(workorders, workorders.recordType);
         }
       },
     );
@@ -818,13 +820,11 @@ class MyDatabase extends _$MyDatabase {
 
   Future getWorkOrderMaximo(String assetnum, String env) async {
     // maybe a return to indicate completion
-    final result = await maximoRequest(
-        'iko_wo?oslc.select=wonum,siteid,description,status,reportdate,IKO_DOWNTIME,WORKTYPE,assetnum,DESCRIPTION_LONGDESCRIPTION&oslc.where=assetnum="$assetnum" and IKO_DOWNTIME>0',
-        'get',
-        env);
-    if (result['member'].length > 0) {
+    final result =
+        await maximoRequest('IKO_API_ASSET_WO?assetnum=$assetnum', 'api', env);
+    if (result.isNotEmpty) {
       List<WorkordersCompanion> woInserts = [];
-      for (var row in result['member'].toList()) {
+      for (var row in result['info'].toList()) {
         woInserts.add(
           WorkordersCompanion.insert(
             wonum: row['wonum'],
@@ -836,9 +836,9 @@ class MyDatabase extends _$MyDatabase {
             type: row['worktype'],
             reportdate: row['reportdate'],
             assetnum: row['assetnum'],
-            details: Value(row['description_longdescription']
-                .toString()
-                .replaceAll(RegExp(r'<[^>]+>'), '')),
+            recordType: Value(row['recordType']),
+            details: Value(
+                row['details'].toString().replaceAll(RegExp(r'<[^>]+>'), '')),
           ),
         );
       }

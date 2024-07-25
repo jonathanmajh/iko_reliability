@@ -788,6 +788,9 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     debugPrint('get response received');
     connectionPool--;
     var parsed = jsonDecode(response.body);
+    if (type == 'api') {
+      return {'info': parsed};
+    }
     if (response.statusCode == 200) {
       if (parsed['member'] != null) {
         if (parsed['member'].length == 0) {
