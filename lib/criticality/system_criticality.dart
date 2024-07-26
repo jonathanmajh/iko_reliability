@@ -688,7 +688,8 @@ class _SystemLoadingIndicatorState extends State<SystemLoadingIndicator> {
     var systems = await database!.getSystemCriticalitiesFiltered(
         context.read<SelectedSiteNotifier>().selectedSite);
     if (systems.isEmpty) {
-      await database!.loadSystems();
+      await database!
+          .loadSystems(context.read<SelectedSiteNotifier>().selectedSite);
     }
     if (!mounted) {
       return;

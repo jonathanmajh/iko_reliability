@@ -704,7 +704,7 @@ class MyDatabase extends _$MyDatabase {
     return result;
   }
 
-  Future<void> loadSystems() async {
+  Future<void> loadSystems(String siteid) async {
     http.Response response = await http.get(Uri.parse(
         'https://raw.githubusercontent.com/jonathanmajh/iko_reliability/master/lib/criticality/CriticalityData.xlsx'));
     final decoder = SpreadsheetDecoder.decodeBytes(response.bodyBytes);
@@ -721,7 +721,6 @@ class MyDatabase extends _$MyDatabase {
               economic: Value(row[4]),
               throughput: Value(row[5]),
               quality: Value(row[6]),
-              // siteid: Value(row.length > 7 ? row[7] : null),
               siteid: Value(row[7]),
               line: row[0],
               score: Value(sqrt((pow(row[2], 2) +
@@ -740,6 +739,38 @@ class MyDatabase extends _$MyDatabase {
     } catch (e) {
       material
           .debugPrint('Error inserting System Criticality\n${e.toString()}');
+    }
+    final associateSheet = decoder.tables.values.elementAt(1);
+    List<AssetCriticalitysCompanion> assetInserts = [];
+    var systems = {};
+    (await getSystemCriticalitiesFiltered(siteid)).map(
+      (system) {
+        systems['${system.description}|${system.line}|${system.siteid}'] =
+            system;
+      },
+    );
+    var assets = {};
+    (await getSiteAssets(siteid)).map((asset) {
+      assets[asset.assetnum] = asset;
+    });
+    for (var i = 2; i < associateSheet.maxRows; i++) {
+      var row = associateSheet.rows[i];
+      if (row[0] != null) {
+        SystemCriticality system;
+        if (systems.containsKey('${row[2]}|${row[3]}|${row[1]}')) {
+          system = systems['${row[2]}|${row[3]}|${row[1]}'];
+        } else {
+          system = systems['${row[2]}|${row[3]}'];
+        }
+        assetInserts.add(AssetCriticalitysCompanion.insert(
+          asset: '${row[1]}|${row[0]}',
+          system: system.id,
+          type: 'type',
+          frequency: 0,
+          downtime: 0,
+          lockedSystem: const Value(true),
+        ));
+      }
     }
   }
 
@@ -879,16 +910,6 @@ class MyDatabase extends _$MyDatabase {
         row.readTableOrNull(systemCriticalitys),
       );
     }).toList();
-  }
-
-  Future<List<SystemCriticality>> getSystemCriticalities() async {
-    var systems = await (select(systemCriticalitys)).get();
-    if (systems.isEmpty) {
-      material.debugPrint('getting data from excel');
-      await loadSystems();
-      systems = await (select(systemCriticalitys)).get();
-    }
-    return systems;
   }
 
   Future<List<SystemCriticality>> getSystemCriticalitiesFiltered(
