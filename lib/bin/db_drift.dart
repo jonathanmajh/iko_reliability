@@ -721,6 +721,8 @@ class MyDatabase extends _$MyDatabase {
               economic: Value(row[4]),
               throughput: Value(row[5]),
               quality: Value(row[6]),
+              // siteid: Value(row.length > 7 ? row[7] : null),
+              siteid: Value(row[7]),
               line: row[0],
               score: Value(sqrt((pow(row[2], 2) +
                       pow(row[3], 2) +
