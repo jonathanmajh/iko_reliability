@@ -269,12 +269,17 @@ class SpareCriticalityWithItem {
   ],
   queries: {
     'systemsFilteredBySite': '''
-SELECT * FROM system_criticalitys
+SELECT *
+FROM system_criticalitys
 WHERE line IN (
-		SELECT substr(assetnum, 1, 1)
-		FROM assets
-		WHERE siteid = :siteid
-		)
+        SELECT substr(assetnum, 1, 1)
+        FROM assets
+        WHERE siteid = :siteid
+        )
+UNION
+SELECT *
+FROM system_criticalitys
+WHERE siteid = :siteid
 ''',
     'maxSystemID': '''
 select max(id) from system_criticalitys
@@ -881,23 +886,26 @@ class MyDatabase extends _$MyDatabase {
 
   Future<List<SystemCriticality>> getSystemCriticalitiesFiltered(
       String siteid) async {
-    var systems = await (select(systemCriticalitys)
-          ..where((tbl) => tbl.siteid.equals(siteid)))
-        .get();
-    if (siteid == '') {
-      return systems;
-    }
-    if (systems.isNotEmpty) {
-      return systems;
-    }
+    List<SystemCriticality> systems = [];
     systems = await systemsFilteredBySite(siteid).get();
     if (systems.isNotEmpty) {
-      return systems;
+      var names = [];
+      systems.map((system) {
+        if (system.siteid != null) {
+          names.add('${system.description}-${system.line}');
+        }
+      }).toList();
+      var toRemove = [];
+      for (var system in systems) {
+        if (names.contains('${system.description}-${system.line}') &&
+            system.siteid == null) {
+          toRemove.add(system);
+        }
+      }
+      for (var remove in toRemove) {
+        systems.remove(remove);
+      }
     }
-    // if there are no systems in DB load systems from Excel
-    debugPrint('Loading all Systems');
-    await loadSystems();
-    systems = await systemsFilteredBySite(siteid).get();
     return systems;
   }
 

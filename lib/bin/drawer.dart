@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
+import '../criticality/asset_criticality.dart';
 import '../criticality/spare_criticality.dart';
+import '../criticality/system_criticality.dart';
 
 class NavDrawer extends StatelessWidget {
   const NavDrawer({super.key});
@@ -42,16 +44,28 @@ class NavDrawer extends StatelessWidget {
               leading: const Icon(Icons.settings),
               title: const Text('System Criticality'),
               onTap: () {
-                context.router.pushNamed("/criticality/system");
-                Navigator.pop(context); // close the drawer
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return const AlertDialog(
+                        title: Text('Loading...'),
+                        content: SystemLoadingIndicator(),
+                      );
+                    });
               },
             ),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Asset Criticality'),
               onTap: () {
-                context.router.pushNamed("/criticality/asset");
-                Navigator.pop(context); // close the drawer
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return const AlertDialog(
+                        title: Text('Loading...'),
+                        content: AssetCriticalityLoadingIndicator(),
+                      );
+                    });
               },
             ),
             ListTile(

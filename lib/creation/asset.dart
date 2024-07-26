@@ -597,6 +597,10 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                     assetCriticality: assetCriticalityValue,
                   );
               // force reload table, should switch out loading later
+              if (!context.mounted) {
+                throw Exception(
+                    'Context no longer mounted, user navigated away?');
+              }
               context
                   .read<SelectedSiteNotifier>()
                   .setSite(context.read<SelectedSiteNotifier>().selectedSite);

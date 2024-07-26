@@ -634,3 +634,53 @@ class _SystemDeleteIconState extends State<SystemDeleteIcon> {
     );
   }
 }
+
+class SystemLoadingIndicator extends StatefulWidget {
+  const SystemLoadingIndicator({super.key});
+
+  @override
+  State<SystemLoadingIndicator> createState() => _SystemLoadingIndicatorState();
+}
+
+class _SystemLoadingIndicatorState extends State<SystemLoadingIndicator> {
+  String message = '';
+  bool loading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.watch<SelectedSiteNotifier>().selectedSite.isEmpty) {
+      return const SiteToggle();
+    }
+    systemLoading(
+      siteid: context.read<SelectedSiteNotifier>().selectedSite,
+      env: context.read<MaximoServerNotifier>().maximoServerSelected,
+    );
+    return Text(message);
+  }
+
+  Future<void> systemLoading(
+      {required String siteid, required String env}) async {
+    if (loading) {
+      // dont load multiple times
+      return;
+    }
+    setState(() {
+      loading = true;
+    });
+    debugPrint('running');
+    setState(() {
+      message = 'Checking system information...';
+    });
+    var systems = await database!.getSystemCriticalitiesFiltered(
+        context.read<SelectedSiteNotifier>().selectedSite);
+    if (systems.isEmpty) {
+      await database!.loadSystems();
+    }
+    if (!mounted) {
+      return;
+    }
+    Navigator.pop(navigatorKey.currentContext!);
+    navigatorKey.currentContext!.router.pushNamed("/criticality/system");
+    Navigator.pop(navigatorKey.currentContext!);
+  }
+}

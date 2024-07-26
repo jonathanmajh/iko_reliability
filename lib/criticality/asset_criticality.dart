@@ -265,7 +265,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       system: rendererContext.row.cells['system']!.value,
                     );
 
-                    if (context.mounted) {
+                    if (mounted) {
                       context.read<AssetOverrideNotifier>().updateAssetOverride(
                         assets: [rendererContext.row.cells['assetnum']!.value],
                         status: AssetOverride.breakdowns,
@@ -310,7 +310,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       frequency: rendererContext.row.cells['frequency']!.value,
                       system: rendererContext.row.cells['system']!.value,
                     );
-                    if (context.mounted) {
+                    if (mounted) {
                       context.read<AssetOverrideNotifier>().updateAssetOverride(
                         assets: [rendererContext.row.cells['assetnum']!.value],
                         status: AssetOverride.breakdowns,
@@ -371,7 +371,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       system: rendererContext.row.cells['system']!.value,
                       frequency: rendererContext.row.cells['frequency']!.value,
                     );
-                    if (context.mounted) {
+                    if (mounted) {
                       context.read<AssetOverrideNotifier>().updateAssetOverride(
                         assets: [rendererContext.row.cells['assetnum']!.value],
                         status: AssetOverride.priority,
@@ -547,7 +547,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}}');
     }
     // bring back previous status Icon
-    if (context.mounted) {
+    if (mounted) {
       context.read<AssetStatusNotifier>().updateAssetStatus(
         assets: [assetnum],
         status: previousStatus,
@@ -792,6 +792,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   }
                 }
                 debugPrint('running grid A on change event');
+                if (!context.mounted) {
+                  return;
+                }
                 AssetCriticalityNotifier assetCriticalityNotifier =
                     context.read<AssetCriticalityNotifier>();
                 AssetStatusNotifier assetStatusNotifier =
@@ -1714,4 +1717,48 @@ Set<String> getChildAssetnums(String assetnum,
     childSet.addAll(getChildAssetnums(child.asset.assetnum, parentAssets));
   }
   return childSet;
+}
+
+class AssetCriticalityLoadingIndicator extends StatefulWidget {
+  const AssetCriticalityLoadingIndicator({super.key});
+
+  @override
+  State<AssetCriticalityLoadingIndicator> createState() =>
+      _AssetCriticalityLoadingIndicatorState();
+}
+
+class _AssetCriticalityLoadingIndicatorState
+    extends State<AssetCriticalityLoadingIndicator> {
+  String message = '';
+  bool loading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.watch<SelectedSiteNotifier>().selectedSite.isEmpty) {
+      return const SiteToggle();
+    }
+    assetLoading(
+      siteid: context.read<SelectedSiteNotifier>().selectedSite,
+      env: context.read<MaximoServerNotifier>().maximoServerSelected,
+    );
+    return Text(message);
+  }
+
+  Future<void> assetLoading(
+      {required String siteid, required String env}) async {
+    if (loading) {
+      // dont load multiple times
+      return;
+    }
+    setState(() {
+      loading = true;
+    });
+    debugPrint('running');
+    setState(() {
+      message = 'Checking asset information...';
+    });
+    // Navigator.pop(navigatorKey.currentContext!);
+    navigatorKey.currentContext!.router.pushNamed("/criticality/asset");
+    // Navigator.pop(navigatorKey.currentContext!);
+  }
 }
