@@ -150,6 +150,7 @@ class AssetCriticalitys extends Table {
   BoolColumn get manual => boolean().withDefault(const Constant(false))();
   IntColumn get newPriority => integer().nullable()();
   RealColumn get newRPN => real().withDefault(const Constant(0))();
+  BoolColumn get lockedSystem => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {asset};
@@ -415,6 +416,7 @@ class MyDatabase extends _$MyDatabase {
           await m.addColumn(
               assetCriticalitys, assetCriticalitys.earlyDetection);
           await m.addColumn(workorders, workorders.recordType);
+          await m.addColumn(assetCriticalitys, assetCriticalitys.lockedSystem);
         }
       },
     );

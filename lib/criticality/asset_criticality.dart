@@ -197,6 +197,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         width: 400,
         title: 'System',
         field: 'system',
+        checkReadOnly: (row, cell) => assetEditCheck(row),
         type: PlutoColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
@@ -403,6 +404,34 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               ],
             );
           }),
+      PlutoColumn(
+          width: 100,
+          title: 'System Locked',
+          field: 'lockedSystem',
+          type: PlutoColumnType.text(),
+          renderer: (rendererContext) {
+            Color color = Colors.green;
+            IconData icon = Icons.lock_open;
+            String statusText = 'System can be freely changed';
+            String searchText = rendererContext.cell.value;
+            if (searchText == 'locked') {
+              color = Colors.red;
+              icon = Icons.lock;
+              statusText = 'System has been pre-assigned by Corporate';
+            }
+            return Row(
+              children: [
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    icon,
+                    color: color,
+                  ),
+                  tooltip: statusText,
+                )
+              ],
+            );
+          }),
     ]);
   }
 
@@ -502,6 +531,10 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             'newPriority': PlutoCell(value: priorityText),
             'rpn': PlutoCell(value: calculatedRPN),
             'id': PlutoCell(value: child.asset.id),
+            'lockedSystem': PlutoCell(
+                value: child.assetCriticality?.lockedSystem ?? false
+                    ? 'locked'
+                    : 'open'),
             'override': PlutoCell(value: ''),
           },
           type: PlutoRowType.group(
@@ -712,6 +745,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 'newPriority': PlutoCell(value: 0),
                 'rpn': PlutoCell(value: 0),
                 'id': PlutoCell(value: ''),
+                'lockedSystem': PlutoCell(value: 'open'),
                 'override': PlutoCell(value: ''),
               },
             ));
@@ -731,6 +765,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 'newPriority': PlutoCell(value: 0),
                 'rpn': PlutoCell(value: 0),
                 'id': PlutoCell(value: ''),
+                'lockedSystem': PlutoCell(value: 'open'),
                 'override': PlutoCell(value: ''),
               },
             ));
@@ -1655,47 +1690,52 @@ class _SystemDropdownState extends State<SystemDropdown> {
       icon: const Icon(Icons.arrow_downward),
       elevation: 16,
       isExpanded: true,
-      onChanged: (int? newValue) async {
-        //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
-        String assetnum = widget.rendererContext.row.cells['assetnum']!.value;
-        //refresh children assets
-        Set<String> childAssetnums =
-            getChildAssetnums(assetnum, widget.parentAssets);
-        // update child assets
-        for (PlutoRow row
-            in widget.rendererContext.stateManager.iterateAllRowAndGroup) {
-          String tempAssetnum = row.cells['assetnum']!.value;
-          if (childAssetnums.contains(tempAssetnum)) {
-            PlutoCell? tempCellRef = row.cells['system'];
-            // only update child assets if they don't already have a system
-            if (tempCellRef!.value == 0) {
-              debugPrint('caller A');
+      disabledHint: const Text('Loading Systems...'),
+      onChanged: widget.rendererContext.row.cells['lockedSystem']?.value ==
+              'locked'
+          ? null
+          : (int? newValue) async {
+              //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
+              String assetnum =
+                  widget.rendererContext.row.cells['assetnum']!.value;
+              //refresh children assets
+              Set<String> childAssetnums =
+                  getChildAssetnums(assetnum, widget.parentAssets);
+              // update child assets
+              for (PlutoRow row in widget
+                  .rendererContext.stateManager.iterateAllRowAndGroup) {
+                String tempAssetnum = row.cells['assetnum']!.value;
+                if (childAssetnums.contains(tempAssetnum)) {
+                  PlutoCell? tempCellRef = row.cells['system'];
+                  // only update child assets if they don't already have a system
+                  if (tempCellRef!.value == 0) {
+                    debugPrint('caller A');
+                    await database!.updateAssetCriticality(
+                      assetid: row.cells['id']!.value,
+                      downtime: row.cells['downtime']!.value,
+                      system: newValue,
+                      frequency: row.cells['frequency']!.value,
+                    );
+                    setState(() {
+                      widget.rendererContext.stateManager
+                          .changeCellValue(tempCellRef, newValue);
+                    });
+                  }
+                }
+              }
+              // update parent asset
+              debugPrint('caller B');
               await database!.updateAssetCriticality(
-                assetid: row.cells['id']!.value,
-                downtime: row.cells['downtime']!.value,
+                assetid: widget.rendererContext.row.cells['id']!.value,
+                downtime: widget.rendererContext.row.cells['downtime']!.value,
                 system: newValue,
-                frequency: row.cells['frequency']!.value,
+                frequency: widget.rendererContext.row.cells['frequency']!.value,
               );
               setState(() {
                 widget.rendererContext.stateManager
-                    .changeCellValue(tempCellRef, newValue);
+                    .changeCellValue(widget.rendererContext.cell, newValue);
               });
-            }
-          }
-        }
-        // update parent asset
-        debugPrint('caller B');
-        await database!.updateAssetCriticality(
-          assetid: widget.rendererContext.row.cells['id']!.value,
-          downtime: widget.rendererContext.row.cells['downtime']!.value,
-          system: newValue,
-          frequency: widget.rendererContext.row.cells['frequency']!.value,
-        );
-        setState(() {
-          widget.rendererContext.stateManager
-              .changeCellValue(widget.rendererContext.cell, newValue);
-        });
-      },
+            },
       items: widget.items,
     );
   }
@@ -1761,4 +1801,11 @@ class _AssetCriticalityLoadingIndicatorState
     navigatorKey.currentContext!.router.pushNamed("/criticality/asset");
     // Navigator.pop(navigatorKey.currentContext!);
   }
+}
+
+bool assetEditCheck(PlutoRow row) {
+  if (row.cells['lockedSystem']?.value == 'locked') {
+    return true;
+  }
+  return false;
 }

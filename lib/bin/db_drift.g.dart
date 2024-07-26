@@ -2538,6 +2538,16 @@ class $AssetCriticalitysTable extends AssetCriticalitys
       type: DriftSqlType.double,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _lockedSystemMeta =
+      const VerificationMeta('lockedSystem');
+  @override
+  late final GeneratedColumn<bool> lockedSystem = GeneratedColumn<bool>(
+      'locked_system', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("locked_system" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         asset,
@@ -2548,7 +2558,8 @@ class $AssetCriticalitysTable extends AssetCriticalitys
         earlyDetection,
         manual,
         newPriority,
-        newRPN
+        newRPN,
+        lockedSystem
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2610,6 +2621,12 @@ class $AssetCriticalitysTable extends AssetCriticalitys
       context.handle(_newRPNMeta,
           newRPN.isAcceptableOrUnknown(data['new_r_p_n']!, _newRPNMeta));
     }
+    if (data.containsKey('locked_system')) {
+      context.handle(
+          _lockedSystemMeta,
+          lockedSystem.isAcceptableOrUnknown(
+              data['locked_system']!, _lockedSystemMeta));
+    }
     return context;
   }
 
@@ -2637,6 +2654,8 @@ class $AssetCriticalitysTable extends AssetCriticalitys
           .read(DriftSqlType.int, data['${effectivePrefix}new_priority']),
       newRPN: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}new_r_p_n'])!,
+      lockedSystem: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}locked_system'])!,
     );
   }
 
@@ -2657,6 +2676,7 @@ class AssetCriticality extends DataClass
   final bool manual;
   final int? newPriority;
   final double newRPN;
+  final bool lockedSystem;
   const AssetCriticality(
       {required this.asset,
       required this.system,
@@ -2666,7 +2686,8 @@ class AssetCriticality extends DataClass
       required this.earlyDetection,
       required this.manual,
       this.newPriority,
-      required this.newRPN});
+      required this.newRPN,
+      required this.lockedSystem});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2681,6 +2702,7 @@ class AssetCriticality extends DataClass
       map['new_priority'] = Variable<int>(newPriority);
     }
     map['new_r_p_n'] = Variable<double>(newRPN);
+    map['locked_system'] = Variable<bool>(lockedSystem);
     return map;
   }
 
@@ -2697,6 +2719,7 @@ class AssetCriticality extends DataClass
           ? const Value.absent()
           : Value(newPriority),
       newRPN: Value(newRPN),
+      lockedSystem: Value(lockedSystem),
     );
   }
 
@@ -2713,6 +2736,7 @@ class AssetCriticality extends DataClass
       manual: serializer.fromJson<bool>(json['manual']),
       newPriority: serializer.fromJson<int?>(json['newPriority']),
       newRPN: serializer.fromJson<double>(json['newRPN']),
+      lockedSystem: serializer.fromJson<bool>(json['lockedSystem']),
     );
   }
   @override
@@ -2728,6 +2752,7 @@ class AssetCriticality extends DataClass
       'manual': serializer.toJson<bool>(manual),
       'newPriority': serializer.toJson<int?>(newPriority),
       'newRPN': serializer.toJson<double>(newRPN),
+      'lockedSystem': serializer.toJson<bool>(lockedSystem),
     };
   }
 
@@ -2740,7 +2765,8 @@ class AssetCriticality extends DataClass
           double? earlyDetection,
           bool? manual,
           Value<int?> newPriority = const Value.absent(),
-          double? newRPN}) =>
+          double? newRPN,
+          bool? lockedSystem}) =>
       AssetCriticality(
         asset: asset ?? this.asset,
         system: system ?? this.system,
@@ -2751,6 +2777,7 @@ class AssetCriticality extends DataClass
         manual: manual ?? this.manual,
         newPriority: newPriority.present ? newPriority.value : this.newPriority,
         newRPN: newRPN ?? this.newRPN,
+        lockedSystem: lockedSystem ?? this.lockedSystem,
       );
   @override
   String toString() {
@@ -2763,14 +2790,15 @@ class AssetCriticality extends DataClass
           ..write('earlyDetection: $earlyDetection, ')
           ..write('manual: $manual, ')
           ..write('newPriority: $newPriority, ')
-          ..write('newRPN: $newRPN')
+          ..write('newRPN: $newRPN, ')
+          ..write('lockedSystem: $lockedSystem')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(asset, system, type, frequency, downtime,
-      earlyDetection, manual, newPriority, newRPN);
+      earlyDetection, manual, newPriority, newRPN, lockedSystem);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2783,7 +2811,8 @@ class AssetCriticality extends DataClass
           other.earlyDetection == this.earlyDetection &&
           other.manual == this.manual &&
           other.newPriority == this.newPriority &&
-          other.newRPN == this.newRPN);
+          other.newRPN == this.newRPN &&
+          other.lockedSystem == this.lockedSystem);
 }
 
 class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
@@ -2796,6 +2825,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
   final Value<bool> manual;
   final Value<int?> newPriority;
   final Value<double> newRPN;
+  final Value<bool> lockedSystem;
   final Value<int> rowid;
   const AssetCriticalitysCompanion({
     this.asset = const Value.absent(),
@@ -2807,6 +2837,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     this.manual = const Value.absent(),
     this.newPriority = const Value.absent(),
     this.newRPN = const Value.absent(),
+    this.lockedSystem = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetCriticalitysCompanion.insert({
@@ -2819,6 +2850,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     this.manual = const Value.absent(),
     this.newPriority = const Value.absent(),
     this.newRPN = const Value.absent(),
+    this.lockedSystem = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : asset = Value(asset),
         system = Value(system),
@@ -2835,6 +2867,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     Expression<bool>? manual,
     Expression<int>? newPriority,
     Expression<double>? newRPN,
+    Expression<bool>? lockedSystem,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2847,6 +2880,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       if (manual != null) 'manual': manual,
       if (newPriority != null) 'new_priority': newPriority,
       if (newRPN != null) 'new_r_p_n': newRPN,
+      if (lockedSystem != null) 'locked_system': lockedSystem,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2861,6 +2895,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       Value<bool>? manual,
       Value<int?>? newPriority,
       Value<double>? newRPN,
+      Value<bool>? lockedSystem,
       Value<int>? rowid}) {
     return AssetCriticalitysCompanion(
       asset: asset ?? this.asset,
@@ -2872,6 +2907,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       manual: manual ?? this.manual,
       newPriority: newPriority ?? this.newPriority,
       newRPN: newRPN ?? this.newRPN,
+      lockedSystem: lockedSystem ?? this.lockedSystem,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2906,6 +2942,9 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     if (newRPN.present) {
       map['new_r_p_n'] = Variable<double>(newRPN.value);
     }
+    if (lockedSystem.present) {
+      map['locked_system'] = Variable<bool>(lockedSystem.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2924,6 +2963,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
           ..write('manual: $manual, ')
           ..write('newPriority: $newPriority, ')
           ..write('newRPN: $newRPN, ')
+          ..write('lockedSystem: $lockedSystem, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5002,9 +5042,9 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   late final $ItemsTable items = $ItemsTable(this);
   late final $SpareCriticalitysTable spareCriticalitys =
       $SpareCriticalitysTable(this);
-  Selectable<SystemCriticality> systemsFilteredBySite(String siteid) {
+  Selectable<SystemCriticality> systemsFilteredBySite(String? siteid) {
     return customSelect(
-        'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1)',
+        'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1) UNION SELECT * FROM system_criticalitys WHERE siteid = ?1',
         variables: [
           Variable<String>(siteid)
         ],
@@ -6352,6 +6392,7 @@ typedef $$AssetCriticalitysTableInsertCompanionBuilder
   Value<bool> manual,
   Value<int?> newPriority,
   Value<double> newRPN,
+  Value<bool> lockedSystem,
   Value<int> rowid,
 });
 typedef $$AssetCriticalitysTableUpdateCompanionBuilder
@@ -6365,6 +6406,7 @@ typedef $$AssetCriticalitysTableUpdateCompanionBuilder
   Value<bool> manual,
   Value<int?> newPriority,
   Value<double> newRPN,
+  Value<bool> lockedSystem,
   Value<int> rowid,
 });
 
@@ -6398,6 +6440,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             Value<bool> manual = const Value.absent(),
             Value<int?> newPriority = const Value.absent(),
             Value<double> newRPN = const Value.absent(),
+            Value<bool> lockedSystem = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               AssetCriticalitysCompanion(
@@ -6410,6 +6453,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             manual: manual,
             newPriority: newPriority,
             newRPN: newRPN,
+            lockedSystem: lockedSystem,
             rowid: rowid,
           ),
           getInsertCompanionBuilder: ({
@@ -6422,6 +6466,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             Value<bool> manual = const Value.absent(),
             Value<int?> newPriority = const Value.absent(),
             Value<double> newRPN = const Value.absent(),
+            Value<bool> lockedSystem = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               AssetCriticalitysCompanion.insert(
@@ -6434,6 +6479,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             manual: manual,
             newPriority: newPriority,
             newRPN: newRPN,
+            lockedSystem: lockedSystem,
             rowid: rowid,
           ),
         ));
@@ -6487,6 +6533,11 @@ class $$AssetCriticalitysTableFilterComposer
 
   ColumnFilters<double> get newRPN => $state.composableBuilder(
       column: $state.table.newRPN,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<bool> get lockedSystem => $state.composableBuilder(
+      column: $state.table.lockedSystem,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -6554,6 +6605,11 @@ class $$AssetCriticalitysTableOrderingComposer
 
   ColumnOrderings<double> get newRPN => $state.composableBuilder(
       column: $state.table.newRPN,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<bool> get lockedSystem => $state.composableBuilder(
+      column: $state.table.lockedSystem,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
