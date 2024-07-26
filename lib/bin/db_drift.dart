@@ -448,11 +448,12 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<SystemCriticality> addSystemCriticalitys(
-      String description, String line) async {
+      String description, String line, String siteid) async {
     final row = await into(systemCriticalitys)
         .insertReturning(SystemCriticalitysCompanion.insert(
       description: description,
       line: line,
+      siteid: Value(siteid),
     ));
     return row;
   }
@@ -581,6 +582,7 @@ class MyDatabase extends _$MyDatabase {
     required int quality,
     required String line,
     required double score,
+    required String siteid,
   }) async {
     final row = await (update(systemCriticalitys)
           ..where((tbl) => tbl.id.equals(key)))
@@ -592,6 +594,7 @@ class MyDatabase extends _$MyDatabase {
       throughput: Value(throughput),
       quality: Value(quality),
       line: Value(line),
+      siteid: siteid == '' ? const Value.absent() : Value(siteid),
       score: Value(sqrt((pow(safety, 2) +
               pow(regulatory, 2) +
               pow(economic, 2) +

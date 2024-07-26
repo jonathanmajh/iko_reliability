@@ -48,6 +48,34 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
       ),
       PlutoColumn(
         width: 150,
+        title: 'Site',
+        field: 'site',
+        type: PlutoColumnType.text(),
+        renderer: (rendererContext) {
+          // change cell to dropdown button
+          return DropdownButton<String>(
+            value: rendererContext.cell.value,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            isExpanded: true,
+            onChanged: (String? value) {
+              setState(() {
+                stateManager.changeCellValue(rendererContext.cell, value);
+              });
+            },
+            items: siteIDAndDescription.keys
+                .toList()
+                .map<DropdownMenuItem<String>>((String key) {
+              return DropdownMenuItem<String>(
+                value: key,
+                child: Text(siteIDAndDescription[key] ?? 'Unknown'),
+              );
+            }).toList(),
+          );
+        },
+      ),
+      PlutoColumn(
+        width: 150,
         title: 'Production Line',
         field: 'line',
         type: PlutoColumnType.text(),
@@ -221,14 +249,6 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         type: PlutoColumnType.number(
           format: '#.##',
         ),
-      ),
-      PlutoColumn(
-        width: 150,
-        title: 'Site',
-        field: 'site',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        hide: true,
       ),
       PlutoColumn(
           width: 85,
@@ -423,28 +443,20 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
 
 Future<int> updateSystem(PlutoRow row) async {
   var id = -1;
-  if (!row.cells.containsKey('id')) {
-    return id;
-    //this shouldnt happen
-  } else {
-    if (row.cells['id']!.value == -1) {
-      id = (await database!.addSystemCriticalitys(
-              row.cells['description']!.value, row.cells['line']!.value))
-          .id;
-    } else {
-      id = await database!.updateSystemCriticalitys(
-        key: row.cells['id']!.value,
-        description: row.cells['description']!.value,
-        safety: row.cells['safety']!.value,
-        regulatory: row.cells['regulatory']!.value,
-        economic: row.cells['economic']!.value,
-        throughput: row.cells['throughput']!.value,
-        quality: row.cells['quality']!.value,
-        line: row.cells['line']!.value,
-        score: row.cells['score']!.value,
-      );
-    }
-  }
+
+  id = await database!.updateSystemCriticalitys(
+    key: row.cells['id']!.value,
+    description: row.cells['description']!.value,
+    safety: row.cells['safety']!.value,
+    regulatory: row.cells['regulatory']!.value,
+    economic: row.cells['economic']!.value,
+    throughput: row.cells['throughput']!.value,
+    quality: row.cells['quality']!.value,
+    line: row.cells['line']!.value,
+    score: row.cells['score']!.value,
+    siteid: row.cells['site']!.value,
+  );
+
   return id;
 }
 
@@ -579,7 +591,9 @@ class _NewSystemFormState extends State<NewSystemForm> {
                           }
                         }
                         final row = await database!.addSystemCriticalitys(
-                            descriptionTextController.text, selectedSystem);
+                            descriptionTextController.text,
+                            selectedSystem,
+                            context.read<SelectedSiteNotifier>().selectedSite);
                         final newRow = stateManager.getNewRow();
                         newRow.cells['id'] = PlutoCell(value: row.id);
                         newRow.cells['line']!.value = row.line;
