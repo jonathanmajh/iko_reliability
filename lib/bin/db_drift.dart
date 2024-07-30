@@ -742,17 +742,17 @@ class MyDatabase extends _$MyDatabase {
     }
     final associateSheet = decoder.tables.values.elementAt(1);
     List<AssetCriticalitysCompanion> assetInserts = [];
+    var temp = await getSystemCriticalitiesFiltered(siteid);
     var systems = {};
-    (await getSystemCriticalitiesFiltered(siteid)).map(
-      (system) {
-        systems['${system.description}|${system.line}|${system.siteid}'] =
-            system;
-      },
-    );
+    // map function doesnt work
+    for (var system in temp) {
+      systems['${system.description}|${system.line}|${system.siteid}'] = system;
+    }
+    var temp2 = await getSiteAssets(siteid);
     var assets = {};
-    (await getSiteAssets(siteid)).map((asset) {
+    for (var asset in temp2) {
       assets[asset.assetnum] = asset;
-    });
+    }
     for (var i = 2; i < associateSheet.maxRows; i++) {
       var row = associateSheet.rows[i];
       if (row[0] != null) {
@@ -760,7 +760,7 @@ class MyDatabase extends _$MyDatabase {
         if (systems.containsKey('${row[2]}|${row[3]}|${row[1]}')) {
           system = systems['${row[2]}|${row[3]}|${row[1]}'];
         } else {
-          system = systems['${row[2]}|${row[3]}'];
+          system = systems['${row[2]}|${row[3]}|null'];
         }
         assetInserts.add(AssetCriticalitysCompanion.insert(
           asset: '${row[1]}|${row[0]}',
@@ -771,6 +771,14 @@ class MyDatabase extends _$MyDatabase {
           lockedSystem: const Value(true),
         ));
       }
+    }
+    try {
+      await batch((batch) {
+        batch.insertAll(assetCriticalitys, assetInserts);
+      });
+    } catch (e) {
+      material.debugPrint(
+          'Error inserting pre-assigned Asset Criticality\n${e.toString()}');
     }
   }
 
