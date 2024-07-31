@@ -225,7 +225,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                     thickness: 1,
                     indent: 0,
                     endIndent: 0,
-                    color: Theme.of(context).colorScheme.background,
+                    color: Theme.of(context).colorScheme.surface,
                   ),
                   Expanded(
                       child: Row(
@@ -252,7 +252,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                           thickness: 1,
                           indent: 5,
                           endIndent: 5,
-                          color: Theme.of(context).colorScheme.background,
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                       ]))
                 ],

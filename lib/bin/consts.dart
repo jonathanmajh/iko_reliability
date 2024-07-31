@@ -163,7 +163,7 @@ final siteIDAndDescription = {
   'GC': 'Sumas',
   'GS': 'Sylacauga',
   'CORP': 'Corporate',
-  '': 'All Sites',
+  'All': 'All Sites',
 };
 
 const tableHeaders = {

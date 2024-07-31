@@ -256,15 +256,15 @@ List<Widget> generateUploadDetailsList(
     List<Widget> rows = [];
     rows.add(Container(
         width: double.maxFinite,
-        color: themeData.colorScheme.onBackground,
+        color: themeData.colorScheme.onSurface,
         child: Text((header),
-            style: TextStyle(color: themeData.colorScheme.background))));
+            style: TextStyle(color: themeData.colorScheme.surface))));
     //table details
     if (uploadDetails[table]!.isNotEmpty) {
       for (final row in uploadDetails[table]!) {
         if (result) {
           final textColor =
-              status[row.last] ?? themeData.colorScheme.background;
+              status[row.last] ?? themeData.colorScheme.surface;
           if (row.last == '!') {
             errors++;
           } else if (row.last == '~') {
@@ -279,14 +279,14 @@ List<Widget> generateUploadDetailsList(
                 row.join(','),
                 style: TextStyle(
                     fontFamily: 'RobotoMono',
-                    color: themeData.colorScheme.onBackground),
+                    color: themeData.colorScheme.onSurface),
               )));
         } else {
           rows.add(Text(
             row.join(','),
             style: TextStyle(
                 fontFamily: 'RobotoMono',
-                color: themeData.colorScheme.onBackground),
+                color: themeData.colorScheme.onSurface),
           ));
         }
       }

@@ -218,13 +218,12 @@ class _EndDrawerState extends State<EndDrawer> {
                 value: siteid,
                 items: [
                   '',
-                  'All',
                   ...siteIDAndDescription.keys,
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(siteIDAndDescription[value] ??
-                        (value == '' ? 'Please Select a Site' : 'All Sites')),
+                    child: Text(
+                        siteIDAndDescription[value] ?? 'Please Select a Site'),
                   );
                 }).toList(),
               ),
@@ -562,8 +561,8 @@ class ThemeToggle extends StatelessWidget {
           onChanged: (value) {
             themeManager.setDarkTheme(value);
           },
-          thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-              (Set<MaterialState> states) {
+          thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+              (Set<WidgetState> states) {
             return (themeManager.theme == ThemeMode.dark)
                 ? const Icon(Icons.dark_mode_rounded)
                 : const Icon(Icons.light_mode_rounded);

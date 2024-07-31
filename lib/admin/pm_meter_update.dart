@@ -48,7 +48,7 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                     ElevatedButton(
                       style: ButtonStyle(
                           shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                              WidgetStateProperty.all<RoundedRectangleBorder>(
                                   const RoundedRectangleBorder(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(18),
@@ -111,7 +111,7 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                     ElevatedButton(
                       style: ButtonStyle(
                           shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                              WidgetStateProperty.all<RoundedRectangleBorder>(
                                   const RoundedRectangleBorder(
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(18),

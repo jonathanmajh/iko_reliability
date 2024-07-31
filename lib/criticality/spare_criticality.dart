@@ -627,7 +627,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
             ),
             divider: themeManager.theme == ThemeMode.dark
                 ? PlutoDualGridDivider.dark(
-                    indicatorColor: Theme.of(context).colorScheme.onBackground)
+                    indicatorColor: Theme.of(context).colorScheme.onSurface)
                 : const PlutoDualGridDivider(),
           );
         },

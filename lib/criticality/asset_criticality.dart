@@ -264,6 +264,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       manual: true,
                       downtime: rendererContext.row.cells['downtime']!.value,
                       system: rendererContext.row.cells['system']!.value,
+                      type: rendererContext.row.cells['assetnum']!.value,
                     );
 
                     if (mounted) {
@@ -310,6 +311,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       manual: true,
                       frequency: rendererContext.row.cells['frequency']!.value,
                       system: rendererContext.row.cells['system']!.value,
+                      type: rendererContext.row.cells['assetnum']!.value,
                     );
                     if (mounted) {
                       context.read<AssetOverrideNotifier>().updateAssetOverride(
@@ -370,6 +372,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       newPriority: value,
                       downtime: rendererContext.row.cells['downtime']!.value,
                       system: rendererContext.row.cells['system']!.value,
+                      type: rendererContext.row.cells['assetnum']!.value,
                       frequency: rendererContext.row.cells['frequency']!.value,
                     );
                     if (mounted) {
@@ -617,6 +620,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           downtime: ratingFromValue(downtime, impactRating),
           earlyDetection: followUps,
           system: row.cells['system']!.value,
+          type: row.cells['assetnum']!.value,
         );
         stateManager.changeCellValue(
             row.cells['downtime']!, ratingFromValue(downtime, impactRating));
@@ -823,6 +827,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       system: event.row.cells['system']!.value,
                       frequency: event.row.cells['frequency']!.value,
                       earlyDetection: earlyDetection,
+                      type: event.row.cells['assetnum']!.value,
                     );
                   }
                 }
@@ -849,6 +854,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                     downtime: event.row.cells['downtime']!.value,
                     system: event.row.cells['system']!.value,
                     frequency: event.row.cells['frequency']!.value,
+                    type: event.row.cells['assetnum']!.value,
                     newRPN: newRpn,
                   );
                   event.row.cells['rpn']!.value = newRpn;
@@ -913,7 +919,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
             ),
             divider: themeManager.theme == ThemeMode.dark
                 ? PlutoDualGridDivider.dark(
-                    indicatorColor: Theme.of(context).colorScheme.onBackground)
+                    indicatorColor: Theme.of(context).colorScheme.onSurface)
                 : const PlutoDualGridDivider(),
           );
         },
@@ -947,6 +953,7 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
           ? stateManager.currentCell!.value + 1
           : stateManager.currentRow!.cells['frequency']!.value,
       system: stateManager.currentRow!.cells['system']!.value,
+      type: stateManager.currentRow!.cells['assetnum']!.value,
     );
     stateManager.changeCellValue(
         stateManager.currentCell!, stateManager.currentCell!.value + 1);
@@ -978,6 +985,7 @@ class CustomMinusKeyAction extends PlutoGridShortcutAction {
           ? stateManager.currentCell!.value - 1
           : stateManager.currentRow!.cells['frequency']!.value,
       system: stateManager.currentRow!.cells['system']!.value,
+      type: stateManager.currentRow!.cells['assetnum']!.value,
     );
     stateManager.changeCellValue(
         stateManager.currentCell!, stateManager.currentCell!.value - 1);
@@ -1245,12 +1253,26 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
                     child: ElevatedButton(
-                      child: const Text('Calculate'),
+                      child: const Text('Calculate RPN Cutoffs'),
                       onPressed: () async {
                         var temp =
                             await calculateRPNDistribution(context, dists!);
                         setState(() {
                           calculationMessage = temp;
+                        });
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
+                    child: ElevatedButton(
+                      child: const Text('Save Criticality'),
+                      onPressed: () async {
+                        var temp = await assignNewCriticality(
+                            context.read<AssetCriticalityNotifier>().rpnCutoffs,
+                            context.read<SelectedSiteNotifier>().selectedSite);
+                        setState(() {
+                          calculationMessage = '$temp';
                         });
                       },
                     ),
@@ -1439,8 +1461,8 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
 }
 
 Future<String> calculateRPNDistribution(
-    BuildContext context, List<int> dists) async {
-  if (calculateTotal(dists) != 100) {
+    BuildContext context, List<int> selectedPercentDistribution) async {
+  if (calculateTotal(selectedPercentDistribution) != 100) {
     return 'Please make sure percentages add up to 100%';
   }
   try {
@@ -1450,11 +1472,11 @@ Future<String> calculateRPNDistribution(
         context.read<AssetCriticalitySettingsNotifier>();
     assetCriticalitySettingsNotifier.setPercentages(
       selectedSite: context.read<SelectedSiteNotifier>().selectedSite,
-      percentVLow: dists[0],
-      percentLow: dists[1],
-      percentMedium: dists[2],
-      percentHigh: dists[3],
-      percentVHigh: dists[4],
+      percentVLow: selectedPercentDistribution[0],
+      percentLow: selectedPercentDistribution[1],
+      percentMedium: selectedPercentDistribution[2],
+      percentHigh: selectedPercentDistribution[3],
+      percentVHigh: selectedPercentDistribution[4],
     );
     //set rpn ranges
     List<double> newCutoffs = calculateRPNCutOffs(
@@ -1474,6 +1496,41 @@ Future<String> calculateRPNDistribution(
     return e.toString();
   }
   return 'RPN cutoffs successfully calculated';
+}
+
+/// assign criticality to all assets based on rpn number
+/// special logic to have ~150 shingle assets be set as VH + H
+Future<int> assignNewCriticality(List<double> rpnCutoffs, String siteid) async {
+  var shingle140 = 0;
+  var shingle55 = 0;
+  if (rpnCutoffs.length != 5) {
+    throw Exception('Unexpected format for List [rpnCutoffs]');
+  }
+  var criticalitys = await database!.assetCriticalityOrdered(siteid).get();
+  var updates = [];
+  for (var criticality in criticalitys) {
+    var newCriticality = 0;
+    for (int i = rpnCutoffs.length - 1; i >= 0; i--) {
+      if (criticality.newRPN <= rpnCutoffs[i]) {
+        newCriticality = assetCriticality.keys.elementAt(i);
+      }
+    }
+    if (criticality.asset.substring(2, 3) == 'S') {
+      if (shingle55 < 55) {
+        shingle55++;
+        shingle140++;
+        newCriticality = 9;
+      } else if (shingle140 < 140) {
+        shingle140++;
+        newCriticality = 7;
+      } else if (newCriticality > 5) {
+        newCriticality = 5;
+      }
+    }
+    updates.add([criticality.asset, newCriticality]);
+  }
+  await database!.batchUpdateAssetNewCriticality(criticalityUpdates: updates);
+  return updates.length;
 }
 
 class RowofTextWidgets {
@@ -1708,18 +1765,22 @@ class _SystemDropdownState extends State<SystemDropdown> {
                 if (childAssetnums.contains(tempAssetnum)) {
                   PlutoCell? tempCellRef = row.cells['system'];
                   // only update child assets if they don't already have a system
-                  if (tempCellRef!.value == 0) {
+                  if (tempCellRef!.value == 0 &&
+                      row.cells['lockedSystem']!.value == 'open') {
                     debugPrint('caller A');
                     await database!.updateAssetCriticality(
                       assetid: row.cells['id']!.value,
                       downtime: row.cells['downtime']!.value,
                       system: newValue,
                       frequency: row.cells['frequency']!.value,
+                      type: row.cells['assetnum']!.value,
                     );
-                    setState(() {
-                      widget.rendererContext.stateManager
-                          .changeCellValue(tempCellRef, newValue);
-                    });
+                    if (mounted) {
+                      setState(() {
+                        widget.rendererContext.stateManager
+                            .changeCellValue(tempCellRef, newValue);
+                      });
+                    }
                   }
                 }
               }
@@ -1729,12 +1790,15 @@ class _SystemDropdownState extends State<SystemDropdown> {
                 assetid: widget.rendererContext.row.cells['id']!.value,
                 downtime: widget.rendererContext.row.cells['downtime']!.value,
                 system: newValue,
+                type: widget.rendererContext.row.cells['assetnum']!.value,
                 frequency: widget.rendererContext.row.cells['frequency']!.value,
               );
-              setState(() {
-                widget.rendererContext.stateManager
-                    .changeCellValue(widget.rendererContext.cell, newValue);
-              });
+              if (mounted) {
+                setState(() {
+                  widget.rendererContext.stateManager
+                      .changeCellValue(widget.rendererContext.cell, newValue);
+                });
+              }
             },
       items: widget.items,
     );

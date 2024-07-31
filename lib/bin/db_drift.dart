@@ -277,6 +277,7 @@ WHERE line IN (
         FROM assets
         WHERE siteid = :siteid
         )
+      AND siteid is null
 UNION
 SELECT *
 FROM system_criticalitys
@@ -285,12 +286,20 @@ WHERE siteid = :siteid
     'maxSystemID': '''
 select max(id) from system_criticalitys
 ''',
+    'assetCriticalityOrdered': '''
+SELECT *
+FROM asset_criticalitys
+WHERE substr(asset, 1, 2) = :siteid
+  AND asset not in (select siteid||parent from assets where parent is not null)
+ORDER BY new_r_p_n DESC;
+''',
     'uniqueRpnNumbers': '''
 SELECT new_r_p_n
 	,count(asset)
 FROM asset_criticalitys
 WHERE new_r_p_n > 0
 	AND asset LIKE :siteid
+  AND asset not in (select siteid||parent from assets where parent is not null)
 GROUP BY new_r_p_n
 ''',
     'uniqueRpnNumbersSpare': '''
@@ -574,6 +583,33 @@ class MyDatabase extends _$MyDatabase {
     return row.first.id;
   }
 
+  Future<int> updateAssetsRelatedSystem(int systemId) async {
+    final system = await (select(systemCriticalitys)
+          ..where((t) => t.id.equals(systemId)))
+        .get();
+    final assets = await (select(assetCriticalitys)
+          ..where((t) => t.system.equals(systemId)))
+        .get();
+    for (var asset in assets) {
+      await (into(assetCriticalitys)
+          .insertOnConflictUpdate(AssetCriticalitysCompanion.insert(
+        asset: asset.asset,
+        system: asset.system,
+        type: asset.type,
+        frequency: asset.frequency,
+        downtime: asset.downtime,
+        manual: Value(asset.manual),
+        earlyDetection: Value(asset.earlyDetection),
+        newPriority: Value(asset.newPriority),
+        newRPN: Value(system.first.score *
+            asset.frequency *
+            asset.downtime *
+            (1 - asset.earlyDetection)),
+      )));
+    }
+    return assets.length;
+  }
+
   Future<int> updateSystemCriticalitys({
     required int key,
     required String description,
@@ -596,7 +632,9 @@ class MyDatabase extends _$MyDatabase {
       throughput: Value(throughput),
       quality: Value(quality),
       line: Value(line),
-      siteid: siteid == '' ? const Value.absent() : Value(siteid),
+      siteid: (siteid == '' || siteid == 'All')
+          ? const Value.absent()
+          : Value(siteid),
       score: Value(sqrt((pow(safety, 2) +
               pow(regulatory, 2) +
               pow(economic, 2) +
@@ -639,14 +677,15 @@ class MyDatabase extends _$MyDatabase {
     int? newPriority,
     double? newRPN,
     double? earlyDetection,
+    String? type,
   }) async {
     debugPrint('updating asset criticality');
-    String type = 'type';
+
     await (into(assetCriticalitys)
         .insertOnConflictUpdate(AssetCriticalitysCompanion(
       asset: Value(assetid),
       system: Value(system ?? 0),
-      type: Value(type),
+      type: type != null ? Value(type) : const Value.absent(),
       frequency: Value(frequency ?? 0),
       downtime: Value(downtime ?? 0),
       manual: manual != null ? Value(manual) : const Value.absent(),
@@ -656,6 +695,19 @@ class MyDatabase extends _$MyDatabase {
       earlyDetection:
           earlyDetection != null ? Value(earlyDetection) : const Value.absent(),
     )));
+  }
+
+  Future<int> batchUpdateAssetNewCriticality(
+      {required List<dynamic> criticalityUpdates}) async {
+    await transaction(() async {
+      for (var criticalityUpdate in criticalityUpdates) {
+        await (update(assetCriticalitys)
+              ..where((t) => t.asset.equals(criticalityUpdate[0])))
+            .write(AssetCriticalitysCompanion(
+                newPriority: Value(criticalityUpdate[1])));
+      }
+    });
+    return criticalityUpdates.length;
   }
 
   Future<void> removeAssetOverride({
@@ -742,7 +794,7 @@ class MyDatabase extends _$MyDatabase {
     }
     final associateSheet = decoder.tables.values.elementAt(1);
     List<AssetCriticalitysCompanion> assetInserts = [];
-    var temp = await getSystemCriticalitiesFiltered(siteid);
+    var temp = await select(systemCriticalitys).get();
     var systems = {};
     // map function doesnt work
     for (var system in temp) {
@@ -763,9 +815,9 @@ class MyDatabase extends _$MyDatabase {
           system = systems['${row[2]}|${row[3]}|null'];
         }
         assetInserts.add(AssetCriticalitysCompanion.insert(
-          asset: '${row[1]}|${row[0]}',
+          asset: '${row[1]}${row[0]}',
           system: system.id,
-          type: 'type',
+          type: '${row[0]}',
           frequency: 0,
           downtime: 0,
           lockedSystem: const Value(true),

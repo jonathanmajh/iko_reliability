@@ -5044,7 +5044,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
       $SpareCriticalitysTable(this);
   Selectable<SystemCriticality> systemsFilteredBySite(String? siteid) {
     return customSelect(
-        'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1) UNION SELECT * FROM system_criticalitys WHERE siteid = ?1',
+        'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1) AND siteid IS NULL UNION SELECT * FROM system_criticalitys WHERE siteid = ?1',
         variables: [
           Variable<String>(siteid)
         ],
@@ -5062,14 +5062,27 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.readNullable<int>('_c0'));
   }
 
-  Selectable<UniqueRpnNumbersResult> uniqueRpnNumbers(String siteid) {
+  Selectable<AssetCriticality> assetCriticalityOrdered(String siteid) {
     return customSelect(
-        'SELECT new_r_p_n, count(asset) AS _c0 FROM asset_criticalitys WHERE new_r_p_n > 0 AND asset LIKE ?1 GROUP BY new_r_p_n',
+        'SELECT * FROM asset_criticalitys WHERE substr(asset, 1, 2) = ?1 AND asset NOT IN (SELECT siteid || parent FROM assets WHERE parent IS NOT NULL) ORDER BY new_r_p_n DESC',
         variables: [
           Variable<String>(siteid)
         ],
         readsFrom: {
           assetCriticalitys,
+          assets,
+        }).asyncMap(assetCriticalitys.mapFromRow);
+  }
+
+  Selectable<UniqueRpnNumbersResult> uniqueRpnNumbers(String siteid) {
+    return customSelect(
+        'SELECT new_r_p_n, count(asset) AS _c0 FROM asset_criticalitys WHERE new_r_p_n > 0 AND asset LIKE ?1 AND asset NOT IN (SELECT siteid || parent FROM assets WHERE parent IS NOT NULL) GROUP BY new_r_p_n',
+        variables: [
+          Variable<String>(siteid)
+        ],
+        readsFrom: {
+          assetCriticalitys,
+          assets,
         }).map((QueryRow row) => UniqueRpnNumbersResult(
           newRPN: row.read<double>('new_r_p_n'),
           countasset: row.read<int>('_c0'),

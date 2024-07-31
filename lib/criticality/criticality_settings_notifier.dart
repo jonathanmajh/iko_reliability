@@ -19,9 +19,9 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   ///The id of the currently viewed site on the plutogrid
 
   ///Target percentages for assign criticality values
-  int percentVLow = 30;
-  int percentLow = 25;
-  int percentMedium = 20;
+  int percentVLow = 10;
+  int percentLow = 15;
+  int percentMedium = 50;
   int percentHigh = 15;
   int percentVHigh = 10;
 

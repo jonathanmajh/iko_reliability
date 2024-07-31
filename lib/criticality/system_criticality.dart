@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/criticality/system_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
@@ -346,7 +347,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                 rows.add(PlutoRow(cells: {
                   'id': PlutoCell(value: row.id),
                   'line': PlutoCell(value: row.line),
-                  'site': PlutoCell(value: row.siteid ?? ''),
+                  'site': PlutoCell(value: row.siteid ?? 'All'),
                   'description': PlutoCell(value: row.description),
                   'safety': PlutoCell(value: row.safety),
                   'regulatory': PlutoCell(value: row.regulatory),
@@ -364,7 +365,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             rows.add(PlutoRow(cells: {
               'id': PlutoCell(value: 0),
               'line': PlutoCell(value: 'C'),
-              'site': PlutoCell(value: ''),
+              'site': PlutoCell(value: 'All'),
               'description': PlutoCell(value: snapshot.error),
               'safety': PlutoCell(value: 0),
               'regulatory': PlutoCell(value: 0),
@@ -378,7 +379,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             rows.add(PlutoRow(cells: {
               'id': PlutoCell(value: 0),
               'line': PlutoCell(value: 'C'),
-              'site': PlutoCell(value: ''),
+              'site': PlutoCell(value: 'All'),
               'description': PlutoCell(value: 'No Site Selected'),
               'safety': PlutoCell(value: 0),
               'regulatory': PlutoCell(value: 0),
@@ -457,6 +458,9 @@ Future<int> updateSystem(PlutoRow row) async {
     siteid: row.cells['site']!.value,
   );
 
+  final rows = await database!.updateAssetsRelatedSystem(id);
+  toast(navigatorKey.currentContext,
+      'Updated $rows assets assigned to ${row.cells['description']!.value}');
   return id;
 }
 
@@ -597,6 +601,10 @@ class _NewSystemFormState extends State<NewSystemForm> {
                         final newRow = stateManager.getNewRow();
                         newRow.cells['id'] = PlutoCell(value: row.id);
                         newRow.cells['line']!.value = row.line;
+                        newRow.cells['site']!.value = navigatorKey
+                            .currentContext!
+                            .read<SelectedSiteNotifier>()
+                            .selectedSite;
                         newRow.cells['description']!.value = row.description;
                         stateManager.appendRows([newRow]);
                         ScaffoldMessenger.of(navigatorKey.currentContext!)
