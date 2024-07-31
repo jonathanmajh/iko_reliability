@@ -148,6 +148,8 @@ class AssetCriticalitys extends Table {
   IntColumn get downtime => integer()();
   RealColumn get earlyDetection => real().withDefault(const Constant(0.0))();
   BoolColumn get manual => boolean().withDefault(const Constant(false))();
+  BoolColumn get manualPriority =>
+      boolean().withDefault(const Constant(false))();
   IntColumn get newPriority => integer().nullable()();
   RealColumn get newRPN => real().withDefault(const Constant(0))();
   BoolColumn get lockedSystem => boolean().withDefault(const Constant(false))();
@@ -233,6 +235,7 @@ class SpareCriticalitys extends Table {
   IntColumn get cost => integer()();
   RealColumn get assetRPN => real()();
   BoolColumn get manual => boolean()();
+  BoolColumn get manualPriority => boolean()();
   IntColumn get newPriority => integer()();
   RealColumn get newRPN => real()();
   TextColumn get siteid => text()();
@@ -426,6 +429,10 @@ class MyDatabase extends _$MyDatabase {
               assetCriticalitys, assetCriticalitys.earlyDetection);
           await m.addColumn(workorders, workorders.recordType);
           await m.addColumn(assetCriticalitys, assetCriticalitys.lockedSystem);
+          await m.addColumn(
+              assetCriticalitys, assetCriticalitys.manualPriority);
+          await m.addColumn(
+              spareCriticalitys, spareCriticalitys.manualPriority);
         }
       },
     );
@@ -678,6 +685,7 @@ class MyDatabase extends _$MyDatabase {
     double? newRPN,
     double? earlyDetection,
     String? type,
+    bool? manualPriority,
   }) async {
     debugPrint('updating asset criticality');
 
@@ -689,6 +697,8 @@ class MyDatabase extends _$MyDatabase {
       frequency: Value(frequency ?? 0),
       downtime: Value(downtime ?? 0),
       manual: manual != null ? Value(manual) : const Value.absent(),
+      manualPriority:
+          manualPriority != null ? Value(manualPriority) : const Value.absent(),
       newPriority:
           newPriority != null ? Value(newPriority) : const Value.absent(),
       newRPN: newRPN != null ? Value(newRPN) : const Value.absent(),
@@ -1362,6 +1372,7 @@ class MyDatabase extends _$MyDatabase {
         cost: temp[2],
         assetRPN: spareAssetInfo.assetRPN ?? 0,
         manual: false,
+        manualPriority: false,
         newPriority: 0,
         newRPN: (spareAssetInfo.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
         siteid: siteid,

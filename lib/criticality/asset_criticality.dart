@@ -374,6 +374,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       system: rendererContext.row.cells['system']!.value,
                       type: rendererContext.row.cells['assetnum']!.value,
                       frequency: rendererContext.row.cells['frequency']!.value,
+                      manualPriority: true,
                     );
                     if (mounted) {
                       context.read<AssetOverrideNotifier>().updateAssetOverride(
@@ -501,11 +502,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
         double calculatedRPN = child.assetCriticality?.newRPN ?? -1;
-        int priorityText = child.assetCriticality?.newPriority ??
-            context
-                .read<AssetCriticalityNotifier>()
-                .rpnFindDistribution(calculatedRPN);
-        if (child.assetCriticality?.newPriority != null) {
+        int priorityText = child.assetCriticality?.newPriority ?? 0;
+        if (child.assetCriticality?.manualPriority ?? false) {
           context.read<AssetOverrideNotifier>().assets[child.asset.assetnum] =
               AssetOverride.priority;
         }

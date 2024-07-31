@@ -466,7 +466,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                 loadedSite = snapshot.data!.first.spareCriticality.siteid;
                 for (var row in snapshot.data!) {
                   AssetOverride overrideStatus = AssetOverride.none;
-                  if (row.spareCriticality.newPriority != 0) {
+                  if (row.spareCriticality.manualPriority) {
                     overrideStatus = AssetOverride.priority;
                   }
                   if (row.spareCriticality.manual) {

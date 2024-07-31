@@ -2525,6 +2525,16 @@ class $AssetCriticalitysTable extends AssetCriticalitys
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("manual" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _manualPriorityMeta =
+      const VerificationMeta('manualPriority');
+  @override
+  late final GeneratedColumn<bool> manualPriority = GeneratedColumn<bool>(
+      'manual_priority', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("manual_priority" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _newPriorityMeta =
       const VerificationMeta('newPriority');
   @override
@@ -2557,6 +2567,7 @@ class $AssetCriticalitysTable extends AssetCriticalitys
         downtime,
         earlyDetection,
         manual,
+        manualPriority,
         newPriority,
         newRPN,
         lockedSystem
@@ -2611,6 +2622,12 @@ class $AssetCriticalitysTable extends AssetCriticalitys
       context.handle(_manualMeta,
           manual.isAcceptableOrUnknown(data['manual']!, _manualMeta));
     }
+    if (data.containsKey('manual_priority')) {
+      context.handle(
+          _manualPriorityMeta,
+          manualPriority.isAcceptableOrUnknown(
+              data['manual_priority']!, _manualPriorityMeta));
+    }
     if (data.containsKey('new_priority')) {
       context.handle(
           _newPriorityMeta,
@@ -2650,6 +2667,8 @@ class $AssetCriticalitysTable extends AssetCriticalitys
           DriftSqlType.double, data['${effectivePrefix}early_detection'])!,
       manual: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}manual'])!,
+      manualPriority: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}manual_priority'])!,
       newPriority: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}new_priority']),
       newRPN: attachedDatabase.typeMapping
@@ -2674,6 +2693,7 @@ class AssetCriticality extends DataClass
   final int downtime;
   final double earlyDetection;
   final bool manual;
+  final bool manualPriority;
   final int? newPriority;
   final double newRPN;
   final bool lockedSystem;
@@ -2685,6 +2705,7 @@ class AssetCriticality extends DataClass
       required this.downtime,
       required this.earlyDetection,
       required this.manual,
+      required this.manualPriority,
       this.newPriority,
       required this.newRPN,
       required this.lockedSystem});
@@ -2698,6 +2719,7 @@ class AssetCriticality extends DataClass
     map['downtime'] = Variable<int>(downtime);
     map['early_detection'] = Variable<double>(earlyDetection);
     map['manual'] = Variable<bool>(manual);
+    map['manual_priority'] = Variable<bool>(manualPriority);
     if (!nullToAbsent || newPriority != null) {
       map['new_priority'] = Variable<int>(newPriority);
     }
@@ -2715,6 +2737,7 @@ class AssetCriticality extends DataClass
       downtime: Value(downtime),
       earlyDetection: Value(earlyDetection),
       manual: Value(manual),
+      manualPriority: Value(manualPriority),
       newPriority: newPriority == null && nullToAbsent
           ? const Value.absent()
           : Value(newPriority),
@@ -2734,6 +2757,7 @@ class AssetCriticality extends DataClass
       downtime: serializer.fromJson<int>(json['downtime']),
       earlyDetection: serializer.fromJson<double>(json['earlyDetection']),
       manual: serializer.fromJson<bool>(json['manual']),
+      manualPriority: serializer.fromJson<bool>(json['manualPriority']),
       newPriority: serializer.fromJson<int?>(json['newPriority']),
       newRPN: serializer.fromJson<double>(json['newRPN']),
       lockedSystem: serializer.fromJson<bool>(json['lockedSystem']),
@@ -2750,6 +2774,7 @@ class AssetCriticality extends DataClass
       'downtime': serializer.toJson<int>(downtime),
       'earlyDetection': serializer.toJson<double>(earlyDetection),
       'manual': serializer.toJson<bool>(manual),
+      'manualPriority': serializer.toJson<bool>(manualPriority),
       'newPriority': serializer.toJson<int?>(newPriority),
       'newRPN': serializer.toJson<double>(newRPN),
       'lockedSystem': serializer.toJson<bool>(lockedSystem),
@@ -2764,6 +2789,7 @@ class AssetCriticality extends DataClass
           int? downtime,
           double? earlyDetection,
           bool? manual,
+          bool? manualPriority,
           Value<int?> newPriority = const Value.absent(),
           double? newRPN,
           bool? lockedSystem}) =>
@@ -2775,6 +2801,7 @@ class AssetCriticality extends DataClass
         downtime: downtime ?? this.downtime,
         earlyDetection: earlyDetection ?? this.earlyDetection,
         manual: manual ?? this.manual,
+        manualPriority: manualPriority ?? this.manualPriority,
         newPriority: newPriority.present ? newPriority.value : this.newPriority,
         newRPN: newRPN ?? this.newRPN,
         lockedSystem: lockedSystem ?? this.lockedSystem,
@@ -2789,6 +2816,7 @@ class AssetCriticality extends DataClass
           ..write('downtime: $downtime, ')
           ..write('earlyDetection: $earlyDetection, ')
           ..write('manual: $manual, ')
+          ..write('manualPriority: $manualPriority, ')
           ..write('newPriority: $newPriority, ')
           ..write('newRPN: $newRPN, ')
           ..write('lockedSystem: $lockedSystem')
@@ -2797,8 +2825,18 @@ class AssetCriticality extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(asset, system, type, frequency, downtime,
-      earlyDetection, manual, newPriority, newRPN, lockedSystem);
+  int get hashCode => Object.hash(
+      asset,
+      system,
+      type,
+      frequency,
+      downtime,
+      earlyDetection,
+      manual,
+      manualPriority,
+      newPriority,
+      newRPN,
+      lockedSystem);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2810,6 +2848,7 @@ class AssetCriticality extends DataClass
           other.downtime == this.downtime &&
           other.earlyDetection == this.earlyDetection &&
           other.manual == this.manual &&
+          other.manualPriority == this.manualPriority &&
           other.newPriority == this.newPriority &&
           other.newRPN == this.newRPN &&
           other.lockedSystem == this.lockedSystem);
@@ -2823,6 +2862,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
   final Value<int> downtime;
   final Value<double> earlyDetection;
   final Value<bool> manual;
+  final Value<bool> manualPriority;
   final Value<int?> newPriority;
   final Value<double> newRPN;
   final Value<bool> lockedSystem;
@@ -2835,6 +2875,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     this.downtime = const Value.absent(),
     this.earlyDetection = const Value.absent(),
     this.manual = const Value.absent(),
+    this.manualPriority = const Value.absent(),
     this.newPriority = const Value.absent(),
     this.newRPN = const Value.absent(),
     this.lockedSystem = const Value.absent(),
@@ -2848,6 +2889,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     required int downtime,
     this.earlyDetection = const Value.absent(),
     this.manual = const Value.absent(),
+    this.manualPriority = const Value.absent(),
     this.newPriority = const Value.absent(),
     this.newRPN = const Value.absent(),
     this.lockedSystem = const Value.absent(),
@@ -2865,6 +2907,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     Expression<int>? downtime,
     Expression<double>? earlyDetection,
     Expression<bool>? manual,
+    Expression<bool>? manualPriority,
     Expression<int>? newPriority,
     Expression<double>? newRPN,
     Expression<bool>? lockedSystem,
@@ -2878,6 +2921,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       if (downtime != null) 'downtime': downtime,
       if (earlyDetection != null) 'early_detection': earlyDetection,
       if (manual != null) 'manual': manual,
+      if (manualPriority != null) 'manual_priority': manualPriority,
       if (newPriority != null) 'new_priority': newPriority,
       if (newRPN != null) 'new_r_p_n': newRPN,
       if (lockedSystem != null) 'locked_system': lockedSystem,
@@ -2893,6 +2937,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       Value<int>? downtime,
       Value<double>? earlyDetection,
       Value<bool>? manual,
+      Value<bool>? manualPriority,
       Value<int?>? newPriority,
       Value<double>? newRPN,
       Value<bool>? lockedSystem,
@@ -2905,6 +2950,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
       downtime: downtime ?? this.downtime,
       earlyDetection: earlyDetection ?? this.earlyDetection,
       manual: manual ?? this.manual,
+      manualPriority: manualPriority ?? this.manualPriority,
       newPriority: newPriority ?? this.newPriority,
       newRPN: newRPN ?? this.newRPN,
       lockedSystem: lockedSystem ?? this.lockedSystem,
@@ -2936,6 +2982,9 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     if (manual.present) {
       map['manual'] = Variable<bool>(manual.value);
     }
+    if (manualPriority.present) {
+      map['manual_priority'] = Variable<bool>(manualPriority.value);
+    }
     if (newPriority.present) {
       map['new_priority'] = Variable<int>(newPriority.value);
     }
@@ -2961,6 +3010,7 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
           ..write('downtime: $downtime, ')
           ..write('earlyDetection: $earlyDetection, ')
           ..write('manual: $manual, ')
+          ..write('manualPriority: $manualPriority, ')
           ..write('newPriority: $newPriority, ')
           ..write('newRPN: $newRPN, ')
           ..write('lockedSystem: $lockedSystem, ')
@@ -4573,6 +4623,15 @@ class $SpareCriticalitysTable extends SpareCriticalitys
       requiredDuringInsert: true,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("manual" IN (0, 1))'));
+  static const VerificationMeta _manualPriorityMeta =
+      const VerificationMeta('manualPriority');
+  @override
+  late final GeneratedColumn<bool> manualPriority = GeneratedColumn<bool>(
+      'manual_priority', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("manual_priority" IN (0, 1))'));
   static const VerificationMeta _newPriorityMeta =
       const VerificationMeta('newPriority');
   @override
@@ -4603,6 +4662,7 @@ class $SpareCriticalitysTable extends SpareCriticalitys
         cost,
         assetRPN,
         manual,
+        manualPriority,
         newPriority,
         newRPN,
         siteid,
@@ -4653,6 +4713,14 @@ class $SpareCriticalitysTable extends SpareCriticalitys
     } else if (isInserting) {
       context.missing(_manualMeta);
     }
+    if (data.containsKey('manual_priority')) {
+      context.handle(
+          _manualPriorityMeta,
+          manualPriority.isAcceptableOrUnknown(
+              data['manual_priority']!, _manualPriorityMeta));
+    } else if (isInserting) {
+      context.missing(_manualPriorityMeta);
+    }
     if (data.containsKey('new_priority')) {
       context.handle(
           _newPriorityMeta,
@@ -4700,6 +4768,8 @@ class $SpareCriticalitysTable extends SpareCriticalitys
           .read(DriftSqlType.double, data['${effectivePrefix}asset_r_p_n'])!,
       manual: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}manual'])!,
+      manualPriority: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}manual_priority'])!,
       newPriority: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}new_priority'])!,
       newRPN: attachedDatabase.typeMapping
@@ -4725,6 +4795,7 @@ class SpareCriticality extends DataClass
   final int cost;
   final double assetRPN;
   final bool manual;
+  final bool manualPriority;
   final int newPriority;
   final double newRPN;
   final String siteid;
@@ -4736,6 +4807,7 @@ class SpareCriticality extends DataClass
       required this.cost,
       required this.assetRPN,
       required this.manual,
+      required this.manualPriority,
       required this.newPriority,
       required this.newRPN,
       required this.siteid,
@@ -4749,6 +4821,7 @@ class SpareCriticality extends DataClass
     map['cost'] = Variable<int>(cost);
     map['asset_r_p_n'] = Variable<double>(assetRPN);
     map['manual'] = Variable<bool>(manual);
+    map['manual_priority'] = Variable<bool>(manualPriority);
     map['new_priority'] = Variable<int>(newPriority);
     map['new_r_p_n'] = Variable<double>(newRPN);
     map['siteid'] = Variable<String>(siteid);
@@ -4764,6 +4837,7 @@ class SpareCriticality extends DataClass
       cost: Value(cost),
       assetRPN: Value(assetRPN),
       manual: Value(manual),
+      manualPriority: Value(manualPriority),
       newPriority: Value(newPriority),
       newRPN: Value(newRPN),
       siteid: Value(siteid),
@@ -4781,6 +4855,7 @@ class SpareCriticality extends DataClass
       cost: serializer.fromJson<int>(json['cost']),
       assetRPN: serializer.fromJson<double>(json['assetRPN']),
       manual: serializer.fromJson<bool>(json['manual']),
+      manualPriority: serializer.fromJson<bool>(json['manualPriority']),
       newPriority: serializer.fromJson<int>(json['newPriority']),
       newRPN: serializer.fromJson<double>(json['newRPN']),
       siteid: serializer.fromJson<String>(json['siteid']),
@@ -4797,6 +4872,7 @@ class SpareCriticality extends DataClass
       'cost': serializer.toJson<int>(cost),
       'assetRPN': serializer.toJson<double>(assetRPN),
       'manual': serializer.toJson<bool>(manual),
+      'manualPriority': serializer.toJson<bool>(manualPriority),
       'newPriority': serializer.toJson<int>(newPriority),
       'newRPN': serializer.toJson<double>(newRPN),
       'siteid': serializer.toJson<String>(siteid),
@@ -4811,6 +4887,7 @@ class SpareCriticality extends DataClass
           int? cost,
           double? assetRPN,
           bool? manual,
+          bool? manualPriority,
           int? newPriority,
           double? newRPN,
           String? siteid,
@@ -4822,6 +4899,7 @@ class SpareCriticality extends DataClass
         cost: cost ?? this.cost,
         assetRPN: assetRPN ?? this.assetRPN,
         manual: manual ?? this.manual,
+        manualPriority: manualPriority ?? this.manualPriority,
         newPriority: newPriority ?? this.newPriority,
         newRPN: newRPN ?? this.newRPN,
         siteid: siteid ?? this.siteid,
@@ -4836,6 +4914,7 @@ class SpareCriticality extends DataClass
           ..write('cost: $cost, ')
           ..write('assetRPN: $assetRPN, ')
           ..write('manual: $manual, ')
+          ..write('manualPriority: $manualPriority, ')
           ..write('newPriority: $newPriority, ')
           ..write('newRPN: $newRPN, ')
           ..write('siteid: $siteid, ')
@@ -4846,7 +4925,7 @@ class SpareCriticality extends DataClass
 
   @override
   int get hashCode => Object.hash(id, usage, leadTime, cost, assetRPN, manual,
-      newPriority, newRPN, siteid, itemnum);
+      manualPriority, newPriority, newRPN, siteid, itemnum);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4857,6 +4936,7 @@ class SpareCriticality extends DataClass
           other.cost == this.cost &&
           other.assetRPN == this.assetRPN &&
           other.manual == this.manual &&
+          other.manualPriority == this.manualPriority &&
           other.newPriority == this.newPriority &&
           other.newRPN == this.newRPN &&
           other.siteid == this.siteid &&
@@ -4870,6 +4950,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
   final Value<int> cost;
   final Value<double> assetRPN;
   final Value<bool> manual;
+  final Value<bool> manualPriority;
   final Value<int> newPriority;
   final Value<double> newRPN;
   final Value<String> siteid;
@@ -4882,6 +4963,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     this.cost = const Value.absent(),
     this.assetRPN = const Value.absent(),
     this.manual = const Value.absent(),
+    this.manualPriority = const Value.absent(),
     this.newPriority = const Value.absent(),
     this.newRPN = const Value.absent(),
     this.siteid = const Value.absent(),
@@ -4895,6 +4977,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     required int cost,
     required double assetRPN,
     required bool manual,
+    required bool manualPriority,
     required int newPriority,
     required double newRPN,
     required String siteid,
@@ -4906,6 +4989,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
         cost = Value(cost),
         assetRPN = Value(assetRPN),
         manual = Value(manual),
+        manualPriority = Value(manualPriority),
         newPriority = Value(newPriority),
         newRPN = Value(newRPN),
         siteid = Value(siteid),
@@ -4917,6 +5001,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     Expression<int>? cost,
     Expression<double>? assetRPN,
     Expression<bool>? manual,
+    Expression<bool>? manualPriority,
     Expression<int>? newPriority,
     Expression<double>? newRPN,
     Expression<String>? siteid,
@@ -4930,6 +5015,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       if (cost != null) 'cost': cost,
       if (assetRPN != null) 'asset_r_p_n': assetRPN,
       if (manual != null) 'manual': manual,
+      if (manualPriority != null) 'manual_priority': manualPriority,
       if (newPriority != null) 'new_priority': newPriority,
       if (newRPN != null) 'new_r_p_n': newRPN,
       if (siteid != null) 'siteid': siteid,
@@ -4945,6 +5031,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       Value<int>? cost,
       Value<double>? assetRPN,
       Value<bool>? manual,
+      Value<bool>? manualPriority,
       Value<int>? newPriority,
       Value<double>? newRPN,
       Value<String>? siteid,
@@ -4957,6 +5044,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       cost: cost ?? this.cost,
       assetRPN: assetRPN ?? this.assetRPN,
       manual: manual ?? this.manual,
+      manualPriority: manualPriority ?? this.manualPriority,
       newPriority: newPriority ?? this.newPriority,
       newRPN: newRPN ?? this.newRPN,
       siteid: siteid ?? this.siteid,
@@ -4986,6 +5074,9 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     if (manual.present) {
       map['manual'] = Variable<bool>(manual.value);
     }
+    if (manualPriority.present) {
+      map['manual_priority'] = Variable<bool>(manualPriority.value);
+    }
     if (newPriority.present) {
       map['new_priority'] = Variable<int>(newPriority.value);
     }
@@ -5013,6 +5104,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
           ..write('cost: $cost, ')
           ..write('assetRPN: $assetRPN, ')
           ..write('manual: $manual, ')
+          ..write('manualPriority: $manualPriority, ')
           ..write('newPriority: $newPriority, ')
           ..write('newRPN: $newRPN, ')
           ..write('siteid: $siteid, ')
@@ -6403,6 +6495,7 @@ typedef $$AssetCriticalitysTableInsertCompanionBuilder
   required int downtime,
   Value<double> earlyDetection,
   Value<bool> manual,
+  Value<bool> manualPriority,
   Value<int?> newPriority,
   Value<double> newRPN,
   Value<bool> lockedSystem,
@@ -6417,6 +6510,7 @@ typedef $$AssetCriticalitysTableUpdateCompanionBuilder
   Value<int> downtime,
   Value<double> earlyDetection,
   Value<bool> manual,
+  Value<bool> manualPriority,
   Value<int?> newPriority,
   Value<double> newRPN,
   Value<bool> lockedSystem,
@@ -6451,6 +6545,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             Value<int> downtime = const Value.absent(),
             Value<double> earlyDetection = const Value.absent(),
             Value<bool> manual = const Value.absent(),
+            Value<bool> manualPriority = const Value.absent(),
             Value<int?> newPriority = const Value.absent(),
             Value<double> newRPN = const Value.absent(),
             Value<bool> lockedSystem = const Value.absent(),
@@ -6464,6 +6559,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             downtime: downtime,
             earlyDetection: earlyDetection,
             manual: manual,
+            manualPriority: manualPriority,
             newPriority: newPriority,
             newRPN: newRPN,
             lockedSystem: lockedSystem,
@@ -6477,6 +6573,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             required int downtime,
             Value<double> earlyDetection = const Value.absent(),
             Value<bool> manual = const Value.absent(),
+            Value<bool> manualPriority = const Value.absent(),
             Value<int?> newPriority = const Value.absent(),
             Value<double> newRPN = const Value.absent(),
             Value<bool> lockedSystem = const Value.absent(),
@@ -6490,6 +6587,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             downtime: downtime,
             earlyDetection: earlyDetection,
             manual: manual,
+            manualPriority: manualPriority,
             newPriority: newPriority,
             newRPN: newRPN,
             lockedSystem: lockedSystem,
@@ -6536,6 +6634,11 @@ class $$AssetCriticalitysTableFilterComposer
 
   ColumnFilters<bool> get manual => $state.composableBuilder(
       column: $state.table.manual,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<bool> get manualPriority => $state.composableBuilder(
+      column: $state.table.manualPriority,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -6608,6 +6711,11 @@ class $$AssetCriticalitysTableOrderingComposer
 
   ColumnOrderings<bool> get manual => $state.composableBuilder(
       column: $state.table.manual,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<bool> get manualPriority => $state.composableBuilder(
+      column: $state.table.manualPriority,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
@@ -7374,6 +7482,7 @@ typedef $$SpareCriticalitysTableInsertCompanionBuilder
   required int cost,
   required double assetRPN,
   required bool manual,
+  required bool manualPriority,
   required int newPriority,
   required double newRPN,
   required String siteid,
@@ -7388,6 +7497,7 @@ typedef $$SpareCriticalitysTableUpdateCompanionBuilder
   Value<int> cost,
   Value<double> assetRPN,
   Value<bool> manual,
+  Value<bool> manualPriority,
   Value<int> newPriority,
   Value<double> newRPN,
   Value<String> siteid,
@@ -7422,6 +7532,7 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             Value<int> cost = const Value.absent(),
             Value<double> assetRPN = const Value.absent(),
             Value<bool> manual = const Value.absent(),
+            Value<bool> manualPriority = const Value.absent(),
             Value<int> newPriority = const Value.absent(),
             Value<double> newRPN = const Value.absent(),
             Value<String> siteid = const Value.absent(),
@@ -7435,6 +7546,7 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             cost: cost,
             assetRPN: assetRPN,
             manual: manual,
+            manualPriority: manualPriority,
             newPriority: newPriority,
             newRPN: newRPN,
             siteid: siteid,
@@ -7448,6 +7560,7 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             required int cost,
             required double assetRPN,
             required bool manual,
+            required bool manualPriority,
             required int newPriority,
             required double newRPN,
             required String siteid,
@@ -7461,6 +7574,7 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             cost: cost,
             assetRPN: assetRPN,
             manual: manual,
+            manualPriority: manualPriority,
             newPriority: newPriority,
             newRPN: newRPN,
             siteid: siteid,
@@ -7516,6 +7630,11 @@ class $$SpareCriticalitysTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
+  ColumnFilters<bool> get manualPriority => $state.composableBuilder(
+      column: $state.table.manualPriority,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   ColumnFilters<int> get newPriority => $state.composableBuilder(
       column: $state.table.newPriority,
       builder: (column, joinBuilders) =>
@@ -7567,6 +7686,11 @@ class $$SpareCriticalitysTableOrderingComposer
 
   ColumnOrderings<bool> get manual => $state.composableBuilder(
       column: $state.table.manual,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<bool> get manualPriority => $state.composableBuilder(
+      column: $state.table.manualPriority,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
