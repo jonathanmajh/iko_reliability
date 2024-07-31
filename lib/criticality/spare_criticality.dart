@@ -342,6 +342,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               );
               await database!.updateSpareCriticality(
                 newPriority: value,
+                manualPriority: true,
                 spareid: rendererContext.row.cells['id']!.value,
               );
               setState(() {

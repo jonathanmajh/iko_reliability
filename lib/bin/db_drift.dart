@@ -661,6 +661,7 @@ class MyDatabase extends _$MyDatabase {
     double? newRPN,
     bool? manual,
     double? assetRpn,
+    bool? manualPriority,
   }) async {
     await (update(spareCriticalitys)..where((tbl) => tbl.id.equals(spareid)))
         .writeReturning(SpareCriticalitysCompanion(
@@ -672,6 +673,8 @@ class MyDatabase extends _$MyDatabase {
       newRPN: newRPN != null ? Value(newRPN) : const Value.absent(),
       manual: manual != null ? Value(manual) : const Value.absent(),
       assetRPN: assetRpn != null ? Value(assetRpn) : const Value.absent(),
+      manualPriority:
+          manualPriority != null ? Value(manualPriority) : const Value.absent(),
     ));
   }
 
