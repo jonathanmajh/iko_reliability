@@ -1,5 +1,6 @@
 //for widgets in the right-side drawer
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:iko_reliability_flutter/criticality/file_export.dart';
 import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
@@ -26,14 +27,12 @@ class EndDrawer extends StatefulWidget {
 
 class _EndDrawerState extends State<EndDrawer> {
   String siteid = '';
-  bool _passVisibility = true;
-  TextEditingController useridController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool _passwordVisible = false;
 
   @override
   void dispose() {
     // Clean up the controller when the widget is removed from the widget tree.
-    useridController.dispose();
     passwordController.dispose();
     super.dispose();
   }
@@ -83,6 +82,7 @@ class _EndDrawerState extends State<EndDrawer> {
   ///Widget for default end drawer. Could not extract widget due to _passVisibility error
   Widget homeRouteEndDrawer(BuildContext context, ThemeManager themeManager) {
     return Drawer(
+      width: 300,
       child: ListView(
         children: <Widget>[
           const ThemeToggle(),
@@ -115,94 +115,44 @@ class _EndDrawerState extends State<EndDrawer> {
                 builder: ((context, snapshot) {
                   if (snapshot.data?.login != null &&
                       snapshot.data?.login != '') {
-                    useridController.text = snapshot.data?.login ?? '';
-                  }
-                  if (snapshot.data?.login != null &&
-                      snapshot.data?.login != '') {
                     passwordController.text = snapshot.data?.password ?? '';
                   }
-                  if (apiKeys.containsKey(maximo.maximoServerSelected)) {
-                    //for username/APIKEY: if APIKEY is used
-                    return ListTile(
-                      title: const Text('Maximo API Key'),
-                      subtitle: TextField(
-                        controller: passwordController,
-                        decoration: const InputDecoration(labelText: 'API Key'),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.login),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                'Attempting to Login to: ${maximo.maximoServerSelected}'),
-                          ));
-                          getUserMaximo('[APIKEY]', passwordController.text,
-                              maximo.maximoServerSelected);
-                        },
-                      ),
-                    );
-                  } else {
-                    //for username/APIKEY: if username is used
-                    return ListTile(
-                      title: const Text('Maximo Login'),
-                      subtitle: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          TextField(
-                            controller: useridController,
-                            decoration:
-                                const InputDecoration(labelText: 'Login'),
+                  return ListTile(
+                    title: const Text('Maximo API Key'),
+                    subtitle: TextField(
+                      obscureText: !_passwordVisible,
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'API Key',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            // Based on passwordVisible state choose the icon
+                            _passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            // color: Theme.of(context).primaryColorDark,
                           ),
-                          TextField(
-                            //password field
-                            controller: passwordController,
-                            obscureText: _passVisibility,
-                            decoration: InputDecoration(
-                                labelText: 'Password',
-                                suffixIcon: IconButton(
-                                  icon: _passVisibility
-                                      ? const Icon(Icons.visibility_off)
-                                      : const Icon(Icons.visibility),
-                                  onPressed: () {
-                                    _passVisibility = !_passVisibility;
-
-                                    setState(() {});
-                                  },
-                                )),
-                          ),
-                        ],
+                          onPressed: () {
+                            // Update the state i.e. toogle the state of passwordVisible variable
+                            setState(() {
+                              _passwordVisible = !_passwordVisible;
+                            });
+                          },
+                        ),
                       ),
-                      trailing: IconButton(
-                        //login button
-                        icon: const Icon(Icons.login),
-                        onPressed: () async {
-                          var processNotifier =
-                              Provider.of<ProcessStateNotifier>(context,
-                                  listen: false);
-                          try {
-                            processNotifier.setProcessState(
-                                ProcessStates.loginState, true);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              //show login snackbar
-                              duration:
-                                  const Duration(days: 1), //some long duration
-                              content: Text(
-                                  'Attempting to Login to: ${maximo.maximoServerSelected}'),
-                            ));
-                            await getUserMaximo(
-                                useridController.text,
-                                passwordController.text,
-                                maximo.maximoServerSelected);
-                          } finally {
-                            ScaffoldMessenger.of(navigatorKey.currentContext!)
-                                .hideCurrentSnackBar(); //hide snackbar once process is complete
-                            processNotifier.setProcessState(
-                                ProcessStates.loginState, false);
-                          }
-                        },
-                      ),
-                    );
-                  }
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.login),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                              'Attempting to Login to: ${maximo.maximoServerSelected}'),
+                        ));
+                        getUserMaximo('[APIKEY]', passwordController.text,
+                            maximo.maximoServerSelected);
+                      },
+                    ),
+                  );
                 }));
           }),
           ListTile(
@@ -265,7 +215,7 @@ class _EndDrawerState extends State<EndDrawer> {
                         }
                       }
                     },
-                    icon: const Icon(Icons.sync),
+                    icon: const Icon(Icons.download),
                   );
                 },
               )),
@@ -561,8 +511,8 @@ class ThemeToggle extends StatelessWidget {
           onChanged: (value) {
             themeManager.setDarkTheme(value);
           },
-          thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
-              (Set<WidgetState> states) {
+          thumbIcon:
+              WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
             return (themeManager.theme == ThemeMode.dark)
                 ? const Icon(Icons.dark_mode_rounded)
                 : const Icon(Icons.light_mode_rounded);

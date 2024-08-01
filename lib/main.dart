@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
 import 'package:window_size/window_size.dart';
 
+import 'admin/settings.dart';
 import 'bin/db_drift.dart';
 import 'bin/drawer.dart';
 import 'bin/end_drawer.dart';
@@ -292,7 +293,32 @@ class _HomePageState extends State<HomePage> {
         child: NavDrawer(),
       ),
       body: ListView(// homepage widgets
-          children: const <Widget>[
+          children: <Widget>[
+        Consumer<MaximoServerNotifier>(
+            //login
+            builder: (context, maximo, child) {
+          return FutureBuilder<Credentials>(
+            future: getLoginMaximo(maximo.maximoServerSelected),
+            builder: ((context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data?.login != null) {
+                  return ListTile(
+                    title: Text('Logging in...'),
+                  );
+                } else {
+                  return ListTile(
+                    title: Text(
+                        'First time using this program?\nOpen the Right settings menu to get started\nClick button below to open documentation'),
+                  );
+                }
+              } else {
+                return ListTile(
+                  title: Text('Error! Please restart the program'),
+                );
+              }
+            }),
+          );
+        }),
         ListTile(
           // a spacer
           title: Text(
