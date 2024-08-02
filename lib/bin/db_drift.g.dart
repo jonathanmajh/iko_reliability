@@ -104,6 +104,13 @@ class Setting extends DataClass implements Insertable<Setting> {
         key: key ?? this.key,
         value: value ?? this.value,
       );
+  Setting copyWithCompanion(SettingsCompanion data) {
+    return Setting(
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Setting(')
@@ -285,6 +292,13 @@ class LoginSetting extends DataClass implements Insertable<LoginSetting> {
         key: key ?? this.key,
         value: value ?? this.value,
       );
+  LoginSetting copyWithCompanion(LoginSettingsCompanion data) {
+    return LoginSetting(
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('LoginSetting(')
@@ -585,6 +599,19 @@ class MeterDB extends DataClass implements Insertable<MeterDB> {
         condition: condition ?? this.condition,
         craft: craft ?? this.craft,
       );
+  MeterDB copyWithCompanion(MeterDBsCompanion data) {
+    return MeterDB(
+      meter: data.meter.present ? data.meter.value : this.meter,
+      inspect: data.inspect.present ? data.inspect.value : this.inspect,
+      description:
+          data.description.present ? data.description.value : this.description,
+      frequency: data.frequency.present ? data.frequency.value : this.frequency,
+      freqUnit: data.freqUnit.present ? data.freqUnit.value : this.freqUnit,
+      condition: data.condition.present ? data.condition.value : this.condition,
+      craft: data.craft.present ? data.craft.value : this.craft,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('MeterDB(')
@@ -892,6 +919,16 @@ class Observation extends DataClass implements Insertable<Observation> {
         description: description ?? this.description,
         action: action.present ? action.value : this.action,
       );
+  Observation copyWithCompanion(ObservationsCompanion data) {
+    return Observation(
+      meter: data.meter.present ? data.meter.value : this.meter,
+      code: data.code.present ? data.code.value : this.code,
+      description:
+          data.description.present ? data.description.value : this.description,
+      action: data.action.present ? data.action.value : this.action,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Observation(')
@@ -1303,6 +1340,23 @@ class Asset extends DataClass implements Insertable<Asset> {
         id: id ?? this.id,
         newAsset: newAsset ?? this.newAsset,
       );
+  Asset copyWithCompanion(AssetsCompanion data) {
+    return Asset(
+      assetnum: data.assetnum.present ? data.assetnum.value : this.assetnum,
+      description:
+          data.description.present ? data.description.value : this.description,
+      status: data.status.present ? data.status.value : this.status,
+      siteid: data.siteid.present ? data.siteid.value : this.siteid,
+      changedate:
+          data.changedate.present ? data.changedate.value : this.changedate,
+      hierarchy: data.hierarchy.present ? data.hierarchy.value : this.hierarchy,
+      parent: data.parent.present ? data.parent.value : this.parent,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      id: data.id.present ? data.id.value : this.id,
+      newAsset: data.newAsset.present ? data.newAsset.value : this.newAsset,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Asset(')
@@ -1798,6 +1852,24 @@ class Workorder extends DataClass implements Insertable<Workorder> {
         details: details.present ? details.value : this.details,
         recordType: recordType.present ? recordType.value : this.recordType,
       );
+  Workorder copyWithCompanion(WorkordersCompanion data) {
+    return Workorder(
+      wonum: data.wonum.present ? data.wonum.value : this.wonum,
+      description:
+          data.description.present ? data.description.value : this.description,
+      status: data.status.present ? data.status.value : this.status,
+      siteid: data.siteid.present ? data.siteid.value : this.siteid,
+      reportdate:
+          data.reportdate.present ? data.reportdate.value : this.reportdate,
+      downtime: data.downtime.present ? data.downtime.value : this.downtime,
+      type: data.type.present ? data.type.value : this.type,
+      assetnum: data.assetnum.present ? data.assetnum.value : this.assetnum,
+      details: data.details.present ? data.details.value : this.details,
+      recordType:
+          data.recordType.present ? data.recordType.value : this.recordType,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Workorder(')
@@ -2292,6 +2364,24 @@ class SystemCriticality extends DataClass
         line: line ?? this.line,
         score: score ?? this.score,
       );
+  SystemCriticality copyWithCompanion(SystemCriticalitysCompanion data) {
+    return SystemCriticality(
+      id: data.id.present ? data.id.value : this.id,
+      description:
+          data.description.present ? data.description.value : this.description,
+      siteid: data.siteid.present ? data.siteid.value : this.siteid,
+      safety: data.safety.present ? data.safety.value : this.safety,
+      regulatory:
+          data.regulatory.present ? data.regulatory.value : this.regulatory,
+      economic: data.economic.present ? data.economic.value : this.economic,
+      throughput:
+          data.throughput.present ? data.throughput.value : this.throughput,
+      quality: data.quality.present ? data.quality.value : this.quality,
+      line: data.line.present ? data.line.value : this.line,
+      score: data.score.present ? data.score.value : this.score,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('SystemCriticality(')
@@ -2806,6 +2896,29 @@ class AssetCriticality extends DataClass
         newRPN: newRPN ?? this.newRPN,
         lockedSystem: lockedSystem ?? this.lockedSystem,
       );
+  AssetCriticality copyWithCompanion(AssetCriticalitysCompanion data) {
+    return AssetCriticality(
+      asset: data.asset.present ? data.asset.value : this.asset,
+      system: data.system.present ? data.system.value : this.system,
+      type: data.type.present ? data.type.value : this.type,
+      frequency: data.frequency.present ? data.frequency.value : this.frequency,
+      downtime: data.downtime.present ? data.downtime.value : this.downtime,
+      earlyDetection: data.earlyDetection.present
+          ? data.earlyDetection.value
+          : this.earlyDetection,
+      manual: data.manual.present ? data.manual.value : this.manual,
+      manualPriority: data.manualPriority.present
+          ? data.manualPriority.value
+          : this.manualPriority,
+      newPriority:
+          data.newPriority.present ? data.newPriority.value : this.newPriority,
+      newRPN: data.newRPN.present ? data.newRPN.value : this.newRPN,
+      lockedSystem: data.lockedSystem.present
+          ? data.lockedSystem.value
+          : this.lockedSystem,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('AssetCriticality(')
@@ -3273,6 +3386,26 @@ class AssetUpload extends DataClass implements Insertable<AssetUpload> {
             ? assetCriticality.value
             : this.assetCriticality,
       );
+  AssetUpload copyWithCompanion(AssetUploadsCompanion data) {
+    return AssetUpload(
+      asset: data.asset.present ? data.asset.value : this.asset,
+      sjpDescription: data.sjpDescription.present
+          ? data.sjpDescription.value
+          : this.sjpDescription,
+      installationDate: data.installationDate.present
+          ? data.installationDate.value
+          : this.installationDate,
+      vendor: data.vendor.present ? data.vendor.value : this.vendor,
+      manufacturer: data.manufacturer.present
+          ? data.manufacturer.value
+          : this.manufacturer,
+      modelNum: data.modelNum.present ? data.modelNum.value : this.modelNum,
+      assetCriticality: data.assetCriticality.present
+          ? data.assetCriticality.value
+          : this.assetCriticality,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('AssetUpload(')
@@ -3596,6 +3729,17 @@ class SparePart extends DataClass implements Insertable<SparePart> {
         quantity: quantity ?? this.quantity,
         sparepartid: sparepartid ?? this.sparepartid,
       );
+  SparePart copyWithCompanion(SparePartsCompanion data) {
+    return SparePart(
+      itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
+      assetnum: data.assetnum.present ? data.assetnum.value : this.assetnum,
+      siteid: data.siteid.present ? data.siteid.value : this.siteid,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      sparepartid:
+          data.sparepartid.present ? data.sparepartid.value : this.sparepartid,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('SparePart(')
@@ -4057,6 +4201,27 @@ class Purchase extends DataClass implements Insertable<Purchase> {
         poStatus: poStatus ?? this.poStatus,
         prlineid: prlineid ?? this.prlineid,
       );
+  Purchase copyWithCompanion(PurchasesCompanion data) {
+    return Purchase(
+      prnum: data.prnum.present ? data.prnum.value : this.prnum,
+      prDescription: data.prDescription.present
+          ? data.prDescription.value
+          : this.prDescription,
+      poDescription: data.poDescription.present
+          ? data.poDescription.value
+          : this.poDescription,
+      ponum: data.ponum.present ? data.ponum.value : this.ponum,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      siteid: data.siteid.present ? data.siteid.value : this.siteid,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      leadTime: data.leadTime.present ? data.leadTime.value : this.leadTime,
+      itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
+      unitCost: data.unitCost.present ? data.unitCost.value : this.unitCost,
+      poStatus: data.poStatus.present ? data.poStatus.value : this.poStatus,
+      prlineid: data.prlineid.present ? data.prlineid.value : this.prlineid,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Purchase(')
@@ -4456,6 +4621,19 @@ class Item extends DataClass implements Insertable<Item> {
         commodityGroup: commodityGroup ?? this.commodityGroup,
         glClass: glClass ?? this.glClass,
       );
+  Item copyWithCompanion(ItemsCompanion data) {
+    return Item(
+      itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
+      description:
+          data.description.present ? data.description.value : this.description,
+      status: data.status.present ? data.status.value : this.status,
+      commodityGroup: data.commodityGroup.present
+          ? data.commodityGroup.value
+          : this.commodityGroup,
+      glClass: data.glClass.present ? data.glClass.value : this.glClass,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Item(')
@@ -4905,6 +5083,25 @@ class SpareCriticality extends DataClass
         siteid: siteid ?? this.siteid,
         itemnum: itemnum ?? this.itemnum,
       );
+  SpareCriticality copyWithCompanion(SpareCriticalitysCompanion data) {
+    return SpareCriticality(
+      id: data.id.present ? data.id.value : this.id,
+      usage: data.usage.present ? data.usage.value : this.usage,
+      leadTime: data.leadTime.present ? data.leadTime.value : this.leadTime,
+      cost: data.cost.present ? data.cost.value : this.cost,
+      assetRPN: data.assetRPN.present ? data.assetRPN.value : this.assetRPN,
+      manual: data.manual.present ? data.manual.value : this.manual,
+      manualPriority: data.manualPriority.present
+          ? data.manualPriority.value
+          : this.manualPriority,
+      newPriority:
+          data.newPriority.present ? data.newPriority.value : this.newPriority,
+      newRPN: data.newRPN.present ? data.newRPN.value : this.newRPN,
+      siteid: data.siteid.present ? data.siteid.value : this.siteid,
+      itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('SpareCriticality(')
@@ -5117,7 +5314,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
 
 abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(e);
-  _$MyDatabaseManager get managers => _$MyDatabaseManager(this);
+  $MyDatabaseManager get managers => $MyDatabaseManager(this);
   late final $SettingsTable settings = $SettingsTable(this);
   late final $LoginSettingsTable loginSettings = $LoginSettingsTable(this);
   late final $MeterDBsTable meterDBs = $MeterDBsTable(this);
@@ -5291,7 +5488,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
       ];
 }
 
-typedef $$SettingsTableInsertCompanionBuilder = SettingsCompanion Function({
+typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   required String key,
   required String value,
   Value<int> rowid,
@@ -5308,8 +5505,7 @@ class $$SettingsTableTableManager extends RootTableManager<
     Setting,
     $$SettingsTableFilterComposer,
     $$SettingsTableOrderingComposer,
-    $$SettingsTableProcessedTableManager,
-    $$SettingsTableInsertCompanionBuilder,
+    $$SettingsTableCreateCompanionBuilder,
     $$SettingsTableUpdateCompanionBuilder> {
   $$SettingsTableTableManager(_$MyDatabase db, $SettingsTable table)
       : super(TableManagerState(
@@ -5319,9 +5515,7 @@ class $$SettingsTableTableManager extends RootTableManager<
               $$SettingsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$SettingsTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$SettingsTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> key = const Value.absent(),
             Value<String> value = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -5331,7 +5525,7 @@ class $$SettingsTableTableManager extends RootTableManager<
             value: value,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String key,
             required String value,
             Value<int> rowid = const Value.absent(),
@@ -5342,18 +5536,6 @@ class $$SettingsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$SettingsTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $SettingsTable,
-    Setting,
-    $$SettingsTableFilterComposer,
-    $$SettingsTableOrderingComposer,
-    $$SettingsTableProcessedTableManager,
-    $$SettingsTableInsertCompanionBuilder,
-    $$SettingsTableUpdateCompanionBuilder> {
-  $$SettingsTableProcessedTableManager(super.$state);
 }
 
 class $$SettingsTableFilterComposer
@@ -5384,7 +5566,7 @@ class $$SettingsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$LoginSettingsTableInsertCompanionBuilder = LoginSettingsCompanion
+typedef $$LoginSettingsTableCreateCompanionBuilder = LoginSettingsCompanion
     Function({
   required String key,
   required String value,
@@ -5403,8 +5585,7 @@ class $$LoginSettingsTableTableManager extends RootTableManager<
     LoginSetting,
     $$LoginSettingsTableFilterComposer,
     $$LoginSettingsTableOrderingComposer,
-    $$LoginSettingsTableProcessedTableManager,
-    $$LoginSettingsTableInsertCompanionBuilder,
+    $$LoginSettingsTableCreateCompanionBuilder,
     $$LoginSettingsTableUpdateCompanionBuilder> {
   $$LoginSettingsTableTableManager(_$MyDatabase db, $LoginSettingsTable table)
       : super(TableManagerState(
@@ -5414,9 +5595,7 @@ class $$LoginSettingsTableTableManager extends RootTableManager<
               $$LoginSettingsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$LoginSettingsTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$LoginSettingsTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> key = const Value.absent(),
             Value<String> value = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -5426,7 +5605,7 @@ class $$LoginSettingsTableTableManager extends RootTableManager<
             value: value,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String key,
             required String value,
             Value<int> rowid = const Value.absent(),
@@ -5437,18 +5616,6 @@ class $$LoginSettingsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$LoginSettingsTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $LoginSettingsTable,
-    LoginSetting,
-    $$LoginSettingsTableFilterComposer,
-    $$LoginSettingsTableOrderingComposer,
-    $$LoginSettingsTableProcessedTableManager,
-    $$LoginSettingsTableInsertCompanionBuilder,
-    $$LoginSettingsTableUpdateCompanionBuilder> {
-  $$LoginSettingsTableProcessedTableManager(super.$state);
 }
 
 class $$LoginSettingsTableFilterComposer
@@ -5479,7 +5646,7 @@ class $$LoginSettingsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$MeterDBsTableInsertCompanionBuilder = MeterDBsCompanion Function({
+typedef $$MeterDBsTableCreateCompanionBuilder = MeterDBsCompanion Function({
   required String meter,
   required String inspect,
   required String description,
@@ -5506,8 +5673,7 @@ class $$MeterDBsTableTableManager extends RootTableManager<
     MeterDB,
     $$MeterDBsTableFilterComposer,
     $$MeterDBsTableOrderingComposer,
-    $$MeterDBsTableProcessedTableManager,
-    $$MeterDBsTableInsertCompanionBuilder,
+    $$MeterDBsTableCreateCompanionBuilder,
     $$MeterDBsTableUpdateCompanionBuilder> {
   $$MeterDBsTableTableManager(_$MyDatabase db, $MeterDBsTable table)
       : super(TableManagerState(
@@ -5517,9 +5683,7 @@ class $$MeterDBsTableTableManager extends RootTableManager<
               $$MeterDBsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$MeterDBsTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$MeterDBsTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> meter = const Value.absent(),
             Value<String> inspect = const Value.absent(),
             Value<String> description = const Value.absent(),
@@ -5539,7 +5703,7 @@ class $$MeterDBsTableTableManager extends RootTableManager<
             craft: craft,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String meter,
             required String inspect,
             required String description,
@@ -5560,18 +5724,6 @@ class $$MeterDBsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$MeterDBsTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $MeterDBsTable,
-    MeterDB,
-    $$MeterDBsTableFilterComposer,
-    $$MeterDBsTableOrderingComposer,
-    $$MeterDBsTableProcessedTableManager,
-    $$MeterDBsTableInsertCompanionBuilder,
-    $$MeterDBsTableUpdateCompanionBuilder> {
-  $$MeterDBsTableProcessedTableManager(super.$state);
 }
 
 class $$MeterDBsTableFilterComposer
@@ -5652,7 +5804,7 @@ class $$MeterDBsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$ObservationsTableInsertCompanionBuilder = ObservationsCompanion
+typedef $$ObservationsTableCreateCompanionBuilder = ObservationsCompanion
     Function({
   required String meter,
   required String code,
@@ -5675,8 +5827,7 @@ class $$ObservationsTableTableManager extends RootTableManager<
     Observation,
     $$ObservationsTableFilterComposer,
     $$ObservationsTableOrderingComposer,
-    $$ObservationsTableProcessedTableManager,
-    $$ObservationsTableInsertCompanionBuilder,
+    $$ObservationsTableCreateCompanionBuilder,
     $$ObservationsTableUpdateCompanionBuilder> {
   $$ObservationsTableTableManager(_$MyDatabase db, $ObservationsTable table)
       : super(TableManagerState(
@@ -5686,9 +5837,7 @@ class $$ObservationsTableTableManager extends RootTableManager<
               $$ObservationsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$ObservationsTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$ObservationsTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> meter = const Value.absent(),
             Value<String> code = const Value.absent(),
             Value<String> description = const Value.absent(),
@@ -5702,7 +5851,7 @@ class $$ObservationsTableTableManager extends RootTableManager<
             action: action,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String meter,
             required String code,
             required String description,
@@ -5717,18 +5866,6 @@ class $$ObservationsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$ObservationsTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $ObservationsTable,
-    Observation,
-    $$ObservationsTableFilterComposer,
-    $$ObservationsTableOrderingComposer,
-    $$ObservationsTableProcessedTableManager,
-    $$ObservationsTableInsertCompanionBuilder,
-    $$ObservationsTableUpdateCompanionBuilder> {
-  $$ObservationsTableProcessedTableManager(super.$state);
 }
 
 class $$ObservationsTableFilterComposer
@@ -5779,7 +5916,7 @@ class $$ObservationsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$AssetsTableInsertCompanionBuilder = AssetsCompanion Function({
+typedef $$AssetsTableCreateCompanionBuilder = AssetsCompanion Function({
   required String assetnum,
   required String description,
   required String status,
@@ -5812,8 +5949,7 @@ class $$AssetsTableTableManager extends RootTableManager<
     Asset,
     $$AssetsTableFilterComposer,
     $$AssetsTableOrderingComposer,
-    $$AssetsTableProcessedTableManager,
-    $$AssetsTableInsertCompanionBuilder,
+    $$AssetsTableCreateCompanionBuilder,
     $$AssetsTableUpdateCompanionBuilder> {
   $$AssetsTableTableManager(_$MyDatabase db, $AssetsTable table)
       : super(TableManagerState(
@@ -5823,8 +5959,7 @@ class $$AssetsTableTableManager extends RootTableManager<
               $$AssetsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$AssetsTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $$AssetsTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> assetnum = const Value.absent(),
             Value<String> description = const Value.absent(),
             Value<String> status = const Value.absent(),
@@ -5850,7 +5985,7 @@ class $$AssetsTableTableManager extends RootTableManager<
             newAsset: newAsset,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String assetnum,
             required String description,
             required String status,
@@ -5877,18 +6012,6 @@ class $$AssetsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$AssetsTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $AssetsTable,
-    Asset,
-    $$AssetsTableFilterComposer,
-    $$AssetsTableOrderingComposer,
-    $$AssetsTableProcessedTableManager,
-    $$AssetsTableInsertCompanionBuilder,
-    $$AssetsTableUpdateCompanionBuilder> {
-  $$AssetsTableProcessedTableManager(super.$state);
 }
 
 class $$AssetsTableFilterComposer
@@ -6029,7 +6152,7 @@ class $$AssetsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$WorkordersTableInsertCompanionBuilder = WorkordersCompanion Function({
+typedef $$WorkordersTableCreateCompanionBuilder = WorkordersCompanion Function({
   required String wonum,
   required String description,
   required String status,
@@ -6062,8 +6185,7 @@ class $$WorkordersTableTableManager extends RootTableManager<
     Workorder,
     $$WorkordersTableFilterComposer,
     $$WorkordersTableOrderingComposer,
-    $$WorkordersTableProcessedTableManager,
-    $$WorkordersTableInsertCompanionBuilder,
+    $$WorkordersTableCreateCompanionBuilder,
     $$WorkordersTableUpdateCompanionBuilder> {
   $$WorkordersTableTableManager(_$MyDatabase db, $WorkordersTable table)
       : super(TableManagerState(
@@ -6073,9 +6195,7 @@ class $$WorkordersTableTableManager extends RootTableManager<
               $$WorkordersTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$WorkordersTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$WorkordersTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> wonum = const Value.absent(),
             Value<String> description = const Value.absent(),
             Value<String> status = const Value.absent(),
@@ -6101,7 +6221,7 @@ class $$WorkordersTableTableManager extends RootTableManager<
             recordType: recordType,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String wonum,
             required String description,
             required String status,
@@ -6128,18 +6248,6 @@ class $$WorkordersTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$WorkordersTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $WorkordersTable,
-    Workorder,
-    $$WorkordersTableFilterComposer,
-    $$WorkordersTableOrderingComposer,
-    $$WorkordersTableProcessedTableManager,
-    $$WorkordersTableInsertCompanionBuilder,
-    $$WorkordersTableUpdateCompanionBuilder> {
-  $$WorkordersTableProcessedTableManager(super.$state);
 }
 
 class $$WorkordersTableFilterComposer
@@ -6250,7 +6358,7 @@ class $$WorkordersTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$SystemCriticalitysTableInsertCompanionBuilder
+typedef $$SystemCriticalitysTableCreateCompanionBuilder
     = SystemCriticalitysCompanion Function({
   Value<int> id,
   required String description,
@@ -6283,8 +6391,7 @@ class $$SystemCriticalitysTableTableManager extends RootTableManager<
     SystemCriticality,
     $$SystemCriticalitysTableFilterComposer,
     $$SystemCriticalitysTableOrderingComposer,
-    $$SystemCriticalitysTableProcessedTableManager,
-    $$SystemCriticalitysTableInsertCompanionBuilder,
+    $$SystemCriticalitysTableCreateCompanionBuilder,
     $$SystemCriticalitysTableUpdateCompanionBuilder> {
   $$SystemCriticalitysTableTableManager(
       _$MyDatabase db, $SystemCriticalitysTable table)
@@ -6295,9 +6402,7 @@ class $$SystemCriticalitysTableTableManager extends RootTableManager<
               $$SystemCriticalitysTableFilterComposer(ComposerState(db, table)),
           orderingComposer: $$SystemCriticalitysTableOrderingComposer(
               ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$SystemCriticalitysTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> description = const Value.absent(),
             Value<String?> siteid = const Value.absent(),
@@ -6321,7 +6426,7 @@ class $$SystemCriticalitysTableTableManager extends RootTableManager<
             line: line,
             score: score,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String description,
             Value<String?> siteid = const Value.absent(),
@@ -6346,19 +6451,6 @@ class $$SystemCriticalitysTableTableManager extends RootTableManager<
             score: score,
           ),
         ));
-}
-
-class $$SystemCriticalitysTableProcessedTableManager
-    extends ProcessedTableManager<
-        _$MyDatabase,
-        $SystemCriticalitysTable,
-        SystemCriticality,
-        $$SystemCriticalitysTableFilterComposer,
-        $$SystemCriticalitysTableOrderingComposer,
-        $$SystemCriticalitysTableProcessedTableManager,
-        $$SystemCriticalitysTableInsertCompanionBuilder,
-        $$SystemCriticalitysTableUpdateCompanionBuilder> {
-  $$SystemCriticalitysTableProcessedTableManager(super.$state);
 }
 
 class $$SystemCriticalitysTableFilterComposer
@@ -6486,7 +6578,7 @@ class $$SystemCriticalitysTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$AssetCriticalitysTableInsertCompanionBuilder
+typedef $$AssetCriticalitysTableCreateCompanionBuilder
     = AssetCriticalitysCompanion Function({
   required String asset,
   required int system,
@@ -6523,8 +6615,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
     AssetCriticality,
     $$AssetCriticalitysTableFilterComposer,
     $$AssetCriticalitysTableOrderingComposer,
-    $$AssetCriticalitysTableProcessedTableManager,
-    $$AssetCriticalitysTableInsertCompanionBuilder,
+    $$AssetCriticalitysTableCreateCompanionBuilder,
     $$AssetCriticalitysTableUpdateCompanionBuilder> {
   $$AssetCriticalitysTableTableManager(
       _$MyDatabase db, $AssetCriticalitysTable table)
@@ -6535,9 +6626,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
               $$AssetCriticalitysTableFilterComposer(ComposerState(db, table)),
           orderingComposer: $$AssetCriticalitysTableOrderingComposer(
               ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$AssetCriticalitysTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> asset = const Value.absent(),
             Value<int> system = const Value.absent(),
             Value<String> type = const Value.absent(),
@@ -6565,7 +6654,7 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             lockedSystem: lockedSystem,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String asset,
             required int system,
             required String type,
@@ -6594,19 +6683,6 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$AssetCriticalitysTableProcessedTableManager
-    extends ProcessedTableManager<
-        _$MyDatabase,
-        $AssetCriticalitysTable,
-        AssetCriticality,
-        $$AssetCriticalitysTableFilterComposer,
-        $$AssetCriticalitysTableOrderingComposer,
-        $$AssetCriticalitysTableProcessedTableManager,
-        $$AssetCriticalitysTableInsertCompanionBuilder,
-        $$AssetCriticalitysTableUpdateCompanionBuilder> {
-  $$AssetCriticalitysTableProcessedTableManager(super.$state);
 }
 
 class $$AssetCriticalitysTableFilterComposer
@@ -6763,7 +6839,7 @@ class $$AssetCriticalitysTableOrderingComposer
   }
 }
 
-typedef $$AssetUploadsTableInsertCompanionBuilder = AssetUploadsCompanion
+typedef $$AssetUploadsTableCreateCompanionBuilder = AssetUploadsCompanion
     Function({
   required String asset,
   Value<String?> sjpDescription,
@@ -6792,8 +6868,7 @@ class $$AssetUploadsTableTableManager extends RootTableManager<
     AssetUpload,
     $$AssetUploadsTableFilterComposer,
     $$AssetUploadsTableOrderingComposer,
-    $$AssetUploadsTableProcessedTableManager,
-    $$AssetUploadsTableInsertCompanionBuilder,
+    $$AssetUploadsTableCreateCompanionBuilder,
     $$AssetUploadsTableUpdateCompanionBuilder> {
   $$AssetUploadsTableTableManager(_$MyDatabase db, $AssetUploadsTable table)
       : super(TableManagerState(
@@ -6803,9 +6878,7 @@ class $$AssetUploadsTableTableManager extends RootTableManager<
               $$AssetUploadsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$AssetUploadsTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$AssetUploadsTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> asset = const Value.absent(),
             Value<String?> sjpDescription = const Value.absent(),
             Value<String?> installationDate = const Value.absent(),
@@ -6825,7 +6898,7 @@ class $$AssetUploadsTableTableManager extends RootTableManager<
             assetCriticality: assetCriticality,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String asset,
             Value<String?> sjpDescription = const Value.absent(),
             Value<String?> installationDate = const Value.absent(),
@@ -6846,18 +6919,6 @@ class $$AssetUploadsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$AssetUploadsTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $AssetUploadsTable,
-    AssetUpload,
-    $$AssetUploadsTableFilterComposer,
-    $$AssetUploadsTableOrderingComposer,
-    $$AssetUploadsTableProcessedTableManager,
-    $$AssetUploadsTableInsertCompanionBuilder,
-    $$AssetUploadsTableUpdateCompanionBuilder> {
-  $$AssetUploadsTableProcessedTableManager(super.$state);
 }
 
 class $$AssetUploadsTableFilterComposer
@@ -6952,7 +7013,7 @@ class $$AssetUploadsTableOrderingComposer
   }
 }
 
-typedef $$SparePartsTableInsertCompanionBuilder = SparePartsCompanion Function({
+typedef $$SparePartsTableCreateCompanionBuilder = SparePartsCompanion Function({
   required String itemnum,
   required String assetnum,
   required String siteid,
@@ -6973,8 +7034,7 @@ class $$SparePartsTableTableManager extends RootTableManager<
     SparePart,
     $$SparePartsTableFilterComposer,
     $$SparePartsTableOrderingComposer,
-    $$SparePartsTableProcessedTableManager,
-    $$SparePartsTableInsertCompanionBuilder,
+    $$SparePartsTableCreateCompanionBuilder,
     $$SparePartsTableUpdateCompanionBuilder> {
   $$SparePartsTableTableManager(_$MyDatabase db, $SparePartsTable table)
       : super(TableManagerState(
@@ -6984,9 +7044,7 @@ class $$SparePartsTableTableManager extends RootTableManager<
               $$SparePartsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$SparePartsTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$SparePartsTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> itemnum = const Value.absent(),
             Value<String> assetnum = const Value.absent(),
             Value<String> siteid = const Value.absent(),
@@ -7000,7 +7058,7 @@ class $$SparePartsTableTableManager extends RootTableManager<
             quantity: quantity,
             sparepartid: sparepartid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String itemnum,
             required String assetnum,
             required String siteid,
@@ -7015,18 +7073,6 @@ class $$SparePartsTableTableManager extends RootTableManager<
             sparepartid: sparepartid,
           ),
         ));
-}
-
-class $$SparePartsTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $SparePartsTable,
-    SparePart,
-    $$SparePartsTableFilterComposer,
-    $$SparePartsTableOrderingComposer,
-    $$SparePartsTableProcessedTableManager,
-    $$SparePartsTableInsertCompanionBuilder,
-    $$SparePartsTableUpdateCompanionBuilder> {
-  $$SparePartsTableProcessedTableManager(super.$state);
 }
 
 class $$SparePartsTableFilterComposer
@@ -7087,7 +7133,7 @@ class $$SparePartsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$PurchasesTableInsertCompanionBuilder = PurchasesCompanion Function({
+typedef $$PurchasesTableCreateCompanionBuilder = PurchasesCompanion Function({
   required String prnum,
   required String prDescription,
   required String poDescription,
@@ -7122,8 +7168,7 @@ class $$PurchasesTableTableManager extends RootTableManager<
     Purchase,
     $$PurchasesTableFilterComposer,
     $$PurchasesTableOrderingComposer,
-    $$PurchasesTableProcessedTableManager,
-    $$PurchasesTableInsertCompanionBuilder,
+    $$PurchasesTableCreateCompanionBuilder,
     $$PurchasesTableUpdateCompanionBuilder> {
   $$PurchasesTableTableManager(_$MyDatabase db, $PurchasesTable table)
       : super(TableManagerState(
@@ -7133,9 +7178,7 @@ class $$PurchasesTableTableManager extends RootTableManager<
               $$PurchasesTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$PurchasesTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$PurchasesTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> prnum = const Value.absent(),
             Value<String> prDescription = const Value.absent(),
             Value<String> poDescription = const Value.absent(),
@@ -7163,7 +7206,7 @@ class $$PurchasesTableTableManager extends RootTableManager<
             poStatus: poStatus,
             prlineid: prlineid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String prnum,
             required String prDescription,
             required String poDescription,
@@ -7192,18 +7235,6 @@ class $$PurchasesTableTableManager extends RootTableManager<
             prlineid: prlineid,
           ),
         ));
-}
-
-class $$PurchasesTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $PurchasesTable,
-    Purchase,
-    $$PurchasesTableFilterComposer,
-    $$PurchasesTableOrderingComposer,
-    $$PurchasesTableProcessedTableManager,
-    $$PurchasesTableInsertCompanionBuilder,
-    $$PurchasesTableUpdateCompanionBuilder> {
-  $$PurchasesTableProcessedTableManager(super.$state);
 }
 
 class $$PurchasesTableFilterComposer
@@ -7334,7 +7365,7 @@ class $$PurchasesTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$ItemsTableInsertCompanionBuilder = ItemsCompanion Function({
+typedef $$ItemsTableCreateCompanionBuilder = ItemsCompanion Function({
   required String itemnum,
   required String description,
   required String status,
@@ -7357,8 +7388,7 @@ class $$ItemsTableTableManager extends RootTableManager<
     Item,
     $$ItemsTableFilterComposer,
     $$ItemsTableOrderingComposer,
-    $$ItemsTableProcessedTableManager,
-    $$ItemsTableInsertCompanionBuilder,
+    $$ItemsTableCreateCompanionBuilder,
     $$ItemsTableUpdateCompanionBuilder> {
   $$ItemsTableTableManager(_$MyDatabase db, $ItemsTable table)
       : super(TableManagerState(
@@ -7368,8 +7398,7 @@ class $$ItemsTableTableManager extends RootTableManager<
               $$ItemsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $$ItemsTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $$ItemsTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> itemnum = const Value.absent(),
             Value<String> description = const Value.absent(),
             Value<String> status = const Value.absent(),
@@ -7385,7 +7414,7 @@ class $$ItemsTableTableManager extends RootTableManager<
             glClass: glClass,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String itemnum,
             required String description,
             required String status,
@@ -7402,18 +7431,6 @@ class $$ItemsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$ItemsTableProcessedTableManager extends ProcessedTableManager<
-    _$MyDatabase,
-    $ItemsTable,
-    Item,
-    $$ItemsTableFilterComposer,
-    $$ItemsTableOrderingComposer,
-    $$ItemsTableProcessedTableManager,
-    $$ItemsTableInsertCompanionBuilder,
-    $$ItemsTableUpdateCompanionBuilder> {
-  $$ItemsTableProcessedTableManager(super.$state);
 }
 
 class $$ItemsTableFilterComposer
@@ -7474,7 +7491,7 @@ class $$ItemsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$SpareCriticalitysTableInsertCompanionBuilder
+typedef $$SpareCriticalitysTableCreateCompanionBuilder
     = SpareCriticalitysCompanion Function({
   required String id,
   required int usage,
@@ -7511,8 +7528,7 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
     SpareCriticality,
     $$SpareCriticalitysTableFilterComposer,
     $$SpareCriticalitysTableOrderingComposer,
-    $$SpareCriticalitysTableProcessedTableManager,
-    $$SpareCriticalitysTableInsertCompanionBuilder,
+    $$SpareCriticalitysTableCreateCompanionBuilder,
     $$SpareCriticalitysTableUpdateCompanionBuilder> {
   $$SpareCriticalitysTableTableManager(
       _$MyDatabase db, $SpareCriticalitysTable table)
@@ -7523,9 +7539,7 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
               $$SpareCriticalitysTableFilterComposer(ComposerState(db, table)),
           orderingComposer: $$SpareCriticalitysTableOrderingComposer(
               ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $$SpareCriticalitysTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<int> usage = const Value.absent(),
             Value<int> leadTime = const Value.absent(),
@@ -7553,7 +7567,7 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             itemnum: itemnum,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String id,
             required int usage,
             required int leadTime,
@@ -7582,19 +7596,6 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $$SpareCriticalitysTableProcessedTableManager
-    extends ProcessedTableManager<
-        _$MyDatabase,
-        $SpareCriticalitysTable,
-        SpareCriticality,
-        $$SpareCriticalitysTableFilterComposer,
-        $$SpareCriticalitysTableOrderingComposer,
-        $$SpareCriticalitysTableProcessedTableManager,
-        $$SpareCriticalitysTableInsertCompanionBuilder,
-        $$SpareCriticalitysTableUpdateCompanionBuilder> {
-  $$SpareCriticalitysTableProcessedTableManager(super.$state);
 }
 
 class $$SpareCriticalitysTableFilterComposer
@@ -7715,9 +7716,9 @@ class $$SpareCriticalitysTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-class _$MyDatabaseManager {
+class $MyDatabaseManager {
   final _$MyDatabase _db;
-  _$MyDatabaseManager(this._db);
+  $MyDatabaseManager(this._db);
   $$SettingsTableTableManager get settings =>
       $$SettingsTableTableManager(_db, _db.settings);
   $$LoginSettingsTableTableManager get loginSettings =>

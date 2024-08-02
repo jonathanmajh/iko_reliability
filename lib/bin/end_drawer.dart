@@ -1,6 +1,5 @@
 //for widgets in the right-side drawer
 import 'package:flutter/material.dart';
-import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:iko_reliability_flutter/criticality/file_export.dart';
 import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';

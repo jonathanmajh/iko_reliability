@@ -44,7 +44,7 @@ void main() async {
         lineLength: 80,
         colors: false,
         printEmojis: false,
-        printTime: true,
+        dateTimeFormat: DateTimeFormat.dateAndTime,
       ),
       output: AppConsoleOutput(),
     );
@@ -58,7 +58,7 @@ void main() async {
         lineLength: 80,
         colors: false,
         printEmojis: false,
-        printTime: true,
+        dateTimeFormat: DateTimeFormat.dateAndTime,
       ),
       output: AppFileOutput(),
     );
