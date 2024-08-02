@@ -947,14 +947,15 @@ class MyDatabase extends _$MyDatabase {
             description:
                 row['description'] ?? 'WO has NO description in Maximo',
             downtime: row['iko_downtime'],
-            siteid: row['siteid'],
+            siteid: row['siteid'] ?? 'WO has No siteid in Maximo',
             status: row['status'],
-            type: row['worktype'],
-            reportdate: row['reportdate'],
-            assetnum: row['assetnum'],
+            type: row['worktype'] ?? 'WO has No worktype in Maximo',
+            reportdate: row['reportdate'] ?? '1900-01-01',
+            assetnum: row['assetnum'] ?? 'WO has No assetnum in Maximo',
             recordType: Value(row['recordType']),
-            details: Value(
-                row['details'].toString().replaceAll(RegExp(r'<[^>]+>'), '')),
+            details: Value((row['details'] ?? 'WO has NO details in Maximo')
+                .toString()
+                .replaceAll(RegExp(r'<[^>]+>'), '')),
           ),
         );
       }
