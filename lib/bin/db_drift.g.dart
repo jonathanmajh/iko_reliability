@@ -4807,9 +4807,10 @@ class $SpareCriticalitysTable extends SpareCriticalitys
   late final GeneratedColumn<bool> manualPriority = GeneratedColumn<bool>(
       'manual_priority', aliasedName, false,
       type: DriftSqlType.bool,
-      requiredDuringInsert: true,
+      requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("manual_priority" IN (0, 1))'));
+          'CHECK ("manual_priority" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _newPriorityMeta =
       const VerificationMeta('newPriority');
   @override
@@ -4896,8 +4897,6 @@ class $SpareCriticalitysTable extends SpareCriticalitys
           _manualPriorityMeta,
           manualPriority.isAcceptableOrUnknown(
               data['manual_priority']!, _manualPriorityMeta));
-    } else if (isInserting) {
-      context.missing(_manualPriorityMeta);
     }
     if (data.containsKey('new_priority')) {
       context.handle(
@@ -5174,7 +5173,7 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     required int cost,
     required double assetRPN,
     required bool manual,
-    required bool manualPriority,
+    this.manualPriority = const Value.absent(),
     required int newPriority,
     required double newRPN,
     required String siteid,
@@ -5186,7 +5185,6 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
         cost = Value(cost),
         assetRPN = Value(assetRPN),
         manual = Value(manual),
-        manualPriority = Value(manualPriority),
         newPriority = Value(newPriority),
         newRPN = Value(newRPN),
         siteid = Value(siteid),
@@ -7499,7 +7497,7 @@ typedef $$SpareCriticalitysTableCreateCompanionBuilder
   required int cost,
   required double assetRPN,
   required bool manual,
-  required bool manualPriority,
+  Value<bool> manualPriority,
   required int newPriority,
   required double newRPN,
   required String siteid,
@@ -7574,7 +7572,7 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             required int cost,
             required double assetRPN,
             required bool manual,
-            required bool manualPriority,
+            Value<bool> manualPriority = const Value.absent(),
             required int newPriority,
             required double newRPN,
             required String siteid,

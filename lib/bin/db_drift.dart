@@ -235,7 +235,8 @@ class SpareCriticalitys extends Table {
   IntColumn get cost => integer()();
   RealColumn get assetRPN => real()();
   BoolColumn get manual => boolean()();
-  BoolColumn get manualPriority => boolean()();
+  BoolColumn get manualPriority =>
+      boolean().withDefault(const Constant(false))();
   IntColumn get newPriority => integer()();
   RealColumn get newRPN => real()();
   TextColumn get siteid => text()();
@@ -1376,7 +1377,7 @@ class MyDatabase extends _$MyDatabase {
         cost: temp[2],
         assetRPN: spareAssetInfo.assetRPN ?? 0,
         manual: false,
-        manualPriority: false,
+        manualPriority: const Value(false),
         newPriority: 0,
         newRPN: (spareAssetInfo.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
         siteid: siteid,
