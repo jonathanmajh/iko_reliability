@@ -4,6 +4,25 @@ import '../main.dart';
 import '../bin/consts.dart';
 import 'package:http/http.dart' as http;
 
+/// logs in and display result in dataAlert
+Future<void> displayLoginAttempt(String password, String env) async {
+  var result = await getUserMaximo('[APIKEY]', password, env);
+  if (result['status'] == 'fail|connection') {
+    showDataAlert(
+        ['No response from Maximo servers', 'Check internet connection'],
+        'Failed to Login');
+  } else if (result['status'] == 'fail|account') {
+    showDataAlert(['Please check credentials', 'Check internet connection'],
+        'Failed to Login');
+  } else {
+    showDataAlert([
+      'Logged into :$env',
+      'As :${result['displayName']}',
+      'Server URL: ${result['spi:clientHost']}'
+    ], 'Logged in!');
+  }
+}
+
 ///gets a Map of user data information from Maximo using HTTP and saves login data into local database if successful
 Future<Map<String, dynamic>> getUserMaximo(
     String userid, String password, String env) async {
@@ -21,27 +40,17 @@ Future<Map<String, dynamic>> getUserMaximo(
   try {
     response = await http.get(Uri.parse(url), headers: header);
   } catch (err) {
-    showDataAlert(
-        ['No response from Maximo servers', 'Check internet connection'],
-        'Failed to Login');
-    return {'status': 'fail'};
+    return {'status': 'fail|connection'};
   }
   var parsed = jsonDecode(response.body);
   if (response.statusCode == 200) {
     if (parsed['displayName'] != null) {
-      showDataAlert([
-        'Logged into :$env',
-        'As :${parsed['displayName']}',
-        'Server URL: ${parsed['spi:clientHost']}'
-      ], 'Logged in!');
       parsed['status'] = 'pass';
       saveLoginMaximo(userid, password, env);
       return parsed;
     }
   }
-  showDataAlert(['Please check credentials', 'Check internet connection'],
-      'Failed to Login');
-  parsed['status'] = 'fail';
+  parsed['status'] = 'fail|account';
   return parsed;
 }
 

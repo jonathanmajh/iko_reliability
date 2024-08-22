@@ -301,10 +301,34 @@ class _HomePageState extends State<HomePage> {
             future: getLoginMaximo(maximo.maximoServerSelected),
             builder: ((context, snapshot) {
               if (snapshot.hasData) {
-                if (snapshot.data?.login != null) {
-                  return ListTile(
-                    title: Text('Logging in...'),
-                  );
+                if (snapshot.data?.password != null) {
+                  return FutureBuilder(
+                      future: getUserMaximo('[APIKEY]', snapshot.data!.password,
+                          maximo.maximoServerSelected),
+                      builder: ((context, snapshot) {
+                        if (snapshot.hasData) {
+                          var text = '';
+                          if (snapshot.data!['status'] == 'fail|connection') {
+                            text =
+                                'No response from Maximo servers, check internet connection';
+                          } else if (snapshot.data!['status'] ==
+                              'fail|account') {
+                            text =
+                                'Please check credentials, check internet connection';
+                          } else {
+                            text =
+                                'Welcome: ${snapshot.data!['displayName']}. Logged into: ${maximo.maximoServerSelected}';
+                          }
+                          return ListTile(
+                            title: Text(text),
+                          );
+                        } else {
+                          return ListTile(
+                            leading: CircularProgressIndicator.adaptive(),
+                            title: Text('Logging in...'),
+                          );
+                        }
+                      }));
                 } else {
                   return ListTile(
                     title: Text(
