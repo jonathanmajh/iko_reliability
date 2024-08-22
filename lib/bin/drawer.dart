@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
+import 'package:provider/provider.dart';
 
 import '../criticality/asset_criticality.dart';
 import '../criticality/spare_criticality.dart';
@@ -10,6 +12,8 @@ class NavDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SettingsNotifier settingsNotifier =
+        Provider.of<SettingsNotifier>(context, listen: true);
     return ListView(
       padding: EdgeInsets.zero,
       children: <Widget>[
@@ -84,53 +88,55 @@ class NavDrawer extends StatelessWidget {
             ),
           ],
         ),
-        ExpansionTile(
-          initiallyExpanded: true,
-          title: const Text("Maximo Admin"),
-          children: <Widget>[
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Validate PMs'),
-              onTap: () {
-                context.router.pushNamed("/pm/check");
-                Navigator.pop(context); // close the drawer
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Update PM Meters'),
-              onTap: () {
-                context.router.pushNamed("/pm/update-meter");
-                Navigator.pop(context); // close the drawer
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Create Assets'),
-              onTap: () {
-                context.router.pushNamed("/asset");
-                Navigator.pop(context); // close the drawer
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Create Contractors'),
-              onTap: () {
-                context.router.pushNamed("/contractor");
-                Navigator.pop(context); // close the drawer
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Generate Timesheets'),
-              onTap: () {
-                context.router.pushNamed("/timesheet");
-                // change app state...
-                Navigator.pop(context); // close the drawer
-              },
-            ),
-          ],
-        )
+        settingsNotifier.isAdmin
+            ? ExpansionTile(
+                initiallyExpanded: true,
+                title: const Text("Maximo Admin"),
+                children: <Widget>[
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Validate PMs'),
+                    onTap: () {
+                      context.router.pushNamed("/pm/check");
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Update PM Meters'),
+                    onTap: () {
+                      context.router.pushNamed("/pm/update-meter");
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Create Assets'),
+                    onTap: () {
+                      context.router.pushNamed("/asset");
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Create Contractors'),
+                    onTap: () {
+                      context.router.pushNamed("/contractor");
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Generate Timesheets'),
+                    onTap: () {
+                      context.router.pushNamed("/timesheet");
+                      // change app state...
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                ],
+              )
+            : const SizedBox.shrink()
       ],
     );
   }

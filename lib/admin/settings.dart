@@ -1,8 +1,13 @@
 import 'dart:convert';
 
+import 'package:provider/provider.dart';
+
+import '../bin/db_drift.dart';
 import '../main.dart';
 import '../bin/consts.dart';
 import 'package:http/http.dart' as http;
+
+import '../settings/settings_notifier.dart';
 
 /// logs in and display result in dataAlert
 Future<void> displayLoginAttempt(String password, String env) async {
@@ -16,9 +21,9 @@ Future<void> displayLoginAttempt(String password, String env) async {
         'Failed to Login');
   } else {
     showDataAlert([
-      'Logged into :$env',
-      'As :${result['displayName']}',
-      'Server URL: ${result['spi:clientHost']}'
+      'Logged into: $env',
+      'As: ${result['displayName']}',
+      'Server URL: ${result['maslogouturl'].toString().substring(0, 42)}'
     ], 'Logged in!');
   }
 }
@@ -47,6 +52,12 @@ Future<Map<String, dynamic>> getUserMaximo(
     if (parsed['displayName'] != null) {
       parsed['status'] = 'pass';
       saveLoginMaximo(userid, password, env);
+      database!.setSettings(
+        newSetting:
+            Setting(key: 'isAdmin', value: parsed['inactiveSites'].toString()),
+      );
+      Provider.of<SettingsNotifier>(navigatorKey.currentContext!, listen: false)
+          .setAdmin(parsed['inactiveSites']);
       return parsed;
     }
   }

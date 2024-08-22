@@ -20,9 +20,15 @@ class SelectedSiteNotifier extends ChangeNotifier {
 class SettingsNotifier extends ChangeNotifier {
   ///Map of current settings
   Map<ApplicationSetting, dynamic> currentSettings = {};
-
+  bool isAdmin = false;
   SettingsNotifier() {
     currentSettings = {};
+  }
+
+  setAdmin(bool setAdmin) {
+    //Setting(key: 'isAdmin')
+    isAdmin = setAdmin;
+    notifyListeners();
   }
 
   ///Initializes the SettingsNotifier
