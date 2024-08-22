@@ -28,6 +28,7 @@ class _EndDrawerState extends State<EndDrawer> {
   String siteid = '';
   TextEditingController passwordController = TextEditingController();
   bool _passwordVisible = false;
+  bool loading = false;
 
   @override
   void dispose() {
@@ -159,9 +160,48 @@ class _EndDrawerState extends State<EndDrawer> {
               title: const Text('Load Assets From Maximo'),
               subtitle: DropdownButton(
                 isExpanded: true,
-                onChanged: (String? newValue) {
+                onChanged: (String? newValue) async {
                   setState(() {
                     siteid = newValue ?? '';
+                    loading = true;
+                  });
+                  if (siteid != '') {
+                    var processNotifier = Provider.of<ProcessStateNotifier>(
+                        context,
+                        listen: false);
+                    ScaffoldMessengerState scaffoldMes =
+                        ScaffoldMessenger.of(context);
+                    try {
+                      processNotifier.setProcessState(
+                          ProcessStates.loadAssetState, true,
+                          notifyListeners: false);
+                      processNotifier.processingDialog(context);
+                      scaffoldMes.showSnackBar(SnackBar(
+                        duration: const Duration(days: 1), //some long duration
+                        content:
+                            Text('Attempting to Load Assets from : $siteid'),
+                      ));
+                      List<String> messages = await maximoAssetCaller(
+                          siteid,
+                          context
+                              .read<MaximoServerNotifier>()
+                              .maximoServerSelected,
+                          context);
+                      processNotifier
+                          .popProcessingDialog(navigatorKey.currentContext!);
+                      if (messages.isNotEmpty) {
+                        showDataAlert(messages, 'Site Assets Loaded');
+                      }
+                    } finally {
+                      scaffoldMes
+                          .hideCurrentSnackBar(); //hide snackbar once asset load is completed
+                      processNotifier.setProcessState(
+                          ProcessStates.loadAssetState, false,
+                          notifyListeners: false);
+                    }
+                  }
+                  setState(() {
+                    loading = false;
                   });
                 },
                 value: siteid,
@@ -179,43 +219,9 @@ class _EndDrawerState extends State<EndDrawer> {
               trailing: Consumer<MaximoServerNotifier>(
                 builder: (context, maximo, child) {
                   //asset load button
-                  return IconButton(
-                    onPressed: () async {
-                      if (siteid != '') {
-                        var processNotifier = Provider.of<ProcessStateNotifier>(
-                            context,
-                            listen: false);
-                        ScaffoldMessengerState scaffoldMes =
-                            ScaffoldMessenger.of(context);
-                        try {
-                          processNotifier.setProcessState(
-                              ProcessStates.loadAssetState, true,
-                              notifyListeners: false);
-                          processNotifier.processingDialog(context);
-                          scaffoldMes.showSnackBar(SnackBar(
-                            duration:
-                                const Duration(days: 1), //some long duration
-                            content: Text(
-                                'Attempting to Load Assets from : $siteid'),
-                          ));
-                          List<String> messages = await maximoAssetCaller(
-                              siteid, maximo.maximoServerSelected, context);
-                          processNotifier.popProcessingDialog(
-                              navigatorKey.currentContext!);
-                          if (messages.isNotEmpty) {
-                            showDataAlert(messages, 'Site Assets Loaded');
-                          }
-                        } finally {
-                          scaffoldMes
-                              .hideCurrentSnackBar(); //hide snackbar once asset load is completed
-                          processNotifier.setProcessState(
-                              ProcessStates.loadAssetState, false,
-                              notifyListeners: false);
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.download),
-                  );
+                  return loading
+                      ? const CircularProgressIndicator.adaptive()
+                      : const SizedBox.shrink();
                 },
               )),
           const ListTile(
