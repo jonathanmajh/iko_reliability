@@ -40,7 +40,7 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
         pmpkg.route?.routeNumber ?? '',
         pmpkg.leadTime.toString(),
         pmpkg.priority.toString(),
-        pmpkg.nextDate == null ? '' : '${pmpkg.nextDate}T00:00:00',
+        pmpkg.nextDate == '' ? '' : '${pmpkg.nextDate}T00:00:00',
         pmpkg.orgID,
         pmpkg.targetStartTime,
         pmpkg.ikoPMHistoryNotes ?? '',
@@ -50,6 +50,11 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
     if (pmpkg.description.length > 100) {
       generated['Errors']!.add([
         'PM Description is too long: ${pmpkg.description.length}/100 character limit'
+      ]);
+    }
+    if (pmpkg.nextDate.contains('/')) {
+      generated['Errors']!.add([
+        'Slash (/) found in PM next due date, Check PM template next due date format'
       ]);
     }
   }

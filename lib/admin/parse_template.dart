@@ -99,7 +99,7 @@ class ParsedTemplate {
   List<JobMaterial> materials;
   List<JobService> services;
   List<JobTask> tasks;
-  String? nextDueDate;
+  String nextDueDate;
   String pmNumber;
   String pmName;
   String? pmPackageNumber;
@@ -119,7 +119,7 @@ class ParsedTemplate {
     this.processCondition,
     List<JobCraft>? crafts,
     List<JobMaterial>? materials,
-    this.nextDueDate,
+    required this.nextDueDate,
     required this.pmNumber,
     required this.pmName,
     this.pmPackageNumber,
@@ -178,7 +178,7 @@ class ParsedTemplate {
             //replace work order types of 'LC1' with 'LIF'
           }
           //read next due date for pm
-          var nextDate;
+          String nextDate = '';
           if (nextRow[2] != null) {
             if (nextRow[2] is String) {
               nextDate = nextRow[2].substring(0, 10);

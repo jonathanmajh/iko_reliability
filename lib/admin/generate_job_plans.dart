@@ -148,7 +148,7 @@ class PMMaximo {
   String assetNumber;
   int leadTime;
   final priority = 2;
-  String? nextDate;
+  String nextDate;
   String orgID;
   String targetStartTime;
   String? ikoPMHistoryNotes;
@@ -167,7 +167,7 @@ class PMMaximo {
     this.pmAssetWOGen = false,
     required this.assetNumber,
     required this.leadTime,
-    this.nextDate,
+    required this.nextDate,
     required this.orgID,
     required this.targetStartTime,
     this.ikoPMHistoryNotes,

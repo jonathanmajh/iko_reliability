@@ -263,8 +263,7 @@ List<Widget> generateUploadDetailsList(
     if (uploadDetails[table]!.isNotEmpty) {
       for (final row in uploadDetails[table]!) {
         if (result) {
-          final textColor =
-              status[row.last] ?? themeData.colorScheme.surface;
+          final textColor = status[row.last] ?? themeData.colorScheme.surface;
           if (row.last == '!') {
             errors++;
           } else if (row.last == '~') {

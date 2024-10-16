@@ -321,23 +321,24 @@ Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
   List<Future> futures = [];
   for (var file in files) {
     futures.add(compute(
-        ParsedTemplate(pmName: 'Error', pmNumber: 'Error').fromExcel,
+        ParsedTemplate(pmName: 'Error', pmNumber: 'Error', nextDueDate: '')
+            .fromExcel,
         [file.bytes!, file.name]));
   }
   return await Future.wait(futures);
 }
 
 ///processes loaded PM template files
-void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
-    String maximoServerSelected) async {
-  context.setLoading(true);
+void processAllTemplates(TemplateNotifier templateNotifier,
+    List<PlatformFile> files, String maximoServerSelected) async {
+  templateNotifier.setLoading(true);
   var parsedTmpts = await parseSpreadsheets(files);
   for (var thing in parsedTmpts) {
     for (var template in thing.keys) {
       //process each selected file
       for (var templateNumber in thing[template].keys) {
         //process each template in a file
-        context.setParsedTemplate(
+        templateNotifier.setParsedTemplate(
             template, templateNumber, thing[template][templateNumber]);
       }
     }
@@ -347,23 +348,23 @@ void processAllTemplates(TemplateNotifier context, List<PlatformFile> files,
       for (int templateNumber in thing[ws].keys) {
         try {
           final value = await generateName(
-            context.getParsedTemplate(ws, templateNumber),
+            templateNotifier.getParsedTemplate(ws, templateNumber),
             maximoServerSelected,
           );
-          context.setNameTemplate(ws, templateNumber, value);
+          templateNotifier.setNameTemplate(ws, templateNumber, value);
           final value2 = await generatePM(
-            context.getParsedTemplate(ws, templateNumber),
-            context.getPMName(ws, templateNumber),
+            templateNotifier.getParsedTemplate(ws, templateNumber),
+            templateNotifier.getPMName(ws, templateNumber),
             maximoServerSelected,
           );
-          context.setProcessedTemplate(ws, templateNumber, value2);
+          templateNotifier.setProcessedTemplate(ws, templateNumber, value2);
         } catch (e) {
           debugPrint(e.toString());
-          context.addStatusMessage(ws, templateNumber, '$e');
+          templateNotifier.addStatusMessage(ws, templateNumber, '$e');
         }
       }
     }
   }
 
-  context.setLoading(false);
+  templateNotifier.setLoading(false);
 }
