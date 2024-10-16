@@ -1,5 +1,6 @@
 import 'package:iko_reliability_flutter/admin/maximo_jp_pm.dart';
 import 'package:iko_reliability_flutter/admin/pm_jp_storage.dart';
+import 'package:intl/intl.dart';
 
 import '../main.dart';
 import '../bin/consts.dart';
@@ -67,9 +68,6 @@ Future<PMName> generateName(
 
 // add frequency details if pm
   if (pmdetails.frequency != null) {
-    number = '$number${pmdetails.frequencyUnit}${pmdetails.frequency}';
-    replaceable[0] =
-        '${replaceable[0]}${pmdetails.frequencyUnit}${pmdetails.frequency}';
     replaceable[1] =
         '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
     name =
@@ -105,23 +103,15 @@ Future<PMName> generateName(
   }
   final counter = await findAvailablePMNumber(
       number, pmdetails.siteId!, maximoServerSelected, wotype, 3);
-  if (counter > 0) {
-    if (wotype != 'LIF') {
-      number = '$number$counter';
-    } else {
-      number =
-          '${number.substring(0, number.length - 2)}${counter + 1}${number.substring(number.length - 1)}';
-      name = '$name${numberToLetter(counter)}';
-      if (pmdetails.replacement != null) {
-        name = '$name ${pmdetails.replacement}';
-      }
-    }
+  NumberFormat formatter = NumberFormat("000");
+  if (wotype != 'LIF') {
+    number = '$number${formatter.format(counter)}';
   } else {
-    if (wotype == 'LIF') {
-      name = '${name}A';
-      if (pmdetails.replacement != null) {
-        name = '$name ${pmdetails.replacement}';
-      }
+    number =
+        '${number.substring(0, number.length - 2)}$counter${number.substring(number.length - 1)}';
+    name = '$name${numberToLetter(counter)}';
+    if (pmdetails.replacement != null) {
+      name = '$name ${pmdetails.replacement}';
     }
   }
 
@@ -174,7 +164,7 @@ Future<int> findAvailablePMNumber(
   bool existPM = false;
   bool existJP = false;
   bool existRoute = false;
-  int counter = 0;
+  int counter = 1;
   if (checkType == 1) {
     existPM = existPmNumberCache(pmNumber, siteID);
   }

@@ -71,6 +71,7 @@ const workType = {
   'PEM': 'Pre-emptive Maintenance',
   'PRO': 'Process Maintenance',
   'SAF': 'Safety',
+  'LCH': 'Line Change',
 };
 
 const assetWorkType = {
@@ -121,6 +122,7 @@ final siteIDAndOrgID = {
   'BA': 'IKO-CAD',
   'BL': 'IKO-US',
   'CA': 'IKO-US',
+  'CM': 'IKO-US',
   'CAM': 'IKO-UK',
   'COM': 'IKO-EU',
   'GC': 'IKO-US',
@@ -147,6 +149,7 @@ final siteIDAndDescription = {
   'GE': 'Ashcroft',
   'GR': 'BramCal',
   'GP': 'CRC Brampton',
+  'CM': 'Chester Mat',
   'AA': 'IKO Brampton',
   'GK': 'IG Brampton',
   'BA': 'Calgary',
@@ -310,8 +313,8 @@ Map<String, String> maximoServerDomains = {
   'MASDEV': 'https://dev.manage.dev.iko.max-it-eam.com/maximo/api/os/',
   'MASTEST': 'https://test.manage.test.iko.max-it-eam.com/maximo/api/os/',
   'MASPROD': 'https://prod.manage.prod.iko.max-it-eam.com/maximo/api/os/',
-  'DEV 8.11':
-      'https://development.manage.development.iko.max-it-eam.com/maximo/api/os/',
+  'DEV 8.11': 'https://dev2.manage.dev2.iko.max-it-eam.com/maximo/api/os/',
+  'TEST 8.11': 'https://test2.manage.test2.iko.max-it-eam.com/maximo/api/os/',
 };
 
 Map<String, String> apiKeys = {
@@ -319,6 +322,7 @@ Map<String, String> apiKeys = {
   'MASTEST': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
   'MASPROD': '',
   'DEV 8.11': '',
+  'TEST 8.11': '',
 };
 
 Map<int, Map<String, dynamic>> frequencyRating = {
