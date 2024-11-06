@@ -1,4 +1,5 @@
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
+import 'package:intl/intl.dart';
 
 import '../main.dart';
 import '../bin/consts.dart';
@@ -294,16 +295,15 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         jpdescription = jpdescription.replaceFirst('XXXXX', asset.description);
         final woType = pmDetails.workOrderType!;
         final counter = await findAvailablePMNumber(
-            jpnumber, pmDetails.siteId!, maximoServerSelected, woType, 2);
+            jpnumber, pmDetails.siteId!, maximoServerSelected);
         jpnumber = '${pmDetails.siteId}$jpnumber';
-        if (counter > 0) {
-          if (woType != 'LIF') {
-            jpnumber = '$jpnumber$counter';
-          } else {
-            jpnumber = jpnumber.replaceFirst('!!!', '$counter');
-            jpdescription =
-                jpdescription.replaceFirst('!!!', numberToLetter(counter));
-          }
+        NumberFormat formatter =
+            NumberFormat("0" * '|'.allMatches(jpnumber).length);
+        jpnumber =
+            jpnumber.replaceAll(RegExp(r'\|+'), formatter.format(counter));
+        if (woType == 'LIF') {
+          jpdescription =
+              jpdescription.replaceFirst('|', numberToLetter(counter));
         }
         routeStops.add(RouteStopMaximo(
             routeStopID: sequence,

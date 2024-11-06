@@ -80,10 +80,10 @@ Future<PMName> generateName(
     replaceable[0] = '${replaceable[0]}$wotype';
     replaceable[1] = '${replaceable[1]} - ${workType[wotype]}';
   } else {
-    number = '${number}LC1';
+    number = '${number}LC|';
     name = '$name - LC-';
-    replaceable[0] = '${replaceable[0]}LC!!!';
-    replaceable[1] = '${replaceable[1]} - LC-!!!';
+    replaceable[0] = '${replaceable[0]}LC|';
+    replaceable[1] = '${replaceable[1]} - LC-|';
     // properly assign letter after number has been determined
     if (pmdetails.replacement != null) {
       replaceable[1] = '${replaceable[1]} ${pmdetails.replacement}';
@@ -95,25 +95,22 @@ Future<PMName> generateName(
   }
   var craft = pmdetails.crafts[0].laborType;
   craft = craft.substring(craft.length - 1);
-  number = '$number$craft';
-  replaceable[0] = '${replaceable[0]}$craft';
   if (wotype != 'LIF') {
+    number = '$number$craft|||';
+    replaceable[0] = '${replaceable[0]}$craft|||';
     name = '$name - ${crafts[craft]}';
     replaceable[1] = '${replaceable[1]} - ${crafts[craft]}';
-  }
-  final counter = await findAvailablePMNumber(
-      number, pmdetails.siteId!, maximoServerSelected, wotype, 3);
-  NumberFormat formatter = NumberFormat("000");
-  if (wotype != 'LIF') {
-    number = '$number${formatter.format(counter)}';
   } else {
-    number =
-        '${number.substring(0, number.length - 2)}$counter${number.substring(number.length - 1)}';
-    name = '$name${numberToLetter(counter)}';
+    number = '$number$craft';
+    replaceable[0] = '${replaceable[0]}$craft';
     if (pmdetails.replacement != null) {
       name = '$name ${pmdetails.replacement}';
     }
   }
+  final counter = await findAvailablePMNumber(
+      number, pmdetails.siteId!, maximoServerSelected);
+  NumberFormat formatter = NumberFormat("0" * '|'.allMatches(number).length);
+  number = number.replaceAll(RegExp(r'\|+'), formatter.format(counter));
 
   //consider suggested PM name of null to be ''
   String pmNameSuggested = pmdetails.suggestedPmName ?? '';
@@ -151,67 +148,29 @@ Future<String> findAvailableRouteCode(
 
 // consider making recursive would probably be cleaner
 Future<int> findAvailablePMNumber(
+  // TODO move number generation into function, caller should give format of PM number, type (life cycle / other), siteid, server
+  // check all PM, route, job plan by default
   String pmNumber,
   String siteID,
   String server,
-  String woType,
-  int checkType,
 ) async {
-  // checkType 1 = PM + JP
-  // checkType 2 = JP
-  // checkType 3 = PM + JP + Route
-  // assume type 2 by default
   bool existPM = false;
   bool existJP = false;
   bool existRoute = false;
-  int counter = 1;
-  if (checkType == 1) {
-    existPM = existPmNumberCache(pmNumber, siteID);
-  }
-  existJP = existJpNumberCache('$siteID$pmNumber');
-  if (checkType == 3) {
-    existRoute = existRouteNumberCache(pmNumber, siteID);
-    existPM = existPmNumberCache(pmNumber, siteID);
-  }
-  if (existRoute == false && existJP == false && existPM == false) {
-    if (checkType == 1) {
-      existPM = await existPmNumberMaximo(pmNumber, siteID, server);
-    }
-    existJP = await existJpNumberMaximo('$siteID$pmNumber', server);
-    if (checkType == 3) {
-      existRoute = await existRouteNumberMaximo(pmNumber, siteID, server);
-      existPM = await existPmNumberMaximo(pmNumber, siteID, server);
-    }
-    if (existRoute == false && existJP == false && existPM == false) {
-      return counter;
-    }
-  }
-  String tempNumber = pmNumber;
-  while (existPM || existJP || existRoute) {
+  int counter = 0;
+  while (existPM || existJP || existRoute || counter == 0) {
     counter++;
-    if (woType != 'LIF') {
-      tempNumber = '$pmNumber$counter';
-    } else {
-      tempNumber =
-          '${pmNumber.substring(0, pmNumber.length - 2)}${counter + 1}${pmNumber.substring(pmNumber.length - 1)}';
-    }
-    existJP = existJpNumberCache('$siteID$tempNumber');
-    if (checkType == 1) {
-      existPM = existPmNumberCache(tempNumber, siteID);
-    }
-    if (checkType == 3) {
-      existRoute = existRouteNumberCache(tempNumber, siteID);
-      existPM = existPmNumberCache(tempNumber, siteID);
-    }
+    NumberFormat formatter =
+        NumberFormat("0" * '|'.allMatches(pmNumber).length);
+    var pmNumberTemp =
+        pmNumber.replaceAll(RegExp(r'\|+'), formatter.format(counter));
+    existPM = existPmNumberCache(pmNumberTemp, siteID);
+    existJP = existJpNumberCache('$siteID$pmNumberTemp');
+    existRoute = existRouteNumberCache(pmNumberTemp, siteID);
     if (existRoute == false && existJP == false && existPM == false) {
-      existJP = await existJpNumberMaximo('$siteID$tempNumber', server);
-      if (checkType == 1) {
-        existPM = await existPmNumberMaximo(tempNumber, siteID, server);
-      }
-      if (checkType == 3) {
-        existRoute = await existRouteNumberMaximo(tempNumber, siteID, server);
-        existPM = await existPmNumberMaximo(tempNumber, siteID, server);
-      }
+      existPM = await existPmNumberMaximo(pmNumberTemp, siteID, server);
+      existJP = await existJpNumberMaximo('$siteID$pmNumberTemp', server);
+      existRoute = await existRouteNumberMaximo(pmNumberTemp, siteID, server);
     }
   }
   return counter;
