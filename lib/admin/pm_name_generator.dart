@@ -81,7 +81,7 @@ Future<PMName> generateName(
     replaceable[1] = '${replaceable[1]} - ${workType[wotype]}';
   } else {
     number = '${number}LC|';
-    name = '$name - LC-';
+    name = '$name - LC-|';
     replaceable[0] = '${replaceable[0]}LC|';
     replaceable[1] = '${replaceable[1]} - LC-|';
     // properly assign letter after number has been determined
@@ -111,6 +111,7 @@ Future<PMName> generateName(
       number, pmdetails.siteId!, maximoServerSelected);
   NumberFormat formatter = NumberFormat("0" * '|'.allMatches(number).length);
   number = number.replaceAll(RegExp(r'\|+'), formatter.format(counter));
+  name = name.replaceAll(RegExp(r'\|+'), numberToLetter(counter));
 
   //consider suggested PM name of null to be ''
   String pmNameSuggested = pmdetails.suggestedPmName ?? '';
@@ -214,6 +215,7 @@ Future<bool> checkJPNumber(String number, String env) async {
 
 ///Creates a string of letters from an int
 String numberToLetter(int counter) {
+  counter--;
   String letters = '';
   while (counter >= 0) {
     letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[counter % 26] + letters;
