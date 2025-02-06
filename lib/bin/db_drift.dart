@@ -332,6 +332,16 @@ SELECT DISTINCT (sp.itemnum) itemnum
 					AND s2.siteid = sp.siteid
 				)
 		) assetRPN
+	,(
+		SELECT max(priority)
+		FROM assets
+		WHERE id IN (
+				SELECT sp.siteid || s3.assetnum
+				FROM spare_parts s3
+				WHERE s3.itemnum = sp.itemnum
+					AND s3.siteid = sp.siteid
+				)
+		) assetCriticality
 FROM spare_parts sp
 WHERE sp.siteid = :siteid
 AND sp.itemnum like :itemnum
@@ -377,6 +387,7 @@ SELECT sp.assetnum
 	,a.description
 	,ac.new_r_p_n
 	,sp.quantity
+  ,a.priority
 FROM spare_parts sp
 LEFT JOIN assets a ON sp.assetnum = a.assetnum
 	AND sp.siteid = a.siteid
@@ -1334,7 +1345,8 @@ class MyDatabase extends _$MyDatabase {
     ));
   }
 
-  Future<void> computeSparePartCriticality({required String siteid}) async {
+  Future<void> computeSparePartCriticality(
+      {required String siteid, bool useCriticality = false}) async {
     final spareAssetInfos = await spareCriticalityAssetInfo(siteid, '%').get();
     final skips = await (select(spareCriticalitys)
           ..where((tbl) =>
@@ -1375,11 +1387,20 @@ class MyDatabase extends _$MyDatabase {
         usage: temp[0],
         leadTime: temp[1],
         cost: temp[2],
-        assetRPN: spareAssetInfo.assetRPN ?? 0,
+        assetRPN: (useCriticality
+                ? spareAssetInfo.assetCriticality ?? 0
+                : spareAssetInfo.assetRPN ?? 0) *
+            1.0,
         manual: false,
         manualPriority: const Value(false),
         newPriority: 0,
-        newRPN: (spareAssetInfo.assetRPN ?? 0) * temp[0] * temp[1] * temp[2],
+        newRPN: (useCriticality
+                ? spareAssetInfo.assetCriticality ?? 0
+                : spareAssetInfo.assetRPN ?? 0) *
+            temp[0] *
+            temp[1] *
+            temp[2] *
+            1.0,
         siteid: siteid,
         itemnum: spareAssetInfo.itemnum,
       ));

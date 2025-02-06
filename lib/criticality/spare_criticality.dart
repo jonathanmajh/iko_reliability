@@ -131,6 +131,9 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                   onPressed: () async {
                     var siteid =
                         context.read<SelectedSiteNotifier>().selectedSite;
+                    final useCriticality = context
+                        .read<SpareCriticalitySettingNotifier>()
+                        .useCriticality;
                     var assets = await database!
                         .assetsAssociatedWithItem(
                             siteid, rendererContext.row.cells['itemnum']!.value)
@@ -140,18 +143,24 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                               DataCell(Text(e.assetnum)),
                               DataCell(Text(e.description ?? '')),
                               DataCell(Text(e.quantity.toString())),
-                              DataCell(Text(e.newRPN.toString()))
+                              DataCell(Text(useCriticality
+                                  ? e.priority.toString()
+                                  : e.newRPN.toString()))
                             ]))
                         .toList();
                     showDialog(
                         context: navigatorKey.currentContext!,
                         builder: (BuildContext context) {
                           return Dialog(
-                            child: DataTable(columns: const [
-                              DataColumn(label: Text('Asset Number')),
-                              DataColumn(label: Text('Asset Description')),
-                              DataColumn(label: Text('Quantity')),
-                              DataColumn(label: Text('Asset RPN')),
+                            child: DataTable(columns: [
+                              const DataColumn(label: Text('Asset Number')),
+                              const DataColumn(
+                                  label: Text('Asset Description')),
+                              const DataColumn(label: Text('Quantity')),
+                              DataColumn(
+                                  label: Text(useCriticality
+                                      ? 'Asset Criticality'
+                                      : 'Asset RPN')),
                             ], rows: data),
                           );
                         });
@@ -733,9 +742,11 @@ class _SparePartsLoadingIndicatorState
 
   @override
   Widget build(BuildContext context) {
-    if (context.watch<SelectedSiteNotifier>().selectedSite.isEmpty) {
+    final selectedSite = context.watch<SelectedSiteNotifier>().selectedSite;
+    if (selectedSite.isEmpty) {
       return const SiteToggle();
     }
+    context.read<SpareCriticalitySettingNotifier>().setSite(selectedSite);
     sparePartLoading(
       siteid: context.read<SelectedSiteNotifier>().selectedSite,
       env: context.read<MaximoServerNotifier>().maximoServerSelected,
@@ -798,7 +809,12 @@ class _SparePartsLoadingIndicatorState
             message =
                 'Calculating spare part criticality...\nThis step can take significant time';
           });
-          await database!.computeSparePartCriticality(siteid: siteid);
+          final spareCriticalitySetting = navigatorKey.currentContext!
+              .read<SpareCriticalitySettingNotifier>();
+
+          await database!.computeSparePartCriticality(
+              siteid: siteid,
+              useCriticality: spareCriticalitySetting.useCriticality);
           Navigator.pop(navigatorKey.currentContext!);
           navigatorKey.currentContext!.router.pushNamed("/criticality/spare");
           Navigator.pop(navigatorKey.currentContext!); // close the drawer
@@ -1079,6 +1095,8 @@ class _PurchaseHistorySettingDialogState
   TextEditingController endDateController = TextEditingController();
   TextEditingController siteFilterController = TextEditingController();
 
+  bool useCriticality = false;
+
   @override
   void initState() {
     super.initState();
@@ -1090,6 +1108,7 @@ class _PurchaseHistorySettingDialogState
     startDateController.text = DateFormat('yyyy-MM-dd').format(startDate!);
     endDateController.text = DateFormat('yyyy-MM-dd').format(endDate!);
     siteFilterController.text = siteFilterBy.toString();
+    useCriticality = spareCriticalitySettingsNotifier.useCriticality;
   }
 
   @override
@@ -1184,6 +1203,27 @@ class _PurchaseHistorySettingDialogState
                               purchaseFilterBy: newValue);
                     });
                   })),
+          ListTile(
+            title: const Text('Use Asset Criticality Instead of RPN'),
+            leading: const Icon(Icons.onetwothree),
+            subtitle: Switch(
+              // This bool value toggles the switch.
+              value: useCriticality,
+              // activeColor: Colors.red,
+              onChanged: (bool value) {
+                // This is called when the user toggles the switch.
+                setState(() {
+                  useCriticality = value;
+                  context
+                      .read<SpareCriticalitySettingNotifier>()
+                      .setPurchaseSettings(
+                          selectedSite:
+                              context.read<SelectedSiteNotifier>().selectedSite,
+                          useCriticality: value);
+                });
+              },
+            ),
+          ),
         ],
       );
     });

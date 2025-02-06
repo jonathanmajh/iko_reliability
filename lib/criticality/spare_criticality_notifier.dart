@@ -34,6 +34,8 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
   int percentB = 30;
   int percentA = 10;
 
+  bool useCriticality = false;
+
   AbcCriticality get abcCriticality => AbcCriticality(
         a: percentA.toDouble(),
         b: percentB.toDouble(),
@@ -103,6 +105,12 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
           orElse: () => Setting(key: '', value: percentA.toString()),
         )
         .value);
+    useCriticality = bool.parse(settings
+        .firstWhere(
+          (element) => element.key == '$selectedSite-useCriticality',
+          orElse: () => Setting(key: '', value: useCriticality.toString()),
+        )
+        .value);
     purchaseCutoffStart = DateTime.parse(settings
         .firstWhere(
           (element) => element.key == '$selectedSite-purchaseCutoffStart',
@@ -134,6 +142,7 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
     DateTime? purchaseCutoffStart,
     DateTime? purchaseCutoffEnd,
     WorkOrderFilterBy? purchaseFilterBy,
+    bool? useCriticality,
   }) {
     if (purchaseCutoffStart != null) {
       this.purchaseCutoffStart = purchaseCutoffStart;
@@ -157,6 +166,14 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
         newSetting: Setting(
             key: '$selectedSite-purchaseFilterBy',
             value: purchaseFilterBy.name.toString()),
+      );
+    }
+    if (useCriticality != null) {
+      this.useCriticality = useCriticality;
+      database!.setSettings(
+        newSetting: Setting(
+            key: '$selectedSite-useCriticality',
+            value: useCriticality.toString()),
       );
     }
     frequencyPeriodYears = this

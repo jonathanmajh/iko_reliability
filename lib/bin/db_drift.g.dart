@@ -5393,7 +5393,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   Selectable<SpareCriticalityAssetInfoResult> spareCriticalityAssetInfo(
       String siteid, String itemnum) {
     return customSelect(
-        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum LIKE ?2',
+        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN, (SELECT max(priority) FROM assets WHERE id IN (SELECT sp.siteid || s3.assetnum FROM spare_parts AS s3 WHERE s3.itemnum = sp.itemnum AND s3.siteid = sp.siteid)) AS assetCriticality FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum LIKE ?2',
         variables: [
           Variable<String>(siteid),
           Variable<String>(itemnum)
@@ -5401,10 +5401,12 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         readsFrom: {
           spareParts,
           assetCriticalitys,
+          assets,
         }).map((QueryRow row) => SpareCriticalityAssetInfoResult(
           itemnum: row.read<String>('itemnum'),
           quantity: row.readNullable<double>('quantity'),
           assetRPN: row.readNullable<double>('assetRPN'),
+          assetCriticality: row.readNullable<int>('assetCriticality'),
         ));
   }
 
@@ -5432,7 +5434,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   Selectable<AssetsAssociatedWithItemResult> assetsAssociatedWithItem(
       String siteid, String itemnum) {
     return customSelect(
-        'SELECT sp.assetnum, a.description, ac.new_r_p_n, sp.quantity FROM spare_parts AS sp LEFT JOIN assets AS a ON sp.assetnum = a.assetnum AND sp.siteid = a.siteid LEFT JOIN asset_criticalitys AS ac ON sp.siteid || sp.assetnum = ac.asset WHERE sp.siteid = ?1 AND sp.itemnum = ?2',
+        'SELECT sp.assetnum, a.description, ac.new_r_p_n, sp.quantity, a.priority FROM spare_parts AS sp LEFT JOIN assets AS a ON sp.assetnum = a.assetnum AND sp.siteid = a.siteid LEFT JOIN asset_criticalitys AS ac ON sp.siteid || sp.assetnum = ac.asset WHERE sp.siteid = ?1 AND sp.itemnum = ?2',
         variables: [
           Variable<String>(siteid),
           Variable<String>(itemnum)
@@ -5446,6 +5448,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
           description: row.readNullable<String>('description'),
           newRPN: row.readNullable<double>('new_r_p_n'),
           quantity: row.read<double>('quantity'),
+          priority: row.readNullable<int>('priority'),
         ));
   }
 
@@ -7767,10 +7770,12 @@ class SpareCriticalityAssetInfoResult {
   final String itemnum;
   final double? quantity;
   final double? assetRPN;
+  final int? assetCriticality;
   SpareCriticalityAssetInfoResult({
     required this.itemnum,
     this.quantity,
     this.assetRPN,
+    this.assetCriticality,
   });
 }
 
@@ -7794,11 +7799,13 @@ class AssetsAssociatedWithItemResult {
   final String? description;
   final double? newRPN;
   final double quantity;
+  final int? priority;
   AssetsAssociatedWithItemResult({
     required this.assetnum,
     this.description,
     this.newRPN,
     required this.quantity,
+    this.priority,
   });
 }
 
