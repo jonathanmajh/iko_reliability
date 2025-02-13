@@ -791,6 +791,13 @@ class _SparePartsLoadingIndicatorState
           siteid: siteid,
           env: env,
         );
+        setState(() {
+          message = 'Loading parts usage information from Maximo...';
+        });
+        await database!.getItemUsageMaximo(
+          siteid: siteid,
+          env: env,
+        );
       } catch (e) {
         setState(() {
           message = e.toString();
@@ -968,10 +975,8 @@ Future<String> calculateRPNDistributionSpares(BuildContext context) async {
         context.read<SpareCriticalitySettingNotifier>();
     SpareCriticalityNotifier spareCritifcalityNotifier =
         context.read<SpareCriticalityNotifier>();
-    var result = await database!
-        .uniqueRpnNumbersSpare(
-            context.read<SelectedSiteNotifier>().selectedSite)
-        .get();
+    final siteid = context.read<SelectedSiteNotifier>().selectedSite;
+    var result = await database!.uniqueRpnNumbersSpare(siteid).get();
     Map<double, int> frequencyOfRPNs = {};
     for (var x in result) {
       frequencyOfRPNs[x.newRPN] = x.countitemnum;
@@ -985,6 +990,8 @@ Future<String> calculateRPNDistributionSpares(BuildContext context) async {
     if (newCutoffs.toSet().length != newCutoffs.length) {
       return 'Duplicate values in RPN cutoffs\nIncrease percentage of duplicate value, Or ensure RPN values are more spread out';
     }
+    await database!.updateSparePriority(newCutoffs: newCutoffs, siteid: siteid);
+    await database!.calculateReorderDetails(siteid: siteid);
     spareCritifcalityNotifier.updateGrid = true;
     debugPrint(spareCritifcalityNotifier.updateGrid.toString());
   } catch (e) {
@@ -1230,6 +1237,7 @@ class _PurchaseHistorySettingDialogState
   }
 }
 
+// TODO this should be changed to a year filter for performance reasons
 bool isPurchaseOrderInRange(
   Purchase purchase,
   String selectedSite,
@@ -1253,4 +1261,24 @@ bool isPurchaseOrderInRange(
     }
   }
   return true;
+}
+
+bool isInFilterDateRange(
+  int checkYear,
+  String selectedSite,
+) {
+  final spareCriticalitySetting =
+      navigatorKey.currentContext!.read<SpareCriticalitySettingNotifier>();
+  return (spareCriticalitySetting.purchaseCutoffStart.year <= checkYear &&
+          checkYear <= spareCriticalitySetting.purchaseCutoffEnd.year)
+      ? true
+      : false;
+}
+
+int yearsInFilterDateRange(String selectedSite) {
+  final spareCriticalitySetting =
+      navigatorKey.currentContext!.read<SpareCriticalitySettingNotifier>();
+  return spareCriticalitySetting.purchaseCutoffEnd.year -
+      spareCriticalitySetting.purchaseCutoffStart.year +
+      1;
 }

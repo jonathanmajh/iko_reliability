@@ -19,6 +19,12 @@ final spareCriticality = {
   0: 'N',
 };
 
+final spareZValue = {
+  1: 1.28,
+  2: 1.65,
+  3: 2.44,
+};
+
 List<String> criticalityStrings = [
   'Very Low',
   'Low',

@@ -245,7 +245,7 @@ class _EndDrawerState extends State<EndDrawer> {
       child: Column(children: <Widget>[
         // force everything outside of this Expanded to bottom
         Expanded(
-            child: Column(
+            child: ListView(
           children: <Widget>[
             const ThemeToggle(),
             const SiteToggle(),

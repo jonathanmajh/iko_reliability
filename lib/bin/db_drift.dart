@@ -10,6 +10,7 @@ import 'package:iko_reliability_flutter/criticality/functions.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
+import 'package:statistics/statistics.dart';
 import '../admin/connections/connection.dart' as impl;
 import '../criticality/spare_criticality.dart';
 import '../main.dart';
@@ -217,6 +218,20 @@ class Purchases extends Table {
   Set<Column> get primaryKey => {prlineid};
 }
 
+class ItemUsage extends Table {
+  TextColumn get itemnum => text()();
+  TextColumn get transdate => text()();
+  RealColumn get quantity => real()();
+  TextColumn get siteid => text()();
+  TextColumn get refwo => text()();
+  IntColumn get year => integer()();
+  IntColumn get month => integer()();
+  IntColumn get matusetransid => integer()();
+
+  @override
+  Set<Column> get primaryKey => {matusetransid};
+}
+
 class Items extends Table {
   TextColumn get itemnum => text()();
   TextColumn get description => text()();
@@ -232,7 +247,9 @@ class SpareCriticalitys extends Table {
   TextColumn get id => text()();
   IntColumn get usage => integer()();
   IntColumn get leadTime => integer()();
+  RealColumn get realLeadTime => real().nullable()();
   IntColumn get cost => integer()();
+  RealColumn get realCost => real().nullable()();
   RealColumn get assetRPN => real()();
   BoolColumn get manual => boolean()();
   BoolColumn get manualPriority =>
@@ -241,6 +258,8 @@ class SpareCriticalitys extends Table {
   RealColumn get newRPN => real()();
   TextColumn get siteid => text()();
   TextColumn get itemnum => text()();
+  RealColumn get reorderPoint => real().nullable()();
+  RealColumn get orderQuantity => real().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -271,6 +290,7 @@ class SpareCriticalityWithItem {
     Purchases,
     Items,
     SpareCriticalitys,
+    ItemUsage,
   ],
   queries: {
     'systemsFilteredBySite': '''
@@ -421,7 +441,7 @@ class MyDatabase extends _$MyDatabase {
   MyDatabase.forTesting(DatabaseConnection super.connection);
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -445,6 +465,13 @@ class MyDatabase extends _$MyDatabase {
               assetCriticalitys, assetCriticalitys.manualPriority);
           await m.addColumn(
               spareCriticalitys, spareCriticalitys.manualPriority);
+        }
+        if (from < 4) {
+          await m.addColumn(spareCriticalitys, spareCriticalitys.reorderPoint);
+          await m.addColumn(spareCriticalitys, spareCriticalitys.orderQuantity);
+          await m.addColumn(spareCriticalitys, spareCriticalitys.realLeadTime);
+          await m.addColumn(spareCriticalitys, spareCriticalitys.realCost);
+          await m.createTable(itemUsage);
         }
       },
     );
@@ -486,6 +513,135 @@ class MyDatabase extends _$MyDatabase {
       siteid: Value(siteid),
     ));
     return row;
+  }
+
+  Future<void> updateSparePriority(
+      {required List<double> newCutoffs, required String siteid}) async {
+    var spareCriticalities = (await (select(spareCriticalitys)
+          ..where((tbl) => tbl.siteid.equals(siteid)))
+        .get());
+    for (var spareCritical in spareCriticalities) {
+      var newPriority = 0;
+      for (int i = 0; i < 3; i++) {
+        if (spareCritical.newRPN <= newCutoffs[i]) {
+          newPriority = spareCriticality.keys.elementAt(i);
+          break;
+        }
+      }
+      await (update(spareCriticalitys)
+            ..where((tbl) => tbl.id.equals(spareCritical.id)))
+          .write(SpareCriticalitysCompanion(
+        newPriority: Value(newPriority),
+      ));
+    }
+    debugPrint('set spare new priority');
+  }
+
+  Future<void> calculateReorderDetails({required String siteid}) async {
+    // TODO add a loading animation when this runs
+    var spareCriticalities = {
+      for (var v in (await (select(spareCriticalitys)
+            ..where((tbl) => tbl.siteid.equals(siteid)))
+          .get()))
+        v.itemnum: v
+    };
+    var itemUsageData = await (select(itemUsage)
+          ..where((tbl) => tbl.siteid.equals(siteid)))
+        .get();
+    // str itemnum, int year, int month
+    Map<String, Map<int, Map<int, List<ItemUsageData>>>> itemUsages = {};
+    // organize the itemUsageData
+    for (var itemUsage in itemUsageData) {
+      if (!isInFilterDateRange(itemUsage.year, siteid)) {
+        continue;
+      }
+      if (itemUsages.containsKey(itemUsage.itemnum)) {
+        if (itemUsages[itemUsage.itemnum]!.containsKey(itemUsage.year)) {
+          if (itemUsages[itemUsage.itemnum]![itemUsage.year]!
+              .containsKey(itemUsage.month)) {
+            itemUsages[itemUsage.itemnum]![itemUsage.year]![itemUsage.month]!
+                .add(itemUsage);
+          } else {
+            itemUsages[itemUsage.itemnum]![itemUsage.year]![itemUsage.month] = [
+              itemUsage
+            ];
+          }
+        } else {
+          itemUsages[itemUsage.itemnum]![itemUsage.year] = {
+            itemUsage.month: [itemUsage]
+          };
+        }
+      } else {
+        itemUsages[itemUsage.itemnum] = {
+          itemUsage.year: {
+            itemUsage.month: [itemUsage]
+          }
+        };
+      }
+    }
+    var sum = 0.0;
+    List<double> arrayUsage = [];
+    // final monthsInRange = yearsInFilterDateRange(siteid) * 12;
+    DateTime firstUsage = DateTime.now();
+    for (var itemnum in itemUsages.keys) {
+      arrayUsage = [];
+      firstUsage = DateTime.now();
+      // create array with empties for std dev calculation
+      for (var itemYear in itemUsages[itemnum]!.keys) {
+        for (var itemMonth in itemUsages[itemnum]![itemYear]!.keys) {
+          sum = 0.0;
+          // add up usages in a month
+          for (var usage in itemUsages[itemnum]![itemYear]![itemMonth]!) {
+            sum = sum + usage.quantity;
+            final usageDate = DateTime.parse(usage.transdate);
+            firstUsage =
+                usageDate.isBefore(firstUsage) ? usageDate : firstUsage;
+          }
+          arrayUsage.add(sum);
+        }
+      }
+      // add extra 0.0 in the array to represent months where items are not used
+      for (var i = arrayUsage.length;
+          i < firstUsage.difference(DateTime.now()).inDays / -30;
+          i++) {
+        arrayUsage.add(0.0);
+      }
+      try {
+        // Reorder points > safety stock, demand, leadtime, Z, Std dev
+        final stdDev = arrayUsage.standardDeviation;
+        final safetyStock =
+            spareZValue[spareCriticalities[itemnum]!.newPriority]! *
+                stdDev *
+                sqrt(spareCriticalities[itemnum]!.realLeadTime!);
+        double demand365 = arrayUsage.sum /
+            firstUsage.difference(DateTime.now()).inDays *
+            -1.0;
+        double reorderPoint = safetyStock +
+            (demand365 * spareCriticalities[itemnum]!.realLeadTime!);
+
+        // EOQ > Demand, Ordering cost, holding cost
+        const orderingCost = 20;
+        const holdingCostPercent = .2;
+
+        final holdingCost =
+            holdingCostPercent * spareCriticalities[itemnum]!.realCost!;
+        final orderQuantity =
+            sqrt(2 * demand365 * 365 * orderingCost / holdingCost);
+        debugPrint(
+            'Item Number: $itemnum, STD DEV: $stdDev, Safety Stock: $safetyStock, Demand: $demand365, Reorder Point: $reorderPoint, Holding Cost: $holdingCost, Order Quantity: $orderQuantity');
+
+        await (update(spareCriticalitys)
+              ..where((tbl) => tbl.id.equals('$siteid$itemnum')))
+            .write(SpareCriticalitysCompanion(
+          reorderPoint: Value(reorderPoint),
+          orderQuantity: Value(orderQuantity),
+        ));
+      } catch (e) {
+        debugPrint(
+            'Failed to generate reorder point, $itemnum: ${e.toString()}');
+      }
+    }
+    debugPrint('done reorder point');
   }
 
   Future<void> importCriticality({
@@ -815,7 +971,7 @@ class MyDatabase extends _$MyDatabase {
       });
     } catch (e) {
       material
-          .debugPrint('Error inserting System Criticality\n${e.toString()}');
+          .debugPrint('Error inserting System Criticality, ${e.toString()}');
     }
     final associateSheet = decoder.tables.values.elementAt(1);
     List<AssetCriticalitysCompanion> assetInserts = [];
@@ -855,7 +1011,7 @@ class MyDatabase extends _$MyDatabase {
       });
     } catch (e) {
       material.debugPrint(
-          'Error inserting pre-assigned Asset Criticality\n${e.toString()}');
+          'Error inserting pre-assigned Asset Criticality, ${e.toString()}');
     }
   }
 
@@ -904,7 +1060,7 @@ class MyDatabase extends _$MyDatabase {
           meterObservationUnique.add('${row[5]}$meterCode');
         }
       } catch (err) {
-        messages.add('Row ${i + 1} is problematic\n$err');
+        messages.add('Row ${i + 1} is problematic, $err');
       }
     }
     try {
@@ -912,14 +1068,14 @@ class MyDatabase extends _$MyDatabase {
         batch.insertAll(meterDBs, meterInserts);
       });
     } catch (e) {
-      messages.add('Error inserting Meters\n${e.toString()}');
+      messages.add('Error inserting Meters, ${e.toString()}');
     }
     try {
       await batch((batch) {
         batch.insertAll(observations, observationInserts);
       });
     } catch (e) {
-      messages.add('Error inserting Observations\n${e.toString()}');
+      messages.add('Error inserting Observations, ${e.toString()}');
     }
     messages.add('Finished Loading');
     showDataAlert(messages, 'Observation List Loaded');
@@ -1141,7 +1297,7 @@ class MyDatabase extends _$MyDatabase {
           batch.insertAllOnConflictUpdate(assets, assetInserts);
         });
       } catch (e) {
-        messages.add('Error getting assets from Maximo\n${e.toString()}');
+        messages.add('Error getting assets from Maximo, ${e.toString()}');
       }
       var siteAssets = await getSiteAssets(siteid);
       assetCache[siteid] = {};
@@ -1229,7 +1385,7 @@ class MyDatabase extends _$MyDatabase {
         batch.insertAllOnConflictUpdate(spareParts, inserts);
       });
     } catch (e) {
-      debugPrint('Error inserting System Criticality\n${e.toString()}');
+      debugPrint('Error inserting System Criticality, ${e.toString()}');
     }
   }
 
@@ -1255,7 +1411,34 @@ class MyDatabase extends _$MyDatabase {
         batch.insertAllOnConflictUpdate(items, inserts);
       });
     } catch (e) {
-      debugPrint('Error inserting Item Details\n${e.toString()}');
+      debugPrint('Error inserting Item Details, ${e.toString()}');
+    }
+  }
+
+  Future<void> getItemUsageMaximo(
+      {required String siteid, required String env}) async {
+    final url = 'IKO_API_MATUSETRANS?site=$siteid';
+    final result = await maximoRequest(url, 'api', env);
+    if (!result.containsKey('info')) {
+      return;
+    }
+    List<ItemUsageCompanion> inserts = [];
+    for (final item in result['info']) {
+      inserts.add(ItemUsageCompanion.insert(
+          itemnum: item['itemnum'],
+          transdate: item['transdate'],
+          quantity: double.parse(item['quantity'].toString()),
+          siteid: item['siteid'],
+          refwo: item['refwo'] ?? '',
+          year: item['yyear'],
+          month: item['mmonth']));
+    }
+    try {
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(itemUsage, inserts);
+      });
+    } catch (e) {
+      debugPrint('Error inserting Item Details, ${e.toString()}');
     }
   }
 
@@ -1301,7 +1484,7 @@ class MyDatabase extends _$MyDatabase {
         batch.insertAllOnConflictUpdate(purchases, inserts);
       });
     } catch (e) {
-      debugPrint('Error inserting System Criticality\n${e.toString()}');
+      debugPrint('Error inserting System Criticality, ${e.toString()}');
     }
   }
 
@@ -1338,6 +1521,8 @@ class MyDatabase extends _$MyDatabase {
       newPriority: const Value(0),
       usage: Value(temp[0]),
       leadTime: Value(temp[1]),
+      realLeadTime: Value(leadTime),
+      realCost: Value(unitCost),
       cost: Value(temp[2]),
       newRPN:
           Value((spareAssetInfo.assetRPN ?? 0) * temp[0] * temp[1] * temp[2]),
@@ -1387,6 +1572,8 @@ class MyDatabase extends _$MyDatabase {
         usage: temp[0],
         leadTime: temp[1],
         cost: temp[2],
+        realLeadTime: Value(leadTime),
+        realCost: Value(unitCost),
         assetRPN: (useCriticality
                 ? spareAssetInfo.assetCriticality ?? 0
                 : spareAssetInfo.assetRPN ?? 0) *

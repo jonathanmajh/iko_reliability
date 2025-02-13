@@ -4782,11 +4782,23 @@ class $SpareCriticalitysTable extends SpareCriticalitys
   late final GeneratedColumn<int> leadTime = GeneratedColumn<int>(
       'lead_time', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _realLeadTimeMeta =
+      const VerificationMeta('realLeadTime');
+  @override
+  late final GeneratedColumn<double> realLeadTime = GeneratedColumn<double>(
+      'real_lead_time', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
   static const VerificationMeta _costMeta = const VerificationMeta('cost');
   @override
   late final GeneratedColumn<int> cost = GeneratedColumn<int>(
       'cost', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _realCostMeta =
+      const VerificationMeta('realCost');
+  @override
+  late final GeneratedColumn<double> realCost = GeneratedColumn<double>(
+      'real_cost', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
   static const VerificationMeta _assetRPNMeta =
       const VerificationMeta('assetRPN');
   @override
@@ -4833,19 +4845,35 @@ class $SpareCriticalitysTable extends SpareCriticalitys
   late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
       'itemnum', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _reorderPointMeta =
+      const VerificationMeta('reorderPoint');
+  @override
+  late final GeneratedColumn<double> reorderPoint = GeneratedColumn<double>(
+      'reorder_point', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _orderQuantityMeta =
+      const VerificationMeta('orderQuantity');
+  @override
+  late final GeneratedColumn<double> orderQuantity = GeneratedColumn<double>(
+      'order_quantity', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
         usage,
         leadTime,
+        realLeadTime,
         cost,
+        realCost,
         assetRPN,
         manual,
         manualPriority,
         newPriority,
         newRPN,
         siteid,
-        itemnum
+        itemnum,
+        reorderPoint,
+        orderQuantity
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4874,11 +4902,21 @@ class $SpareCriticalitysTable extends SpareCriticalitys
     } else if (isInserting) {
       context.missing(_leadTimeMeta);
     }
+    if (data.containsKey('real_lead_time')) {
+      context.handle(
+          _realLeadTimeMeta,
+          realLeadTime.isAcceptableOrUnknown(
+              data['real_lead_time']!, _realLeadTimeMeta));
+    }
     if (data.containsKey('cost')) {
       context.handle(
           _costMeta, cost.isAcceptableOrUnknown(data['cost']!, _costMeta));
     } else if (isInserting) {
       context.missing(_costMeta);
+    }
+    if (data.containsKey('real_cost')) {
+      context.handle(_realCostMeta,
+          realCost.isAcceptableOrUnknown(data['real_cost']!, _realCostMeta));
     }
     if (data.containsKey('asset_r_p_n')) {
       context.handle(_assetRPNMeta,
@@ -4924,6 +4962,18 @@ class $SpareCriticalitysTable extends SpareCriticalitys
     } else if (isInserting) {
       context.missing(_itemnumMeta);
     }
+    if (data.containsKey('reorder_point')) {
+      context.handle(
+          _reorderPointMeta,
+          reorderPoint.isAcceptableOrUnknown(
+              data['reorder_point']!, _reorderPointMeta));
+    }
+    if (data.containsKey('order_quantity')) {
+      context.handle(
+          _orderQuantityMeta,
+          orderQuantity.isAcceptableOrUnknown(
+              data['order_quantity']!, _orderQuantityMeta));
+    }
     return context;
   }
 
@@ -4939,8 +4989,12 @@ class $SpareCriticalitysTable extends SpareCriticalitys
           .read(DriftSqlType.int, data['${effectivePrefix}usage'])!,
       leadTime: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}lead_time'])!,
+      realLeadTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}real_lead_time']),
       cost: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}cost'])!,
+      realCost: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}real_cost']),
       assetRPN: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}asset_r_p_n'])!,
       manual: attachedDatabase.typeMapping
@@ -4955,6 +5009,10 @@ class $SpareCriticalitysTable extends SpareCriticalitys
           .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
       itemnum: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
+      reorderPoint: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}reorder_point']),
+      orderQuantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}order_quantity']),
     );
   }
 
@@ -4969,7 +5027,9 @@ class SpareCriticality extends DataClass
   final String id;
   final int usage;
   final int leadTime;
+  final double? realLeadTime;
   final int cost;
+  final double? realCost;
   final double assetRPN;
   final bool manual;
   final bool manualPriority;
@@ -4977,25 +5037,37 @@ class SpareCriticality extends DataClass
   final double newRPN;
   final String siteid;
   final String itemnum;
+  final double? reorderPoint;
+  final double? orderQuantity;
   const SpareCriticality(
       {required this.id,
       required this.usage,
       required this.leadTime,
+      this.realLeadTime,
       required this.cost,
+      this.realCost,
       required this.assetRPN,
       required this.manual,
       required this.manualPriority,
       required this.newPriority,
       required this.newRPN,
       required this.siteid,
-      required this.itemnum});
+      required this.itemnum,
+      this.reorderPoint,
+      this.orderQuantity});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['usage'] = Variable<int>(usage);
     map['lead_time'] = Variable<int>(leadTime);
+    if (!nullToAbsent || realLeadTime != null) {
+      map['real_lead_time'] = Variable<double>(realLeadTime);
+    }
     map['cost'] = Variable<int>(cost);
+    if (!nullToAbsent || realCost != null) {
+      map['real_cost'] = Variable<double>(realCost);
+    }
     map['asset_r_p_n'] = Variable<double>(assetRPN);
     map['manual'] = Variable<bool>(manual);
     map['manual_priority'] = Variable<bool>(manualPriority);
@@ -5003,6 +5075,12 @@ class SpareCriticality extends DataClass
     map['new_r_p_n'] = Variable<double>(newRPN);
     map['siteid'] = Variable<String>(siteid);
     map['itemnum'] = Variable<String>(itemnum);
+    if (!nullToAbsent || reorderPoint != null) {
+      map['reorder_point'] = Variable<double>(reorderPoint);
+    }
+    if (!nullToAbsent || orderQuantity != null) {
+      map['order_quantity'] = Variable<double>(orderQuantity);
+    }
     return map;
   }
 
@@ -5011,7 +5089,13 @@ class SpareCriticality extends DataClass
       id: Value(id),
       usage: Value(usage),
       leadTime: Value(leadTime),
+      realLeadTime: realLeadTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(realLeadTime),
       cost: Value(cost),
+      realCost: realCost == null && nullToAbsent
+          ? const Value.absent()
+          : Value(realCost),
       assetRPN: Value(assetRPN),
       manual: Value(manual),
       manualPriority: Value(manualPriority),
@@ -5019,6 +5103,12 @@ class SpareCriticality extends DataClass
       newRPN: Value(newRPN),
       siteid: Value(siteid),
       itemnum: Value(itemnum),
+      reorderPoint: reorderPoint == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reorderPoint),
+      orderQuantity: orderQuantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderQuantity),
     );
   }
 
@@ -5029,7 +5119,9 @@ class SpareCriticality extends DataClass
       id: serializer.fromJson<String>(json['id']),
       usage: serializer.fromJson<int>(json['usage']),
       leadTime: serializer.fromJson<int>(json['leadTime']),
+      realLeadTime: serializer.fromJson<double?>(json['realLeadTime']),
       cost: serializer.fromJson<int>(json['cost']),
+      realCost: serializer.fromJson<double?>(json['realCost']),
       assetRPN: serializer.fromJson<double>(json['assetRPN']),
       manual: serializer.fromJson<bool>(json['manual']),
       manualPriority: serializer.fromJson<bool>(json['manualPriority']),
@@ -5037,6 +5129,8 @@ class SpareCriticality extends DataClass
       newRPN: serializer.fromJson<double>(json['newRPN']),
       siteid: serializer.fromJson<String>(json['siteid']),
       itemnum: serializer.fromJson<String>(json['itemnum']),
+      reorderPoint: serializer.fromJson<double?>(json['reorderPoint']),
+      orderQuantity: serializer.fromJson<double?>(json['orderQuantity']),
     );
   }
   @override
@@ -5046,7 +5140,9 @@ class SpareCriticality extends DataClass
       'id': serializer.toJson<String>(id),
       'usage': serializer.toJson<int>(usage),
       'leadTime': serializer.toJson<int>(leadTime),
+      'realLeadTime': serializer.toJson<double?>(realLeadTime),
       'cost': serializer.toJson<int>(cost),
+      'realCost': serializer.toJson<double?>(realCost),
       'assetRPN': serializer.toJson<double>(assetRPN),
       'manual': serializer.toJson<bool>(manual),
       'manualPriority': serializer.toJson<bool>(manualPriority),
@@ -5054,6 +5150,8 @@ class SpareCriticality extends DataClass
       'newRPN': serializer.toJson<double>(newRPN),
       'siteid': serializer.toJson<String>(siteid),
       'itemnum': serializer.toJson<String>(itemnum),
+      'reorderPoint': serializer.toJson<double?>(reorderPoint),
+      'orderQuantity': serializer.toJson<double?>(orderQuantity),
     };
   }
 
@@ -5061,19 +5159,26 @@ class SpareCriticality extends DataClass
           {String? id,
           int? usage,
           int? leadTime,
+          Value<double?> realLeadTime = const Value.absent(),
           int? cost,
+          Value<double?> realCost = const Value.absent(),
           double? assetRPN,
           bool? manual,
           bool? manualPriority,
           int? newPriority,
           double? newRPN,
           String? siteid,
-          String? itemnum}) =>
+          String? itemnum,
+          Value<double?> reorderPoint = const Value.absent(),
+          Value<double?> orderQuantity = const Value.absent()}) =>
       SpareCriticality(
         id: id ?? this.id,
         usage: usage ?? this.usage,
         leadTime: leadTime ?? this.leadTime,
+        realLeadTime:
+            realLeadTime.present ? realLeadTime.value : this.realLeadTime,
         cost: cost ?? this.cost,
+        realCost: realCost.present ? realCost.value : this.realCost,
         assetRPN: assetRPN ?? this.assetRPN,
         manual: manual ?? this.manual,
         manualPriority: manualPriority ?? this.manualPriority,
@@ -5081,13 +5186,21 @@ class SpareCriticality extends DataClass
         newRPN: newRPN ?? this.newRPN,
         siteid: siteid ?? this.siteid,
         itemnum: itemnum ?? this.itemnum,
+        reorderPoint:
+            reorderPoint.present ? reorderPoint.value : this.reorderPoint,
+        orderQuantity:
+            orderQuantity.present ? orderQuantity.value : this.orderQuantity,
       );
   SpareCriticality copyWithCompanion(SpareCriticalitysCompanion data) {
     return SpareCriticality(
       id: data.id.present ? data.id.value : this.id,
       usage: data.usage.present ? data.usage.value : this.usage,
       leadTime: data.leadTime.present ? data.leadTime.value : this.leadTime,
+      realLeadTime: data.realLeadTime.present
+          ? data.realLeadTime.value
+          : this.realLeadTime,
       cost: data.cost.present ? data.cost.value : this.cost,
+      realCost: data.realCost.present ? data.realCost.value : this.realCost,
       assetRPN: data.assetRPN.present ? data.assetRPN.value : this.assetRPN,
       manual: data.manual.present ? data.manual.value : this.manual,
       manualPriority: data.manualPriority.present
@@ -5098,6 +5211,12 @@ class SpareCriticality extends DataClass
       newRPN: data.newRPN.present ? data.newRPN.value : this.newRPN,
       siteid: data.siteid.present ? data.siteid.value : this.siteid,
       itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
+      reorderPoint: data.reorderPoint.present
+          ? data.reorderPoint.value
+          : this.reorderPoint,
+      orderQuantity: data.orderQuantity.present
+          ? data.orderQuantity.value
+          : this.orderQuantity,
     );
   }
 
@@ -5107,21 +5226,39 @@ class SpareCriticality extends DataClass
           ..write('id: $id, ')
           ..write('usage: $usage, ')
           ..write('leadTime: $leadTime, ')
+          ..write('realLeadTime: $realLeadTime, ')
           ..write('cost: $cost, ')
+          ..write('realCost: $realCost, ')
           ..write('assetRPN: $assetRPN, ')
           ..write('manual: $manual, ')
           ..write('manualPriority: $manualPriority, ')
           ..write('newPriority: $newPriority, ')
           ..write('newRPN: $newRPN, ')
           ..write('siteid: $siteid, ')
-          ..write('itemnum: $itemnum')
+          ..write('itemnum: $itemnum, ')
+          ..write('reorderPoint: $reorderPoint, ')
+          ..write('orderQuantity: $orderQuantity')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, usage, leadTime, cost, assetRPN, manual,
-      manualPriority, newPriority, newRPN, siteid, itemnum);
+  int get hashCode => Object.hash(
+      id,
+      usage,
+      leadTime,
+      realLeadTime,
+      cost,
+      realCost,
+      assetRPN,
+      manual,
+      manualPriority,
+      newPriority,
+      newRPN,
+      siteid,
+      itemnum,
+      reorderPoint,
+      orderQuantity);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5129,21 +5266,27 @@ class SpareCriticality extends DataClass
           other.id == this.id &&
           other.usage == this.usage &&
           other.leadTime == this.leadTime &&
+          other.realLeadTime == this.realLeadTime &&
           other.cost == this.cost &&
+          other.realCost == this.realCost &&
           other.assetRPN == this.assetRPN &&
           other.manual == this.manual &&
           other.manualPriority == this.manualPriority &&
           other.newPriority == this.newPriority &&
           other.newRPN == this.newRPN &&
           other.siteid == this.siteid &&
-          other.itemnum == this.itemnum);
+          other.itemnum == this.itemnum &&
+          other.reorderPoint == this.reorderPoint &&
+          other.orderQuantity == this.orderQuantity);
 }
 
 class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
   final Value<String> id;
   final Value<int> usage;
   final Value<int> leadTime;
+  final Value<double?> realLeadTime;
   final Value<int> cost;
+  final Value<double?> realCost;
   final Value<double> assetRPN;
   final Value<bool> manual;
   final Value<bool> manualPriority;
@@ -5151,12 +5294,16 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
   final Value<double> newRPN;
   final Value<String> siteid;
   final Value<String> itemnum;
+  final Value<double?> reorderPoint;
+  final Value<double?> orderQuantity;
   final Value<int> rowid;
   const SpareCriticalitysCompanion({
     this.id = const Value.absent(),
     this.usage = const Value.absent(),
     this.leadTime = const Value.absent(),
+    this.realLeadTime = const Value.absent(),
     this.cost = const Value.absent(),
+    this.realCost = const Value.absent(),
     this.assetRPN = const Value.absent(),
     this.manual = const Value.absent(),
     this.manualPriority = const Value.absent(),
@@ -5164,13 +5311,17 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     this.newRPN = const Value.absent(),
     this.siteid = const Value.absent(),
     this.itemnum = const Value.absent(),
+    this.reorderPoint = const Value.absent(),
+    this.orderQuantity = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SpareCriticalitysCompanion.insert({
     required String id,
     required int usage,
     required int leadTime,
+    this.realLeadTime = const Value.absent(),
     required int cost,
+    this.realCost = const Value.absent(),
     required double assetRPN,
     required bool manual,
     this.manualPriority = const Value.absent(),
@@ -5178,6 +5329,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     required double newRPN,
     required String siteid,
     required String itemnum,
+    this.reorderPoint = const Value.absent(),
+    this.orderQuantity = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         usage = Value(usage),
@@ -5193,7 +5346,9 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     Expression<String>? id,
     Expression<int>? usage,
     Expression<int>? leadTime,
+    Expression<double>? realLeadTime,
     Expression<int>? cost,
+    Expression<double>? realCost,
     Expression<double>? assetRPN,
     Expression<bool>? manual,
     Expression<bool>? manualPriority,
@@ -5201,13 +5356,17 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     Expression<double>? newRPN,
     Expression<String>? siteid,
     Expression<String>? itemnum,
+    Expression<double>? reorderPoint,
+    Expression<double>? orderQuantity,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (usage != null) 'usage': usage,
       if (leadTime != null) 'lead_time': leadTime,
+      if (realLeadTime != null) 'real_lead_time': realLeadTime,
       if (cost != null) 'cost': cost,
+      if (realCost != null) 'real_cost': realCost,
       if (assetRPN != null) 'asset_r_p_n': assetRPN,
       if (manual != null) 'manual': manual,
       if (manualPriority != null) 'manual_priority': manualPriority,
@@ -5215,6 +5374,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       if (newRPN != null) 'new_r_p_n': newRPN,
       if (siteid != null) 'siteid': siteid,
       if (itemnum != null) 'itemnum': itemnum,
+      if (reorderPoint != null) 'reorder_point': reorderPoint,
+      if (orderQuantity != null) 'order_quantity': orderQuantity,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5223,7 +5384,9 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       {Value<String>? id,
       Value<int>? usage,
       Value<int>? leadTime,
+      Value<double?>? realLeadTime,
       Value<int>? cost,
+      Value<double?>? realCost,
       Value<double>? assetRPN,
       Value<bool>? manual,
       Value<bool>? manualPriority,
@@ -5231,12 +5394,16 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       Value<double>? newRPN,
       Value<String>? siteid,
       Value<String>? itemnum,
+      Value<double?>? reorderPoint,
+      Value<double?>? orderQuantity,
       Value<int>? rowid}) {
     return SpareCriticalitysCompanion(
       id: id ?? this.id,
       usage: usage ?? this.usage,
       leadTime: leadTime ?? this.leadTime,
+      realLeadTime: realLeadTime ?? this.realLeadTime,
       cost: cost ?? this.cost,
+      realCost: realCost ?? this.realCost,
       assetRPN: assetRPN ?? this.assetRPN,
       manual: manual ?? this.manual,
       manualPriority: manualPriority ?? this.manualPriority,
@@ -5244,6 +5411,8 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
       newRPN: newRPN ?? this.newRPN,
       siteid: siteid ?? this.siteid,
       itemnum: itemnum ?? this.itemnum,
+      reorderPoint: reorderPoint ?? this.reorderPoint,
+      orderQuantity: orderQuantity ?? this.orderQuantity,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5260,8 +5429,14 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     if (leadTime.present) {
       map['lead_time'] = Variable<int>(leadTime.value);
     }
+    if (realLeadTime.present) {
+      map['real_lead_time'] = Variable<double>(realLeadTime.value);
+    }
     if (cost.present) {
       map['cost'] = Variable<int>(cost.value);
+    }
+    if (realCost.present) {
+      map['real_cost'] = Variable<double>(realCost.value);
     }
     if (assetRPN.present) {
       map['asset_r_p_n'] = Variable<double>(assetRPN.value);
@@ -5284,6 +5459,12 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     if (itemnum.present) {
       map['itemnum'] = Variable<String>(itemnum.value);
     }
+    if (reorderPoint.present) {
+      map['reorder_point'] = Variable<double>(reorderPoint.value);
+    }
+    if (orderQuantity.present) {
+      map['order_quantity'] = Variable<double>(orderQuantity.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5296,7 +5477,9 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
           ..write('id: $id, ')
           ..write('usage: $usage, ')
           ..write('leadTime: $leadTime, ')
+          ..write('realLeadTime: $realLeadTime, ')
           ..write('cost: $cost, ')
+          ..write('realCost: $realCost, ')
           ..write('assetRPN: $assetRPN, ')
           ..write('manual: $manual, ')
           ..write('manualPriority: $manualPriority, ')
@@ -5304,7 +5487,418 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
           ..write('newRPN: $newRPN, ')
           ..write('siteid: $siteid, ')
           ..write('itemnum: $itemnum, ')
+          ..write('reorderPoint: $reorderPoint, ')
+          ..write('orderQuantity: $orderQuantity, ')
           ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ItemUsageTable extends ItemUsage
+    with TableInfo<$ItemUsageTable, ItemUsageData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ItemUsageTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _itemnumMeta =
+      const VerificationMeta('itemnum');
+  @override
+  late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
+      'itemnum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _transdateMeta =
+      const VerificationMeta('transdate');
+  @override
+  late final GeneratedColumn<String> transdate = GeneratedColumn<String>(
+      'transdate', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantityMeta =
+      const VerificationMeta('quantity');
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+      'quantity', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
+  @override
+  late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
+      'siteid', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _refwoMeta = const VerificationMeta('refwo');
+  @override
+  late final GeneratedColumn<String> refwo = GeneratedColumn<String>(
+      'refwo', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _yearMeta = const VerificationMeta('year');
+  @override
+  late final GeneratedColumn<int> year = GeneratedColumn<int>(
+      'year', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _monthMeta = const VerificationMeta('month');
+  @override
+  late final GeneratedColumn<int> month = GeneratedColumn<int>(
+      'month', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _matusetransidMeta =
+      const VerificationMeta('matusetransid');
+  @override
+  late final GeneratedColumn<int> matusetransid = GeneratedColumn<int>(
+      'matusetransid', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [itemnum, transdate, quantity, siteid, refwo, year, month, matusetransid];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'item_usage';
+  @override
+  VerificationContext validateIntegrity(Insertable<ItemUsageData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('itemnum')) {
+      context.handle(_itemnumMeta,
+          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+    } else if (isInserting) {
+      context.missing(_itemnumMeta);
+    }
+    if (data.containsKey('transdate')) {
+      context.handle(_transdateMeta,
+          transdate.isAcceptableOrUnknown(data['transdate']!, _transdateMeta));
+    } else if (isInserting) {
+      context.missing(_transdateMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(_quantityMeta,
+          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('siteid')) {
+      context.handle(_siteidMeta,
+          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+    } else if (isInserting) {
+      context.missing(_siteidMeta);
+    }
+    if (data.containsKey('refwo')) {
+      context.handle(
+          _refwoMeta, refwo.isAcceptableOrUnknown(data['refwo']!, _refwoMeta));
+    } else if (isInserting) {
+      context.missing(_refwoMeta);
+    }
+    if (data.containsKey('year')) {
+      context.handle(
+          _yearMeta, year.isAcceptableOrUnknown(data['year']!, _yearMeta));
+    } else if (isInserting) {
+      context.missing(_yearMeta);
+    }
+    if (data.containsKey('month')) {
+      context.handle(
+          _monthMeta, month.isAcceptableOrUnknown(data['month']!, _monthMeta));
+    } else if (isInserting) {
+      context.missing(_monthMeta);
+    }
+    if (data.containsKey('matusetransid')) {
+      context.handle(
+          _matusetransidMeta,
+          matusetransid.isAcceptableOrUnknown(
+              data['matusetransid']!, _matusetransidMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {matusetransid};
+  @override
+  ItemUsageData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ItemUsageData(
+      itemnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
+      transdate: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}transdate'])!,
+      quantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
+      siteid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
+      refwo: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}refwo'])!,
+      year: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}year'])!,
+      month: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}month'])!,
+      matusetransid: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}matusetransid'])!,
+    );
+  }
+
+  @override
+  $ItemUsageTable createAlias(String alias) {
+    return $ItemUsageTable(attachedDatabase, alias);
+  }
+}
+
+class ItemUsageData extends DataClass implements Insertable<ItemUsageData> {
+  final String itemnum;
+  final String transdate;
+  final double quantity;
+  final String siteid;
+  final String refwo;
+  final int year;
+  final int month;
+  final int matusetransid;
+  const ItemUsageData(
+      {required this.itemnum,
+      required this.transdate,
+      required this.quantity,
+      required this.siteid,
+      required this.refwo,
+      required this.year,
+      required this.month,
+      required this.matusetransid});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['itemnum'] = Variable<String>(itemnum);
+    map['transdate'] = Variable<String>(transdate);
+    map['quantity'] = Variable<double>(quantity);
+    map['siteid'] = Variable<String>(siteid);
+    map['refwo'] = Variable<String>(refwo);
+    map['year'] = Variable<int>(year);
+    map['month'] = Variable<int>(month);
+    map['matusetransid'] = Variable<int>(matusetransid);
+    return map;
+  }
+
+  ItemUsageCompanion toCompanion(bool nullToAbsent) {
+    return ItemUsageCompanion(
+      itemnum: Value(itemnum),
+      transdate: Value(transdate),
+      quantity: Value(quantity),
+      siteid: Value(siteid),
+      refwo: Value(refwo),
+      year: Value(year),
+      month: Value(month),
+      matusetransid: Value(matusetransid),
+    );
+  }
+
+  factory ItemUsageData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ItemUsageData(
+      itemnum: serializer.fromJson<String>(json['itemnum']),
+      transdate: serializer.fromJson<String>(json['transdate']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      siteid: serializer.fromJson<String>(json['siteid']),
+      refwo: serializer.fromJson<String>(json['refwo']),
+      year: serializer.fromJson<int>(json['year']),
+      month: serializer.fromJson<int>(json['month']),
+      matusetransid: serializer.fromJson<int>(json['matusetransid']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'itemnum': serializer.toJson<String>(itemnum),
+      'transdate': serializer.toJson<String>(transdate),
+      'quantity': serializer.toJson<double>(quantity),
+      'siteid': serializer.toJson<String>(siteid),
+      'refwo': serializer.toJson<String>(refwo),
+      'year': serializer.toJson<int>(year),
+      'month': serializer.toJson<int>(month),
+      'matusetransid': serializer.toJson<int>(matusetransid),
+    };
+  }
+
+  ItemUsageData copyWith(
+          {String? itemnum,
+          String? transdate,
+          double? quantity,
+          String? siteid,
+          String? refwo,
+          int? year,
+          int? month,
+          int? matusetransid}) =>
+      ItemUsageData(
+        itemnum: itemnum ?? this.itemnum,
+        transdate: transdate ?? this.transdate,
+        quantity: quantity ?? this.quantity,
+        siteid: siteid ?? this.siteid,
+        refwo: refwo ?? this.refwo,
+        year: year ?? this.year,
+        month: month ?? this.month,
+        matusetransid: matusetransid ?? this.matusetransid,
+      );
+  ItemUsageData copyWithCompanion(ItemUsageCompanion data) {
+    return ItemUsageData(
+      itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
+      transdate: data.transdate.present ? data.transdate.value : this.transdate,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      siteid: data.siteid.present ? data.siteid.value : this.siteid,
+      refwo: data.refwo.present ? data.refwo.value : this.refwo,
+      year: data.year.present ? data.year.value : this.year,
+      month: data.month.present ? data.month.value : this.month,
+      matusetransid: data.matusetransid.present
+          ? data.matusetransid.value
+          : this.matusetransid,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ItemUsageData(')
+          ..write('itemnum: $itemnum, ')
+          ..write('transdate: $transdate, ')
+          ..write('quantity: $quantity, ')
+          ..write('siteid: $siteid, ')
+          ..write('refwo: $refwo, ')
+          ..write('year: $year, ')
+          ..write('month: $month, ')
+          ..write('matusetransid: $matusetransid')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      itemnum, transdate, quantity, siteid, refwo, year, month, matusetransid);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ItemUsageData &&
+          other.itemnum == this.itemnum &&
+          other.transdate == this.transdate &&
+          other.quantity == this.quantity &&
+          other.siteid == this.siteid &&
+          other.refwo == this.refwo &&
+          other.year == this.year &&
+          other.month == this.month &&
+          other.matusetransid == this.matusetransid);
+}
+
+class ItemUsageCompanion extends UpdateCompanion<ItemUsageData> {
+  final Value<String> itemnum;
+  final Value<String> transdate;
+  final Value<double> quantity;
+  final Value<String> siteid;
+  final Value<String> refwo;
+  final Value<int> year;
+  final Value<int> month;
+  final Value<int> matusetransid;
+  const ItemUsageCompanion({
+    this.itemnum = const Value.absent(),
+    this.transdate = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.siteid = const Value.absent(),
+    this.refwo = const Value.absent(),
+    this.year = const Value.absent(),
+    this.month = const Value.absent(),
+    this.matusetransid = const Value.absent(),
+  });
+  ItemUsageCompanion.insert({
+    required String itemnum,
+    required String transdate,
+    required double quantity,
+    required String siteid,
+    required String refwo,
+    required int year,
+    required int month,
+    this.matusetransid = const Value.absent(),
+  })  : itemnum = Value(itemnum),
+        transdate = Value(transdate),
+        quantity = Value(quantity),
+        siteid = Value(siteid),
+        refwo = Value(refwo),
+        year = Value(year),
+        month = Value(month);
+  static Insertable<ItemUsageData> custom({
+    Expression<String>? itemnum,
+    Expression<String>? transdate,
+    Expression<double>? quantity,
+    Expression<String>? siteid,
+    Expression<String>? refwo,
+    Expression<int>? year,
+    Expression<int>? month,
+    Expression<int>? matusetransid,
+  }) {
+    return RawValuesInsertable({
+      if (itemnum != null) 'itemnum': itemnum,
+      if (transdate != null) 'transdate': transdate,
+      if (quantity != null) 'quantity': quantity,
+      if (siteid != null) 'siteid': siteid,
+      if (refwo != null) 'refwo': refwo,
+      if (year != null) 'year': year,
+      if (month != null) 'month': month,
+      if (matusetransid != null) 'matusetransid': matusetransid,
+    });
+  }
+
+  ItemUsageCompanion copyWith(
+      {Value<String>? itemnum,
+      Value<String>? transdate,
+      Value<double>? quantity,
+      Value<String>? siteid,
+      Value<String>? refwo,
+      Value<int>? year,
+      Value<int>? month,
+      Value<int>? matusetransid}) {
+    return ItemUsageCompanion(
+      itemnum: itemnum ?? this.itemnum,
+      transdate: transdate ?? this.transdate,
+      quantity: quantity ?? this.quantity,
+      siteid: siteid ?? this.siteid,
+      refwo: refwo ?? this.refwo,
+      year: year ?? this.year,
+      month: month ?? this.month,
+      matusetransid: matusetransid ?? this.matusetransid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (itemnum.present) {
+      map['itemnum'] = Variable<String>(itemnum.value);
+    }
+    if (transdate.present) {
+      map['transdate'] = Variable<String>(transdate.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (siteid.present) {
+      map['siteid'] = Variable<String>(siteid.value);
+    }
+    if (refwo.present) {
+      map['refwo'] = Variable<String>(refwo.value);
+    }
+    if (year.present) {
+      map['year'] = Variable<int>(year.value);
+    }
+    if (month.present) {
+      map['month'] = Variable<int>(month.value);
+    }
+    if (matusetransid.present) {
+      map['matusetransid'] = Variable<int>(matusetransid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ItemUsageCompanion(')
+          ..write('itemnum: $itemnum, ')
+          ..write('transdate: $transdate, ')
+          ..write('quantity: $quantity, ')
+          ..write('siteid: $siteid, ')
+          ..write('refwo: $refwo, ')
+          ..write('year: $year, ')
+          ..write('month: $month, ')
+          ..write('matusetransid: $matusetransid')
           ..write(')'))
         .toString();
   }
@@ -5329,6 +5923,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   late final $ItemsTable items = $ItemsTable(this);
   late final $SpareCriticalitysTable spareCriticalitys =
       $SpareCriticalitysTable(this);
+  late final $ItemUsageTable itemUsage = $ItemUsageTable(this);
   Selectable<SystemCriticality> systemsFilteredBySite(String? siteid) {
     return customSelect(
         'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1) AND siteid IS NULL UNION SELECT * FROM system_criticalitys WHERE siteid = ?1',
@@ -5485,7 +6080,8 @@ abstract class _$MyDatabase extends GeneratedDatabase {
         spareParts,
         purchases,
         items,
-        spareCriticalitys
+        spareCriticalitys,
+        itemUsage
       ];
 }
 
@@ -7497,7 +8093,9 @@ typedef $$SpareCriticalitysTableCreateCompanionBuilder
   required String id,
   required int usage,
   required int leadTime,
+  Value<double?> realLeadTime,
   required int cost,
+  Value<double?> realCost,
   required double assetRPN,
   required bool manual,
   Value<bool> manualPriority,
@@ -7505,6 +8103,8 @@ typedef $$SpareCriticalitysTableCreateCompanionBuilder
   required double newRPN,
   required String siteid,
   required String itemnum,
+  Value<double?> reorderPoint,
+  Value<double?> orderQuantity,
   Value<int> rowid,
 });
 typedef $$SpareCriticalitysTableUpdateCompanionBuilder
@@ -7512,7 +8112,9 @@ typedef $$SpareCriticalitysTableUpdateCompanionBuilder
   Value<String> id,
   Value<int> usage,
   Value<int> leadTime,
+  Value<double?> realLeadTime,
   Value<int> cost,
+  Value<double?> realCost,
   Value<double> assetRPN,
   Value<bool> manual,
   Value<bool> manualPriority,
@@ -7520,6 +8122,8 @@ typedef $$SpareCriticalitysTableUpdateCompanionBuilder
   Value<double> newRPN,
   Value<String> siteid,
   Value<String> itemnum,
+  Value<double?> reorderPoint,
+  Value<double?> orderQuantity,
   Value<int> rowid,
 });
 
@@ -7544,7 +8148,9 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<int> usage = const Value.absent(),
             Value<int> leadTime = const Value.absent(),
+            Value<double?> realLeadTime = const Value.absent(),
             Value<int> cost = const Value.absent(),
+            Value<double?> realCost = const Value.absent(),
             Value<double> assetRPN = const Value.absent(),
             Value<bool> manual = const Value.absent(),
             Value<bool> manualPriority = const Value.absent(),
@@ -7552,13 +8158,17 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             Value<double> newRPN = const Value.absent(),
             Value<String> siteid = const Value.absent(),
             Value<String> itemnum = const Value.absent(),
+            Value<double?> reorderPoint = const Value.absent(),
+            Value<double?> orderQuantity = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SpareCriticalitysCompanion(
             id: id,
             usage: usage,
             leadTime: leadTime,
+            realLeadTime: realLeadTime,
             cost: cost,
+            realCost: realCost,
             assetRPN: assetRPN,
             manual: manual,
             manualPriority: manualPriority,
@@ -7566,13 +8176,17 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             newRPN: newRPN,
             siteid: siteid,
             itemnum: itemnum,
+            reorderPoint: reorderPoint,
+            orderQuantity: orderQuantity,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String id,
             required int usage,
             required int leadTime,
+            Value<double?> realLeadTime = const Value.absent(),
             required int cost,
+            Value<double?> realCost = const Value.absent(),
             required double assetRPN,
             required bool manual,
             Value<bool> manualPriority = const Value.absent(),
@@ -7580,13 +8194,17 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             required double newRPN,
             required String siteid,
             required String itemnum,
+            Value<double?> reorderPoint = const Value.absent(),
+            Value<double?> orderQuantity = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SpareCriticalitysCompanion.insert(
             id: id,
             usage: usage,
             leadTime: leadTime,
+            realLeadTime: realLeadTime,
             cost: cost,
+            realCost: realCost,
             assetRPN: assetRPN,
             manual: manual,
             manualPriority: manualPriority,
@@ -7594,6 +8212,8 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
             newRPN: newRPN,
             siteid: siteid,
             itemnum: itemnum,
+            reorderPoint: reorderPoint,
+            orderQuantity: orderQuantity,
             rowid: rowid,
           ),
         ));
@@ -7617,8 +8237,18 @@ class $$SpareCriticalitysTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
+  ColumnFilters<double> get realLeadTime => $state.composableBuilder(
+      column: $state.table.realLeadTime,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   ColumnFilters<int> get cost => $state.composableBuilder(
       column: $state.table.cost,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get realCost => $state.composableBuilder(
+      column: $state.table.realCost,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -7656,6 +8286,16 @@ class $$SpareCriticalitysTableFilterComposer
       column: $state.table.itemnum,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get reorderPoint => $state.composableBuilder(
+      column: $state.table.reorderPoint,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get orderQuantity => $state.composableBuilder(
+      column: $state.table.orderQuantity,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 }
 
 class $$SpareCriticalitysTableOrderingComposer
@@ -7676,8 +8316,18 @@ class $$SpareCriticalitysTableOrderingComposer
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
+  ColumnOrderings<double> get realLeadTime => $state.composableBuilder(
+      column: $state.table.realLeadTime,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
   ColumnOrderings<int> get cost => $state.composableBuilder(
       column: $state.table.cost,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get realCost => $state.composableBuilder(
+      column: $state.table.realCost,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
@@ -7715,6 +8365,184 @@ class $$SpareCriticalitysTableOrderingComposer
       column: $state.table.itemnum,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get reorderPoint => $state.composableBuilder(
+      column: $state.table.reorderPoint,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get orderQuantity => $state.composableBuilder(
+      column: $state.table.orderQuantity,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $$ItemUsageTableCreateCompanionBuilder = ItemUsageCompanion Function({
+  required String itemnum,
+  required String transdate,
+  required double quantity,
+  required String siteid,
+  required String refwo,
+  required int year,
+  required int month,
+  Value<int> matusetransid,
+});
+typedef $$ItemUsageTableUpdateCompanionBuilder = ItemUsageCompanion Function({
+  Value<String> itemnum,
+  Value<String> transdate,
+  Value<double> quantity,
+  Value<String> siteid,
+  Value<String> refwo,
+  Value<int> year,
+  Value<int> month,
+  Value<int> matusetransid,
+});
+
+class $$ItemUsageTableTableManager extends RootTableManager<
+    _$MyDatabase,
+    $ItemUsageTable,
+    ItemUsageData,
+    $$ItemUsageTableFilterComposer,
+    $$ItemUsageTableOrderingComposer,
+    $$ItemUsageTableCreateCompanionBuilder,
+    $$ItemUsageTableUpdateCompanionBuilder> {
+  $$ItemUsageTableTableManager(_$MyDatabase db, $ItemUsageTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $$ItemUsageTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$ItemUsageTableOrderingComposer(ComposerState(db, table)),
+          updateCompanionCallback: ({
+            Value<String> itemnum = const Value.absent(),
+            Value<String> transdate = const Value.absent(),
+            Value<double> quantity = const Value.absent(),
+            Value<String> siteid = const Value.absent(),
+            Value<String> refwo = const Value.absent(),
+            Value<int> year = const Value.absent(),
+            Value<int> month = const Value.absent(),
+            Value<int> matusetransid = const Value.absent(),
+          }) =>
+              ItemUsageCompanion(
+            itemnum: itemnum,
+            transdate: transdate,
+            quantity: quantity,
+            siteid: siteid,
+            refwo: refwo,
+            year: year,
+            month: month,
+            matusetransid: matusetransid,
+          ),
+          createCompanionCallback: ({
+            required String itemnum,
+            required String transdate,
+            required double quantity,
+            required String siteid,
+            required String refwo,
+            required int year,
+            required int month,
+            Value<int> matusetransid = const Value.absent(),
+          }) =>
+              ItemUsageCompanion.insert(
+            itemnum: itemnum,
+            transdate: transdate,
+            quantity: quantity,
+            siteid: siteid,
+            refwo: refwo,
+            year: year,
+            month: month,
+            matusetransid: matusetransid,
+          ),
+        ));
+}
+
+class $$ItemUsageTableFilterComposer
+    extends FilterComposer<_$MyDatabase, $ItemUsageTable> {
+  $$ItemUsageTableFilterComposer(super.$state);
+  ColumnFilters<String> get itemnum => $state.composableBuilder(
+      column: $state.table.itemnum,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get transdate => $state.composableBuilder(
+      column: $state.table.transdate,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get quantity => $state.composableBuilder(
+      column: $state.table.quantity,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get siteid => $state.composableBuilder(
+      column: $state.table.siteid,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get refwo => $state.composableBuilder(
+      column: $state.table.refwo,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get year => $state.composableBuilder(
+      column: $state.table.year,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get month => $state.composableBuilder(
+      column: $state.table.month,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get matusetransid => $state.composableBuilder(
+      column: $state.table.matusetransid,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $$ItemUsageTableOrderingComposer
+    extends OrderingComposer<_$MyDatabase, $ItemUsageTable> {
+  $$ItemUsageTableOrderingComposer(super.$state);
+  ColumnOrderings<String> get itemnum => $state.composableBuilder(
+      column: $state.table.itemnum,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get transdate => $state.composableBuilder(
+      column: $state.table.transdate,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get quantity => $state.composableBuilder(
+      column: $state.table.quantity,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get siteid => $state.composableBuilder(
+      column: $state.table.siteid,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get refwo => $state.composableBuilder(
+      column: $state.table.refwo,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get year => $state.composableBuilder(
+      column: $state.table.year,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get month => $state.composableBuilder(
+      column: $state.table.month,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get matusetransid => $state.composableBuilder(
+      column: $state.table.matusetransid,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
 class $MyDatabaseManager {
@@ -7746,6 +8574,8 @@ class $MyDatabaseManager {
       $$ItemsTableTableManager(_db, _db.items);
   $$SpareCriticalitysTableTableManager get spareCriticalitys =>
       $$SpareCriticalitysTableTableManager(_db, _db.spareCriticalitys);
+  $$ItemUsageTableTableManager get itemUsage =>
+      $$ItemUsageTableTableManager(_db, _db.itemUsage);
 }
 
 class UniqueRpnNumbersResult {
