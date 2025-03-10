@@ -602,7 +602,7 @@ class MyDatabase extends _$MyDatabase {
         }
       }
       // add extra 0.0 in the array to represent months where items are not used
-      for (var i = arrayUsage.length;
+      for (var i = arrayUsage.length + 1;
           i < firstUsage.difference(DateTime.now()).inDays / -30;
           i++) {
         arrayUsage.add(0.0);
@@ -1518,6 +1518,7 @@ class MyDatabase extends _$MyDatabase {
       ratingFromValue(leadTime, leadTimeRating),
       ratingFromValue(unitCost, costRating),
     ];
+    leadTime = leadTime / 30.0;
     return await (update(spareCriticalitys)
           ..where((tbl) => tbl.id.equals('$siteid$itemnum')))
         .writeReturning(SpareCriticalitysCompanion(
@@ -1539,7 +1540,7 @@ class MyDatabase extends _$MyDatabase {
     final spareAssetInfos = await spareCriticalityAssetInfo(siteid, '%').get();
     final skips = await (select(spareCriticalitys)
           ..where((tbl) =>
-              tbl.manual.equals(true) | tbl.newPriority.isBiggerThanValue(0)))
+              tbl.manual.equals(true) | tbl.manualPriority.equals(true)))
         .get();
     final skip = skips.map((e) {
       return e.id;
@@ -1571,6 +1572,7 @@ class MyDatabase extends _$MyDatabase {
         ratingFromValue(leadTime, leadTimeRating),
         ratingFromValue(unitCost, costRating),
       ];
+      leadTime = leadTime / 30.0;
       results2.add(SpareCriticalitysCompanion.insert(
         id: '$siteid${spareAssetInfo.itemnum}',
         usage: temp[0],
