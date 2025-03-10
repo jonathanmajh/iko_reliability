@@ -323,16 +323,12 @@ const tableHeaders = {
 };
 
 Map<String, String> maximoServerDomains = {
-  'MASDEV': 'https://dev.manage.dev.iko.max-it-eam.com/maximo/api/os/',
-  'MASTEST': 'https://test.manage.test.iko.max-it-eam.com/maximo/api/os/',
   'MASPROD': 'https://prod.manage.prod.iko.max-it-eam.com/maximo/api/os/',
   'DEV 8.11': 'https://dev2.manage.dev2.iko.max-it-eam.com/maximo/api/os/',
   'TEST 8.11': 'https://test2.manage.test2.iko.max-it-eam.com/maximo/api/os/',
 };
 
 Map<String, String> apiKeys = {
-  'MASDEV': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
-  'MASTEST': '', //'n075qt6edkgf931ike9pegc3vejbbtgalabbrrrf'
   'MASPROD': '',
   'DEV 8.11': '',
   'TEST 8.11': '',

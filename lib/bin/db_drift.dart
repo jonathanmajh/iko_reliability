@@ -1,4 +1,5 @@
 //handling local database (drift)
+import 'dart:developer';
 import 'dart:math';
 
 import 'package:drift/drift.dart';
@@ -1381,6 +1382,7 @@ class MyDatabase extends _$MyDatabase {
       ));
     }
     try {
+      await (delete(spareParts)..where((t) => t.siteid.equals(siteid))).go();
       await batch((batch) {
         batch.insertAllOnConflictUpdate(spareParts, inserts);
       });
@@ -1434,6 +1436,7 @@ class MyDatabase extends _$MyDatabase {
           month: item['mmonth']));
     }
     try {
+      await (delete(itemUsage)..where((t) => t.siteid.equals(siteid))).go();
       await batch((batch) {
         batch.insertAllOnConflictUpdate(itemUsage, inserts);
       });
@@ -1480,6 +1483,7 @@ class MyDatabase extends _$MyDatabase {
       ));
     }
     try {
+      await (delete(purchases)..where((t) => t.siteid.equals(siteid))).go();
       await batch((batch) {
         batch.insertAllOnConflictUpdate(purchases, inserts);
       });
