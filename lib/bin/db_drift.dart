@@ -615,7 +615,8 @@ class MyDatabase extends _$MyDatabase {
                 stdDev *
                 sqrt(spareCriticalities[itemnum]!.realLeadTime!);
         double demand365 = arrayUsage.sum /
-            firstUsage.difference(DateTime.now()).inDays *
+            firstUsage.difference(DateTime.now()).inDays /
+            30 *
             -1.0;
         double reorderPoint = safetyStock +
             (demand365 * spareCriticalities[itemnum]!.realLeadTime!);

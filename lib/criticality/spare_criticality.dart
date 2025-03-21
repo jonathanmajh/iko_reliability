@@ -371,6 +371,20 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         },
       ),
       PlutoColumn(
+        title: 'ROP',
+        field: 'rop',
+        type: PlutoColumnType.number(),
+        readOnly: true,
+        width: 75,
+      ),
+      PlutoColumn(
+        title: 'ROQ',
+        field: 'roq',
+        type: PlutoColumnType.number(),
+        readOnly: true,
+        width: 75,
+      ),
+      PlutoColumn(
           width: 100,
           title: 'Override',
           field: 'override',
@@ -500,6 +514,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                                 .read<SpareCriticalityNotifier>()
                                 .rpnFindDistribution(
                                     row.spareCriticality.newRPN)),
+                    'rop': PlutoCell(value: row.spareCriticality.reorderPoint),
+                    'roq': PlutoCell(value: row.spareCriticality.orderQuantity),
                     'id': PlutoCell(value: row.spareCriticality.id),
                     'status': PlutoCell(value: ''),
                     'override': PlutoCell(value: overrideStatus),
@@ -535,6 +551,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               'rpn': PlutoCell(value: 0),
               'newPriority': PlutoCell(value: 0),
               'id': PlutoCell(value: 0),
+              'rop': PlutoCell(value: 0),
+              'roq': PlutoCell(value: 0),
               'status': PlutoCell(value: ''),
               'override': PlutoCell(value: ''),
             }));
@@ -548,6 +566,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               'cost': PlutoCell(value: 0),
               'rpn': PlutoCell(value: 0),
               'newPriority': PlutoCell(value: 0),
+              'rop': PlutoCell(value: 0),
+              'roq': PlutoCell(value: 0),
               'id': PlutoCell(value: 0),
               'status': PlutoCell(value: ''),
               'override': PlutoCell(value: ''),

@@ -150,6 +150,7 @@ class ParsedTemplate {
     var readMaterials = false;
     var readService = false;
     var readRouteAsset = false;
+    var errors = [];
     pmTemplates[filename] = {};
     for (var sheet in decoder.tables.keys) {
       if (sheet != 'Main') {
@@ -157,152 +158,160 @@ class ParsedTemplate {
       }
       for (var i = 0; i < decoder.tables[sheet]!.maxRows; i++) {
         //read spreadsheet row by row
-        var row = decoder.tables[sheet]!.rows[i];
-        if (row[0] == "DON’T REMOVE THIS LINE") {
-          continue;
-        }
-        if (row[0] == 'PM Asset/ Parent (Route)*:') {
-          //new PM template header found on spreadsheet, read PM's values and write into new [ParsedTemplate] object
-          //flags to read/write data of these category in the next loop iteration(s)
-          readTasks = false;
-          readCraft = false;
-          readMaterials = false;
-          readService = false;
-          readRouteAsset = false;
-
-          var nextRow = decoder.tables[sheet]!.rows[i + 1];
-          var nextNextRow = decoder.tables[sheet]!.rows[i + 2];
-          pmNumber++;
-          //read work order type
-          String workOrderType = nextRow[6].substring(0, 3);
-          if (workOrderType == 'LC1') {
-            workOrderType = 'LIF';
-            //replace work order types of 'LC1' with 'LIF'
+        try {
+          var row = decoder.tables[sheet]!.rows[i];
+          if (row[0] == "DON’T REMOVE THIS LINE") {
+            continue;
           }
-          //read next due date for pm
-          String nextDate = '';
-          if (nextRow[2] != null) {
-            if (nextRow[2] is String) {
-              String temp = nextRow[2];
-              nextDate = temp.substring(0, (min(10, temp.length)));
-            } else {
-              nextDate = DateTime.fromMillisecondsSinceEpoch(
-                      (nextRow[2] - 25569) * 86400000,
-                      isUtc: true)
-                  .toString()
-                  .substring(0, 10);
+          if (row[0] == 'PM Asset/ Parent (Route)*:') {
+            //new PM template header found on spreadsheet, read PM's values and write into new [ParsedTemplate] object
+            //flags to read/write data of these category in the next loop iteration(s)
+            readTasks = false;
+            readCraft = false;
+            readMaterials = false;
+            readService = false;
+            readRouteAsset = false;
+
+            var nextRow = decoder.tables[sheet]!.rows[i + 1];
+            var nextNextRow = decoder.tables[sheet]!.rows[i + 2];
+            pmNumber++;
+            //read work order type
+            String workOrderType = nextRow[6].substring(0, 3);
+            if (workOrderType == 'LC1') {
+              workOrderType = 'LIF';
+              //replace work order types of 'LC1' with 'LIF'
+            }
+            //read next due date for pm
+            String nextDate = '';
+            if (nextRow[2] != null) {
+              if (nextRow[2] is String) {
+                String temp = nextRow[2];
+                nextDate = temp.substring(0, (min(10, temp.length)));
+              } else {
+                nextDate = DateTime.fromMillisecondsSinceEpoch(
+                        (nextRow[2] - 25569) * 86400000,
+                        isUtc: true)
+                    .toString()
+                    .substring(0, 10);
+              }
+            }
+            //write to template object
+            pmTemplates[filename][pmNumber] = ParsedTemplate(
+              nextDueDate: nextDate,
+              siteId: nextRow[3].toString().toUpperCase(),
+              frequencyUnit:
+                  nextRow[4]?.substring(0, 1)?.toString().toUpperCase(),
+              frequency: nextRow[5],
+              workOrderType: workOrderType,
+              processCondition: nextRow[7].substring(0, 4),
+              pmAsset: nextRow[0]?.toString().toUpperCase(),
+              pmName: nextRow[8] ?? 'Generating Name...',
+              pmNumber: nextNextRow[8] ?? 'Generating Number...',
+              suggestedPmName: nextRow[8],
+              suggestedPmNumber: nextNextRow[8],
+              routeName:
+                  (nextRow[9] == 'Select Route (Optional)' ? null : nextRow[9]),
+              routeCode:
+                  (nextRow[9] == 'Select Route (Optional)' || nextRow[9] == null
+                      ? null
+                      : nextNextRow[9].toString()),
+            );
+          }
+          if (row[7] != null && readTasks) {
+            //reading job task info of current PM, writing data to [ParsedTemplate] object(s)
+            pmTemplates[filename][pmNumber].tasks.add(JobTask(
+                jptask: row[6],
+                description: row[7],
+                assetNumber: row[4]?.toString().toUpperCase(),
+                metername: row[5],
+                longdescription: row[8]));
+            if (row[4] != null) {
+              pmTemplates[filename][pmNumber].assets.add(row[4]);
             }
           }
-          //write to template object
-          pmTemplates[filename][pmNumber] = ParsedTemplate(
-            nextDueDate: nextDate,
-            siteId: nextRow[3].toString().toUpperCase(),
-            frequencyUnit:
-                nextRow[4]?.substring(0, 1)?.toString().toUpperCase(),
-            frequency: nextRow[5],
-            workOrderType: workOrderType,
-            processCondition: nextRow[7].substring(0, 4),
-            pmAsset: nextRow[0]?.toString().toUpperCase(),
-            pmName: nextRow[8] ?? 'Generating Name...',
-            pmNumber: nextNextRow[8] ?? 'Generating Number...',
-            suggestedPmName: nextRow[8],
-            suggestedPmNumber: nextNextRow[8],
-            routeName:
-                (nextRow[9] == 'Select Route (Optional)' ? null : nextRow[9]),
-            routeCode:
-                (nextRow[9] == 'Select Route (Optional)' || nextRow[9] == null
-                    ? null
-                    : nextNextRow[9].toString()),
-          );
-        }
-        if (row[7] != null && readTasks) {
-          //reading job task info of current PM, writing data to [ParsedTemplate] object(s)
-          pmTemplates[filename][pmNumber].tasks.add(JobTask(
-              jptask: row[6],
-              description: row[7],
-              assetNumber: row[4]?.toString().toUpperCase(),
-              metername: row[5],
-              longdescription: row[8]));
-          if (row[4] != null) {
-            pmTemplates[filename][pmNumber].assets.add(row[4]);
+          if (row[3] != null && readRouteAsset) {
+            //reading task rout asset data of current PM and write it to [ParsedTemplate] object
+            pmTemplates[filename][pmNumber]
+                .assets
+                .add(row[3].toString().toUpperCase());
           }
-        }
-        if (row[3] != null && readRouteAsset) {
-          //reading task rout asset data of current PM and write it to [ParsedTemplate] object
-          pmTemplates[filename][pmNumber]
-              .assets
-              .add(row[3].toString().toUpperCase());
-        }
-        if (row[0] == 'Materials (Mapics Number)') {
-          //check if current row has materials/mapics # header for PM. If so, read the data next iteration(s)
-          readCraft = false;
-          readMaterials = true;
-          readService = false;
-          continue;
-        }
-        if (row[0] == 'Services (Mapics Number)') {
-          //check if current row has services/mapics # header for PM. If so, read the data next iteration(s)
-          readCraft = false;
-          readMaterials = false;
-          readService = true;
-          continue;
-        }
-        if (row[1] != null && readCraft) {
-          //read/write craft data
-          //parse craft line
-          String str = row[0];
-          String laborType = str.substring(0, 1).toUpperCase();
-          // Patch for Production which is code O, but starts with P
-          if (laborType == 'P') {
-            laborType = 'O';
+          if (row[0] == 'Materials (Mapics Number)') {
+            //check if current row has materials/mapics # header for PM. If so, read the data next iteration(s)
+            readCraft = false;
+            readMaterials = true;
+            readService = false;
+            continue;
           }
-          String laborCode = '';
-          int pos = str.lastIndexOf('@');
-          if (pos != -1) {
-            //if @ symbol exists, might have labor code
-            laborCode = str.substring(pos + 1).trim();
+          if (row[0] == 'Services (Mapics Number)') {
+            //check if current row has services/mapics # header for PM. If so, read the data next iteration(s)
+            readCraft = false;
+            readMaterials = false;
+            readService = true;
+            continue;
+          }
+          if (row[1] != null && readCraft) {
+            //read/write craft data
+            //parse craft line
+            String str = row[0];
+            String laborType = str.substring(0, 1).toUpperCase();
+            // Patch for Production which is code O, but starts with P
+            if (laborType == 'P') {
+              laborType = 'O';
+            }
+            String laborCode = '';
+            int pos = str.lastIndexOf('@');
+            if (pos != -1) {
+              //if @ symbol exists, might have labor code
+              laborCode = str.substring(pos + 1).trim();
+            }
+
+            pmTemplates[filename][pmNumber].crafts.add(JobCraft(
+                laborType: laborType,
+                quantity: row[1],
+                hours: parseTime(row[2]),
+                laborCode: laborCode));
+          }
+          if (row[0] != null && readMaterials) {
+            //read/write material data
+            pmTemplates[filename][pmNumber].materials.add(JobMaterial(
+                itemNumber: row[0].toString(),
+                quantity: row[1] ?? 1,
+                cost: row[2]?.toDouble()));
+          }
+          if (row[0] != null && readService) {
+            //read/write service data
+            pmTemplates[filename][pmNumber].services.add(JobService(
+                itemNumber: row[0].toString(),
+                vendorId: row[2],
+                cost: row[1]?.toDouble()));
+          }
+          if (row[0] == 'Craft @ (Optional) Labour Code' ||
+              row[0] == 'Craft (Labour Code(Optional))') {
+            //check if current row has craft info header for PM. If so, read the data next iteration
+            readTasks = true;
+            readCraft = true;
+            readMaterials = false;
+            readService = false;
+            pmTemplates[filename][pmNumber].replacement = row[3].toString();
+            continue;
           }
 
-          pmTemplates[filename][pmNumber].crafts.add(JobCraft(
-              laborType: laborType,
-              quantity: row[1],
-              hours: parseTime(row[2]),
-              laborCode: laborCode));
-        }
-        if (row[0] != null && readMaterials) {
-          //read/write material data
-          pmTemplates[filename][pmNumber].materials.add(JobMaterial(
-              itemNumber: row[0].toString(),
-              quantity: row[1] ?? 1,
-              cost: row[2]?.toDouble()));
-        }
-        if (row[0] != null && readService) {
-          //read/write service data
-          pmTemplates[filename][pmNumber].services.add(JobService(
-              itemNumber: row[0].toString(),
-              vendorId: row[2],
-              cost: row[1]?.toDouble()));
-        }
-        if (row[0] == 'Craft @ (Optional) Labour Code' ||
-            row[0] == 'Craft (Labour Code(Optional))') {
-          //check if current row has craft info header for PM. If so, read the data next iteration
-          readTasks = true;
-          readCraft = true;
-          readMaterials = false;
-          readService = false;
-          pmTemplates[filename][pmNumber].replacement = row[3].toString();
-          continue;
-        }
-
-        if (row[3] == 'Route Assets (one per cell):' ||
-            row[3] == 'Task Route Assets (one per cell):') {
-          //check if current row has task route asset header for PM. If so, read the data next iteration
-          readRouteAsset = true;
+          if (row[3] == 'Route Assets (one per cell):' ||
+              row[3] == 'Task Route Assets (one per cell):') {
+            //check if current row has task route asset header for PM. If so, read the data next iteration
+            readRouteAsset = true;
+          }
+        } catch (e) {
+          errors.add(
+              'Error parsing PM Templates\nFile: $filename | Row: ${i + 1}\n$e');
         }
       }
     }
     if (pmTemplates.isEmpty) {
       throw NoPMException();
+    }
+    if (errors.isNotEmpty) {
+      throw Exception(errors.toString());
     }
     return pmTemplates;
   }
