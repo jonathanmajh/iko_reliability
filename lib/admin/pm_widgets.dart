@@ -57,7 +57,7 @@ Widget templateDescription(
               ),
               Text(
                 templateNotifier.getTemplateName(filename, templateNumber),
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
@@ -66,7 +66,7 @@ Widget templateDescription(
               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
               Text(
                 filename,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 12.0,

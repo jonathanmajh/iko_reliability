@@ -1,5 +1,4 @@
 //handling local database (drift)
-import 'dart:developer';
 import 'dart:math';
 
 import 'package:drift/drift.dart';
