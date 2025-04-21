@@ -185,7 +185,7 @@ Future<String?> generateMeterNumber(Map<String, List<String>> meters,
       assetNumber == '') {
     return null;
   }
-  final meterObj = await database!.getMeterByDescription(metername, condition);
+  final meterObj = await database!.getMeterByDescription(metername);
   String meter = '';
   int meterCount = 1;
   if (meters.keys.contains(assetNumber)) {

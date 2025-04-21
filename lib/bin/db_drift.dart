@@ -1235,12 +1235,10 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
-  Future<Meter> getMeterByDescription(
-      String meterName, String condition) async {
+  Future<Meter> getMeterByDescription(String meterName) async {
     try {
       var meterObj = await (select(meterDBs)
-            ..where((t) =>
-                t.inspect.equals(meterName) & t.condition.equals(condition)))
+            ..where((t) => t.inspect.equals(meterName)))
           .get();
       var observation = await (select(observations)
             ..where((t) => t.meter.equals(meterObj[0].meter)))
@@ -1256,7 +1254,7 @@ class MyDatabase extends _$MyDatabase {
           observation);
     } catch (e) {
       throw Exception(
-          'No meter can be found for the following combination: "$meterName": "$condition": ${e.toString()}');
+          'No meter can be found for: "$meterName": ${e.toString()}');
     }
   }
 
