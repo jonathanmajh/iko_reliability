@@ -63,6 +63,7 @@ final productionLines = {
   'W': 'Wrapper',
   'G': 'Mortar',
   'M': 'Mod',
+  'U': 'Rubber'
 };
 
 const workType = {
