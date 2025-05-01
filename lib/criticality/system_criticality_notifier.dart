@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import '../bin/db_drift.dart';
 
 class SystemCriticalityNotifier extends ChangeNotifier {
   bool updateGrid = false;
-  PlutoGridStateManager? stateManager;
+  TrinaGridStateManager? stateManager;
   String selectedSite = '';
   List<SystemCriticality> systems = [];
 

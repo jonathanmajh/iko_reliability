@@ -106,7 +106,7 @@ class ParsedTemplate {
   String pmName;
   String? pmPackageNumber;
   String? routeCode;
-  String? routeName; // TODO replace this with loaded value list + editor later
+  String? routeName;
   String? pmAsset; // the parent asset specified for the PM
   String? suggestedPmNumber;
   String? suggestedPmName;

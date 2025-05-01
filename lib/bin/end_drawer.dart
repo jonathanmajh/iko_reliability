@@ -7,7 +7,7 @@ import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:provider/provider.dart';
 import '../criticality/criticality_db_export_import.dart';
 import '../criticality/spare_criticality.dart';
@@ -306,7 +306,7 @@ class _EndDrawerState extends State<EndDrawer> {
               trailing: ElevatedButton(
                 child: const Text('Export'),
                 onPressed: () async {
-                  PlutoGridStateManager? stateManager =
+                  TrinaGridStateManager? stateManager =
                       context.read<SpareCriticalityNotifier>().stateManager;
                   //export as csv
                   if (stateManager != null) {
@@ -394,6 +394,14 @@ class _EndDrawerState extends State<EndDrawer> {
                 ),
               ),
               ListTile(
+                title: const Text('Recalculate RPN Values'),
+                trailing: ElevatedButton(
+                  child: const Icon(Icons.refresh),
+                  onPressed: () => reCalculateAssetRpnValues(
+                      context.read<AssetCriticalityNotifier>().stateManager!),
+                ),
+              ),
+              ListTile(
                 title: const Text('Work Order Filter Settings'),
                 trailing: ElevatedButton(
                   child: const Icon(Icons.settings),
@@ -405,7 +413,7 @@ class _EndDrawerState extends State<EndDrawer> {
                 trailing: ElevatedButton(
                   child: const Text('Export'),
                   onPressed: () async {
-                    PlutoGridStateManager? stateManager =
+                    TrinaGridStateManager? stateManager =
                         context.read<AssetCriticalityNotifier>().stateManager;
                     if (!context
                         .read<AssetCriticalityNotifier>()

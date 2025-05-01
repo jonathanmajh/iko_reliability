@@ -310,7 +310,7 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
 ///
 ///Order of upload: Location > Asset > JobPlan > JobLabor > JobAsset
 ///
-///@returns Map<String, dynamic> with keys 'location', 'asset', 'jobplan', 'joblabor', 'jpassetlink'
+///@returns Map&lt;String, dynamic&gt; with keys 'location', 'asset', 'jobplan', 'joblabor', 'jpassetlink'
 ///
 ///Possible statuses for each key: 'success', 'fail', 'duplicate'.
 ///In case of duplicate, the upload will continue
@@ -450,7 +450,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
               'PRIORITY',
               'VENDOR',
               'MANUFACTURER',
-              // 'IKO_MODELNUM', TODO when DB field is added to Prod
+              // 'IKO_MODELNUM',
             ],
             [
               selectedSite,

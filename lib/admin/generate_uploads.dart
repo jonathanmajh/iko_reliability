@@ -1,7 +1,7 @@
 import 'package:csv/csv.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/admin/generate_job_plans.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import '../main.dart';
 import '../bin/db_drift.dart';
@@ -377,9 +377,9 @@ Future<Map<String, List<List<String>>>> generateMeterJobplan(
   return generated;
 }
 
-///Creates a jagged array (list) from data from a plutogrid. A list of rows from top to bottom (visible columns only).
+///Creates a jagged array (list) from data from a Trinagrid. A list of rows from top to bottom (visible columns only).
 ///The first value of each column is its title.
-List<List<String>> generatePlutogrid(PlutoGridStateManager stateManager,
+List<List<String>> generateTrinagrid(TrinaGridStateManager stateManager,
     {List<String> excludeFields = const []}) {
   List<List<String>> generated = [];
   List<String> fields = List<String>.from(stateManager.columns
@@ -390,7 +390,7 @@ List<List<String>> generatePlutogrid(PlutoGridStateManager stateManager,
       .where((column) => fields.contains(column.field))
       .map((column) => column.title)));
   //add body rows
-  for (PlutoRow row in stateManager.rows) {
+  for (TrinaRow row in stateManager.rows) {
     generated.add(
         List.from(fields.map((e) => (row.cells[e]?.value ?? '').toString())));
   }

@@ -9,7 +9,7 @@ import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/criticality/system_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:provider/provider.dart';
 
 import '../bin/db_drift.dart';
@@ -26,10 +26,10 @@ class SystemCriticalityPage extends StatefulWidget {
 }
 
 class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
-  List<PlutoColumn> columns = [];
-  List<PlutoRow> rows = [];
+  List<TrinaColumn> columns = [];
+  List<TrinaRow> rows = [];
   List<Widget> fabList = [];
-  late PlutoGridStateManager stateManager;
+  late TrinaGridStateManager stateManager;
   String loadedSite = '';
 
   @override
@@ -40,18 +40,18 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
 
 // define columns
     columns.addAll([
-      PlutoColumn(
+      TrinaColumn(
         title: '',
         field: 'id',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         hide: true,
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 150,
         title: 'Site',
         field: 'site',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<String>(
@@ -75,11 +75,11 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 150,
         title: 'Production Line',
         field: 'line',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<String>(
@@ -103,17 +103,17 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 300,
         title: 'System Name',
         field: 'description',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 250,
         title: 'Safety',
         field: 'safety',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -136,11 +136,11 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 250,
         title: 'Regulatory',
         field: 'regulatory',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -163,11 +163,11 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 250,
         title: 'Economic',
         field: 'economic',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -190,11 +190,11 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 250,
         title: 'Throughput',
         field: 'throughput',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -217,11 +217,11 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 250,
         title: 'Quality',
         field: 'quality',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -243,19 +243,19 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 80,
         title: 'Score',
         field: 'score',
-        type: PlutoColumnType.number(
+        type: TrinaColumnType.number(
           format: '#.##',
         ),
       ),
-      PlutoColumn(
+      TrinaColumn(
           width: 85,
           title: 'Delete?',
           field: 'delete',
-          type: PlutoColumnType.text(),
+          type: TrinaColumnType.text(),
           renderer: (rendererContext) {
             return Row(
               children: [
@@ -339,63 +339,63 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             context.watch<SelectedSiteNotifier>().selectedSite),
         builder: (BuildContext context,
             AsyncSnapshot<List<SystemCriticality>> snapshot) {
-          List<PlutoRow> rows = [];
+          List<TrinaRow> rows = [];
           if (snapshot.hasData) {
             if (snapshot.data!.isNotEmpty) {
               debugPrint('Reloading Grid');
               for (var row in snapshot.data!) {
-                rows.add(PlutoRow(cells: {
-                  'id': PlutoCell(value: row.id),
-                  'line': PlutoCell(value: row.line),
-                  'site': PlutoCell(value: row.siteid ?? 'All'),
-                  'description': PlutoCell(value: row.description),
-                  'safety': PlutoCell(value: row.safety),
-                  'regulatory': PlutoCell(value: row.regulatory),
-                  'economic': PlutoCell(value: row.economic),
-                  'throughput': PlutoCell(value: row.throughput),
-                  'quality': PlutoCell(value: row.quality),
-                  'score': PlutoCell(value: row.score),
-                  'delete': PlutoCell(value: ''),
+                rows.add(TrinaRow(cells: {
+                  'id': TrinaCell(value: row.id),
+                  'line': TrinaCell(value: row.line),
+                  'site': TrinaCell(value: row.siteid ?? 'All'),
+                  'description': TrinaCell(value: row.description),
+                  'safety': TrinaCell(value: row.safety),
+                  'regulatory': TrinaCell(value: row.regulatory),
+                  'economic': TrinaCell(value: row.economic),
+                  'throughput': TrinaCell(value: row.throughput),
+                  'quality': TrinaCell(value: row.quality),
+                  'score': TrinaCell(value: row.score),
+                  'delete': TrinaCell(value: ''),
                 }));
                 stateManager.removeAllRows();
                 stateManager.appendRows(rows);
               }
             }
           } else if (snapshot.hasError) {
-            rows.add(PlutoRow(cells: {
-              'id': PlutoCell(value: 0),
-              'line': PlutoCell(value: 'C'),
-              'site': PlutoCell(value: 'All'),
-              'description': PlutoCell(value: snapshot.error),
-              'safety': PlutoCell(value: 0),
-              'regulatory': PlutoCell(value: 0),
-              'economic': PlutoCell(value: 0),
-              'throughput': PlutoCell(value: 0),
-              'quality': PlutoCell(value: 0),
-              'score': PlutoCell(value: 0),
-              'delete': PlutoCell(value: ''),
+            rows.add(TrinaRow(cells: {
+              'id': TrinaCell(value: 0),
+              'line': TrinaCell(value: 'C'),
+              'site': TrinaCell(value: 'All'),
+              'description': TrinaCell(value: snapshot.error),
+              'safety': TrinaCell(value: 0),
+              'regulatory': TrinaCell(value: 0),
+              'economic': TrinaCell(value: 0),
+              'throughput': TrinaCell(value: 0),
+              'quality': TrinaCell(value: 0),
+              'score': TrinaCell(value: 0),
+              'delete': TrinaCell(value: ''),
             }));
           } else {
-            rows.add(PlutoRow(cells: {
-              'id': PlutoCell(value: 0),
-              'line': PlutoCell(value: 'C'),
-              'site': PlutoCell(value: 'All'),
-              'description': PlutoCell(value: 'No Site Selected'),
-              'safety': PlutoCell(value: 0),
-              'regulatory': PlutoCell(value: 0),
-              'economic': PlutoCell(value: 0),
-              'throughput': PlutoCell(value: 0),
-              'quality': PlutoCell(value: 0),
-              'score': PlutoCell(value: 0),
-              'delete': PlutoCell(value: ''),
+            rows.add(TrinaRow(cells: {
+              'id': TrinaCell(value: 0),
+              'line': TrinaCell(value: 'C'),
+              'site': TrinaCell(value: 'All'),
+              'description': TrinaCell(value: 'No Site Selected'),
+              'safety': TrinaCell(value: 0),
+              'regulatory': TrinaCell(value: 0),
+              'economic': TrinaCell(value: 0),
+              'throughput': TrinaCell(value: 0),
+              'quality': TrinaCell(value: 0),
+              'score': TrinaCell(value: 0),
+              'delete': TrinaCell(value: ''),
             }));
           }
-          return PlutoGrid(
+          return TrinaGrid(
             columns: columns,
             rows: rows,
-            configuration: PlutoGridConfiguration(
-              shortcut: PlutoGridShortcut(actions: {
-                ...PlutoGridShortcut.defaultActions,
+            configuration: TrinaGridConfiguration(
+              shortcut: TrinaGridShortcut(actions: {
+                ...TrinaGridShortcut.defaultActions,
                 // + / - keys should increase / decrease values
                 LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
                 LogicalKeySet(LogicalKeyboardKey.numpadAdd):
@@ -405,10 +405,10 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                     CustomMinusKeyAction(),
               }),
               style: context.watch<ThemeManager>().theme == ThemeMode.dark
-                  ? const PlutoGridStyleConfig.dark()
-                  : const PlutoGridStyleConfig(),
+                  ? const TrinaGridStyleConfig.dark()
+                  : const TrinaGridStyleConfig(),
             ),
-            onChanged: (PlutoGridOnChangedEvent event) async {
+            onChanged: (TrinaGridOnChangedEvent event) async {
               // score should auto calcualte when values change
               event.row.cells['score']!.value = sqrt(
                   (event.row.cells['safety']?.value *
@@ -429,8 +429,8 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                       context.read<SelectedSiteNotifier>().selectedSite);
               debugPrint('$event');
             },
-            onLoaded: (PlutoGridOnLoadedEvent event) {
-              event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
+            onLoaded: (TrinaGridOnLoadedEvent event) {
+              event.stateManager.setSelectingMode(TrinaGridSelectingMode.cell);
               stateManager = event.stateManager;
               context.read<SystemCriticalityNotifier>().stateManager =
                   stateManager;
@@ -442,7 +442,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
   }
 }
 
-Future<int> updateSystem(PlutoRow row) async {
+Future<int> updateSystem(TrinaRow row) async {
   var id = -1;
 
   id = await database!.updateSystemCriticalitys(
@@ -464,11 +464,11 @@ Future<int> updateSystem(PlutoRow row) async {
   return id;
 }
 
-class CustomAddKeyAction extends PlutoGridShortcutAction {
+class CustomAddKeyAction extends TrinaGridShortcutAction {
   @override
   void execute({
-    required PlutoKeyManagerEvent keyEvent,
-    required PlutoGridStateManager stateManager,
+    required TrinaKeyManagerEvent keyEvent,
+    required TrinaGridStateManager stateManager,
   }) {
     debugPrint('Pressed add key.');
     if (stateManager.currentColumnField != 'safety' &&
@@ -490,11 +490,11 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
   }
 }
 
-class CustomMinusKeyAction extends PlutoGridShortcutAction {
+class CustomMinusKeyAction extends TrinaGridShortcutAction {
   @override
   void execute({
-    required PlutoKeyManagerEvent keyEvent,
-    required PlutoGridStateManager stateManager,
+    required TrinaKeyManagerEvent keyEvent,
+    required TrinaGridStateManager stateManager,
   }) {
     debugPrint('Pressed minus key.');
     if (stateManager.currentColumnField != 'safety' &&
@@ -599,7 +599,7 @@ class _NewSystemFormState extends State<NewSystemForm> {
                             selectedSystem,
                             context.read<SelectedSiteNotifier>().selectedSite);
                         final newRow = stateManager.getNewRow();
-                        newRow.cells['id'] = PlutoCell(value: row.id);
+                        newRow.cells['id'] = TrinaCell(value: row.id);
                         newRow.cells['line']!.value = row.line;
                         newRow.cells['site']!.value = navigatorKey
                             .currentContext!
@@ -627,7 +627,7 @@ class _NewSystemFormState extends State<NewSystemForm> {
 class SystemDeleteIcon extends StatefulWidget {
   const SystemDeleteIcon({super.key, required this.rendererContext});
 
-  final PlutoColumnRendererContext rendererContext;
+  final TrinaColumnRendererContext rendererContext;
 
   @override
   State<SystemDeleteIcon> createState() => _SystemDeleteIconState();

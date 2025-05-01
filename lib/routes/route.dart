@@ -13,7 +13,7 @@ import '../main.dart';
 part 'route.gr.dart';
 
 @AutoRouterConfig()
-class AppRouter extends _$AppRouter {
+class AppRouter extends RootStackRouter {
   // @override
   // RouteType get defaultRouteType => RouteType.material(); //.cupertino, .adaptive ..etc
   AppRouter({super.navigatorKey});

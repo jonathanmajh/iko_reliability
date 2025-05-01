@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/criticality/criticality_settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:intl/intl.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:provider/provider.dart';
 
 import '../bin/consts.dart';
@@ -25,101 +25,101 @@ class SpareCriticalityPage extends StatefulWidget {
 }
 
 class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
-  List<PlutoColumn> columns = [];
+  List<TrinaColumn> columns = [];
   String loadedSite = '';
   // used to track if update event is done by system or manually
 
-  List<PlutoColumn> detailColumns = [];
-  List<PlutoRow> detailRows = [];
+  List<TrinaColumn> detailColumns = [];
+  List<TrinaRow> detailRows = [];
 
   Key? currentRowKey;
 
-  late PlutoGridStateManager stateManager;
-  late PlutoGridStateManager detailStateManager;
+  late TrinaGridStateManager stateManager;
+  late TrinaGridStateManager detailStateManager;
 
   @override
   void initState() {
     super.initState();
 
     detailColumns.addAll([
-      PlutoColumn(
+      TrinaColumn(
         title: 'PR Number',
         field: 'prnum',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'PO Number',
         field: 'ponum',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Start Date',
         field: 'startDate',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'End Date',
         field: 'endDate',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Lead Time',
         field: 'leadTime',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Unit Cost',
         field: 'unitCost',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 100,
         readOnly: true,
         title: 'Site',
         field: 'site',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Included?',
         field: 'included',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
       ),
     ]);
 
     columns.addAll([
-      PlutoColumn(
+      TrinaColumn(
         title: 'ID',
         field: 'id',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         hide: true,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Item Number',
         field: 'itemnum',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 100,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Description',
         field: 'description',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 600,
       ),
-      PlutoColumn(
+      TrinaColumn(
           title: 'Status',
           field: 'status',
           width: 140,
-          type: PlutoColumnType.text(),
+          type: TrinaColumnType.text(),
           renderer: (rendererContext) {
             return Row(
               children: [
@@ -207,18 +207,18 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               ],
             );
           }),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Asset RPN',
         field: 'assetRpn',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 100,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Usage',
         field: 'usage',
         width: 210,
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -251,11 +251,11 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Lead Time',
         field: 'leadTime',
         width: 180,
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -288,11 +288,11 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Cost',
         field: 'cost',
         width: 180,
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -325,17 +325,17 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'RPN',
         field: 'rpn',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         width: 75,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'New Priority',
         field: 'newPriority',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         width: 100,
         renderer: (rendererContext) {
           // change cell to dropdown button
@@ -370,25 +370,25 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
           );
         },
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'ROP',
         field: 'rop',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         width: 75,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'ROQ',
         field: 'roq',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         width: 75,
       ),
-      PlutoColumn(
+      TrinaColumn(
           width: 100,
           title: 'Override',
           field: 'override',
-          type: PlutoColumnType.text(),
+          type: TrinaColumnType.text(),
           renderer: (rendererContext) {
             return Row(
               children: [
@@ -417,30 +417,30 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
   void fetchPurchaseHistory({required String itemnum}) async {
     final selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
     var itemPurchases = await database!.getItemPurchases(itemnum: itemnum);
-    List<PlutoRow> rows = [];
-    List<PlutoRow> excludeRows = [];
+    List<TrinaRow> rows = [];
+    List<TrinaRow> excludeRows = [];
     for (var itemPurchase in itemPurchases) {
       if (isPurchaseOrderInRange(itemPurchase, selectedSite)) {
-        rows.add(PlutoRow(cells: {
-          'prnum': PlutoCell(value: itemPurchase.prnum),
-          'ponum': PlutoCell(value: itemPurchase.ponum),
-          'startDate': PlutoCell(value: itemPurchase.startDate),
-          'endDate': PlutoCell(value: itemPurchase.endDate),
-          'leadTime': PlutoCell(value: itemPurchase.leadTime),
-          'unitCost': PlutoCell(value: itemPurchase.unitCost),
-          'site': PlutoCell(value: siteIDAndDescription[itemPurchase.siteid]),
-          'included': PlutoCell(value: 'Yes'),
+        rows.add(TrinaRow(cells: {
+          'prnum': TrinaCell(value: itemPurchase.prnum),
+          'ponum': TrinaCell(value: itemPurchase.ponum),
+          'startDate': TrinaCell(value: itemPurchase.startDate),
+          'endDate': TrinaCell(value: itemPurchase.endDate),
+          'leadTime': TrinaCell(value: itemPurchase.leadTime),
+          'unitCost': TrinaCell(value: itemPurchase.unitCost),
+          'site': TrinaCell(value: siteIDAndDescription[itemPurchase.siteid]),
+          'included': TrinaCell(value: 'Yes'),
         }));
       } else {
-        excludeRows.add(PlutoRow(cells: {
-          'prnum': PlutoCell(value: itemPurchase.prnum),
-          'ponum': PlutoCell(value: itemPurchase.ponum),
-          'startDate': PlutoCell(value: itemPurchase.startDate),
-          'endDate': PlutoCell(value: itemPurchase.endDate),
-          'leadTime': PlutoCell(value: itemPurchase.leadTime),
-          'unitCost': PlutoCell(value: itemPurchase.unitCost),
-          'site': PlutoCell(value: siteIDAndDescription[itemPurchase.siteid]),
-          'included': PlutoCell(value: 'No'),
+        excludeRows.add(TrinaRow(cells: {
+          'prnum': TrinaCell(value: itemPurchase.prnum),
+          'ponum': TrinaCell(value: itemPurchase.ponum),
+          'startDate': TrinaCell(value: itemPurchase.startDate),
+          'endDate': TrinaCell(value: itemPurchase.endDate),
+          'leadTime': TrinaCell(value: itemPurchase.leadTime),
+          'unitCost': TrinaCell(value: itemPurchase.unitCost),
+          'site': TrinaCell(value: siteIDAndDescription[itemPurchase.siteid]),
+          'included': TrinaCell(value: 'No'),
         }));
       }
     }
@@ -481,7 +481,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         }(),
         builder: (BuildContext context,
             AsyncSnapshot<List<SpareCriticalityWithItem>> snapshot) {
-          List<PlutoRow> rows = [];
+          List<TrinaRow> rows = [];
           debugPrint('SPC - builder');
           if (snapshot.hasData) {
             if (snapshot.data!.isNotEmpty) {
@@ -496,29 +496,29 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                   if (row.spareCriticality.manual) {
                     overrideStatus = AssetOverride.breakdowns;
                   }
-                  rows.add(PlutoRow(cells: {
-                    'itemnum': PlutoCell(value: row.spareCriticality.itemnum),
+                  rows.add(TrinaRow(cells: {
+                    'itemnum': TrinaCell(value: row.spareCriticality.itemnum),
                     'description':
-                        PlutoCell(value: row.item?.description ?? ''),
-                    'assetRpn': PlutoCell(
+                        TrinaCell(value: row.item?.description ?? ''),
+                    'assetRpn': TrinaCell(
                         value: row.spareCriticality.assetRPN
                             .toStringAsPrecision(3)),
-                    'usage': PlutoCell(value: row.spareCriticality.usage),
-                    'leadTime': PlutoCell(value: row.spareCriticality.leadTime),
-                    'cost': PlutoCell(value: row.spareCriticality.cost),
-                    'rpn': PlutoCell(value: row.spareCriticality.newRPN),
-                    'newPriority': PlutoCell(
+                    'usage': TrinaCell(value: row.spareCriticality.usage),
+                    'leadTime': TrinaCell(value: row.spareCriticality.leadTime),
+                    'cost': TrinaCell(value: row.spareCriticality.cost),
+                    'rpn': TrinaCell(value: row.spareCriticality.newRPN),
+                    'newPriority': TrinaCell(
                         value: row.spareCriticality.newPriority > 0
                             ? row.spareCriticality.newPriority
                             : context
                                 .read<SpareCriticalityNotifier>()
                                 .rpnFindDistribution(
                                     row.spareCriticality.newRPN)),
-                    'rop': PlutoCell(value: row.spareCriticality.reorderPoint),
-                    'roq': PlutoCell(value: row.spareCriticality.orderQuantity),
-                    'id': PlutoCell(value: row.spareCriticality.id),
-                    'status': PlutoCell(value: ''),
-                    'override': PlutoCell(value: overrideStatus),
+                    'rop': TrinaCell(value: row.spareCriticality.reorderPoint),
+                    'roq': TrinaCell(value: row.spareCriticality.orderQuantity),
+                    'id': TrinaCell(value: row.spareCriticality.id),
+                    'status': TrinaCell(value: ''),
+                    'override': TrinaCell(value: overrideStatus),
                   }));
                 }
                 stateManager.removeAllRows();
@@ -527,10 +527,10 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                     context.watch<SpareCriticalitySettingNotifier>();
                 if (settings.sortType != null) {
                   switch (settings.sortType) {
-                    case PlutoColumnSort.ascending:
+                    case TrinaColumnSort.ascending:
                       stateManager.sortAscending(settings.sortColumn!);
                       break;
-                    case PlutoColumnSort.descending:
+                    case TrinaColumnSort.descending:
                       stateManager.sortDescending(settings.sortColumn!);
                       break;
                     default:
@@ -541,58 +541,58 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               }
             }
           } else if (snapshot.hasError) {
-            rows.add(PlutoRow(cells: {
-              'itemnum': PlutoCell(value: 'Error!'),
-              'description': PlutoCell(value: ''),
-              'assetRpn': PlutoCell(value: snapshot.error),
-              'usage': PlutoCell(value: 0),
-              'leadTime': PlutoCell(value: 0),
-              'cost': PlutoCell(value: 0),
-              'rpn': PlutoCell(value: 0),
-              'newPriority': PlutoCell(value: 0),
-              'id': PlutoCell(value: 0),
-              'rop': PlutoCell(value: 0),
-              'roq': PlutoCell(value: 0),
-              'status': PlutoCell(value: ''),
-              'override': PlutoCell(value: ''),
+            rows.add(TrinaRow(cells: {
+              'itemnum': TrinaCell(value: 'Error!'),
+              'description': TrinaCell(value: ''),
+              'assetRpn': TrinaCell(value: snapshot.error),
+              'usage': TrinaCell(value: 0),
+              'leadTime': TrinaCell(value: 0),
+              'cost': TrinaCell(value: 0),
+              'rpn': TrinaCell(value: 0),
+              'newPriority': TrinaCell(value: 0),
+              'id': TrinaCell(value: 0),
+              'rop': TrinaCell(value: 0),
+              'roq': TrinaCell(value: 0),
+              'status': TrinaCell(value: ''),
+              'override': TrinaCell(value: ''),
             }));
           } else {
-            rows.add(PlutoRow(cells: {
-              'itemnum': PlutoCell(value: ''),
-              'description': PlutoCell(value: ''),
-              'assetRpn': PlutoCell(value: 'No Site Selected'),
-              'usage': PlutoCell(value: 0),
-              'leadTime': PlutoCell(value: 0),
-              'cost': PlutoCell(value: 0),
-              'rpn': PlutoCell(value: 0),
-              'newPriority': PlutoCell(value: 0),
-              'rop': PlutoCell(value: 0),
-              'roq': PlutoCell(value: 0),
-              'id': PlutoCell(value: 0),
-              'status': PlutoCell(value: ''),
-              'override': PlutoCell(value: ''),
+            rows.add(TrinaRow(cells: {
+              'itemnum': TrinaCell(value: ''),
+              'description': TrinaCell(value: ''),
+              'assetRpn': TrinaCell(value: 'No Site Selected'),
+              'usage': TrinaCell(value: 0),
+              'leadTime': TrinaCell(value: 0),
+              'cost': TrinaCell(value: 0),
+              'rpn': TrinaCell(value: 0),
+              'newPriority': TrinaCell(value: 0),
+              'rop': TrinaCell(value: 0),
+              'roq': TrinaCell(value: 0),
+              'id': TrinaCell(value: 0),
+              'status': TrinaCell(value: ''),
+              'override': TrinaCell(value: ''),
             }));
           }
-          return PlutoDualGrid(
+          return TrinaDualGrid(
             isVertical: true,
-            display: PlutoDualGridDisplayRatio(ratio: 0.75),
-            gridPropsA: PlutoDualGridProps(
+            display: TrinaDualGridDisplayRatio(ratio: 0.75),
+            gridPropsA: TrinaDualGridProps(
               columns: columns,
               rows: rows,
-              onLoaded: (PlutoGridOnLoadedEvent event) {
+              onLoaded: (TrinaGridOnLoadedEvent event) {
                 stateManager = event.stateManager;
                 context.read<SpareCriticalityNotifier>().stateManager =
                     stateManager;
                 event.stateManager.addListener(gridAHandler);
                 stateManager.setShowColumnFilter(true);
               },
-              onSorted: (PlutoGridOnSortedEvent event) {
+              onSorted: (TrinaGridOnSortedEvent event) {
                 context.read<SpareCriticalitySettingNotifier>().sortColumn =
                     event.column;
                 context.read<SpareCriticalitySettingNotifier>().sortType =
                     event.column.sort;
               },
-              onChanged: (PlutoGridOnChangedEvent event) async {
+              onChanged: (TrinaGridOnChangedEvent event) async {
                 // recalculate rpn number > nre priority if not overwritten
                 if (![4, 5, 6].contains(event.columnIdx)) {
                   // only need to update if changes made to these columns
@@ -621,12 +621,12 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                   }
                 }
               },
-              configuration: PlutoGridConfiguration(
+              configuration: TrinaGridConfiguration(
                   style: themeManager.theme == ThemeMode.dark
-                      ? const PlutoGridStyleConfig.dark()
-                      : const PlutoGridStyleConfig(),
-                  shortcut: PlutoGridShortcut(actions: {
-                    ...PlutoGridShortcut.defaultActions,
+                      ? const TrinaGridStyleConfig.dark()
+                      : const TrinaGridStyleConfig(),
+                  shortcut: TrinaGridShortcut(actions: {
+                    ...TrinaGridShortcut.defaultActions,
                     LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
                     LogicalKeySet(LogicalKeyboardKey.numpadAdd):
                         CustomAddKeyAction(),
@@ -636,14 +636,14 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                         CustomMinusKeyAction(),
                   })),
             ),
-            gridPropsB: PlutoDualGridProps(
-              configuration: PlutoGridConfiguration(
+            gridPropsB: TrinaDualGridProps(
+              configuration: TrinaGridConfiguration(
                   style: themeManager.theme == ThemeMode.dark
-                      ? const PlutoGridStyleConfig.dark()
-                      : const PlutoGridStyleConfig()),
+                      ? const TrinaGridStyleConfig.dark()
+                      : const TrinaGridStyleConfig()),
               columns: detailColumns,
               rows: detailRows,
-              onLoaded: (PlutoGridOnLoadedEvent event) {
+              onLoaded: (TrinaGridOnLoadedEvent event) {
                 detailStateManager = event.stateManager;
               },
               rowColorCallback: (rowColorContext) {
@@ -656,9 +656,9 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               },
             ),
             divider: themeManager.theme == ThemeMode.dark
-                ? PlutoDualGridDivider.dark(
+                ? TrinaDualGridDivider.dark(
                     indicatorColor: Theme.of(context).colorScheme.onSurface)
-                : const PlutoDualGridDivider(),
+                : const TrinaDualGridDivider(),
           );
         },
       ),
@@ -666,11 +666,11 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
   }
 }
 
-class CustomAddKeyAction extends PlutoGridShortcutAction {
+class CustomAddKeyAction extends TrinaGridShortcutAction {
   @override
   void execute({
-    required PlutoKeyManagerEvent keyEvent,
-    required PlutoGridStateManager stateManager,
+    required TrinaKeyManagerEvent keyEvent,
+    required TrinaGridStateManager stateManager,
   }) async {
     debugPrint('Pressed add key.');
     if (stateManager.currentColumnField != 'usage' &&
@@ -706,11 +706,11 @@ class CustomAddKeyAction extends PlutoGridShortcutAction {
   }
 }
 
-class CustomMinusKeyAction extends PlutoGridShortcutAction {
+class CustomMinusKeyAction extends TrinaGridShortcutAction {
   @override
   void execute({
-    required PlutoKeyManagerEvent keyEvent,
-    required PlutoGridStateManager stateManager,
+    required TrinaKeyManagerEvent keyEvent,
+    required TrinaGridStateManager stateManager,
   }) async {
     debugPrint('Pressed minus key.');
     if (stateManager.currentColumnField != 'usage' &&
@@ -877,7 +877,7 @@ class SparePartStatusIcon extends StatefulWidget {
     required this.rendererContext,
   });
 
-  final PlutoColumnRendererContext rendererContext;
+  final TrinaColumnRendererContext rendererContext;
 
   @override
   State<SparePartStatusIcon> createState() => _StatusIconState();
@@ -891,7 +891,7 @@ class _StatusIconState extends State<SparePartStatusIcon> {
 
   @override
   Widget build(BuildContext context) {
-    PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
+    TrinaGridStateManager stateManager = widget.rendererContext.stateManager;
     var sparePartRpn = widget.rendererContext.row.cells['rpn']!.value;
     Color color = Colors.orange;
     IconData icon = Icons.pending;
@@ -924,7 +924,7 @@ class OverrideSparePartStatusIcon extends StatefulWidget {
     required this.rendererContext,
   });
 
-  final PlutoColumnRendererContext rendererContext;
+  final TrinaColumnRendererContext rendererContext;
 
   @override
   State<OverrideSparePartStatusIcon> createState() =>
@@ -934,7 +934,7 @@ class OverrideSparePartStatusIcon extends StatefulWidget {
 class _OverrideStatusIconState extends State<OverrideSparePartStatusIcon> {
   @override
   Widget build(BuildContext context) {
-    PlutoGridStateManager stateManager = widget.rendererContext.stateManager;
+    TrinaGridStateManager stateManager = widget.rendererContext.stateManager;
     Color color = Colors.green;
     IconData icon = Icons.lock_open;
     String statusText = '';

@@ -16,7 +16,7 @@ enum WorkOrderFilterBy {
 }
 
 class AssetCriticalitySettingsNotifier extends ChangeNotifier {
-  ///The id of the currently viewed site on the plutogrid
+  ///The id of the currently viewed site on the Trinagrid
 
   ///Target percentages for assign criticality values
   int percentVLow = 10;

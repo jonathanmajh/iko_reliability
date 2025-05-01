@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/main.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import '../bin/consts.dart';
 
 ///ChangeNotifier for data in AssetCriticalityPage
 class AssetCriticalityNotifier extends ChangeNotifier {
-  ///Map where the keys are the plutogrid row and the values are the rpns
+  ///Map where the keys are the Trinagrid row and the values are the rpns
   Map<String, double> rpnMap = {};
 
   ///List of cutoff rpns for priorites from very low to very high
@@ -15,8 +15,8 @@ class AssetCriticalityNotifier extends ChangeNotifier {
   ///flag if the priority ranges are up to date. Used to show warnings when exporting
   bool priorityRangesUpToDate = true;
 
-  ///the stateManager of the main plutogrid
-  PlutoGridStateManager? stateManager;
+  ///the stateManager of the main Trinagrid
+  TrinaGridStateManager? stateManager;
 
   ///list of rpns. Not ordered
   ///exclude -1 and 0 values from the rpnlist

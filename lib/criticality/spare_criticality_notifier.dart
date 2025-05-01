@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:collection/collection.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import '../bin/consts.dart';
 import '../bin/db_drift.dart';
@@ -52,9 +52,9 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
 
   double frequencyPeriodYears = 10;
 
-  PlutoColumnSort? sortType;
+  TrinaColumnSort? sortType;
 
-  PlutoColumn? sortColumn;
+  TrinaColumn? sortColumn;
 
   Future<void> setPercentages(
       {int percentA = -1,
@@ -266,7 +266,7 @@ AbcCriticality calculateRPNCutOffsSpares({
 class SpareCriticalityNotifier extends ChangeNotifier {
   List<double> rpnCutoffs = [];
   bool updateGrid = true;
-  PlutoGridStateManager? stateManager;
+  TrinaGridStateManager? stateManager;
 
   ///sets the rpnCutoffs to the [newCutoffs] and notifies listeners
   void setRpnCutoffs(List<double> newCutoffs) {

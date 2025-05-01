@@ -202,13 +202,6 @@ class _TimesheetPageState extends State<TimesheetPage>
           },
           child: const Text('Copy to Clipboard'),
         ),
-        ElevatedButton(
-          onPressed: () {
-            // Clipboard.setData(ClipboardData(text: allData)).then((_) {return;});
-            // TODO IKO ID	SiteID	Labor Code	Name	Hours Worked
-          },
-          child: const Text('Copy Header for Timesheet Format'),
-        ),
       ],
     );
   }

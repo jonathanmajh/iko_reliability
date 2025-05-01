@@ -9,69 +9,6 @@
 
 part of 'route.dart';
 
-abstract class _$AppRouter extends RootStackRouter {
-  // ignore: unused_element
-  _$AppRouter({super.navigatorKey});
-
-  @override
-  final Map<String, PageFactory> pagesMap = {
-    AssetCriticalityRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const AssetCriticalityPage(),
-      );
-    },
-    AssetRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const AssetPage(),
-      );
-    },
-    ContractorRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const ContractorPage(),
-      );
-    },
-    HomeRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const HomePage(),
-      );
-    },
-    PmCheckRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const PmCheckPage(),
-      );
-    },
-    PmMeterUpdateRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const PmMeterUpdatePage(),
-      );
-    },
-    SpareCriticalityRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const SpareCriticalityPage(),
-      );
-    },
-    SystemCriticalityRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const SystemCriticalityPage(),
-      );
-    },
-    TimesheetRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const TimesheetPage(),
-      );
-    },
-  };
-}
-
 /// generated route for
 /// [AssetCriticalityPage]
 class AssetCriticalityRoute extends PageRouteInfo<void> {
@@ -83,7 +20,12 @@ class AssetCriticalityRoute extends PageRouteInfo<void> {
 
   static const String name = 'AssetCriticalityRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const AssetCriticalityPage();
+    },
+  );
 }
 
 /// generated route for
@@ -97,7 +39,12 @@ class AssetRoute extends PageRouteInfo<void> {
 
   static const String name = 'AssetRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const AssetPage();
+    },
+  );
 }
 
 /// generated route for
@@ -111,7 +58,12 @@ class ContractorRoute extends PageRouteInfo<void> {
 
   static const String name = 'ContractorRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ContractorPage();
+    },
+  );
 }
 
 /// generated route for
@@ -125,7 +77,12 @@ class HomeRoute extends PageRouteInfo<void> {
 
   static const String name = 'HomeRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const HomePage();
+    },
+  );
 }
 
 /// generated route for
@@ -139,7 +96,12 @@ class PmCheckRoute extends PageRouteInfo<void> {
 
   static const String name = 'PmCheckRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PmCheckPage();
+    },
+  );
 }
 
 /// generated route for
@@ -153,7 +115,12 @@ class PmMeterUpdateRoute extends PageRouteInfo<void> {
 
   static const String name = 'PmMeterUpdateRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PmMeterUpdatePage();
+    },
+  );
 }
 
 /// generated route for
@@ -167,7 +134,12 @@ class SpareCriticalityRoute extends PageRouteInfo<void> {
 
   static const String name = 'SpareCriticalityRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const SpareCriticalityPage();
+    },
+  );
 }
 
 /// generated route for
@@ -181,7 +153,12 @@ class SystemCriticalityRoute extends PageRouteInfo<void> {
 
   static const String name = 'SystemCriticalityRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const SystemCriticalityPage();
+    },
+  );
 }
 
 /// generated route for
@@ -195,5 +172,10 @@ class TimesheetRoute extends PageRouteInfo<void> {
 
   static const String name = 'TimesheetRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const TimesheetPage();
+    },
+  );
 }

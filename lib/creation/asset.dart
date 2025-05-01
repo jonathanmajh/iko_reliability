@@ -9,7 +9,7 @@ import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/bin/db_drift.dart';
 import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:provider/provider.dart';
 import '../bin/common.dart';
 import '../bin/drawer.dart';
@@ -29,8 +29,8 @@ class AssetPage extends StatefulWidget {
 
 class _AssetPageState extends State<AssetPage>
     with SingleTickerProviderStateMixin {
-  List<PlutoColumn> columns = [];
-  List<PlutoRow> rows = [];
+  List<TrinaColumn> columns = [];
+  List<TrinaRow> rows = [];
 
   int fabIndex = 0;
   List fabList = [
@@ -140,10 +140,10 @@ class AssetCreationGrid extends StatefulWidget {
 }
 
 class _AssetCreationGridState extends State<AssetCreationGrid> {
-  late PlutoGridStateManager stateManager;
+  late TrinaGridStateManager stateManager;
 
-  List<PlutoColumn> columns = [];
-  List<PlutoRow> rows = [];
+  List<TrinaColumn> columns = [];
+  List<TrinaRow> rows = [];
 
   @override
   void dispose() {
@@ -156,33 +156,33 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
     super.initState();
 
     columns.addAll([
-      PlutoColumn(
+      TrinaColumn(
         width: 350,
         title: 'Hierarchy',
         readOnly: true,
         field: 'hierarchy',
-        type: PlutoColumnType.text(),
-        //sort: PlutoColumnSort.ascending,
+        type: TrinaColumnType.text(),
+        //sort: TrinaColumnSort.ascending,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Description',
         readOnly: true,
         field: 'description',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 900,
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 100,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Site',
         field: 'site',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
           title: 'Actions',
           field: 'actions',
-          type: PlutoColumnType.text(),
+          type: TrinaColumnType.text(),
           readOnly: true,
           renderer: (rendererContext) {
             //if asset is new, display a delete button
@@ -260,7 +260,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
 
     var fetchedRows = _getChildRows('Top', assetCreationNotifier.parentAssets);
     var value =
-        await PlutoGridStateManager.initializeRowsAsync(columns, fetchedRows);
+        await TrinaGridStateManager.initializeRowsAsync(columns, fetchedRows);
     stateManager.refRows.clear();
     stateManager.refRows.addAll(value);
     stateManager.setShowLoading(false);
@@ -271,23 +271,23 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
     return;
   }
 
-  /// Returns a list of pluto rows that are children of the parent given
+  /// Returns a list of Trina rows that are children of the parent given
   /// the parent's asset number.
-  List<PlutoRow> _getChildRows(
+  List<TrinaRow> _getChildRows(
       String parent, Map<String, List<Asset>> parentAssets) {
-    List<PlutoRow> rows = [];
+    List<TrinaRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
-        rows.add(PlutoRow(
+        rows.add(TrinaRow(
           cells: {
-            'description': PlutoCell(value: child.description),
-            'hierarchy': PlutoCell(value: child.assetnum),
-            'site': PlutoCell(value: child.siteid),
-            'actions': PlutoCell(value: ''),
+            'description': TrinaCell(value: child.description),
+            'hierarchy': TrinaCell(value: child.assetnum),
+            'site': TrinaCell(value: child.siteid),
+            'actions': TrinaCell(value: ''),
           },
-          type: PlutoRowType.group(
+          type: TrinaRowType.group(
               expanded: true,
-              children: FilteredList<PlutoRow>(
+              children: FilteredList<TrinaRow>(
                   initialList: _getChildRows(child.assetnum, parentAssets))),
         ));
       }
@@ -303,7 +303,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
     return Consumer<SelectedSiteNotifier>(
         builder: (context, selectedSiteNotifier, child) {
       _loadGrid(selectedSiteNotifier.selectedSite);
-      return PlutoGrid(
+      return TrinaGrid(
         rowColorCallback: (rowColorContext) {
           var assetStatus = context
               .read<AssetCreationNotifier>()
@@ -324,20 +324,20 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
         },
         columns: columns,
         rows: rows,
-        onLoaded: (PlutoGridOnLoadedEvent event) {
+        onLoaded: (TrinaGridOnLoadedEvent event) {
           stateManager = event.stateManager;
           stateManager.setShowColumnFilter(true);
-          stateManager.setRowGroup(PlutoRowGroupTreeDelegate(
+          stateManager.setRowGroup(TrinaRowGroupTreeDelegate(
             resolveColumnDepth: (column) => stateManager.columnIndex(column),
             showText: (cell) => true,
             showCount: false,
             showFirstExpandableIcon: true,
           ));
         },
-        configuration: PlutoGridConfiguration(
+        configuration: TrinaGridConfiguration(
             style: themeManager.theme == ThemeMode.dark
-                ? const PlutoGridStyleConfig.dark()
-                : const PlutoGridStyleConfig()),
+                ? const TrinaGridStyleConfig.dark()
+                : const TrinaGridStyleConfig()),
       );
     });
   }
@@ -411,13 +411,13 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                         autofocus: true,
                       ),
                     ),
-                    items: context
-                        .watch<AssetCreationNotifier>()
+                    items: (f, cs) => context
+                        .read<AssetCreationNotifier>()
                         .siteAssets
                         .keys
                         .toList(),
-                    dropdownDecoratorProps: const DropDownDecoratorProps(
-                      dropdownSearchDecoration: InputDecoration(
+                    decoratorProps: const DropDownDecoratorProps(
+                      decoration: InputDecoration(
                         labelText: "Parent Asset",
                         hintText: "Select Parent Asset",
                       ),
@@ -627,10 +627,10 @@ class AssetUploadGrid extends StatefulWidget {
 }
 
 class _AssetUploadGridState extends State<AssetUploadGrid> {
-  late PlutoGridStateManager stateManager;
+  late TrinaGridStateManager stateManager;
 
-  List<PlutoColumn> columns = [];
-  List<PlutoRow> rows = [];
+  List<TrinaColumn> columns = [];
+  List<TrinaRow> rows = [];
 
   @override
   void dispose() {
@@ -642,11 +642,11 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
     super.initState();
 
     columns.addAll([
-      PlutoColumn(
+      TrinaColumn(
           title: 'Actions',
           field: 'actions',
           width: 100,
-          type: PlutoColumnType.text(),
+          type: TrinaColumnType.text(),
           readOnly: true,
           renderer: (rendererContext) {
             var assetStatus = context
@@ -736,76 +736,76 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
               size: 18,
             );
           }),
-      PlutoColumn(
+      TrinaColumn(
         width: 100,
         title: 'Asset Number',
         readOnly: true,
         field: 'hierarchy',
-        type: PlutoColumnType.text(),
-        //sort: PlutoColumnSort.ascending,
+        type: TrinaColumnType.text(),
+        //sort: TrinaColumnSort.ascending,
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Description',
         readOnly: true,
         field: 'description',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 400,
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 100,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Site',
         field: 'site',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 400,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Standard Description',
         field: 'sjpDescription',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 150,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Installation Date',
         field: 'installationDate',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 150,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Vendor Number',
         field: 'vendor',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 150,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Manufacturer',
         field: 'manufacturer',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 150,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Model Number',
         field: 'modelNum',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         width: 100,
         readOnly: true,
         enableAutoEditing: false,
         title: 'Criticality',
         field: 'assetCriticality',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
       ),
     ]);
   }
@@ -816,7 +816,7 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
 
     var fetchedRows = getRows(assetCreationNotifier.siteAssets.values.toList());
     var value =
-        await PlutoGridStateManager.initializeRowsAsync(columns, fetchedRows);
+        await TrinaGridStateManager.initializeRowsAsync(columns, fetchedRows);
     stateManager.refRows.clear();
     stateManager.refRows.addAll(value);
     stateManager.setShowLoading(false);
@@ -824,26 +824,26 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
     return;
   }
 
-  List<PlutoRow> getRows(List<AssetWithUpload> siteAssets) {
-    List<PlutoRow> rows = [];
+  List<TrinaRow> getRows(List<AssetWithUpload> siteAssets) {
+    List<TrinaRow> rows = [];
 
     for (AssetWithUpload asset in siteAssets) {
       if (asset.asset.newAsset != 0) {
-        rows.add(PlutoRow(
+        rows.add(TrinaRow(
           cells: {
-            'description': PlutoCell(value: asset.asset.description),
-            'hierarchy': PlutoCell(value: asset.asset.assetnum),
-            'site': PlutoCell(value: asset.asset.siteid),
-            'actions': PlutoCell(value: ''),
+            'description': TrinaCell(value: asset.asset.description),
+            'hierarchy': TrinaCell(value: asset.asset.assetnum),
+            'site': TrinaCell(value: asset.asset.siteid),
+            'actions': TrinaCell(value: ''),
             'sjpDescription':
-                PlutoCell(value: asset.uploads?.sjpDescription ?? ''),
+                TrinaCell(value: asset.uploads?.sjpDescription ?? ''),
             'installationDate':
-                PlutoCell(value: asset.uploads?.installationDate ?? ''),
-            'vendor': PlutoCell(value: asset.uploads?.vendor ?? ''),
-            'manufacturer': PlutoCell(value: asset.uploads?.manufacturer ?? ''),
-            'modelNum': PlutoCell(value: asset.uploads?.modelNum ?? ''),
+                TrinaCell(value: asset.uploads?.installationDate ?? ''),
+            'vendor': TrinaCell(value: asset.uploads?.vendor ?? ''),
+            'manufacturer': TrinaCell(value: asset.uploads?.manufacturer ?? ''),
+            'modelNum': TrinaCell(value: asset.uploads?.modelNum ?? ''),
             'assetCriticality':
-                PlutoCell(value: asset.uploads?.assetCriticality ?? 0),
+                TrinaCell(value: asset.uploads?.assetCriticality ?? 0),
           },
         ));
       }
@@ -860,17 +860,17 @@ class _AssetUploadGridState extends State<AssetUploadGrid> {
     return Consumer<AssetCreationNotifier>(
         builder: (context, assetCreationNotifier, child) {
       _loadGrid();
-      return PlutoGrid(
+      return TrinaGrid(
         columns: columns,
         rows: rows,
         onLoaded: (event) {
           stateManager = event.stateManager;
           stateManager.setShowColumnFilter(true);
         },
-        configuration: PlutoGridConfiguration(
+        configuration: TrinaGridConfiguration(
             style: themeManager.theme == ThemeMode.dark
-                ? const PlutoGridStyleConfig.dark()
-                : const PlutoGridStyleConfig()),
+                ? const TrinaGridStyleConfig.dark()
+                : const TrinaGridStyleConfig()),
       );
     });
   }

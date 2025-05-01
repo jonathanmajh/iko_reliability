@@ -12,14 +12,14 @@ dependencies:
     flutter:
         sdk: flutter
     cupertino_icons: ^1.0.6
-    auto_route: ^8.1.3
+    auto_route: ^9.3.0+1
     http: ^1.1.0
-    dropdown_search: ^5.0.1
-    pluto_grid:
+    dropdown_search: ^6.0.2
+    trina_grid:
         git: 
-            url: https://github.com/jonathanmajh/pluto_grid
-            ref: master
-    file_picker: ^8.0.3
+            url: https://github.com/jonathanmajh/trina_grid
+            ref: main
+    file_picker: ^10.1.2
     spreadsheet_decoder: ^2.0.2
     hive_flutter: ^1.1.0
     hive: ^2.2.3
@@ -46,8 +46,8 @@ dependencies:
 dev_dependencies:
     flutter_test:
         sdk: flutter
-    flutter_lints: ^4.0.0
-    auto_route_generator: ^8.0.0
+    flutter_lints: ^5.0.0
+    auto_route_generator: ^9.0.0
     hive_generator: ^2.0.0
     drift_dev: ^2.3.3
     build_runner: ^2.2.0
