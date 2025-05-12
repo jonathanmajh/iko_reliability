@@ -1860,7 +1860,7 @@ class _AssetCriticalityLoadingIndicatorState
       message = 'Checking asset information...';
     });
     // Navigator.pop(navigatorKey.currentContext!);
-    navigatorKey.currentContext!.router.pushNamed("/criticality/asset");
+    navigatorKey.currentContext!.router.replaceNamed("/criticality/asset");
     // Navigator.pop(navigatorKey.currentContext!);
   }
 }

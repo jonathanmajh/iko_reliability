@@ -843,7 +843,8 @@ class _SparePartsLoadingIndicatorState
               siteid: siteid,
               useCriticality: spareCriticalitySetting.useCriticality);
           Navigator.pop(navigatorKey.currentContext!);
-          navigatorKey.currentContext!.router.pushNamed("/criticality/spare");
+          navigatorKey.currentContext!.router
+              .replaceNamed("/criticality/spare");
           Navigator.pop(navigatorKey.currentContext!); // close the drawer
         } catch (e) {
           setState(() {
@@ -854,7 +855,7 @@ class _SparePartsLoadingIndicatorState
       });
     } else {
       Navigator.pop(navigatorKey.currentContext!);
-      navigatorKey.currentContext!.router.pushNamed("/criticality/spare");
+      navigatorKey.currentContext!.router.replaceNamed("/criticality/spare");
       Navigator.pop(navigatorKey.currentContext!); // close the drawer
     }
   }

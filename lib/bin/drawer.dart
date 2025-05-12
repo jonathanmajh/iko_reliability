@@ -33,7 +33,7 @@ class NavDrawer extends StatelessWidget {
               leading: const Icon(Icons.home),
               title: const Text('Home'),
               onTap: () {
-                context.router.pushNamed("/");
+                context.router.replaceNamed("/");
                 // change app state...
                 Navigator.pop(context); // close the drawer
               },
@@ -97,7 +97,7 @@ class NavDrawer extends StatelessWidget {
                     leading: const Icon(Icons.settings),
                     title: const Text('Validate PMs'),
                     onTap: () {
-                      context.router.pushNamed("/pm/check");
+                      context.router.replaceNamed("/pm/check");
                       Navigator.pop(context); // close the drawer
                     },
                   ),
@@ -105,7 +105,7 @@ class NavDrawer extends StatelessWidget {
                     leading: const Icon(Icons.settings),
                     title: const Text('Update PM Meters'),
                     onTap: () {
-                      context.router.pushNamed("/pm/update-meter");
+                      context.router.replaceNamed("/pm/update-meter");
                       Navigator.pop(context); // close the drawer
                     },
                   ),
@@ -113,7 +113,7 @@ class NavDrawer extends StatelessWidget {
                     leading: const Icon(Icons.settings),
                     title: const Text('Create Assets'),
                     onTap: () {
-                      context.router.pushNamed("/asset");
+                      context.router.replaceNamed("/asset");
                       Navigator.pop(context); // close the drawer
                     },
                   ),
@@ -121,7 +121,7 @@ class NavDrawer extends StatelessWidget {
                     leading: const Icon(Icons.settings),
                     title: const Text('Create Contractors'),
                     onTap: () {
-                      context.router.pushNamed("/contractor");
+                      context.router.replaceNamed("/contractor");
                       Navigator.pop(context); // close the drawer
                     },
                   ),
@@ -129,7 +129,7 @@ class NavDrawer extends StatelessWidget {
                     leading: const Icon(Icons.settings),
                     title: const Text('Generate Timesheets'),
                     onTap: () {
-                      context.router.pushNamed("/timesheet");
+                      context.router.replaceNamed("/timesheet");
                       // change app state...
                       Navigator.pop(context); // close the drawer
                     },

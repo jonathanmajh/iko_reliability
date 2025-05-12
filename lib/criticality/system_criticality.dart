@@ -705,7 +705,7 @@ class _SystemLoadingIndicatorState extends State<SystemLoadingIndicator> {
       return;
     }
     Navigator.pop(navigatorKey.currentContext!);
-    navigatorKey.currentContext!.router.pushNamed("/criticality/system");
+    navigatorKey.currentContext!.router.replaceNamed("/criticality/system");
     Navigator.pop(navigatorKey.currentContext!);
   }
 }

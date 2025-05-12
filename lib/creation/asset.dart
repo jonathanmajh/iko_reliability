@@ -407,15 +407,18 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                     popupProps: const PopupProps.menu(
                       showSearchBox: true,
                       showSelectedItems: true,
+                      searchDelay: Duration.zero,
                       searchFieldProps: TextFieldProps(
                         autofocus: true,
                       ),
                     ),
-                    items: (f, cs) => context
-                        .read<AssetCreationNotifier>()
-                        .siteAssets
-                        .keys
-                        .toList(),
+                    items: (f, cs) {
+                      return context
+                          .read<AssetCreationNotifier>()
+                          .siteAssets
+                          .keys
+                          .toList();
+                    },
                     decoratorProps: const DropDownDecoratorProps(
                       decoration: InputDecoration(
                         labelText: "Parent Asset",
