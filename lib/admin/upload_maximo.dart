@@ -772,7 +772,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     header['apikey'] = login.password;
   }
   while (connectionPool > 1) {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 500));
   }
   connectionPool++;
   http.Response response;

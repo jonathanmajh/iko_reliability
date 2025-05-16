@@ -3,7 +3,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
 import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
@@ -131,12 +130,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
               heroTag: UniqueKey(),
               onPressed: () {
                 context.read<TemplateNotifier>().clearTemplates();
-                var box = Hive.box('jpNumber');
-                box.clear();
-                box = Hive.box('pmNumber');
-                box.clear();
-                box = Hive.box('routeNumber');
-                box.clear();
+                numberNotifier.clear();
                 _updateFab();
               },
               tooltip: 'Clear PM templates',

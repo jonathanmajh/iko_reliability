@@ -1,30 +1,36 @@
-import 'package:hive/hive.dart';
+import '../main.dart';
+
+class NumberNotifier {
+  List<String> pmNumbers = [];
+  List<String> jobPlanNumbers = [];
+  List<String> routeNumbers = [];
+
+  void clear() {
+    pmNumbers.clear();
+    jobPlanNumbers.clear();
+    routeNumbers.clear();
+  }
+}
 
 bool existPmNumberCache(String pmNumber, String siteid) {
-  final box = Hive.box('pmNumber');
-  var result = box.get('$siteid|$pmNumber');
-  if (result == null) {
-    box.put('$siteid|$pmNumber', '$siteid|$pmNumber');
+  if (!numberNotifier.pmNumbers.contains('$siteid|$pmNumber')) {
+    numberNotifier.pmNumbers.add('$siteid|$pmNumber');
     return false;
   }
   return true;
 }
 
 bool existJpNumberCache(String jpNumber) {
-  final box = Hive.box('jpNumber');
-  var result = box.get(jpNumber);
-  if (result == null) {
-    box.put(jpNumber, jpNumber);
+  if (!numberNotifier.jobPlanNumbers.contains(jpNumber)) {
+    numberNotifier.jobPlanNumbers.add(jpNumber);
     return false;
   }
   return true;
 }
 
 bool existRouteNumberCache(String routeNumber, String siteid) {
-  final box = Hive.box('routeNumber');
-  var result = box.get('$siteid|$routeNumber');
-  if (result == null) {
-    box.put('$siteid|$routeNumber', '$siteid|$routeNumber');
+  if (!numberNotifier.routeNumbers.contains('$siteid|$routeNumber')) {
+    numberNotifier.routeNumbers.add('$siteid|$routeNumber');
     return false;
   }
   return true;

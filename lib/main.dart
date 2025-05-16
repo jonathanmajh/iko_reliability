@@ -3,7 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:iko_reliability_flutter/admin/pm_jp_storage.dart';
 import 'package:iko_reliability_flutter/bin/logger_web.dart';
 import 'package:iko_reliability_flutter/bin/logger_windows.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
@@ -32,6 +32,7 @@ MyDatabase? database;
 final navigatorKey = GlobalKey<NavigatorState>();
 Logger? logger;
 int connectionPool = 0;
+NumberNotifier numberNotifier = NumberNotifier();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,16 +81,7 @@ void main() async {
     );
     return false;
   };
-  await Hive.initFlutter();
-  await Hive.openBox('pmNumber');
-  await Hive.openBox('jpNumber');
-  await Hive.openBox('routeNumber');
-  var box = Hive.box('jpNumber');
-  box.clear();
-  box = Hive.box('pmNumber');
-  box.clear();
-  box = Hive.box('routeNumber');
-  box.clear();
+  numberNotifier.clear();
   database = MyDatabase();
   SettingsNotifier settingsNotifier = SettingsNotifier();
   SelectedSiteNotifier selectedSiteNotifier = SelectedSiteNotifier();
