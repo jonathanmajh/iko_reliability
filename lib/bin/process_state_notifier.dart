@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 // app while processes are still running. Also to show undismissible dialog windows to prevent user
 // input from messing with the processes.
 
-///records the application processing states
+/// Notifier for tracking and managing application processing states and database tasks.
 class ProcessStateNotifier extends ChangeNotifier {
   ///Map of the currently running processes where the index of the ProcessStates are the keys
   Map<int, bool> processStates = <int, bool>{};

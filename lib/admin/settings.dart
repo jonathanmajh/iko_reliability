@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:provider/provider.dart';
 
 import '../bin/db_drift.dart';
@@ -14,17 +15,23 @@ Future<void> displayLoginAttempt(String password, String env) async {
   var result = await getUserMaximo('[APIKEY]', password, env);
   if (result['status'] == 'fail|connection') {
     showDataAlert(
+        navigatorKey.currentContext!,
         ['No response from Maximo servers', 'Check internet connection'],
         'Failed to Login');
   } else if (result['status'] == 'fail|account') {
-    showDataAlert(['Please check credentials', 'Check internet connection'],
+    showDataAlert(
+        navigatorKey.currentContext!,
+        ['Please check credentials', 'Check internet connection'],
         'Failed to Login');
   } else {
-    showDataAlert([
-      'Logged into: $env',
-      'As: ${result['displayName']}',
-      'Server URL: ${result['maslogouturl'].toString().substring(0, 42)}'
-    ], 'Logged in!');
+    showDataAlert(
+        navigatorKey.currentContext!,
+        [
+          'Logged into: $env',
+          'As: ${result['displayName']}',
+          'Server URL: ${result['maslogouturl'].toString().substring(0, 42)}'
+        ],
+        'Logged in!');
   }
 }
 

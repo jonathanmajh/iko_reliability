@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
 import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
+import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:provider/provider.dart';
 
 import '../bin/drawer.dart';
@@ -18,22 +19,27 @@ import 'template_notifier.dart';
 import 'pm_widgets.dart';
 import 'upload_maximo.dart';
 
+/// Intent to move to the previous PM in the PM check page.
 class PreviousPMIntent extends Intent {
   const PreviousPMIntent();
 }
 
+/// Intent to move to the next PM in the PM check page.
 class NextPMIntent extends Intent {
   const NextPMIntent();
 }
 
+/// PM Check page for verifying and uploading PM templates.
 @RoutePage()
 class PmCheckPage extends StatefulWidget {
+  /// Constructs the PM Check page.
   const PmCheckPage({super.key});
 
   @override
   State<PmCheckPage> createState() => _PmCheckPageState();
 }
 
+/// State for the PM Check page, manages template uploads and FAB actions.
 class _PmCheckPageState extends State<PmCheckPage> {
   List<PlatformFile> templates = [];
   String uploadDetails = '';

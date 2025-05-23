@@ -1,9 +1,11 @@
+/// Maps person group codes to their string representations.
 final personGroups = {
   'O': 'PRODSUP',
   'M': 'MECHSUP',
   'E': 'ELECTSUP',
 };
 
+/// Maps asset criticality levels to their string descriptions.
 final assetCriticality = {
   1: 'Very Low',
   3: 'Low',
@@ -12,6 +14,7 @@ final assetCriticality = {
   9: 'Very High',
 };
 
+/// Maps spare criticality levels to their ABC codes.
 final spareCriticality = {
   1: 'C',
   2: 'B',
@@ -19,12 +22,14 @@ final spareCriticality = {
   0: 'N',
 };
 
+/// Maps spare criticality levels to their Z values.
 final spareZValue = {
   1: 1.28,
   2: 1.65,
   3: 2.44,
 };
 
+/// List of criticality string descriptions.
 List<String> criticalityStrings = [
   'Very Low',
   'Low',
@@ -33,12 +38,14 @@ List<String> criticalityStrings = [
   'Very High',
 ];
 
+/// List of ABC string codes for spares.
 List<String> abcStrings = [
   'A',
   'B',
   'C',
 ];
 
+/// Enum for criticality percentage categories.
 enum CriticalityEnums {
   percentVL,
   percentL,
@@ -47,6 +54,7 @@ enum CriticalityEnums {
   percentVH,
 }
 
+/// Maps frequency units to their equivalent values in days.
 final freqUnitToDays = {
   'D': 1,
   'W': 7,
@@ -54,6 +62,7 @@ final freqUnitToDays = {
   'Y': 365,
 };
 
+/// Maps production line codes to their string representations.
 final productionLines = {
   'C': 'Common',
   'S': 'Shingle',
@@ -66,6 +75,7 @@ final productionLines = {
   'U': 'Rubber'
 };
 
+/// Maps work type codes to their full descriptions.
 const workType = {
   'PPM': 'Preventive Maintenance',
   'CAL': 'Calibration',
@@ -81,6 +91,7 @@ const workType = {
   'LCH': 'Line Change',
 };
 
+/// Contains asset work type information for different job plans.
 const assetWorkType = {
   "BDE": AssetWorkType("BDE", "Breakdown - Electrical", 4),
   "BDM": AssetWorkType("BDM", "Breakdown - Mechanical", 4),
@@ -104,18 +115,21 @@ const assetWorkType = {
   "TSHM": AssetWorkType("TSHM", "Troubleshooting - Mechanical", 3),
 };
 
+/// Maps craft codes to their full craft descriptions.
 const crafts = {
   'E': 'Electrical',
   'M': 'Mechanical',
   'O': 'Production',
 };
 
+/// Maps craft codes to their corresponding code used in the system.
 const craftCode = {
   'E': 'ELECT',
   'M': 'MECH-MW',
   'O': 'PROD',
 };
 
+/// Maps frequency units to their string representations.
 final freqUnitToString = {
   'D': 'Days',
   'W': 'Weeks',
@@ -123,6 +137,7 @@ final freqUnitToString = {
   'Y': 'Years',
 };
 
+/// Maps site IDs to their corresponding organization IDs.
 final siteIDAndOrgID = {
   'AA': 'IKO-CAD',
   'ANT': 'IKO-EU',
@@ -153,6 +168,7 @@ final siteIDAndOrgID = {
   'CORP': 'IKO-CAD',
 };
 
+/// Maps site IDs to their corresponding descriptions.
 final siteIDAndDescription = {
   'RAM': 'Alconbury',
   'ANT': 'Antwerp',
@@ -183,6 +199,7 @@ final siteIDAndDescription = {
   'All': 'All Sites',
 };
 
+/// Contains the table headers for different Maximo object types.
 const tableHeaders = {
   'PM': [
     'SITEID',
@@ -323,18 +340,21 @@ const tableHeaders = {
   ],
 };
 
+/// Maps Maximo server environments to their API endpoints.
 Map<String, String> maximoServerDomains = {
   'MASPROD': 'https://prod.manage.prod.iko.max-it-eam.com/maximo/api/os/',
   'DEV 8.11': 'https://dev2.manage.dev2.iko.max-it-eam.com/maximo/api/os/',
   'TEST 8.11': 'https://test2.manage.test2.iko.max-it-eam.com/maximo/api/os/',
 };
 
+/// Contains API keys for different Maximo environments.
 Map<String, String> apiKeys = {
   'MASPROD': '',
   'DEV 8.11': '',
   'TEST 8.11': '',
 };
 
+/// Contains frequency rating information for different levels of maintenance.
 Map<int, Map<String, dynamic>> frequencyRating = {
   1: {
     'description': '1 Per 5 Years',
@@ -418,6 +438,7 @@ Map<int, Map<String, dynamic>> frequencyRating = {
   },
 };
 
+/// Contains impact rating information for different levels of maintenance.
 Map<int, Map<String, dynamic>> impactRating = {
   1: {
     'description': 'No Down Time',
@@ -501,6 +522,7 @@ Map<int, Map<String, dynamic>> impactRating = {
   },
 };
 
+/// List of system safety categories.
 List<String> systemSafety = [
   '',
   'No Injury',
@@ -515,6 +537,7 @@ List<String> systemSafety = [
   'Catastrophic Event'
 ];
 
+/// List of regulatory impact categories for the system.
 List<String> systemRegulatory = [
   '',
   'No Fine',
@@ -529,6 +552,7 @@ List<String> systemRegulatory = [
   'Legal Action',
 ];
 
+/// List of economic impact categories for the system.
 List<String> systemEconomic = [
   '',
   'No Cost',
@@ -543,6 +567,7 @@ List<String> systemEconomic = [
   '500K+ in Parts',
 ];
 
+/// List of throughput impact categories for the system.
 List<String> systemThroughput = [
   '',
   'No Impact',
@@ -557,6 +582,7 @@ List<String> systemThroughput = [
   '1+ Weeks downtime',
 ];
 
+/// List of quality impact categories for the system.
 List<String> systemQuality = [
   '',
   'No Scrap',
@@ -567,6 +593,7 @@ List<String> systemQuality = [
   'Potential class action',
 ];
 
+/// Contains usage rating information for different levels of maintenance.
 Map<int, Map<String, dynamic>> usageRating = {
   1: {
     'description': 'Single Occurrence',
@@ -630,6 +657,7 @@ Map<int, Map<String, dynamic>> usageRating = {
   },
 };
 
+/// Contains lead time rating information for different levels of maintenance.
 Map<int, Map<String, dynamic>> leadTimeRating = {
   1: {
     'description': 'Stock Item',
@@ -694,6 +722,7 @@ Map<int, Map<String, dynamic>> leadTimeRating = {
   },
 };
 
+/// Contains cost rating information for different levels of maintenance.
 Map<int, Map<String, dynamic>> costRating = {
   1: {
     'description': '< \$10',

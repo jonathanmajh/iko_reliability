@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+/// LogOutput implementation for writing logs to a file and showing error dialogs on Windows.
 class AppFileOutput extends LogOutput {
   AppFileOutput();
 

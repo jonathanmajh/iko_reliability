@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
+import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -21,15 +22,17 @@ import '../settings/theme_manager.dart';
 import 'functions.dart';
 import 'system_criticality_notifier.dart';
 
+/// Asset Criticality page for managing and displaying asset criticality data.
 @RoutePage()
 class AssetCriticalityPage extends StatefulWidget {
+  /// Constructs the Asset Criticality page.
   const AssetCriticalityPage({super.key});
 
   @override
   State<AssetCriticalityPage> createState() => _AssetCriticalityPageState();
 }
 
-///Widget for asset criticality page
+/// State for the Asset Criticality page, manages table data and UI.
 class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   //table objects
   List<TrinaColumn> columns = [];
@@ -1301,6 +1304,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
 ///shows the dialog for changing work order settings
 void showWOSettingsDialog(BuildContext context) {
   showDataAlert(
+    navigatorKey.currentContext!,
     [
       'Please use the "Refresh" button for each asset after changing settings',
     ],
@@ -1860,7 +1864,7 @@ class _AssetCriticalityLoadingIndicatorState
       message = 'Checking asset information...';
     });
     // Navigator.pop(navigatorKey.currentContext!);
-    navigatorKey.currentContext!.router.replaceNamed("/criticality/asset");
+    navigatorKey.currentContext!.router.replacePath("/criticality/asset");
     // Navigator.pop(navigatorKey.currentContext!);
   }
 }

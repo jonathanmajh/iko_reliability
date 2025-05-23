@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/criticality/system_criticality_notifier.dart';
+import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -17,14 +18,17 @@ import '../bin/drawer.dart';
 import '../bin/end_drawer.dart';
 import '../main.dart';
 
+/// System Criticality page for managing and displaying system criticality data.
 @RoutePage()
 class SystemCriticalityPage extends StatefulWidget {
+  /// Constructs the System Criticality page.
   const SystemCriticalityPage({super.key});
 
   @override
   State<SystemCriticalityPage> createState() => _SystemCriticalityPageState();
 }
 
+/// State for the System Criticality page, manages table data and UI.
 class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
   List<TrinaColumn> columns = [];
   List<TrinaRow> rows = [];
@@ -705,7 +709,7 @@ class _SystemLoadingIndicatorState extends State<SystemLoadingIndicator> {
       return;
     }
     Navigator.pop(navigatorKey.currentContext!);
-    navigatorKey.currentContext!.router.replaceNamed("/criticality/system");
+    navigatorKey.currentContext!.router.replacePath("/criticality/system");
     Navigator.pop(navigatorKey.currentContext!);
   }
 }

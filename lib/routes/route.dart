@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:iko_reliability_flutter/home_page.dart';
 
 import '../admin/timesheet.dart';
 import '../creation/asset.dart';
@@ -8,7 +9,6 @@ import '../admin/pm_meter_update.dart';
 import '../criticality/asset_criticality.dart';
 import '../criticality/spare_criticality.dart';
 import '../criticality/system_criticality.dart';
-import '../main.dart';
 
 part 'route.gr.dart';
 

@@ -1,3 +1,6 @@
+/// Provides the function to check for application updates.
+library;
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';

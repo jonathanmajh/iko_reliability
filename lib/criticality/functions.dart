@@ -2,9 +2,10 @@ import "dart:math";
 
 import '../bin/db_drift.dart';
 
+/// Calculates the risk priority number (RPN) for an asset.
+/// Returns -1 if any parameter is null.
 ///Function/Equation to calculate risk priority number (RPN)
 ///Currently just a product between all parameters
-///returns -1 if any parameter is null
 double? rpnFunc(AssetCriticalityWithAsset asset) {
   try {
     return asset.systemCriticality!.score *
@@ -16,7 +17,7 @@ double? rpnFunc(AssetCriticalityWithAsset asset) {
   }
 }
 
-///Function/Equation to calculate the score of a system.
+/// Calculates the score of a system using the root mean square of its parameters.
 ///Just the root mean square between all parameters
 double systemScoreFunc(int safety, int regulatory, int economic, int throughput,
         int quality) =>
@@ -27,6 +28,7 @@ double systemScoreFunc(int safety, int regulatory, int economic, int throughput,
             quality * quality) /
         5);
 
+/// Returns a rating from a value using a definition map.
 int ratingFromValue(double value, Map<int, Map<String, dynamic>> definition) {
   if (value == -1) {
     return 0;
@@ -39,7 +41,7 @@ int ratingFromValue(double value, Map<int, Map<String, dynamic>> definition) {
   return 1;
 }
 
-///To calculate the system score for an asset.
+/// Calculates the system score for an asset using RMS of ratings.
 ///Uses the root mean squared (RMS) of the asset's ratings of safety, regulatory, economic, throughput, and quality.
 ///Economic and quality values are integers from 1-5, while the rest are between 1-10.
 ///System score is used to calculate risk priority number (RPN)

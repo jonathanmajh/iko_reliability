@@ -2,7 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-///Multi percent bar slider from left to right. A variation of https://gist.github.com/yeasin50/fc597892b500b12e2b2fb0a9d5ba53bb
+/// Multi percent bar slider widget for visualizing and adjusting multiple percentage values.
+/// Multi percent bar slider from left to right. A variation of https://gist.github.com/yeasin50/fc597892b500b12e2b2fb0a9d5ba53bb
 class PercentSlider extends StatefulWidget {
   const PercentSlider(
       {super.key,

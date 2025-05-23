@@ -1,10 +1,12 @@
 //for widgets in the right-side drawer
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:iko_reliability_flutter/criticality/file_export.dart';
 import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
+import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -16,7 +18,7 @@ import '../main.dart';
 import 'consts.dart';
 import 'db_drift.dart';
 
-///Widget for the right-side drawer of the app
+/// Widget for the right-side drawer of the app, providing context-specific controls and settings.
 class EndDrawer extends StatefulWidget {
   const EndDrawer({super.key});
 
@@ -190,7 +192,8 @@ class _EndDrawerState extends State<EndDrawer> {
                       processNotifier
                           .popProcessingDialog(navigatorKey.currentContext!);
                       if (messages.isNotEmpty) {
-                        showDataAlert(messages, 'Site Assets Loaded');
+                        showDataAlert(navigatorKey.currentContext!, messages,
+                            'Site Assets Loaded');
                       }
                     } finally {
                       scaffoldMes
@@ -255,6 +258,7 @@ class _EndDrawerState extends State<EndDrawer> {
                 child: const Icon(Icons.settings),
                 onPressed: () {
                   showDataAlert(
+                    navigatorKey.currentContext!,
                     [],
                     'Enter Desired Precentages',
                     [const SpareCriticalityConfig()],
@@ -268,6 +272,7 @@ class _EndDrawerState extends State<EndDrawer> {
                 child: const Icon(Icons.settings),
                 onPressed: () {
                   showDataAlert(
+                    navigatorKey.currentContext!,
                     [
                       'Please use the "Refresh Data from Maximo" button in the side bar after changing settings',
                     ],

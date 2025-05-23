@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:iko_reliability_flutter/criticality/criticality_settings_notifier.dart';
+import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -16,14 +18,17 @@ import '../settings/theme_manager.dart';
 import 'asset_criticality_notifier.dart';
 import 'spare_criticality_notifier.dart';
 
+/// Spare Criticality page for managing and displaying spare part criticality data.
 @RoutePage()
 class SpareCriticalityPage extends StatefulWidget {
+  /// Constructs the Spare Criticality page.
   const SpareCriticalityPage({super.key});
 
   @override
   State<SpareCriticalityPage> createState() => _SpareCriticalityPageState();
 }
 
+/// State for the Spare Criticality page, manages table data and UI.
 class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
   List<TrinaColumn> columns = [];
   String loadedSite = '';
@@ -552,7 +557,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               'newPriority': TrinaCell(value: 0),
               'id': TrinaCell(value: 0),
               'rop': TrinaCell(value: 0),
-              'roq': TrinaCell(value: 0),
+              'oq': TrinaCell(value: 0),
               'status': TrinaCell(value: ''),
               'override': TrinaCell(value: ''),
             }));
@@ -567,7 +572,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               'rpn': TrinaCell(value: 0),
               'newPriority': TrinaCell(value: 0),
               'rop': TrinaCell(value: 0),
-              'roq': TrinaCell(value: 0),
+              'oq': TrinaCell(value: 0),
               'id': TrinaCell(value: 0),
               'status': TrinaCell(value: ''),
               'override': TrinaCell(value: ''),
@@ -825,6 +830,7 @@ class _SparePartsLoadingIndicatorState
         return;
       }
       showDataAlert(
+        navigatorKey.currentContext!,
         [
           'Please use the "Refresh Data from Maximo" button in the side bar after changing settings',
         ],
@@ -843,8 +849,7 @@ class _SparePartsLoadingIndicatorState
               siteid: siteid,
               useCriticality: spareCriticalitySetting.useCriticality);
           Navigator.pop(navigatorKey.currentContext!);
-          navigatorKey.currentContext!.router
-              .replaceNamed("/criticality/spare");
+          navigatorKey.currentContext!.router.replacePath("/criticality/spare");
           Navigator.pop(navigatorKey.currentContext!); // close the drawer
         } catch (e) {
           setState(() {
@@ -855,7 +860,7 @@ class _SparePartsLoadingIndicatorState
       });
     } else {
       Navigator.pop(navigatorKey.currentContext!);
-      navigatorKey.currentContext!.router.replaceNamed("/criticality/spare");
+      navigatorKey.currentContext!.router.replacePath("/criticality/spare");
       Navigator.pop(navigatorKey.currentContext!); // close the drawer
     }
   }

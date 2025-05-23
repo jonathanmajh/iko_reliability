@@ -1,3 +1,7 @@
+/// Drift database table and data model definitions for the application.
+library;
+
+//
 //handling local database (drift)
 import 'dart:math';
 
@@ -6,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:http/http.dart' as http;
+import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:iko_reliability_flutter/criticality/functions.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
@@ -1079,7 +1084,8 @@ class MyDatabase extends _$MyDatabase {
       messages.add('Error inserting Observations, ${e.toString()}');
     }
     messages.add('Finished Loading');
-    showDataAlert(messages, 'Observation List Loaded');
+    showDataAlert(
+        navigatorKey.currentContext!, messages, 'Observation List Loaded');
   }
 
   Future<List<Setting>> getSettings() async {

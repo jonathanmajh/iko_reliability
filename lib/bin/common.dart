@@ -1,3 +1,6 @@
+/// Utility functions and shared widgets for the application.
+library;
+
 import 'package:flutter/material.dart';
 
 void toast(context, msg, [int? time]) {
@@ -61,4 +64,89 @@ class _BlinkingWidgetState extends State<BlinkingWidget>
         ),
         child: widget.child,
       );
+}
+
+/// Shows an alert dialog with [title] as the title and [messages] as the description rows.
+Future<T?> showDataAlert<T>(
+    BuildContext context, List<String> messages, String title,
+    [List<Widget> widgets = const []]) {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(
+              20.0,
+            ),
+          ),
+        ),
+        contentPadding: const EdgeInsets.only(
+          top: 10.0,
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 24.0),
+        ),
+        content: SizedBox(
+          height: 400,
+          width: 400,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ...messageListTile(messages),
+                  const Divider(
+                    // spacer
+                    height: 10,
+                    thickness: 0,
+                    indent: 0,
+                    endIndent: 0,
+                    color: Colors.transparent,
+                  ),
+                  ...widgets,
+                  const Divider(
+                    // spacer
+                    height: 10,
+                    thickness: 0,
+                    indent: 0,
+                    endIndent: 0,
+                    color: Colors.transparent,
+                  ),
+                  Center(
+                    child: SizedBox(
+                      width: 200,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text(
+                          "OK",
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+/// Creates a list of text widgets from [messages].
+List<Widget> messageListTile(List<String> messages) {
+  List<Widget> list = [];
+  for (final msg in messages) {
+    list.add(Text(msg));
+  }
+  return list;
 }

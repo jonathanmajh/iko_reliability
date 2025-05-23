@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 
 import '../main.dart';
 
+/// LogOutput implementation for writing logs to the console and showing error dialogs on web.
 class AppConsoleOutput extends LogOutput {
   AppConsoleOutput();
 

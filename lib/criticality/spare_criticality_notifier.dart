@@ -8,6 +8,7 @@ import '../main.dart';
 import 'asset_criticality_notifier.dart';
 import 'criticality_settings_notifier.dart';
 
+/// Notifier for managing spare part override statuses.
 class SpareOverrideNotifier extends ChangeNotifier {
   Map<String, AssetOverride> spares = {};
 
@@ -29,6 +30,7 @@ class SpareOverrideNotifier extends ChangeNotifier {
   }
 }
 
+/// Notifier for managing spare criticality settings and thresholds.
 class SpareCriticalitySettingNotifier extends ChangeNotifier {
   int percentC = 60;
   int percentB = 30;
