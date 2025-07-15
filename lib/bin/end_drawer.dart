@@ -174,10 +174,9 @@ class _EndDrawerState extends State<EndDrawer> {
                     ScaffoldMessengerState scaffoldMes =
                         ScaffoldMessenger.of(context);
                     try {
-                      processNotifier.setProcessState(
-                          ProcessStates.loadAssetState, true,
-                          notifyListeners: false);
-                      processNotifier.processingDialog(context);
+                      processNotifier.addTask(
+                        'loadAssetState',
+                      );
                       scaffoldMes.showSnackBar(SnackBar(
                         duration: const Duration(days: 1), //some long duration
                         content:
@@ -189,8 +188,6 @@ class _EndDrawerState extends State<EndDrawer> {
                               .read<MaximoServerNotifier>()
                               .maximoServerSelected,
                           context);
-                      processNotifier
-                          .popProcessingDialog(navigatorKey.currentContext!);
                       if (messages.isNotEmpty) {
                         showDataAlert(navigatorKey.currentContext!, messages,
                             'Site Assets Loaded');
@@ -198,9 +195,7 @@ class _EndDrawerState extends State<EndDrawer> {
                     } finally {
                       scaffoldMes
                           .hideCurrentSnackBar(); //hide snackbar once asset load is completed
-                      processNotifier.setProcessState(
-                          ProcessStates.loadAssetState, false,
-                          notifyListeners: false);
+                      processNotifier.removeTask('loadAssetState');
                     }
                   }
                   setState(() {

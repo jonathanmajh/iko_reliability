@@ -10,7 +10,6 @@ import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:provider/provider.dart';
 
 import '../bin/drawer.dart';
-import '../bin/consts.dart';
 import '../main.dart';
 import '../bin/end_drawer.dart';
 import 'generate_job_plans.dart';
@@ -116,13 +115,11 @@ class _PmCheckPageState extends State<PmCheckPage> {
               var processNotifier = Provider.of<ProcessStateNotifier>(context,
                   listen: false); //for recording PM file loading process state
               try {
-                processNotifier.setProcessState(
-                    ProcessStates.loadPMFilesState, true);
+                processNotifier.addTask('loadPMFilesState');
                 await pickTemplates(context);
                 _updateFab();
               } finally {
-                processNotifier.setProcessState(
-                    ProcessStates.loadPMFilesState, false);
+                processNotifier.removeTask('loadPMFilesState');
               }
             },
             tooltip: 'Select files to load PM templates',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart'
     show Credentials, getLoginMaximo, getUserMaximo;
+import 'package:iko_reliability_flutter/main.dart';
 import 'package:provider/provider.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -38,10 +39,10 @@ class _HomePageState extends State<HomePage> {
           //don't create another prompt if one already exists
           return false;
         }
-
         //check if there are any processes running
-        var processNotifier =
-            Provider.of<ProcessStateNotifier>(context, listen: false);
+        var processNotifier = Provider.of<ProcessStateNotifier>(
+            navigatorKey.currentContext!,
+            listen: false);
 
         if (!processNotifier.processRunning()) {
           return true;
@@ -50,7 +51,7 @@ class _HomePageState extends State<HomePage> {
 
         return await showDialog(
             //create confirmation prompt
-            context: context,
+            context: navigatorKey.currentContext!,
             builder: (context) {
               return AlertDialog(
                   title: const Text('Are you sure you want to quit?'),

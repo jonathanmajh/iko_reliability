@@ -824,7 +824,13 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     }
     debugPrint('post preview response');
     connectionPool--;
-    debugPrint(response.body);
+    try {
+      jsonDecode(response.body);
+    } catch (e) {
+      debugPrint('Error decoding JSON: $e');
+      debugPrint(response.body);
+      return {'status': 'Invalid Response from Maximo'};
+    }
     var parsed = jsonDecode(response.body);
     if (parsed['Error'] != null) {
       return {'status': response.body};
