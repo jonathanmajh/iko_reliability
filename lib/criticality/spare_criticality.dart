@@ -557,7 +557,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               'newPriority': TrinaCell(value: 0),
               'id': TrinaCell(value: 0),
               'rop': TrinaCell(value: 0),
-              'oq': TrinaCell(value: 0),
+              'roq': TrinaCell(value: 0),
               'status': TrinaCell(value: ''),
               'override': TrinaCell(value: ''),
             }));
@@ -571,9 +571,9 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               'cost': TrinaCell(value: 0),
               'rpn': TrinaCell(value: 0),
               'newPriority': TrinaCell(value: 0),
-              'rop': TrinaCell(value: 0),
-              'oq': TrinaCell(value: 0),
               'id': TrinaCell(value: 0),
+              'rop': TrinaCell(value: 0),
+              'roq': TrinaCell(value: 0),
               'status': TrinaCell(value: ''),
               'override': TrinaCell(value: ''),
             }));

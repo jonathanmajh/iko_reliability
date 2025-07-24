@@ -1577,6 +1577,15 @@ class MyDatabase extends _$MyDatabase {
         ratingFromValue(unitCost, costRating),
       ];
       leadTime = leadTime / 30.0;
+      double assetMultiplier = 1.0;
+      if (useCriticality) {
+        assetMultiplier = (spareAssetInfo.assetCriticality ?? 1) * 1.0;
+        if (assetMultiplier < 1) {
+          assetMultiplier = 1.0;
+        }
+      } else {
+        assetMultiplier = spareAssetInfo.assetRPN ?? 0;
+      }
       results2.add(SpareCriticalitysCompanion.insert(
         id: '$siteid${spareAssetInfo.itemnum}',
         usage: temp[0],
@@ -1584,20 +1593,11 @@ class MyDatabase extends _$MyDatabase {
         cost: temp[2],
         realLeadTime: Value(leadTime),
         realCost: Value(unitCost),
-        assetRPN: (useCriticality
-                ? spareAssetInfo.assetCriticality ?? 0
-                : spareAssetInfo.assetRPN ?? 0) *
-            1.0,
+        assetRPN: assetMultiplier,
         manual: false,
         manualPriority: const Value(false),
         newPriority: 0,
-        newRPN: (useCriticality
-                ? spareAssetInfo.assetCriticality ?? 0
-                : spareAssetInfo.assetRPN ?? 0) *
-            temp[0] *
-            temp[1] *
-            temp[2] *
-            1.0,
+        newRPN: (assetMultiplier) * temp[0] * temp[1] * temp[2],
         siteid: siteid,
         itemnum: spareAssetInfo.itemnum,
       ));
