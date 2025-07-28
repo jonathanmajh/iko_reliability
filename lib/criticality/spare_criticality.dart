@@ -341,7 +341,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         title: 'New Priority',
         field: 'newPriority',
         type: TrinaColumnType.number(),
-        width: 100,
+        width: 130,
         renderer: (rendererContext) {
           // change cell to dropdown button
           return DropdownButton<int>(
@@ -369,7 +369,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                 spareCriticality.keys.map<DropdownMenuItem<int>>((int value) {
               return DropdownMenuItem<int>(
                 value: value,
-                child: Text('$value: ${spareCriticality[value]}'),
+                child: Text(spareCriticality[value] ?? ""),
               );
             }).toList(),
           );

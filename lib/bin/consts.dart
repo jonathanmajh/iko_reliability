@@ -16,10 +16,10 @@ final assetCriticality = {
 
 /// Maps spare criticality levels to their ABC codes.
 final spareCriticality = {
-  1: 'C',
-  2: 'B',
-  3: 'A',
-  0: 'N',
+  1: 'C: Low',
+  2: 'B: Medium',
+  3: 'A: High',
+  0: 'N: N/A',
 };
 
 /// Maps spare criticality levels to their Z values.
