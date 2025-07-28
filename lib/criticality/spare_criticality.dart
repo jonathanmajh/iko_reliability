@@ -338,7 +338,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         width: 75,
       ),
       TrinaColumn(
-        title: 'New Priority',
+        title: 'ABC Type',
         field: 'newPriority',
         type: TrinaColumnType.number(),
         width: 130,
