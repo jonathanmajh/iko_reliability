@@ -611,7 +611,7 @@ Map<int, Map<String, dynamic>> usageRating = {
     'description': '3 - 4 Occurrences',
     'longdesc': '',
     'low': 2,
-    'high': 5,
+    'high': 4,
   },
   4: {
     'description': '5 - 10 Occurrences',

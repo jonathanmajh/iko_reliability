@@ -34,7 +34,7 @@ int ratingFromValue(double value, Map<int, Map<String, dynamic>> definition) {
     return 0;
   }
   for (var i = 1; i < 11; i++) {
-    if (value < definition[i]!['high']!) {
+    if (value <= definition[i]!['high']!) {
       return i;
     }
   }
