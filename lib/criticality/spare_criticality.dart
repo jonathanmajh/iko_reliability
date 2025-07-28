@@ -220,7 +220,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         width: 100,
       ),
       TrinaColumn(
-        title: 'Usage',
+        title: 'Part Count',
         field: 'usage',
         width: 210,
         type: TrinaColumnType.number(),
