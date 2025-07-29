@@ -540,7 +540,7 @@ class SiteToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: const Text('Plant Site'),
+      title: const Text('Selected Site'),
       trailing: DropdownButton(
         value: context.watch<SelectedSiteNotifier>().selectedSite,
         items: () {

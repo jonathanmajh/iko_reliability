@@ -1128,8 +1128,6 @@ class _PurchaseHistorySettingDialogState
   TextEditingController endDateController = TextEditingController();
   TextEditingController siteFilterController = TextEditingController();
 
-  bool useCriticality = false;
-
   @override
   void initState() {
     super.initState();
@@ -1141,7 +1139,6 @@ class _PurchaseHistorySettingDialogState
     startDateController.text = DateFormat('yyyy-MM-dd').format(startDate!);
     endDateController.text = DateFormat('yyyy-MM-dd').format(endDate!);
     siteFilterController.text = siteFilterBy.toString();
-    useCriticality = spareCriticalitySettingsNotifier.useCriticality;
   }
 
   @override
@@ -1158,61 +1155,65 @@ class _PurchaseHistorySettingDialogState
         builder: (context, notifier, child) {
       return Column(
         children: [
-          TextField(
-            controller: startDateController,
-            decoration: const InputDecoration(
-                icon: Icon(Icons.calendar_month),
-                labelText: 'Ignore Purchases Before'),
-            readOnly: true,
-            onTap: () async {
-              DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: startDate,
-                  firstDate: DateTime(1951),
-                  //DateTime.now() - not to allow to choose before today.
-                  lastDate: DateTime.now());
-              if (pickedDate != null) {
-                setState(() {
-                  startDateController.text =
-                      DateFormat('yyyy-MM-dd').format(pickedDate);
-                  //set output date to TextField value.
-                  context
-                      .read<SpareCriticalitySettingNotifier>()
-                      .setPurchaseSettings(
-                          selectedSite:
-                              context.read<SelectedSiteNotifier>().selectedSite,
-                          purchaseCutoffStart: pickedDate);
-                });
-              }
-            },
+          ListTile(
+            title: const Text('Ignore Purchases Before'),
+            leading: const Icon(Icons.calendar_month),
+            subtitle: TextField(
+              controller: startDateController,
+              readOnly: true,
+              onTap: () async {
+                DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: startDate,
+                    firstDate: DateTime(1951),
+                    //DateTime.now() - not to allow to choose before today.
+                    lastDate: DateTime.now());
+                if (pickedDate != null) {
+                  setState(() {
+                    startDateController.text =
+                        DateFormat('yyyy-MM-dd').format(pickedDate);
+                    //set output date to TextField value.
+                    context
+                        .read<SpareCriticalitySettingNotifier>()
+                        .setPurchaseSettings(
+                            selectedSite: context
+                                .read<SelectedSiteNotifier>()
+                                .selectedSite,
+                            purchaseCutoffStart: pickedDate);
+                  });
+                }
+              },
+            ),
           ),
-          TextField(
-            controller: endDateController,
-            decoration: const InputDecoration(
-                icon: Icon(Icons.calendar_month),
-                labelText: 'Ignore Purchases After'),
-            readOnly: true,
-            onTap: () async {
-              DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: endDate,
-                  firstDate: DateTime(1951),
-                  //DateTime.now() - not to allow to choose before today.
-                  lastDate: DateTime.now());
-              if (pickedDate != null) {
-                setState(() {
-                  endDateController.text =
-                      DateFormat('yyyy-MM-dd').format(pickedDate);
-                  //set output date to TextField value.
-                  context
-                      .read<SpareCriticalitySettingNotifier>()
-                      .setPurchaseSettings(
-                          selectedSite:
-                              context.read<SelectedSiteNotifier>().selectedSite,
-                          purchaseCutoffEnd: pickedDate);
-                });
-              }
-            },
+          ListTile(
+            title: const Text('Ignore Purchases After'),
+            leading: const Icon(Icons.calendar_month),
+            subtitle: TextField(
+              controller: endDateController,
+              readOnly: true,
+              onTap: () async {
+                DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: endDate,
+                    firstDate: DateTime(1951),
+                    //DateTime.now() - not to allow to choose before today.
+                    lastDate: DateTime.now());
+                if (pickedDate != null) {
+                  setState(() {
+                    endDateController.text =
+                        DateFormat('yyyy-MM-dd').format(pickedDate);
+                    //set output date to TextField value.
+                    context
+                        .read<SpareCriticalitySettingNotifier>()
+                        .setPurchaseSettings(
+                            selectedSite: context
+                                .read<SelectedSiteNotifier>()
+                                .selectedSite,
+                            purchaseCutoffEnd: pickedDate);
+                  });
+                }
+              },
+            ),
           ),
           ListTile(
               title: const Text('Purchases Site Filter'),
@@ -1237,29 +1238,66 @@ class _PurchaseHistorySettingDialogState
                     });
                   })),
           ListTile(
-            title: const Text('Use Asset Criticality Instead of RPN'),
-            leading: const Icon(Icons.onetwothree),
-            subtitle: Switch(
-              // This bool value toggles the switch.
-              value: useCriticality,
-              // activeColor: Colors.red,
-              onChanged: (bool value) {
-                // This is called when the user toggles the switch.
-                setState(() {
-                  useCriticality = value;
-                  context
-                      .read<SpareCriticalitySettingNotifier>()
-                      .setPurchaseSettings(
-                          selectedSite:
-                              context.read<SelectedSiteNotifier>().selectedSite,
-                          useCriticality: value);
-                });
-              },
-            ),
+            title: const Text('Use Asset RPN Or Criticality'),
+            leading: const Icon(Icons.compare_arrows),
+            subtitle: CalcOptionChoice(),
           ),
         ],
       );
     });
+  }
+}
+
+enum CalcOption { rpn, criticality }
+
+class CalcOptionChoice extends StatefulWidget {
+  const CalcOptionChoice({super.key});
+
+  @override
+  State<CalcOptionChoice> createState() => _CalcOptionChoiceState();
+}
+
+class _CalcOptionChoiceState extends State<CalcOptionChoice> {
+  CalcOption selectedOption = CalcOption.criticality;
+
+  bool useCriticality = false;
+
+  @override
+  void initState() {
+    super.initState();
+    SpareCriticalitySettingNotifier spareCriticalitySettingsNotifier =
+        context.read<SpareCriticalitySettingNotifier>();
+    useCriticality = spareCriticalitySettingsNotifier.useCriticality;
+    selectedOption = useCriticality ? CalcOption.criticality : CalcOption.rpn;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SegmentedButton<CalcOption>(
+      segments: const <ButtonSegment<CalcOption>>[
+        ButtonSegment<CalcOption>(
+          value: CalcOption.rpn,
+          label: Text('Asset RPN'),
+          icon: Icon(Icons.calculate),
+        ),
+        ButtonSegment<CalcOption>(
+          value: CalcOption.criticality,
+          label: Text('Maximo Criticality'),
+          icon: Icon(Icons.cloud),
+        ),
+      ],
+      selected: <CalcOption>{selectedOption},
+      onSelectionChanged: (Set<CalcOption> newSelection) {
+        setState(() {
+          selectedOption = newSelection.first;
+          useCriticality =
+              selectedOption == CalcOption.criticality ? true : false;
+          context.read<SpareCriticalitySettingNotifier>().setPurchaseSettings(
+              selectedSite: context.read<SelectedSiteNotifier>().selectedSite,
+              useCriticality: useCriticality);
+        });
+      },
+    );
   }
 }
 

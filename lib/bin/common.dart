@@ -89,7 +89,7 @@ Future<T?> showDataAlert<T>(
           style: const TextStyle(fontSize: 24.0),
         ),
         content: SizedBox(
-          height: 400,
+          height: 500,
           width: 400,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(8.0),
