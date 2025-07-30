@@ -34,7 +34,7 @@ class JobLaborMaximo {
 
 class JobMaterialMaximo {
   final String itemNumber;
-  final int quantity;
+  final double quantity;
   final double? cost;
 
   const JobMaterialMaximo({

@@ -38,7 +38,7 @@ class JobCraft {
 
 class JobMaterial {
   final String itemNumber;
-  final int quantity;
+  final double quantity;
   final double? cost;
 
   const JobMaterial({
@@ -275,7 +275,7 @@ class ParsedTemplate {
             //read/write material data
             pmTemplates[filename][pmNumber].materials.add(JobMaterial(
                 itemNumber: row[0].toString(),
-                quantity: row[1] ?? 1,
+                quantity: row[1]?.toDouble() ?? 1.0,
                 cost: row[2]?.toDouble()));
           }
           if (row[0] != null && readService) {
