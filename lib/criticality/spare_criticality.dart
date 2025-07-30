@@ -576,8 +576,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               } else if (snapshot.hasError) {
                 rows.add(TrinaRow(cells: {
                   'itemnum': TrinaCell(value: 'Error!'),
-                  'description': TrinaCell(value: ''),
-                  'assetRpn': TrinaCell(value: snapshot.error),
+                  'description': TrinaCell(value: snapshot.error),
+                  'assetRpn': TrinaCell(value: ''),
                   'usage': TrinaCell(value: 0),
                   'leadTime': TrinaCell(value: 0),
                   'cost': TrinaCell(value: 0),
@@ -592,8 +592,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               } else {
                 rows.add(TrinaRow(cells: {
                   'itemnum': TrinaCell(value: ''),
-                  'description': TrinaCell(value: ''),
-                  'assetRpn': TrinaCell(value: 'No Site Selected'),
+                  'description': TrinaCell(value: 'No Site Selected'),
+                  'assetRpn': TrinaCell(value: ''),
                   'usage': TrinaCell(value: 0),
                   'leadTime': TrinaCell(value: 0),
                   'cost': TrinaCell(value: 0),
