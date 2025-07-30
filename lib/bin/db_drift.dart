@@ -543,7 +543,6 @@ class MyDatabase extends _$MyDatabase {
   }
 
   Future<void> calculateReorderDetails({required String siteid}) async {
-    // TODO add a loading animation when this runs
     var spareCriticalities = {
       for (var v in (await (select(spareCriticalitys)
             ..where((tbl) => tbl.siteid.equals(siteid)))
@@ -1496,8 +1495,11 @@ class MyDatabase extends _$MyDatabase {
     }
   }
 
-  Future<List<SpareCriticality>> updateSparePartCriticality(
-      {required String siteid, required String itemnum}) async {
+  Future<List<SpareCriticality>> updateSparePartCriticality({
+    required String siteid,
+    required String itemnum,
+    required bool useCriticality,
+  }) async {
     final spareAssetInfo =
         await spareCriticalityAssetInfo(siteid, itemnum).getSingle();
     final sparePurchases = await (select(purchases)
@@ -1516,6 +1518,15 @@ class MyDatabase extends _$MyDatabase {
       numPurchases++;
     }
     leadTime = leadTime / numPurchases;
+    double assetMultiplier = 1.0;
+    if (useCriticality) {
+      assetMultiplier = (spareAssetInfo.assetCriticality ?? 1) * 1.0;
+      if (assetMultiplier < 1) {
+        assetMultiplier = 1.0;
+      }
+    } else {
+      assetMultiplier = spareAssetInfo.assetRPN ?? 0;
+    }
     unitCost = unitCost / numPurchases;
     final temp = [
       ratingFromValue(spareAssetInfo.quantity!, usageRating),
@@ -1533,14 +1544,17 @@ class MyDatabase extends _$MyDatabase {
       realLeadTime: Value(leadTime),
       realCost: Value(unitCost),
       cost: Value(temp[2]),
-      newRPN:
-          Value((spareAssetInfo.assetRPN ?? 0) * temp[0] * temp[1] * temp[2]),
-      assetRPN: Value(spareAssetInfo.assetRPN ?? 0),
+      newRPN: Value((assetMultiplier) * temp[0] * temp[1] * temp[2]),
+      assetRPN: Value(assetMultiplier),
+      manual: Value(false),
+      manualPriority: Value(false),
     ));
   }
 
-  Future<void> computeSparePartCriticality(
-      {required String siteid, bool useCriticality = false}) async {
+  Future<void> computeSparePartCriticality({
+    required String siteid,
+    bool useCriticality = false,
+  }) async {
     final spareAssetInfos = await spareCriticalityAssetInfo(siteid, '%').get();
     final skips = await (select(spareCriticalitys)
           ..where((tbl) =>

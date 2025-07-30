@@ -297,9 +297,17 @@ class _EndDrawerState extends State<EndDrawer> {
             ListTile(
               title: const Text('Calculate ABC from RPN'),
               trailing: ElevatedButton(
-                child: const Icon(Icons.calculate),
-                onPressed: () => calculateRPNDistributionSpares(context),
-              ),
+                  child: const Icon(Icons.calculate),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return const AlertDialog(
+                            title: Text('Loading...'),
+                            content: SparePartCalculatingIndicator(),
+                          );
+                        });
+                  }),
             ),
             ListTile(
               title: const Text('Export to CSV'),

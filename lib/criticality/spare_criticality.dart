@@ -186,6 +186,9 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                     final result = await database!.updateSparePartCriticality(
                       itemnum: itemnum,
                       siteid: context.read<SelectedSiteNotifier>().selectedSite,
+                      useCriticality: context
+                          .read<SpareCriticalitySettingNotifier>()
+                          .useCriticality,
                     );
                     setState(() {
                       rendererContext.row.cells['assetRpn']!.value =
@@ -402,6 +405,12 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
             );
           }),
     ]);
+
+    // Listen for SpareCriticalityNotifier updates and trigger refresh
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final notifier = context.read<SpareCriticalityNotifier>();
+      notifier.addListener(_handleNotifierUpdate);
+    });
   }
 
   void gridAHandler() {
@@ -456,6 +465,22 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
     detailStateManager.setShowLoading(false);
   }
 
+  // ValueNotifier to trigger FutureBuilder refresh
+  final ValueNotifier<int> _refreshKey = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    context
+        .read<SpareCriticalityNotifier>()
+        .removeListener(_handleNotifierUpdate);
+    super.dispose();
+  }
+
+  void _handleNotifierUpdate() {
+    // Increment key to force FutureBuilder to refresh
+    _refreshKey.value++;
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeManager themeManager = Provider.of<ThemeManager>(context);
@@ -479,191 +504,202 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         ],
       ),
       endDrawer: const EndDrawer(),
-      body: FutureBuilder<List<SpareCriticalityWithItem>>(
-        future: () async {
-          return database!.getSpareCriticalities(
-              siteid: context.watch<SelectedSiteNotifier>().selectedSite);
-        }(),
-        builder: (BuildContext context,
-            AsyncSnapshot<List<SpareCriticalityWithItem>> snapshot) {
-          List<TrinaRow> rows = [];
-          debugPrint('SPC - builder');
-          if (snapshot.hasData) {
-            if (snapshot.data!.isNotEmpty) {
-              if (loadedSite != snapshot.data?.first.spareCriticality.siteid ||
-                  context.watch<SpareCriticalityNotifier>().updateGrid) {
-                loadedSite = snapshot.data!.first.spareCriticality.siteid;
-                for (var row in snapshot.data!) {
-                  AssetOverride overrideStatus = AssetOverride.none;
-                  if (row.spareCriticality.manualPriority) {
-                    overrideStatus = AssetOverride.priority;
+      body: ValueListenableBuilder<int>(
+        valueListenable: _refreshKey,
+        builder: (context, value, _) {
+          return FutureBuilder<List<SpareCriticalityWithItem>>(
+            future: database!.getSpareCriticalities(
+                siteid: context.watch<SelectedSiteNotifier>().selectedSite),
+            builder: (BuildContext context,
+                AsyncSnapshot<List<SpareCriticalityWithItem>> snapshot) {
+              List<TrinaRow> rows = [];
+              debugPrint('SPC - builder');
+              if (snapshot.hasData) {
+                if (snapshot.data!.isNotEmpty) {
+                  if (loadedSite !=
+                      snapshot.data?.first.spareCriticality.siteid) {
+                    loadedSite = snapshot.data!.first.spareCriticality.siteid;
                   }
-                  if (row.spareCriticality.manual) {
-                    overrideStatus = AssetOverride.breakdowns;
-                  }
-                  rows.add(TrinaRow(cells: {
-                    'itemnum': TrinaCell(value: row.spareCriticality.itemnum),
-                    'description':
-                        TrinaCell(value: row.item?.description ?? ''),
-                    'assetRpn': TrinaCell(
-                        value: row.spareCriticality.assetRPN
-                            .toStringAsPrecision(3)),
-                    'usage': TrinaCell(value: row.spareCriticality.usage),
-                    'leadTime': TrinaCell(value: row.spareCriticality.leadTime),
-                    'cost': TrinaCell(value: row.spareCriticality.cost),
-                    'rpn': TrinaCell(value: row.spareCriticality.newRPN),
-                    'newPriority': TrinaCell(
-                        value: row.spareCriticality.newPriority > 0
-                            ? row.spareCriticality.newPriority
-                            : context
-                                .read<SpareCriticalityNotifier>()
-                                .rpnFindDistribution(
-                                    row.spareCriticality.newRPN)),
-                    'rop': TrinaCell(value: row.spareCriticality.reorderPoint),
-                    'roq': TrinaCell(value: row.spareCriticality.orderQuantity),
-                    'id': TrinaCell(value: row.spareCriticality.id),
-                    'status': TrinaCell(value: ''),
-                    'override': TrinaCell(value: overrideStatus),
-                  }));
-                }
-                stateManager.removeAllRows();
-                stateManager.appendRows(rows);
-                final settings =
-                    context.watch<SpareCriticalitySettingNotifier>();
-                if (settings.sortType != null) {
-                  switch (settings.sortType) {
-                    case TrinaColumnSort.ascending:
-                      stateManager.sortAscending(settings.sortColumn!);
-                      break;
-                    case TrinaColumnSort.descending:
-                      stateManager.sortDescending(settings.sortColumn!);
-                      break;
-                    default:
-                  }
-                  stateManager.notifyListeners();
-                }
-                context.watch<SpareCriticalityNotifier>().updateGrid = false;
-              }
-            }
-          } else if (snapshot.hasError) {
-            rows.add(TrinaRow(cells: {
-              'itemnum': TrinaCell(value: 'Error!'),
-              'description': TrinaCell(value: ''),
-              'assetRpn': TrinaCell(value: snapshot.error),
-              'usage': TrinaCell(value: 0),
-              'leadTime': TrinaCell(value: 0),
-              'cost': TrinaCell(value: 0),
-              'rpn': TrinaCell(value: 0),
-              'newPriority': TrinaCell(value: 0),
-              'id': TrinaCell(value: 0),
-              'rop': TrinaCell(value: 0),
-              'roq': TrinaCell(value: 0),
-              'status': TrinaCell(value: ''),
-              'override': TrinaCell(value: ''),
-            }));
-          } else {
-            rows.add(TrinaRow(cells: {
-              'itemnum': TrinaCell(value: ''),
-              'description': TrinaCell(value: ''),
-              'assetRpn': TrinaCell(value: 'No Site Selected'),
-              'usage': TrinaCell(value: 0),
-              'leadTime': TrinaCell(value: 0),
-              'cost': TrinaCell(value: 0),
-              'rpn': TrinaCell(value: 0),
-              'newPriority': TrinaCell(value: 0),
-              'id': TrinaCell(value: 0),
-              'rop': TrinaCell(value: 0),
-              'roq': TrinaCell(value: 0),
-              'status': TrinaCell(value: ''),
-              'override': TrinaCell(value: ''),
-            }));
-          }
-          return TrinaDualGrid(
-            isVertical: true,
-            display: TrinaDualGridDisplayRatio(ratio: 0.75),
-            gridPropsA: TrinaDualGridProps(
-              columns: columns,
-              rows: rows,
-              onLoaded: (TrinaGridOnLoadedEvent event) {
-                stateManager = event.stateManager;
-                context.read<SpareCriticalityNotifier>().stateManager =
-                    stateManager;
-                event.stateManager.addListener(gridAHandler);
-                stateManager.setShowColumnFilter(true);
-              },
-              onSorted: (TrinaGridOnSortedEvent event) {
-                context.read<SpareCriticalitySettingNotifier>().sortColumn =
-                    event.column;
-                context.read<SpareCriticalitySettingNotifier>().sortType =
-                    event.column.sort;
-              },
-              onChanged: (TrinaGridOnChangedEvent event) async {
-                // recalculate rpn number > nre priority if not overwritten
-                if (![4, 5, 6].contains(event.columnIdx)) {
-                  // only need to update if changes made to these columns
-                  return;
-                }
-                debugPrint('running grid A on change event');
-                final newRpn = rpnFunc(await database!
-                    .getSpareCriticality(id: event.row.cells['id']!.value));
-                debugPrint(newRpn.toString());
-                if (newRpn > 0) {
-                  await database!.updateSpareCriticality(
-                    newRPN: newRpn,
-                    spareid: event.row.cells['id']!.value,
-                  );
-                  event.row.cells['rpn']!.value = newRpn;
-                  if (context.mounted) {
-                    final newPriority = context
-                        .read<SpareCriticalityNotifier>()
-                        .rpnFindDistribution(newRpn);
-                    if (event.row.cells['override']!.value !=
-                        AssetOverride.priority) {
-                      event.row.cells['newPriority']!.value = newPriority;
-                      event.row.cells['override']!.value =
-                          AssetOverride.breakdowns;
+                  for (var row in snapshot.data!) {
+                    AssetOverride overrideStatus = AssetOverride.none;
+                    if (row.spareCriticality.manualPriority) {
+                      overrideStatus = AssetOverride.priority;
                     }
+                    if (row.spareCriticality.manual) {
+                      overrideStatus = AssetOverride.breakdowns;
+                    }
+                    rows.add(TrinaRow(cells: {
+                      'itemnum': TrinaCell(value: row.spareCriticality.itemnum),
+                      'description':
+                          TrinaCell(value: row.item?.description ?? ''),
+                      'assetRpn': TrinaCell(
+                          value: row.spareCriticality.assetRPN
+                              .toStringAsPrecision(3)),
+                      'usage': TrinaCell(value: row.spareCriticality.usage),
+                      'leadTime':
+                          TrinaCell(value: row.spareCriticality.leadTime),
+                      'cost': TrinaCell(value: row.spareCriticality.cost),
+                      'rpn': TrinaCell(value: row.spareCriticality.newRPN),
+                      'newPriority': TrinaCell(
+                          value: row.spareCriticality.newPriority > 0
+                              ? row.spareCriticality.newPriority
+                              : context
+                                  .read<SpareCriticalityNotifier>()
+                                  .rpnFindDistribution(
+                                      row.spareCriticality.newRPN)),
+                      'rop':
+                          TrinaCell(value: row.spareCriticality.reorderPoint),
+                      'roq':
+                          TrinaCell(value: row.spareCriticality.orderQuantity),
+                      'id': TrinaCell(value: row.spareCriticality.id),
+                      'status': TrinaCell(value: ''),
+                      'override': TrinaCell(value: overrideStatus),
+                    }));
+                  }
+                  stateManager.removeAllRows();
+                  stateManager.appendRows(rows);
+                  final settings =
+                      context.watch<SpareCriticalitySettingNotifier>();
+                  if (settings.sortType != null) {
+                    switch (settings.sortType) {
+                      case TrinaColumnSort.ascending:
+                        stateManager.sortAscending(settings.sortColumn!);
+                        break;
+                      case TrinaColumnSort.descending:
+                        stateManager.sortDescending(settings.sortColumn!);
+                        break;
+                      default:
+                    }
+                    stateManager.notifyListeners();
                   }
                 }
-              },
-              configuration: TrinaGridConfiguration(
-                  style: themeManager.theme == ThemeMode.dark
-                      ? const TrinaGridStyleConfig.dark()
-                      : const TrinaGridStyleConfig(),
-                  shortcut: TrinaGridShortcut(actions: {
-                    ...TrinaGridShortcut.defaultActions,
-                    LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-                    LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                        CustomAddKeyAction(),
-                    LogicalKeySet(LogicalKeyboardKey.minus):
-                        CustomMinusKeyAction(),
-                    LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                        CustomMinusKeyAction(),
-                  })),
-            ),
-            gridPropsB: TrinaDualGridProps(
-              configuration: TrinaGridConfiguration(
-                  style: themeManager.theme == ThemeMode.dark
-                      ? const TrinaGridStyleConfig.dark()
-                      : const TrinaGridStyleConfig()),
-              columns: detailColumns,
-              rows: detailRows,
-              onLoaded: (TrinaGridOnLoadedEvent event) {
-                detailStateManager = event.stateManager;
-              },
-              rowColorCallback: (rowColorContext) {
-                if (rowColorContext.row.cells['included']!.value != 'Yes') {
-                  return Colors.grey;
-                }
-                return themeManager.theme == ThemeMode.dark
-                    ? Colors.black
-                    : Colors.white;
-              },
-            ),
-            divider: themeManager.theme == ThemeMode.dark
-                ? TrinaDualGridDivider.dark(
-                    indicatorColor: Theme.of(context).colorScheme.onSurface)
-                : const TrinaDualGridDivider(),
+              } else if (snapshot.hasError) {
+                rows.add(TrinaRow(cells: {
+                  'itemnum': TrinaCell(value: 'Error!'),
+                  'description': TrinaCell(value: ''),
+                  'assetRpn': TrinaCell(value: snapshot.error),
+                  'usage': TrinaCell(value: 0),
+                  'leadTime': TrinaCell(value: 0),
+                  'cost': TrinaCell(value: 0),
+                  'rpn': TrinaCell(value: 0),
+                  'newPriority': TrinaCell(value: 0),
+                  'id': TrinaCell(value: 0),
+                  'rop': TrinaCell(value: 0),
+                  'roq': TrinaCell(value: 0),
+                  'status': TrinaCell(value: ''),
+                  'override': TrinaCell(value: ''),
+                }));
+              } else {
+                rows.add(TrinaRow(cells: {
+                  'itemnum': TrinaCell(value: ''),
+                  'description': TrinaCell(value: ''),
+                  'assetRpn': TrinaCell(value: 'No Site Selected'),
+                  'usage': TrinaCell(value: 0),
+                  'leadTime': TrinaCell(value: 0),
+                  'cost': TrinaCell(value: 0),
+                  'rpn': TrinaCell(value: 0),
+                  'newPriority': TrinaCell(value: 0),
+                  'id': TrinaCell(value: 0),
+                  'rop': TrinaCell(value: 0),
+                  'roq': TrinaCell(value: 0),
+                  'status': TrinaCell(value: ''),
+                  'override': TrinaCell(value: ''),
+                }));
+              }
+              return TrinaDualGrid(
+                isVertical: true,
+                display: TrinaDualGridDisplayRatio(ratio: 0.75),
+                gridPropsA: TrinaDualGridProps(
+                  columns: columns,
+                  rows: rows,
+                  onLoaded: (TrinaGridOnLoadedEvent event) {
+                    stateManager = event.stateManager;
+                    context.read<SpareCriticalityNotifier>().stateManager =
+                        stateManager;
+                    event.stateManager.addListener(gridAHandler);
+                    stateManager.setShowColumnFilter(true);
+                  },
+                  onSorted: (TrinaGridOnSortedEvent event) {
+                    context.read<SpareCriticalitySettingNotifier>().sortColumn =
+                        event.column;
+                    context.read<SpareCriticalitySettingNotifier>().sortType =
+                        event.column.sort;
+                  },
+                  onChanged: (TrinaGridOnChangedEvent event) async {
+                    // recalculate rpn number > nre priority if not overwritten
+                    if (![4, 5, 6].contains(event.columnIdx)) {
+                      // only need to update if changes made to these columns
+                      return;
+                    }
+                    debugPrint('running grid A on change event');
+                    final newRpn = rpnFunc(await database!
+                        .getSpareCriticality(id: event.row.cells['id']!.value));
+                    debugPrint(newRpn.toString());
+                    if (newRpn > 0) {
+                      await database!.updateSpareCriticality(
+                        newRPN: newRpn,
+                        spareid: event.row.cells['id']!.value,
+                      );
+                      event.row.cells['rpn']!.value = newRpn;
+                      if (context.mounted) {
+                        final newPriority = context
+                            .read<SpareCriticalityNotifier>()
+                            .rpnFindDistribution(newRpn);
+                        if (event.row.cells['override']!.value !=
+                            AssetOverride.priority) {
+                          event.row.cells['newPriority']!.value = newPriority;
+                          event.row.cells['override']!.value =
+                              AssetOverride.breakdowns;
+                        }
+                      }
+                    }
+                  },
+                  configuration: TrinaGridConfiguration(
+                    style: themeManager.theme == ThemeMode.dark
+                        ? const TrinaGridStyleConfig.dark()
+                        : const TrinaGridStyleConfig(),
+                    shortcut: TrinaGridShortcut(actions: {
+                      ...TrinaGridShortcut.defaultActions,
+                      LogicalKeySet(LogicalKeyboardKey.add):
+                          CustomAddKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                          CustomAddKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.minus):
+                          CustomMinusKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                          CustomMinusKeyAction(),
+                    }),
+                    scrollbar: TrinaGridScrollbarConfig(
+                      isAlwaysShown: true,
+                      thickness: 10,
+                    ),
+                  ),
+                ),
+                gridPropsB: TrinaDualGridProps(
+                  configuration: TrinaGridConfiguration(
+                      style: themeManager.theme == ThemeMode.dark
+                          ? const TrinaGridStyleConfig.dark()
+                          : const TrinaGridStyleConfig()),
+                  columns: detailColumns,
+                  rows: detailRows,
+                  onLoaded: (TrinaGridOnLoadedEvent event) {
+                    detailStateManager = event.stateManager;
+                  },
+                  rowColorCallback: (rowColorContext) {
+                    if (rowColorContext.row.cells['included']!.value != 'Yes') {
+                      return Colors.grey;
+                    }
+                    return themeManager.theme == ThemeMode.dark
+                        ? Colors.black
+                        : Colors.white;
+                  },
+                ),
+                divider: themeManager.theme == ThemeMode.dark
+                    ? TrinaDualGridDivider.dark(
+                        indicatorColor: Theme.of(context).colorScheme.onSurface)
+                    : const TrinaDualGridDivider(),
+              );
+            },
           );
         },
       ),
@@ -995,36 +1031,95 @@ class _OverrideStatusIconState extends State<OverrideSparePartStatusIcon> {
   }
 }
 
-Future<String> calculateRPNDistributionSpares(BuildContext context) async {
-  try {
+class SparePartCalculatingIndicator extends StatefulWidget {
+  const SparePartCalculatingIndicator({super.key});
+
+  @override
+  State<SparePartCalculatingIndicator> createState() =>
+      _SparePartCalculatingIndicatorState();
+}
+
+class _SparePartCalculatingIndicatorState
+    extends State<SparePartCalculatingIndicator> {
+  String message = '';
+  bool loading = false;
+
+  @override
+  Widget build(BuildContext context) {
     SpareCriticalitySettingNotifier spareCritifcalitySettingNotifier =
         context.read<SpareCriticalitySettingNotifier>();
     SpareCriticalityNotifier spareCritifcalityNotifier =
         context.read<SpareCriticalityNotifier>();
     final siteid = context.read<SelectedSiteNotifier>().selectedSite;
-    var result = await database!.uniqueRpnNumbersSpare(siteid).get();
-    Map<double, int> frequencyOfRPNs = {};
-    for (var x in result) {
-      frequencyOfRPNs[x.newRPN] = x.countitemnum;
-    }
-    List<double> newCutoffs = calculateRPNCutOffsSpares(
-      targetPercentages: spareCritifcalitySettingNotifier.abcCriticality,
-      frequencyOfRPNs: frequencyOfRPNs,
-    ).ordered();
-    spareCritifcalityNotifier.setRpnCutoffs(newCutoffs);
-    debugPrint('new rpn cutoffs: ${spareCritifcalityNotifier.rpnCutoffs}');
-    if (newCutoffs.toSet().length != newCutoffs.length) {
-      return 'Duplicate values in RPN cutoffs\nIncrease percentage of duplicate value, Or ensure RPN values are more spread out';
-    }
-    await database!.updateSparePriority(newCutoffs: newCutoffs, siteid: siteid);
-    await database!.calculateReorderDetails(siteid: siteid);
-    spareCritifcalityNotifier.updateGrid = true;
-    debugPrint(spareCritifcalityNotifier.updateGrid.toString());
-  } catch (e) {
-    debugPrint(e.toString());
-    return e.toString();
+    calculateRPNDistributionSpares(
+      siteid: siteid,
+      spareCritifcalityNotifier: spareCritifcalityNotifier,
+      spareCritifcalitySettingNotifier: spareCritifcalitySettingNotifier,
+    );
+    return Text(message);
   }
-  return 'RPN cutoffs successfully calculated';
+
+  Future<void> calculateRPNDistributionSpares({
+    required String siteid,
+    required SpareCriticalitySettingNotifier spareCritifcalitySettingNotifier,
+    required SpareCriticalityNotifier spareCritifcalityNotifier,
+  }) async {
+    if (loading) {
+      // dont load multiple times
+      return;
+    }
+    setState(() {
+      loading = true;
+    });
+    setState(() {
+      message = 'Calculating Cutoffs for ABC Type...';
+    });
+    try {
+      var result = await database!.uniqueRpnNumbersSpare(siteid).get();
+      Map<double, int> frequencyOfRPNs = {};
+      for (var x in result) {
+        frequencyOfRPNs[x.newRPN] = x.countitemnum;
+      }
+      List<double> newCutoffs = calculateRPNCutOffsSpares(
+        targetPercentages: spareCritifcalitySettingNotifier.abcCriticality,
+        frequencyOfRPNs: frequencyOfRPNs,
+      ).ordered();
+      spareCritifcalityNotifier.setRpnCutoffs(newCutoffs);
+      debugPrint('new rpn cutoffs: ${spareCritifcalityNotifier.rpnCutoffs}');
+      if (newCutoffs.toSet().length != newCutoffs.length) {
+        setState(() {
+          message =
+              'Duplicate values in RPN cutoffs\nIncrease percentage of duplicate value, Or ensure RPN values are more spread out';
+        });
+      }
+      setState(() {
+        message = 'Saving Calculated ABC Values...';
+      });
+      await database!
+          .updateSparePriority(newCutoffs: newCutoffs, siteid: siteid);
+      setState(() {
+        message = 'Calculating Reorder Information (Inventory Optimization)...';
+      });
+      await database!.calculateReorderDetails(siteid: siteid);
+      setState(() {
+        message = 'ABC Type and Reorder Details Successfully Calculated';
+      });
+      setState(() {
+        spareCritifcalityNotifier.toggleUpdate();
+      });
+      spareCritifcalityNotifier.toggleUpdate();
+      debugPrint('RPN cutoffs successfully calculated...');
+      Navigator.pop(navigatorKey.currentContext!);
+      Navigator.pop(navigatorKey.currentContext!);
+      toast(navigatorKey.currentContext!,
+          'ABC Type and Reorder Details Successfully Calculated');
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(() {
+        message = 'ERROR: ${e.toString()}';
+      });
+    }
+  }
 }
 
 class SpareCriticalityConfig extends StatefulWidget {

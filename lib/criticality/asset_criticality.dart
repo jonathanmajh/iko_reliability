@@ -884,19 +884,21 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                 // systemUpdate.remove(assetCrit.asset.assetnum);
               },
               configuration: TrinaGridConfiguration(
-                  style: themeManager.theme == ThemeMode.dark
-                      ? const TrinaGridStyleConfig.dark()
-                      : const TrinaGridStyleConfig(),
-                  shortcut: TrinaGridShortcut(actions: {
-                    ...TrinaGridShortcut.defaultActions,
-                    LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-                    LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                        CustomAddKeyAction(),
-                    LogicalKeySet(LogicalKeyboardKey.minus):
-                        CustomMinusKeyAction(),
-                    LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                        CustomMinusKeyAction(),
-                  })),
+                style: themeManager.theme == ThemeMode.dark
+                    ? const TrinaGridStyleConfig.dark()
+                    : const TrinaGridStyleConfig(),
+                shortcut: TrinaGridShortcut(actions: {
+                  ...TrinaGridShortcut.defaultActions,
+                  LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
+                  LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                      CustomAddKeyAction(),
+                  LogicalKeySet(LogicalKeyboardKey.minus):
+                      CustomMinusKeyAction(),
+                  LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                      CustomMinusKeyAction(),
+                }),
+                scrollbar: TrinaGridScrollbarConfig(isAlwaysShown: true),
+              ),
             ),
             gridPropsB: TrinaDualGridProps(
               configuration: TrinaGridConfiguration(

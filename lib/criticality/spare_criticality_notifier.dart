@@ -276,6 +276,11 @@ class SpareCriticalityNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleUpdate() {
+    updateGrid = true;
+    notifyListeners();
+  }
+
   int rpnFindDistribution(double rpn) {
     try {
       if (rpnCutoffs.length != 3) {
