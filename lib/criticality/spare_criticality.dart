@@ -470,7 +470,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
 
   @override
   void dispose() {
-    context
+    navigatorKey.currentContext!
         .read<SpareCriticalityNotifier>()
         .removeListener(_handleNotifierUpdate);
     super.dispose();
@@ -880,7 +880,7 @@ class _SparePartsLoadingIndicatorState
           });
           final spareCriticalitySetting = navigatorKey.currentContext!
               .read<SpareCriticalitySettingNotifier>();
-
+          // TODO this should be multi-threaded
           await database!.computeSparePartCriticality(
               siteid: siteid,
               useCriticality: spareCriticalitySetting.useCriticality);
