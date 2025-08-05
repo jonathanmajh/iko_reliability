@@ -261,10 +261,9 @@ class _PmCheckPageState extends State<PmCheckPage> {
   }
 
 // for displaying bottom status notifications
-  void _show(toastMsg) {
-    final msg = toastMsg;
+  void _show(String toastMsg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
+      content: Text(toastMsg),
     ));
   }
 

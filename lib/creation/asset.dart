@@ -56,7 +56,7 @@ class _AssetPageState extends State<AssetPage>
     super.dispose();
   }
 
-  _updateFab() {
+  void _updateFab() {
     setState(() {
       fabIndex = _tabController.index;
     });

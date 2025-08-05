@@ -877,11 +877,11 @@ class AssetWorkType {
   final String _title, _description;
   final int _priority;
 
-  get title => _title;
+  String get title => _title;
 
-  get priority => _priority;
+  int get priority => _priority;
 
-  get description => _description;
+  String get description => _description;
 }
 
 class CriticalityCompletion {

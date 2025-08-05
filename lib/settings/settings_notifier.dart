@@ -25,7 +25,7 @@ class SettingsNotifier extends ChangeNotifier {
     currentSettings = {};
   }
 
-  setAdmin(bool setAdmin) {
+  void setAdmin(bool setAdmin) {
     //Setting(key: 'isAdmin')
     isAdmin = setAdmin;
     notifyListeners();

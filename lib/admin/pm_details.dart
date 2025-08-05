@@ -186,7 +186,6 @@ class _PMDetailViewState extends State<PMDetailView>
       if (selected.selectedFile == null) {
         return const Text('No Template Selected');
       }
-      ThemeData themeData = Theme.of(context);
       return Scaffold(
           appBar: TabBar(
             controller: _tabController,
@@ -194,23 +193,14 @@ class _PMDetailViewState extends State<PMDetailView>
               Tab(
                   icon: Icon(
                 Icons.tune,
-                color: (themeData.colorScheme.brightness == Brightness.dark)
-                    ? themeData.indicatorColor
-                    : themeData.primaryColor,
               )),
               Tab(
                   icon: Icon(
                 Icons.cloud_upload,
-                color: (themeData.colorScheme.brightness == Brightness.dark)
-                    ? themeData.indicatorColor
-                    : themeData.primaryColor,
               )),
               Tab(
                   icon: Icon(
                 Icons.edit_note,
-                color: (themeData.colorScheme.brightness == Brightness.dark)
-                    ? themeData.indicatorColor
-                    : themeData.primaryColor,
               )),
             ],
           ),

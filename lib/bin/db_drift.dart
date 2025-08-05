@@ -68,13 +68,13 @@ class MeterDBs extends Table {
 class Meter extends MeterDB {
   List<Observation> observations;
   Meter(
-    meter,
-    inspect,
-    description,
-    frequency,
-    freqUnit,
-    condition,
-    craft,
+    String meter,
+    String inspect,
+    String description,
+    int frequency,
+    String freqUnit,
+    String condition,
+    String craft,
     this.observations,
   ) : super(
           meter: meter,

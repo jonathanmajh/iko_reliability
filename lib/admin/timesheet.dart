@@ -81,7 +81,6 @@ class _TimesheetPageState extends State<TimesheetPage>
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
     return Scaffold(
         appBar: AppBar(
           title: const Text("Timesheet Generator"),
@@ -97,23 +96,14 @@ class _TimesheetPageState extends State<TimesheetPage>
               Tab(
                   icon: Icon(
                 Icons.tune,
-                color: (themeData.colorScheme.brightness == Brightness.dark)
-                    ? themeData.indicatorColor
-                    : themeData.primaryColor,
               )),
               Tab(
                   icon: Icon(
                 Icons.cloud_upload,
-                color: (themeData.colorScheme.brightness == Brightness.dark)
-                    ? themeData.indicatorColor
-                    : themeData.primaryColor,
               )),
               Tab(
                   icon: Icon(
                 Icons.edit_note,
-                color: (themeData.colorScheme.brightness == Brightness.dark)
-                    ? themeData.indicatorColor
-                    : themeData.primaryColor,
               )),
             ],
           ),

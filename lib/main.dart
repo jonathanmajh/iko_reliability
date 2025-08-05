@@ -196,7 +196,7 @@ Future<void> checkForUpdate(BuildContext context) async {
   final update = await checkUpdate();
   if (update) {
     showDataAlert(
-        context,
+        navigatorKey.currentContext!,
         ['Update available'],
         'Update Checker',
         [

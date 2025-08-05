@@ -463,7 +463,7 @@ Future<int> updateSystem(TrinaRow row) async {
   );
 
   final rows = await database!.updateAssetsRelatedSystem(id);
-  toast(navigatorKey.currentContext,
+  toast(navigatorKey.currentContext!,
       'Updated $rows assets assigned to ${row.cells['description']!.value}');
   return id;
 }

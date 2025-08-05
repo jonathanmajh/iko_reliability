@@ -3,7 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-void toast(context, msg, [int? time]) {
+void toast(BuildContext context, String msg, [int? time]) {
   ScaffoldMessenger.of(context).clearSnackBars();
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(msg),
