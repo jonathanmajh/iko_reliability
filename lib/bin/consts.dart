@@ -173,6 +173,7 @@ final siteIDAndDescription = {
   'RAM': 'Alconbury',
   'ANT': 'Antwerp',
   'CF': 'Chester Fiber',
+  'CH': 'Clay Hill',
   'CM': 'Chester Mat',
   'SE': 'Blair Rubber',
   'ES': 'Ennis',

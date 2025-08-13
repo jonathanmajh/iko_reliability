@@ -31,8 +31,6 @@ class SpareCriticalityPage extends StatefulWidget {
 /// State for the Spare Criticality page, manages table data and UI.
 class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
   List<TrinaColumn> columns = [];
-  String loadedSite = '';
-  // used to track if update event is done by system or manually
 
   List<TrinaColumn> detailColumns = [];
   List<TrinaRow> detailRows = [];
@@ -410,6 +408,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final notifier = context.read<SpareCriticalityNotifier>();
       notifier.addListener(_handleNotifierUpdate);
+      final siteNotifier = context.read<SelectedSiteNotifier>();
+      siteNotifier.addListener(_handleNotifierUpdate);
     });
   }
 
@@ -473,6 +473,9 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
     navigatorKey.currentContext!
         .read<SpareCriticalityNotifier>()
         .removeListener(_handleNotifierUpdate);
+    navigatorKey.currentContext!
+        .read<SelectedSiteNotifier>()
+        .removeListener(_handleNotifierUpdate);
     super.dispose();
   }
 
@@ -516,10 +519,6 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               debugPrint('SPC - builder');
               if (snapshot.hasData) {
                 if (snapshot.data!.isNotEmpty) {
-                  if (loadedSite !=
-                      snapshot.data?.first.spareCriticality.siteid) {
-                    loadedSite = snapshot.data!.first.spareCriticality.siteid;
-                  }
                   for (var row in snapshot.data!) {
                     AssetOverride overrideStatus = AssetOverride.none;
                     if (row.spareCriticality.manualPriority) {
