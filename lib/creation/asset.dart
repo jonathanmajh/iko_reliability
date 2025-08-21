@@ -170,7 +170,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
         readOnly: true,
         field: 'description',
         type: TrinaColumnType.text(),
-        width: 900,
+        width: 600,
       ),
       TrinaColumn(
         width: 100,
@@ -436,14 +436,15 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                         labelText: 'New Asset Number', hintText: 'X####'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Asset Number must be 5 characters long';
+                        return 'Asset Number cannot be blank';
                       }
-                      if (value.length != 5) {
-                        return 'Asset Number must be 5 characters long';
+                      if (value.length != 5 || value.length != 7) {
+                        return 'Asset Number must be 5 or 7 characters long';
                       }
                       var exp = RegExp(r'(^[a-zA-Z]{1}[0-9]{4}$)');
-                      if (!exp.hasMatch(value)) {
-                        return 'Asset Number must be in the format X####';
+                      var exp2 = RegExp(r'(^[a-zA-Z]{1}[0-9]{6}$)');
+                      if (!exp.hasMatch(value) || !exp2.hasMatch(value)) {
+                        return 'Asset Number must be in the format X#### / X######';
                       }
                       return null;
                     },
@@ -459,28 +460,22 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
               decoration: const InputDecoration(
                 labelText: 'Asset Description',
               ),
+              maxLength: 55,
+              maxLengthEnforcement: MaxLengthEnforcement.none,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Description cannot be empty';
                 }
                 return null;
               },
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(
-                  55,
-                  maxLengthEnforcement: MaxLengthEnforcement.none,
-                ), // to limit total description to 55 characters
-              ],
             ),
             TextFormField(
               controller: sjpTextController,
               decoration: const InputDecoration(
                   labelText: 'Standard Job Plan Description (Optional)',
                   hintText: 'Will use Asset Description if empty'),
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(
-                    55), // to limit total description to 55 characters
-              ],
+              maxLength: 55,
+              maxLengthEnforcement: MaxLengthEnforcement.none,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

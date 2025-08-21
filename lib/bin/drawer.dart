@@ -19,28 +19,28 @@ class NavDrawer extends StatelessWidget {
       padding: EdgeInsets.zero,
       children: <Widget>[
         DrawerHeader(
+            padding: EdgeInsetsGeometry.fromLTRB(0, 16, 0, 8),
             child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'IKO Reliability Maximo',
-              style: TextStyle(
-                // color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Home'),
-              onTap: () {
-                context.router.replacePath("/");
-                // change app state...
-                Navigator.pop(context); // close the drawer
-              },
-            ),
-          ],
-        )),
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const ListTile(
+                  title: Text(
+                    style: TextStyle(fontSize: 24),
+                    'IKO Reliability Tool',
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.home),
+                  title: const Text('Home'),
+                  onTap: () {
+                    context.router.replacePath("/");
+                    // change app state...
+                    Navigator.pop(context); // close the drawer
+                  },
+                ),
+              ],
+            )),
         ExpansionTile(
           initiallyExpanded: true,
           title: const Text("Criticality"),
@@ -95,7 +95,7 @@ class NavDrawer extends StatelessWidget {
                 title: const Text("Maximo Admin"),
                 children: <Widget>[
                   ListTile(
-                    leading: const Icon(Icons.settings),
+                    leading: const Icon(Icons.edit_calendar),
                     title: const Text('Validate PMs'),
                     onTap: () {
                       context.router.replacePath("/pm/check");
@@ -103,15 +103,7 @@ class NavDrawer extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: const Text('Update PM Meters'),
-                    onTap: () {
-                      context.router.replacePath("/pm/update-meter");
-                      Navigator.pop(context); // close the drawer
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.settings),
+                    leading: const Icon(Icons.precision_manufacturing),
                     title: const Text('Create Assets'),
                     onTap: () {
                       context.router.replacePath("/asset");
@@ -119,15 +111,7 @@ class NavDrawer extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: const Text('Create Contractors'),
-                    onTap: () {
-                      context.router.replacePath("/contractor");
-                      Navigator.pop(context); // close the drawer
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.settings),
+                    leading: const Icon(Icons.punch_clock),
                     title: const Text('Generate Timesheets'),
                     onTap: () {
                       context.router.replacePath("/timesheet");

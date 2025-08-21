@@ -19,8 +19,7 @@ class AssetCreationNotifier extends ChangeNotifier {
     parentAssets.clear();
     pendingAssets.clear();
 
-    final dbrows = await database!
-        .getSiteAssetUploads(site); //todo make it able to load other sites
+    final dbrows = await database!.getSiteAssetUploads(site);
     for (var row in dbrows) {
       if (row.asset.newAsset == 1) {
         pendingAssets[row.asset.assetnum] = 'new';
@@ -96,7 +95,6 @@ class AssetCreationNotifier extends ChangeNotifier {
       throw 'Asset $assetNum has children';
     }
     if (siteAssets[assetNum]!.asset.newAsset == 0) {
-      //TODO: != 1?
       throw 'Asset already exists in Maximo, cannot delete';
     }
 
