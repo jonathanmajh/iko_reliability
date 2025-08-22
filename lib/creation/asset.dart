@@ -181,6 +181,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
         type: TrinaColumnType.text(),
       ),
       TrinaColumn(
+          width: 100,
           title: 'Actions',
           field: 'actions',
           type: TrinaColumnType.text(),
@@ -438,18 +439,18 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                       if (value == null || value.isEmpty) {
                         return 'Asset Number cannot be blank';
                       }
-                      if (value.length != 5 || value.length != 7) {
+                      if (value.length != 5 && value.length != 7) {
                         return 'Asset Number must be 5 or 7 characters long';
                       }
                       var exp = RegExp(r'(^[a-zA-Z]{1}[0-9]{4}$)');
                       var exp2 = RegExp(r'(^[a-zA-Z]{1}[0-9]{6}$)');
-                      if (!exp.hasMatch(value) || !exp2.hasMatch(value)) {
+                      if (!exp.hasMatch(value) && !exp2.hasMatch(value)) {
                         return 'Asset Number must be in the format X#### / X######';
                       }
                       return null;
                     },
                     inputFormatters: [
-                      LengthLimitingTextInputFormatter(5),
+                      LengthLimitingTextInputFormatter(7),
                     ],
                   ),
                 ),
@@ -604,7 +605,7 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                   .read<SelectedSiteNotifier>()
                   .setSite(context.read<SelectedSiteNotifier>().selectedSite);
               toast(navigatorKey.currentContext!,
-                  'Created Asset $assetNum, id: $id');
+                  'Added $assetNum to table, id: $id');
             } catch (err) {
               toast(navigatorKey.currentContext!, '$err');
             }
