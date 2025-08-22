@@ -30,15 +30,24 @@ class AssetPage extends StatefulWidget {
 
 class _AssetPageState extends State<AssetPage>
     with SingleTickerProviderStateMixin {
+  TrinaGridStateManager? assetGridStateManager;
+
+  void setAssetGridStateManager(TrinaGridStateManager manager) {
+    assetGridStateManager = manager;
+  }
+
   List<TrinaColumn> columns = [];
   List<TrinaRow> rows = [];
 
   int fabIndex = 0;
-  List fabList = [
-    //pairs of icons and alert dialogs
-    [const Icon(Icons.add), const AssetCreationDialog()],
-    [const Icon(Icons.upload), const AssetUploadDialog()],
-  ];
+  List fabList(BuildContext context) => [
+        //pairs of icons and alert dialogs
+        [
+          const Icon(Icons.add),
+          AssetCreationDialog(stateManager: assetGridStateManager)
+        ],
+        [const Icon(Icons.upload), const AssetUploadDialog()],
+      ];
 
   late TabController _tabController;
 
@@ -86,13 +95,14 @@ class _AssetPageState extends State<AssetPage>
       endDrawer: const EndDrawer(),
       body: TabBarView(
         controller: _tabController,
-        children: const [
+        children: [
           Column(
             children: <Widget>[
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(30),
-                  child: AssetCreationGrid(),
+                  child: AssetCreationGrid(
+                      onStateManagerReady: setAssetGridStateManager),
                 ),
               ),
             ],
@@ -124,17 +134,18 @@ class _AssetPageState extends State<AssetPage>
           showDialog<String>(
               context: context,
               builder: (BuildContext context) {
-                return fabList[fabIndex][1];
+                return fabList(context)[fabIndex][1];
               });
         },
-        child: fabList[fabIndex][0],
+        child: fabList(context)[fabIndex][0],
       ),
     );
   }
 }
 
 class AssetCreationGrid extends StatefulWidget {
-  const AssetCreationGrid({super.key});
+  final void Function(TrinaGridStateManager) onStateManagerReady;
+  const AssetCreationGrid({super.key, required this.onStateManagerReady});
 
   @override
   State<AssetCreationGrid> createState() => _AssetCreationGridState();
@@ -181,6 +192,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
         type: TrinaColumnType.text(),
       ),
       TrinaColumn(
+          width: 100,
           title: 'Actions',
           field: 'actions',
           type: TrinaColumnType.text(),
@@ -327,6 +339,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
         rows: rows,
         onLoaded: (TrinaGridOnLoadedEvent event) {
           stateManager = event.stateManager;
+          widget.onStateManagerReady(stateManager);
           stateManager.setShowColumnFilter(true);
           stateManager.setRowGroup(TrinaRowGroupTreeDelegate(
             resolveColumnDepth: (column) => stateManager.columnIndex(column),
@@ -345,7 +358,8 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
 }
 
 class AssetCreationDialog extends StatefulWidget {
-  const AssetCreationDialog({super.key});
+  final TrinaGridStateManager? stateManager;
+  const AssetCreationDialog({super.key, required this.stateManager});
 
   @override
   State<AssetCreationDialog> createState() => _AssetCreationDialogState();
@@ -438,18 +452,18 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                       if (value == null || value.isEmpty) {
                         return 'Asset Number cannot be blank';
                       }
-                      if (value.length != 5 || value.length != 7) {
+                      if (value.length != 5 && value.length != 7) {
                         return 'Asset Number must be 5 or 7 characters long';
                       }
                       var exp = RegExp(r'(^[a-zA-Z]{1}[0-9]{4}$)');
                       var exp2 = RegExp(r'(^[a-zA-Z]{1}[0-9]{6}$)');
-                      if (!exp.hasMatch(value) || !exp2.hasMatch(value)) {
+                      if (!exp.hasMatch(value) && !exp2.hasMatch(value)) {
                         return 'Asset Number must be in the format X#### / X######';
                       }
                       return null;
                     },
                     inputFormatters: [
-                      LengthLimitingTextInputFormatter(5),
+                      LengthLimitingTextInputFormatter(7),
                     ],
                   ),
                 ),
@@ -600,11 +614,32 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                 throw Exception(
                     'Context no longer mounted, user navigated away?');
               }
-              context
-                  .read<SelectedSiteNotifier>()
-                  .setSite(context.read<SelectedSiteNotifier>().selectedSite);
+              for (var group in widget.stateManager!.iterateAllRowGroup) {
+                // Add a new row to this group
+                // nah doesn't work lol, need to trigger build somehow
+                // https://github.com/bosskmk/pluto_grid/issues/689
+                group.type.group.children.add(
+                  TrinaRow(
+                    cells: {
+                      'description':
+                          TrinaCell(value: descriptionTextController.text),
+                      'hierarchy': TrinaCell(
+                          value: assetNumTextController.text.toUpperCase()),
+                      'site': TrinaCell(
+                          value: context
+                              .read<SelectedSiteNotifier>()
+                              .selectedSite),
+                      'actions': TrinaCell(value: ''),
+                    },
+                  ),
+                );
+                widget.stateManager!.notifyListeners();
+              }
+              // context
+              //     .read<SelectedSiteNotifier>()
+              //     .setSite(context.read<SelectedSiteNotifier>().selectedSite);
               toast(navigatorKey.currentContext!,
-                  'Created Asset $assetNum, id: $id');
+                  'Add $assetNum to view, id: $id');
             } catch (err) {
               toast(navigatorKey.currentContext!, '$err');
             }
