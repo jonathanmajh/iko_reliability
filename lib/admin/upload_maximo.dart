@@ -8,6 +8,7 @@ import 'package:iko_reliability_flutter/main.dart';
 import '../creation/asset_creation_notifier.dart';
 import '../bin/consts.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 Future<Map<String, List<List<String>>>> uploadPMToMaximo(
   String env,
@@ -320,11 +321,6 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   AssetCreationNotifier assetCreationNotifier,
   String selectedSite,
 ) async {
-  const assetUrl = 'iko_asset?action=importfile';
-  const locationUrl = 'iko_location?action=importfile';
-  var headers = {
-    "preview": "1",
-  };
   Map<String, dynamic> result = {};
   int numDuplicates = 0;
 
@@ -346,29 +342,14 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       }
     }
 
-    if (postResult['status'] == 'uploaded') {
+    if (postResult) {
       debugPrint('$object upload success');
       setResultValue('success');
-    } else if (postResult['status'] == 'failed') {
-      debugPrint('$object upload failed');
-      setResultValue('fail');
-      result['result'] = 'fail';
-      result['failReason'] = 'Invalid Request';
-      result['postResponse'] = postResult['body'];
-      throw ['Invalid Request Body for ($object)', result];
-    } else if (postResult['status'] == 'preview') {
-      setResultValue('preview');
-      result['result'] = 'preview';
-      result['failReason'] = 'Preview mode on';
-      result['postResponse'] = 'null';
-      throw ['Preview mode on', result];
     } else {
       debugPrint('$object upload failed');
       setResultValue('fail');
       result['result'] = 'fail';
       result['failReason'] = 'An error has occured';
-      result['postResponse'] = postResult['status'];
-      throw ['An error has occured', result];
     }
   }
 
@@ -379,27 +360,20 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     numDuplicates++;
   } else {
     //upload location
-    var locationResult = await maximoRequest(
-        locationUrl,
-        'post',
-        env,
-        const ListToCsvConverter().convert(
-          [
-            tableHeaders['Location']!,
-            [
-              selectedSite,
-              'L-${asset.asset.assetnum}',
-              asset.asset.description,
-              'OPERATING',
-              'GENERAL',
-              'OPERATING',
-              'L-${asset.asset.parent}'
-            ]
-          ],
-        ),
-        headers,
-        false,
-        false);
+    var locationResult = await uploadGeneric(
+      [
+        selectedSite,
+        'L-${asset.asset.assetnum}',
+        asset.asset.description,
+        'OPERATING',
+        'GENERAL',
+        'OPERATING',
+        'L-${asset.asset.parent}'
+      ],
+      env,
+      'Location',
+      'iko_location',
+    );
     handlePostResult(locationResult, 'location', ['location']);
   }
 
@@ -411,79 +385,26 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     numDuplicates++;
   } else {
     debugPrint('asset does not exist, uploading');
-    var assetResult = await maximoRequest(
-        assetUrl,
-        'post',
-        env,
-        const ListToCsvConverter().convert([
-          [
-            'SITEID',
-            'ASSETNUM',
-            'DESCRIPTION',
-            'LOCATION',
-            'PARENT',
-            'STATUS',
-          ],
-          [
-            selectedSite,
-            asset.asset.assetnum,
-            asset.asset.description,
-            'L-${asset.asset.assetnum}',
-            asset.asset.parent,
-            'OPERATING'
-          ]
-        ]),
-        headers,
-        false,
-        false);
+    var assetResult = await uploadGeneric(
+      [
+        selectedSite,
+        asset.asset.assetnum,
+        asset.asset.description,
+        'L-${asset.asset.assetnum}',
+        asset.asset.parent ?? '',
+        'OPERATING',
+        asset.uploads?.installationDate ?? '',
+        asset.uploads?.assetCriticality?.toString() ?? '',
+        asset.uploads?.vendor ?? '',
+        asset.uploads?.manufacturer ?? '',
+      ],
+      env,
+      'AssetUpload',
+      'iko_asset',
+    );
     handlePostResult(assetResult, 'asset', ['asset']);
-    if (asset.uploads != null) {
-      assetResult = await maximoRequest(
-          assetUrl,
-          'post',
-          env,
-          const ListToCsvConverter().convert([
-            [
-              'SITEID',
-              'ASSETNUM',
-              'INSTALLDATE',
-              'PRIORITY',
-              'VENDOR',
-              'MANUFACTURER',
-              // 'IKO_MODELNUM',
-            ],
-            [
-              selectedSite,
-              asset.asset.assetnum,
-              asset.uploads?.installationDate ?? '',
-              asset.uploads?.assetCriticality ?? '',
-              asset.uploads?.vendor ?? '',
-              asset.uploads?.manufacturer ?? '',
-              // asset.uploads?.modelNum ?? '',
-            ]
-          ]),
-          headers,
-          false,
-          false);
-      handlePostResult(assetResult, 'asset', ['asset']);
-    }
   }
 
-  List<String> jobPlanHeaders = [
-    "JPNUM",
-    "PLUSCREVNUM",
-    "DESCRIPTION",
-    "DESCRIPTION_LONGDESCRIPTION",
-    "STATUS",
-    "PERSONGROUP",
-    "IKO_CONDITIONS",
-    "PRIORITY",
-    "IKO_WORKTYPE",
-    "TEMPLATETYPE",
-    "JPDURATION",
-    "DOWNTIME",
-    "INTERRUPTIBLE"
-  ];
   result['jobplan'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
     List<String> jobPlanBody = [];
@@ -493,10 +414,13 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       numDuplicates++;
       continue;
     }
+    String description = asset.uploads?.sjpDescription ?? '';
     jobPlanBody = [
+      '',
+      '',
       '${asset.asset.assetnum}${entry.key}',
       '0',
-      '${asset.uploads?.sjpDescription ?? asset.asset.description} - ${entry.value.description}',
+      '${description.isEmpty ? asset.asset.description : description} - ${entry.value.description}',
       '',
       'ACTIVE',
       personGroups[entry.key[entry.key.length - 1]]!,
@@ -507,17 +431,16 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       '1',
       'N',
       'N',
+      '',
+      'N',
     ];
 
-    var jobPlanResult = await maximoRequest(
-        'iko_jobplan?action=importfile',
-        'post',
-        env,
-        const ListToCsvConverter().convert([jobPlanHeaders, jobPlanBody]),
-        headers,
-        false,
-        false);
-
+    var jobPlanResult = await uploadGeneric(
+      jobPlanBody,
+      env,
+      'JobPlan',
+      'iko_jobplan',
+    );
     handlePostResult(
         jobPlanResult,
         'jobplan ${asset.asset.assetnum}${entry.key}',
@@ -538,7 +461,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       continue;
     }
 
-    List<String> jobPlanBody = [
+    List<String> jobLaborBody = [
       '',
       '',
       '${asset.asset.assetnum}${entry.key}',
@@ -550,15 +473,13 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       ''
     ];
 
-    var jobLaborResult = await maximoRequest(
-        'iko_joblabor?action=importfile',
-        'post',
-        env,
-        const ListToCsvConverter()
-            .convert([tableHeaders['JobLabor'], jobPlanBody]),
-        headers,
-        false,
-        false);
+    var jobLaborResult = await uploadGeneric(
+      jobLaborBody,
+      env,
+      'JobLabor',
+      'iko_joblabor',
+    );
+
     handlePostResult(
         jobLaborResult,
         'joblabor ${asset.asset.assetnum}${entry.key}',
@@ -576,7 +497,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       continue;
     }
 
-    List<String> jobPlanBody = [
+    List<String> jobAssetBody = [
       '',
       '',
       '${asset.asset.assetnum}${entry.key}',
@@ -587,15 +508,13 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       selectedSite,
     ];
 
-    var jpassetlinkResult = await maximoRequest(
-        'iko_jpassetlink?action=importfile',
-        'post',
-        env,
-        const ListToCsvConverter()
-            .convert([tableHeaders['JPASSETLINK'], jobPlanBody]),
-        headers,
-        false,
-        false);
+    var jpassetlinkResult = await uploadGeneric(
+      jobAssetBody,
+      env,
+      'JPASSETLINK',
+      'iko_jpassetlink',
+    );
+
     handlePostResult(
         jpassetlinkResult,
         'jpassetlink ${asset.asset.assetnum}${entry.key}',
@@ -740,9 +659,16 @@ Future<bool> isNewAsset(
   }
 }
 
-Future<bool> uploadGeneric(List<String> data, String maximoEnvironment,
-    String table, String url) async {
-  final result = await maximoRequest(url, 'post', maximoEnvironment,
+Future<bool> uploadGeneric(
+  List<String> data,
+  String maximoEnvironment,
+  String table,
+  String url,
+) async {
+  final result = await maximoRequest(
+      '$url?action=importfile',
+      'post',
+      maximoEnvironment,
       const ListToCsvConverter().convert([tableHeaders[table], data]));
   if (result['status'] == 'uploaded') {
     debugPrint('uploaded');
@@ -753,33 +679,40 @@ Future<bool> uploadGeneric(List<String> data, String maximoEnvironment,
   }
 }
 
-Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
-    [String? body,
-    Map<String, String>? header,
-    bool addQuery = true,
-    bool preview = false]) async {
+Future<Map<String, dynamic>> maximoRequest(
+  String url,
+  String type,
+  String env, [
+  String? body,
+  Map<String, String>? header,
+]) async {
   url = '${maximoServerDomains[env]}$url';
   final login = await getLoginMaximo(env);
   header ??= {};
-  if (url.contains('?')) {
-    url = '$url&lean=1';
-  } else {
-    url = '$url?lean=1';
-  }
+  url = url.contains('?') ? '$url&lean=1' : '$url?lean=1';
+
   if (!apiKeys.containsKey(env)) {
     url = '$url&_lid=${login.login}&_lpwd=${login.password}';
   } else {
     header['apikey'] = login.password;
   }
+
   while (connectionPool > 1) {
     await Future.delayed(const Duration(milliseconds: 500));
   }
   connectionPool++;
+
+  if (type == 'api') {
+    url = url.replaceAll('/os/', '/script/');
+  }
+
+  if (kIsWeb) {
+    header['x-proxy-target-url'] = url;
+    url = 'https://iko-proxy.jonathanmajh.workers.dev/';
+  }
+
   http.Response response;
   if (type == 'get' || type == 'api') {
-    if (type == 'api') {
-      url = url.replaceAll('/os/', '/script/');
-    }
     try {
       response = await http.get(Uri.parse(url), headers: header);
     } catch (err) {
@@ -809,13 +742,7 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     header['Content-Type'] = 'text/plain';
     try {
       response = await http.post(
-        Uri.parse(
-          addQuery
-              ? (url.contains('?')
-                  ? '$url&action=importfile'
-                  : '$url?action=importfile')
-              : url,
-        ),
+        Uri.parse(url),
         headers: header,
         body: body,
       );
@@ -842,18 +769,11 @@ Future<Map<String, dynamic>> maximoRequest(String url, String type, String env,
     }
     if (parsed['totaldoc'] != null && parsed['validdoc'] != null) {
       if (parsed['totaldoc'] == parsed['validdoc']) {
-        if (preview == true) {
-          return {'status': 'preview'};
-        }
         // preview passed
         header.remove('preview');
         try {
           response = await http.post(
-            Uri.parse(
-              url.contains('?')
-                  ? '$url&action=importfile'
-                  : '$url?action=importfile',
-            ),
+            Uri.parse(url),
             headers: header,
             body: body,
           );

@@ -7,6 +7,7 @@ import '../bin/db_drift.dart';
 import '../main.dart';
 import '../bin/consts.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../settings/settings_notifier.dart';
 
@@ -48,6 +49,11 @@ Future<Map<String, dynamic>> getUserMaximo(
     url = '$url?_lid=$userid&_lpwd=$password';
   }
   url = url.replaceAll('/os/', '/');
+  if (kIsWeb) {
+    header['x-proxy-target-url'] = url;
+    url = 'https://iko-proxy.jonathanmajh.workers.dev/';
+  }
+
   http.Response response;
   try {
     response = await http.get(Uri.parse(url), headers: header);

@@ -339,6 +339,18 @@ const tableHeaders = {
     'TYPE',
     'PARENT'
   ],
+  'AssetUpload': [
+    'SITEID',
+    'ASSETNUM',
+    'DESCRIPTION',
+    'LOCATION',
+    'PARENT',
+    'STATUS',
+    'INSTALLDATE',
+    'PRIORITY',
+    'VENDOR',
+    'MANUFACTURER',
+  ],
 };
 
 /// Maps Maximo server environments to their API endpoints.
