@@ -441,7 +441,7 @@ WHERE siteid = :siteid
   },
 )
 class MyDatabase extends _$MyDatabase {
-  MyDatabase() : super(impl.connect());
+  MyDatabase() : super(impl.connect(name: 'reliability'));
 
   MyDatabase.forTesting(DatabaseConnection super.connection);
   // you should bump this number whenever you change or add a table definition.

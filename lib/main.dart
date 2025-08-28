@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/pm_jp_storage.dart';
 import 'package:iko_reliability_flutter/bin/logger_web.dart';
 import 'package:iko_reliability_flutter/bin/logger_windows.dart';
+import 'package:iko_reliability_flutter/items/item_db.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:logger/logger.dart';
@@ -26,6 +27,7 @@ import 'notifiers/maximo_server_notifier.dart';
 import 'bin/common.dart';
 
 MyDatabase? database;
+ItemDatabase? itemDatabase;
 final navigatorKey = GlobalKey<NavigatorState>();
 Logger? logger;
 int connectionPool = 0;
@@ -83,6 +85,7 @@ void main() async {
   };
   numberNotifier.clear();
   database = MyDatabase();
+  itemDatabase = ItemDatabase();
   SettingsNotifier settingsNotifier = SettingsNotifier();
   SelectedSiteNotifier selectedSiteNotifier = SelectedSiteNotifier();
   ThemeManager themeManager = ThemeManager();

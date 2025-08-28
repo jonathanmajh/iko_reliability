@@ -5,12 +5,13 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:drift/wasm.dart';
 import 'package:flutter/foundation.dart';
+import 'package:iko_reliability_flutter/bin/fetch_remote_db.dart';
 
 /// Obtains a database connection for running drift on the web.
-DatabaseConnection connect() {
+DatabaseConnection connect({required String name}) {
   return DatabaseConnection.delayed(Future(() async {
-    final db = await WasmDatabase.open(
-      databaseName: 'iko_reliability',
+    WasmDatabaseResult db = await WasmDatabase.open(
+      databaseName: name,
       sqlite3Uri: Uri.parse('/sqlite3.wasm'),
       driftWorkerUri: Uri.parse('/drift_worker.js'),
     );
@@ -18,6 +19,30 @@ DatabaseConnection connect() {
     if (db.missingFeatures.isNotEmpty) {
       debugPrint('Using ${db.chosenImplementation} due to unsupported '
           'browser features: ${db.missingFeatures}');
+    }
+
+    if (name == 'item') {
+      final executor = db.resolvedExecutor;
+      final result = await executor
+          .runSelect('select description from itemCache limit 1;', []);
+      if (result.isEmpty) {
+        // No tables found, so fetch and import the remote DB
+        final dbBytes = await fetchAndUnzipDb(
+            'https://raw.githubusercontent.com/jonathanmajh/iko_proxy/refs/heads/main/program.zip',
+            'program.db');
+
+        // Import the database file into IndexedDB
+        db = await WasmDatabase.open(
+          databaseName: name,
+          sqlite3Uri: Uri.parse('/sqlite3.wasm'),
+          driftWorkerUri: Uri.parse('/drift_worker.js'),
+          initializeDatabase: () async {
+            final data = dbBytes;
+            return data.buffer.asUint8List();
+          },
+        );
+        debugPrint('Imported remote DB');
+      }
     }
 
     return db.resolvedExecutor;

@@ -9,6 +9,7 @@ import '../admin/pm_meter_update.dart';
 import '../criticality/asset_criticality.dart';
 import '../criticality/spare_criticality.dart';
 import '../criticality/system_criticality.dart';
+import '../items/item.dart';
 
 part 'route.gr.dart';
 
@@ -32,5 +33,6 @@ class AppRouter extends RootStackRouter {
         AutoRoute(path: "/pm/update-meter", page: PmMeterUpdateRoute.page),
         AutoRoute(path: '/criticality/spare', page: SpareCriticalityRoute.page),
         AutoRoute(path: "/timesheet", page: TimesheetRoute.page),
+        AutoRoute(path: "/item", page: ItemRoute.page),
       ];
 }

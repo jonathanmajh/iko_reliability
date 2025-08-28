@@ -14,7 +14,7 @@ part of 'route.dart';
 /// [AssetCriticalityPage]
 class AssetCriticalityRoute extends PageRouteInfo<void> {
   const AssetCriticalityRoute({List<PageRouteInfo>? children})
-    : super(AssetCriticalityRoute.name, initialChildren: children);
+      : super(AssetCriticalityRoute.name, initialChildren: children);
 
   static const String name = 'AssetCriticalityRoute';
 
@@ -30,7 +30,7 @@ class AssetCriticalityRoute extends PageRouteInfo<void> {
 /// [AssetPage]
 class AssetRoute extends PageRouteInfo<void> {
   const AssetRoute({List<PageRouteInfo>? children})
-    : super(AssetRoute.name, initialChildren: children);
+      : super(AssetRoute.name, initialChildren: children);
 
   static const String name = 'AssetRoute';
 
@@ -46,7 +46,7 @@ class AssetRoute extends PageRouteInfo<void> {
 /// [ContractorPage]
 class ContractorRoute extends PageRouteInfo<void> {
   const ContractorRoute({List<PageRouteInfo>? children})
-    : super(ContractorRoute.name, initialChildren: children);
+      : super(ContractorRoute.name, initialChildren: children);
 
   static const String name = 'ContractorRoute';
 
@@ -62,7 +62,7 @@ class ContractorRoute extends PageRouteInfo<void> {
 /// [HomePage]
 class HomeRoute extends PageRouteInfo<void> {
   const HomeRoute({List<PageRouteInfo>? children})
-    : super(HomeRoute.name, initialChildren: children);
+      : super(HomeRoute.name, initialChildren: children);
 
   static const String name = 'HomeRoute';
 
@@ -75,10 +75,26 @@ class HomeRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [ItemPage]
+class ItemRoute extends PageRouteInfo<void> {
+  const ItemRoute({List<PageRouteInfo>? children})
+      : super(ItemRoute.name, initialChildren: children);
+
+  static const String name = 'ItemRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ItemPage();
+    },
+  );
+}
+
+/// generated route for
 /// [PmCheckPage]
 class PmCheckRoute extends PageRouteInfo<void> {
   const PmCheckRoute({List<PageRouteInfo>? children})
-    : super(PmCheckRoute.name, initialChildren: children);
+      : super(PmCheckRoute.name, initialChildren: children);
 
   static const String name = 'PmCheckRoute';
 
@@ -94,7 +110,7 @@ class PmCheckRoute extends PageRouteInfo<void> {
 /// [PmMeterUpdatePage]
 class PmMeterUpdateRoute extends PageRouteInfo<void> {
   const PmMeterUpdateRoute({List<PageRouteInfo>? children})
-    : super(PmMeterUpdateRoute.name, initialChildren: children);
+      : super(PmMeterUpdateRoute.name, initialChildren: children);
 
   static const String name = 'PmMeterUpdateRoute';
 
@@ -110,7 +126,7 @@ class PmMeterUpdateRoute extends PageRouteInfo<void> {
 /// [SpareCriticalityPage]
 class SpareCriticalityRoute extends PageRouteInfo<void> {
   const SpareCriticalityRoute({List<PageRouteInfo>? children})
-    : super(SpareCriticalityRoute.name, initialChildren: children);
+      : super(SpareCriticalityRoute.name, initialChildren: children);
 
   static const String name = 'SpareCriticalityRoute';
 
@@ -126,7 +142,7 @@ class SpareCriticalityRoute extends PageRouteInfo<void> {
 /// [SystemCriticalityPage]
 class SystemCriticalityRoute extends PageRouteInfo<void> {
   const SystemCriticalityRoute({List<PageRouteInfo>? children})
-    : super(SystemCriticalityRoute.name, initialChildren: children);
+      : super(SystemCriticalityRoute.name, initialChildren: children);
 
   static const String name = 'SystemCriticalityRoute';
 
@@ -142,7 +158,7 @@ class SystemCriticalityRoute extends PageRouteInfo<void> {
 /// [TimesheetPage]
 class TimesheetRoute extends PageRouteInfo<void> {
   const TimesheetRoute({List<PageRouteInfo>? children})
-    : super(TimesheetRoute.name, initialChildren: children);
+      : super(TimesheetRoute.name, initialChildren: children);
 
   static const String name = 'TimesheetRoute';
 

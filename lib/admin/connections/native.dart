@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:iko_reliability_flutter/bin/fetch_remote_db.dart';
 import 'package:intl/intl.dart';
 
 import 'package:drift/drift.dart';
@@ -9,28 +10,43 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-Future<File> get databaseFile async {
+Future<File> databaseFile({required String name}) async {
   // We use `path_provider` to find a suitable path to store our data in.
   final appDir = await getApplicationDocumentsDirectory();
-  final dbPath = p.join(appDir.path, 'ReliabilityApp', 'iko_reliability');
+  String dbPath = p.join(appDir.path, 'ReliabilityApp', name);
+  dbPath = '$dbPath.db';
+  final file = File(dbPath);
   // auto-backup function, runs every 10 minutes
-  Timer.periodic(const Duration(minutes: 5), (arg) async {
-    (File('$dbPath.db')).copy(
-        '$dbPath-${DateFormat('yyyyMMddHHmmSS').format(DateTime.now())}.db');
-    // remove backups past 100
-    final myDir = Directory(p.join(appDir.path, 'ReliabilityApp'));
-    final files = myDir.listSync();
-    if (files.length > 101) {
-      files[1].delete();
+  if (name == 'item') {
+    if (!file.existsSync()) {
+      // copy prepopulated database
+      final bytes = await fetchAndUnzipDb(
+          'https://raw.githubusercontent.com/jonathanmajh/iko_proxy/refs/heads/main/program.zip',
+          'program.db');
+      await file.create(recursive: true);
+      await file.writeAsBytes(bytes);
     }
-  });
-  return File('$dbPath.db');
+  }
+  if (name == 'reliability') {
+    Timer.periodic(const Duration(minutes: 5), (arg) async {
+      (File(dbPath)).copy(
+          '$dbPath-${DateFormat('yyyyMMddHHmmSS').format(DateTime.now())}.db');
+      // remove backups past 100
+      final myDir = Directory(p.join(appDir.path, 'ReliabilityApp'));
+      final files = myDir.listSync();
+      if (files.length > 101) {
+        files[1].delete();
+      }
+    });
+  }
+  return file;
 }
 
 /// Obtains a database connection for running drift in a Dart VM.
-DatabaseConnection connect() {
+DatabaseConnection connect({required String name}) {
   return DatabaseConnection.delayed(Future(() async {
-    return NativeDatabase.createBackgroundConnection(await databaseFile);
+    return NativeDatabase.createBackgroundConnection(
+        await databaseFile(name: name));
   }));
 }
 
