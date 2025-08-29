@@ -9,14 +9,14 @@ part 'item_db.g.dart';
 class ItemCaches extends Table {
   TextColumn get itemnum => text()();
   TextColumn get description => text()();
-  TextColumn get details => text()();
-  TextColumn get changedDate => text()();
-  TextColumn get searchText => text()();
-  TextColumn get glClass => text()();
-  TextColumn get uom => text()();
-  TextColumn get commodityGroup => text()();
-  TextColumn get extSearchText => text()();
-  TextColumn get extDescription => text()();
+  TextColumn get details => text().nullable()();
+  TextColumn get changedDate => text().nullable()();
+  TextColumn get searchText => text().nullable()();
+  TextColumn get glClass => text().nullable()();
+  TextColumn get uom => text().nullable()();
+  TextColumn get commodityGroup => text().nullable()();
+  TextColumn get extSearchText => text().nullable()();
+  TextColumn get extDescription => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {itemnum};
@@ -24,15 +24,55 @@ class ItemCaches extends Table {
   String get tableName => 'itemCache';
 }
 
+class InventoryCaches extends Table {
+  TextColumn get itemnum => text()();
+  TextColumn get siteid => text()();
+  TextColumn get catalogcode => text().nullable()();
+  TextColumn get modelnum => text().nullable()();
+  TextColumn get vendor => text().nullable()();
+  TextColumn get manufacturer => text().nullable()();
+  TextColumn get companyname => text().nullable()();
+  TextColumn get rowstamp => text().nullable()();
+  TextColumn get location => text()();
+  TextColumn get binnum => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {itemnum, location};
+  @override
+  String get tableName => 'inventoryCache';
+}
+
+class Manufacturers extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get fullName => text()();
+  TextColumn get shortName => text()();
+}
+
+class Abbreviations extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get origText => text()();
+  TextColumn get replaceText => text()();
+}
+
 @DriftDatabase(
   tables: [
     ItemCaches,
+    Manufacturers,
+    Abbreviations,
   ],
   queries: {
     'findItems':
         '''select itemnum from itemCache where search_text like :search''',
     'findItemsExt':
         '''select itemnum from itemCache where ext_search_text like :search''',
+    'getReplacements': '''SELECT upper(orig_text) orig_text
+    , upper(replace_text) replace_text
+FROM abbreviations
+UNION
+SELECT upper(full_name) orig_text
+    , upper(short_name) replace_text
+FROM manufacturers
+''',
   },
 )
 class ItemDatabase extends _$ItemDatabase {
@@ -48,11 +88,6 @@ class ItemDatabase extends _$ItemDatabase {
         await m.createAll();
       },
     );
-  }
-
-  Future<String> testCache() async {
-    final row = (await (select(itemCaches)..limit(1)).get());
-    return row.toString();
   }
 
   /// retrive lists of items with phrase in the description

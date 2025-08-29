@@ -6,13 +6,22 @@ class ItemNotifier extends ChangeNotifier {
   int currentLevel = 0;
   List<String> allItems = [];
   Map<int, String> rankedItems = {};
+  List<String> searchTerms = [];
 
-  void newResults(Map<int, List<String>> ranked) {
+  void newResults({
+    required Map<int, List<String>> ranked,
+    required List<String> searchTerm,
+  }) {
     results = ranked;
     for (var item in ranked.entries) {
       allItems.addAll(item.value);
     }
-    currentLevel = ranked.keys.max;
+    if (ranked.isEmpty) {
+      currentLevel = -1;
+    } else {
+      currentLevel = ranked.keys.max;
+    }
+    searchTerms = searchTerm;
     notifyListeners();
   }
 
@@ -20,8 +29,11 @@ class ItemNotifier extends ChangeNotifier {
     if (currentLevel == -1) {
       return [];
     }
+
     if (results.keys.contains(currentLevel)) {
-      return results[currentLevel]!;
+      final temp = results[currentLevel];
+      currentLevel -= 1;
+      return temp!;
     } else {
       currentLevel -= 1;
       return getResults();

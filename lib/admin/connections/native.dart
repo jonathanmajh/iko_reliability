@@ -13,7 +13,7 @@ import 'package:path/path.dart' as p;
 Future<File> databaseFile({required String name}) async {
   // We use `path_provider` to find a suitable path to store our data in.
   final appDir = await getApplicationDocumentsDirectory();
-  String dbPath = p.join(appDir.path, 'ReliabilityApp', name);
+  String dbPath = p.join(appDir.path, 'ReliabilityApp', 'iko_$name');
   dbPath = '$dbPath.db';
   final file = File(dbPath);
   // auto-backup function, runs every 10 minutes

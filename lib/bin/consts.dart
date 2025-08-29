@@ -29,6 +29,8 @@ final spareZValue = {
   3: 2.44,
 };
 
+final itemSearchDescCleanup = [',', ' ', '-', '	'];
+
 /// List of criticality string descriptions.
 List<String> criticalityStrings = [
   'Very Low',
