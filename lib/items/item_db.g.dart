@@ -85,7 +85,7 @@ class $ItemCachesTable extends ItemCaches
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'item_caches';
+  static const String $name = 'itemCache';
   @override
   VerificationContext validateIntegrity(Insertable<ItemCache> instance,
       {bool isInserting = false}) {
@@ -534,6 +534,28 @@ abstract class _$ItemDatabase extends GeneratedDatabase {
   _$ItemDatabase(QueryExecutor e) : super(e);
   $ItemDatabaseManager get managers => $ItemDatabaseManager(this);
   late final $ItemCachesTable itemCaches = $ItemCachesTable(this);
+  Selectable<String> findItems(String search) {
+    return customSelect(
+        'SELECT itemnum FROM itemCache WHERE search_text LIKE ?1',
+        variables: [
+          Variable<String>(search)
+        ],
+        readsFrom: {
+          itemCaches,
+        }).map((QueryRow row) => row.read<String>('itemnum'));
+  }
+
+  Selectable<String> findItemsExt(String search) {
+    return customSelect(
+        'SELECT itemnum FROM itemCache WHERE ext_search_text LIKE ?1',
+        variables: [
+          Variable<String>(search)
+        ],
+        readsFrom: {
+          itemCaches,
+        }).map((QueryRow row) => row.read<String>('itemnum'));
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

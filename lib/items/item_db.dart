@@ -20,12 +20,20 @@ class ItemCaches extends Table {
 
   @override
   Set<Column> get primaryKey => {itemnum};
+  @override
+  String get tableName => 'itemCache';
 }
 
 @DriftDatabase(
   tables: [
     ItemCaches,
   ],
+  queries: {
+    'findItems':
+        '''select itemnum from itemCache where search_text like :search''',
+    'findItemsExt':
+        '''select itemnum from itemCache where ext_search_text like :search''',
+  },
 )
 class ItemDatabase extends _$ItemDatabase {
   ItemDatabase() : super(impl.connect(name: 'item'));
@@ -45,5 +53,49 @@ class ItemDatabase extends _$ItemDatabase {
   Future<String> testCache() async {
     final row = (await (select(itemCaches)..limit(1)).get());
     return row.toString();
+  }
+
+  /// retrive lists of items with phrase in the description
+  /// return map with the number of times each item appears across all lists
+  Future<Map<int, List<String>>> rankResults(
+      {required List<String> phrases, bool extended = false}) async {
+    List<List<String>> results = [];
+    Map<String, bool> allSet = {};
+    // get results for each phrase
+    for (String phrase in phrases) {
+      var temp = extended
+          ? await findItemsExt('%$phrase%').get()
+          : await findItems('%$phrase%').get();
+      results.add(temp);
+      for (var item in temp) {
+        allSet[item] = true;
+      }
+    }
+    // rank results by number of appearances
+    Map<int, List<String>> ranked = {};
+    for (String item in allSet.keys) {
+      int count = 0;
+      for (var result in results) {
+        if (result.contains(item)) {
+          count += 1;
+        }
+      }
+      if (ranked[count] == null) {
+        ranked[count] = [];
+      }
+      ranked[count]!.add(item);
+    }
+    return ranked;
+  }
+
+  Future<Map<String, ItemCache>> getItemDetails(
+      {required List<String> items}) async {
+    final result =
+        await (select(itemCaches)..where((a) => a.itemnum.isIn(items))).get();
+    Map<String, ItemCache> details = {};
+    for (var item in result) {
+      details[item.itemnum] = item;
+    }
+    return details;
   }
 }

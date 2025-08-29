@@ -6,6 +6,7 @@ import 'package:iko_reliability_flutter/admin/pm_jp_storage.dart';
 import 'package:iko_reliability_flutter/bin/logger_web.dart';
 import 'package:iko_reliability_flutter/bin/logger_windows.dart';
 import 'package:iko_reliability_flutter/items/item_db.dart';
+import 'package:iko_reliability_flutter/items/item_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:logger/logger.dart';
@@ -143,6 +144,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => SpareOverrideNotifier()),
           ChangeNotifierProvider(
               create: (context) => SystemCriticalityNotifier()),
+          ChangeNotifierProvider(create: (context) => ItemNotifier()),
         ],
         child: Builder(
           builder: (context) {
