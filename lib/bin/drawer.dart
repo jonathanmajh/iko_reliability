@@ -87,6 +87,15 @@ class NavDrawer extends StatelessWidget {
                     });
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.warehouse),
+              title: const Text('Item Tool'),
+              onTap: () {
+                context.router.replacePath("/item");
+                // change app state...
+                Navigator.pop(context); // close the drawer
+              },
+            ),
           ],
         ),
         settingsNotifier.isAdmin

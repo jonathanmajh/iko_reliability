@@ -147,17 +147,20 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
         );
         double percent = (((formattedText.length - 1) / 2) /
             context.watch<ItemNotifier>().searchTerms.length);
+        if (percent > 1) {
+          percent = 1;
+        }
         final colour = percent > 0.7
             ? Colors.green
             : (percent > 0.4 ? Colors.orange : Colors.red);
         return Card(
             child: ListTile(
-                minTileHeight: 200,
+                // minTileHeight: 200,
                 leading: CircularPercentIndicator(
                   percent: percent,
                   center: Text('${(percent * 100).toStringAsFixed(0)}%'),
                   progressColor: colour,
-                  radius: 25,
+                  radius: 24,
                 ),
                 title: Text(items[index]),
                 subtitle: Text.rich(

@@ -4,6 +4,7 @@ import 'package:archive/archive.dart';
 
 Future<Uint8List> fetchAndUnzipDb(String url, String dbFileName) async {
   // Fetch the ZIP file
+  // TODO ahah turns out this doesn't work
   final response = await http.get(Uri.parse(url));
   final bytes = response.bodyBytes;
 
