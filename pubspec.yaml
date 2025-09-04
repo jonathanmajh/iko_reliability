@@ -45,7 +45,7 @@ dev_dependencies:
     flutter_lints: ^6.0.0
     auto_route_generator: ^10.0.1
     drift_dev: ^2.3.3
-    build_runner: ^2.2.0
+    build_runner: ^2.7.1
     squirrel:
         git: https://github.com/jonathanmajh/squirrel-flutter
 
