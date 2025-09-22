@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
-import 'dart:math';
-
+import 'package:intl/intl.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 const frequencyUnits = ['D', 'W', 'M', 'Y', 'J']; // J for job plan
@@ -185,8 +184,9 @@ class ParsedTemplate {
             String nextDate = '';
             if (nextRow[2] != null) {
               if (nextRow[2] is String) {
-                String temp = nextRow[2];
-                nextDate = temp.substring(0, (min(10, temp.length)));
+                DateFormat formatter = DateFormat('MM/dd/yyyy');
+                nextDate =
+                    formatter.parse(nextRow[2]).toString().substring(0, 10);
               } else {
                 nextDate = DateTime.fromMillisecondsSinceEpoch(
                         (nextRow[2] - 25569) * 86400000,
