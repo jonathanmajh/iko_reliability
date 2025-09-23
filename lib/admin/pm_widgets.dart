@@ -213,12 +213,92 @@ List<Widget> buildPMList(
         ]));
   }
   if (list.isEmpty) {
-    list.add(const Text('Open PM Template - Select and parse template files'));
-    list.add(const Text('Clear Templates - Clears all templates from program'));
-    list.add(const Text('Parsed PMs will appear in below list'));
-    list.add(const Text('Click on PMs in list to view details'));
+    list.add(instructionListItem(
+        'Open PM Template - Select and parse template files', context));
+    list.add(Divider(
+      height: 5,
+      thickness: 1,
+      indent: 20,
+      endIndent: 20,
+      color: Theme.of(context).dividerColor,
+    ));
+    list.add(instructionListItem(
+        'Clear Templates - Clears all templates from program', context));
+    list.add(Divider(
+      height: 5,
+      thickness: 1,
+      indent: 20,
+      endIndent: 20,
+      color: Theme.of(context).dividerColor,
+    ));
+    list.add(
+        instructionListItem('Parsed PMs will appear in below list', context));
+    list.add(Divider(
+      height: 5,
+      thickness: 1,
+      indent: 20,
+      endIndent: 20,
+      color: Theme.of(context).dividerColor,
+    ));
+    list.add(
+        instructionListItem('Click on PMs in list to view details', context));
+    list.add(Divider(
+      height: 5,
+      thickness: 1,
+      indent: 20,
+      endIndent: 20,
+      color: Theme.of(context).dividerColor,
+    ));
+    list.add(instructionListItem(
+        'Drag and drop PM template files to parse', context));
   }
   return list;
+}
+
+Widget instructionListItem(String instruction, BuildContext context) {
+  return SizedBox(
+    height: 100,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    width: 100,
+                    child: Icon(
+                      Icons.info_rounded,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 35,
+                    ),
+                  ),
+                  VerticalDivider(
+                    width: 20,
+                    thickness: 1,
+                    indent: 10,
+                    endIndent: 10,
+                    color: Colors.redAccent,
+                  ),
+                  Expanded(
+                    child: Text(
+                      instruction,
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              )),
+        ),
+      ],
+    ),
+  );
 }
 
 Widget templateListItem(
