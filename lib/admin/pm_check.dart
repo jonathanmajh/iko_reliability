@@ -310,9 +310,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
                                                   sigmaX: 5,
                                                   sigmaY: 5), // Blur effect
                                               child: Container(
-                                                color: Colors.white.withValues(
-                                                    alpha:
-                                                        0.2), // Slight dark overlay
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .surface
+                                                    .withValues(
+                                                        alpha:
+                                                            0.2), // Slight dark overlay
                                                 alignment: Alignment.center,
                                                 child: Text(
                                                   'Drop Files Here',
