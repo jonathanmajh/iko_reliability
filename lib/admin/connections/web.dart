@@ -6,7 +6,6 @@ import 'package:drift/drift.dart';
 import 'package:drift/wasm.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:iko_reliability_flutter/bin/fetch_remote_db.dart';
 
 /// Obtains a database connection for running drift on the web.
 DatabaseConnection connect({required String name}) {

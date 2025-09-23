@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:intl/intl.dart';
+import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 const frequencyUnits = ['D', 'W', 'M', 'Y', 'J']; // J for job plan
@@ -139,9 +139,9 @@ class ParsedTemplate {
         services = services ?? [],
         tasks = tasks ?? [];
 
-  Map<dynamic, dynamic> fromExcel(List<dynamic> stuff) {
-    Uint8List bytes = stuff[0];
-    String filename = stuff[1];
+  Map<dynamic, dynamic> fromExcel(FileDetails stuff) {
+    Uint8List bytes = stuff.bytes;
+    String filename = stuff.name;
     var decoder = SpreadsheetDecoder.decodeBytes(bytes); //Takes a LONG time
     var pmTemplates = {};
     var pmNumber = 0;

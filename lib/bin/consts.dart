@@ -1,3 +1,5 @@
+import 'dart:typed_data' show Uint8List;
+
 /// Maps person group codes to their string representations.
 final personGroups = {
   'O': 'PRODSUP',
@@ -908,5 +910,15 @@ class CriticalityCompletion {
     required this.total,
     required this.complete,
     this.ignore = 0,
+  });
+}
+
+class FileDetails {
+  final String name;
+  final Uint8List bytes;
+
+  FileDetails({
+    required this.name,
+    required this.bytes,
   });
 }
