@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:auto_route/auto_route.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -45,6 +47,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
   List<FileDetails> templates = [];
   String uploadDetails = '';
   List<Widget> fabList = [];
+  bool dropHover = false;
 
   @override
   void initState() {
@@ -235,65 +238,93 @@ class _PmCheckPageState extends State<PmCheckPage> {
                             child: Consumer<TemplateNotifier>(
                                 builder: (context, value, child) {
                               return DropRegion(
-                                // Formats this region can accept.
-                                formats: Formats.standardFormats,
-                                hitTestBehavior: HitTestBehavior.opaque,
-                                onDropOver: (event) {
-                                  // You can inspect local data here, as well as formats of each item.
-                                  // However on certain platforms (mobile / web) the actual data is
-                                  // only available when the drop is accepted (onPerformDrop).
-                                  final item = event.session.items.first;
-                                  if (item.localData is Map) {
-                                    // This is a drag within the app and has custom local data set.
-                                  }
-                                  if (item.canProvide(Formats.plainText)) {
-                                    // this item contains plain text.
-                                  }
-                                  // This drop region only supports copy operation.
-                                  if (event.session.allowedOperations
-                                      .contains(DropOperation.copy)) {
-                                    return DropOperation.copy;
-                                  } else {
-                                    return DropOperation.none;
-                                  }
-                                },
-                                onDropEnter: (event) {
-                                  // This is called when region first accepts a drag. You can use this
-                                  // to display a visual indicator that the drop is allowed.
-                                },
-                                onDropLeave: (event) {
-                                  // Called when drag leaves the region. Will also be called after
-                                  // drag completion.
-                                  // This is a good place to remove any visual indicators.
-                                },
-                                onPerformDrop: (event) async {
-                                  // Called when user dropped the item. You can now request the data.
-                                  // Note that data must be requested before the performDrop callback
-                                  // is over.
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content: Text(
-                                        'Processing ${event.session.items.length} dropped files'),
-                                  ));
-                                  for (final item in event.session.items) {
-                                    // data reader is available now
-                                    final reader = item.dataReader;
-
-                                    if (reader != null) {
-                                      reader.getFile(null, (file) async {
-                                        var fileDetails = FileDetails(
-                                            name: file.fileName!,
-                                            bytes: await file.readAll());
-                                        processDroppedFiles(
-                                            value, [fileDetails]);
-                                      });
+                                  // Formats this region can accept.
+                                  formats: Formats.standardFormats,
+                                  hitTestBehavior: HitTestBehavior.opaque,
+                                  onDropOver: (event) {
+                                    // You can inspect local data here, as well as formats of each item.
+                                    // However on certain platforms (mobile / web) the actual data is
+                                    // only available when the drop is accepted (onPerformDrop).
+                                    final item = event.session.items.first;
+                                    if (item.localData is Map) {
+                                      // This is a drag within the app and has custom local data set.
                                     }
-                                  }
-                                },
-                                child: ListView(
-                                  children: buildPMList(value, context),
-                                ),
-                              );
+                                    if (item.canProvide(Formats.plainText)) {
+                                      // this item contains plain text.
+                                    }
+                                    // This drop region only supports copy operation.
+                                    if (event.session.allowedOperations
+                                        .contains(DropOperation.copy)) {
+                                      return DropOperation.copy;
+                                    } else {
+                                      return DropOperation.none;
+                                    }
+                                  },
+                                  onDropEnter: (event) {
+                                    setState(() {
+                                      dropHover = true;
+                                    });
+                                    // This is called when region first accepts a drag. You can use this
+                                    // to display a visual indicator that the drop is allowed.
+                                  },
+                                  onDropLeave: (event) {
+                                    setState(() {
+                                      dropHover = false;
+                                    });
+                                    // Called when drag leaves the region. Will also be called after
+                                    // drag completion.
+                                    // This is a good place to remove any visual indicators.
+                                  },
+                                  onPerformDrop: (event) async {
+                                    // Called when user dropped the item. You can now request the data.
+                                    // Note that data must be requested before the performDrop callback
+                                    // is over.
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text(
+                                          'Processing ${event.session.items.length} dropped files'),
+                                    ));
+                                    for (final item in event.session.items) {
+                                      // data reader is available now
+                                      final reader = item.dataReader;
+
+                                      if (reader != null) {
+                                        reader.getFile(null, (file) async {
+                                          var fileDetails = FileDetails(
+                                              name: file.fileName!,
+                                              bytes: await file.readAll());
+                                          processDroppedFiles(
+                                              value, [fileDetails]);
+                                        });
+                                      }
+                                    }
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      ListView(
+                                        children: buildPMList(value, context),
+                                      ),
+                                      dropHover
+                                          ? BackdropFilter(
+                                              filter: ImageFilter.blur(
+                                                  sigmaX: 5,
+                                                  sigmaY: 5), // Blur effect
+                                              child: Container(
+                                                color: Colors.white.withValues(
+                                                    alpha:
+                                                        0.2), // Slight dark overlay
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  'Drop Files Here',
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 24),
+                                                ),
+                                              ),
+                                            )
+                                          : const SizedBox(),
+                                    ],
+                                  ));
                             })),
                         VerticalDivider(
                           width: 20,
