@@ -270,6 +270,11 @@ class _PmCheckPageState extends State<PmCheckPage> {
                                   // Called when user dropped the item. You can now request the data.
                                   // Note that data must be requested before the performDrop callback
                                   // is over.
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(
+                                        'Processing ${event.session.items.length} dropped files'),
+                                  ));
                                   for (final item in event.session.items) {
                                     // data reader is available now
                                     final reader = item.dataReader;
@@ -343,7 +348,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
     String msg = '';
     if (result != null) {
       files = result.files.map((files) => (files)).toList();
-      msg = 'Selected ${files.length} files';
+      msg = 'Processing ${files.length} selected files';
     } else {
       msg = 'File selector cancelled';
     }
@@ -366,7 +371,6 @@ class _PmCheckPageState extends State<PmCheckPage> {
     final maximo = context.read<MaximoServerNotifier>();
     setState(() {
       templates = files;
-      _show('Processing ${files.length} files');
     });
     if (files.isEmpty) {
       setState(() {
