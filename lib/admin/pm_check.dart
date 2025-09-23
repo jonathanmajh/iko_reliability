@@ -320,7 +320,9 @@ class _PmCheckPageState extends State<PmCheckPage> {
                                                 child: Text(
                                                   'Drop Files Here',
                                                   style: TextStyle(
-                                                      color: Colors.black,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface,
                                                       fontSize: 24),
                                                 ),
                                               ),
