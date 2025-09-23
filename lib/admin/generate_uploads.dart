@@ -1,6 +1,7 @@
 import 'package:csv/csv.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/admin/generate_job_plans.dart';
+import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../main.dart';
@@ -25,6 +26,17 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
   generated['Errors'] = [];
   // pm
   if (pmpkg.freqUnit != 'J') {
+    if (pmpkg.nextDate.contains('/')) {
+      try {
+        DateFormat formatter = DateFormat('MM/dd/yyyy');
+        pmpkg.nextDate =
+            formatter.parse(pmpkg.nextDate).toString().substring(0, 10);
+      } catch (e) {
+        generated['Errors']!.add([
+          'PM next due date is not in MM/DD/YYYY format: ${pmpkg.nextDate}'
+        ]);
+      }
+    }
     generated['PM'] = [
       [
         pmpkg.siteID,
@@ -50,11 +62,6 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
     if (pmpkg.description.length > 100) {
       generated['Errors']!.add([
         'PM Description is too long: ${pmpkg.description.length}/100 character limit'
-      ]);
-    }
-    if (pmpkg.nextDate.contains('/')) {
-      generated['Errors']!.add([
-        'Slash (/) found in PM next due date, Check PM template next due date format'
       ]);
     }
   }
