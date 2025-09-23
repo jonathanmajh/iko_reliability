@@ -9,7 +9,9 @@ Widget templateDescription(
   BuildContext context,
 ) {
   Color vertCol = Colors.grey;
-  BoxDecoration? boxDecoration;
+  var boxDecoration = BoxDecoration(
+      border: Border.all(),
+      borderRadius: const BorderRadius.all(Radius.circular(20)));
   final selected = templateNotifier.getSelectedTemplate();
   if (selected.selectedFile == filename &&
       selected.selectedTemplate == templateNumber) {
