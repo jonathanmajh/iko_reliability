@@ -184,7 +184,7 @@ class _PMDetailViewState extends State<PMDetailView>
     return Consumer<TemplateNotifier>(builder: (context, value, child) {
       final selected = value.getSelectedTemplate();
       if (selected.selectedFile == null) {
-        return const Text('No Template Selected');
+        return const Text('Select a template to see details');
       }
       return Scaffold(
           appBar: TabBar(
@@ -333,7 +333,7 @@ class _PMDetailsState extends State<PMDetails> {
         builder: (context, templateNotifier, child) {
       final selected = templateNotifier.getSelectedTemplate();
       if (selected.selectedFile == null) {
-        return const Text('No Template Selected');
+        return const Text('Select a template to see details');
       }
       final processedTemplate = templateNotifier.getProcessedTemplate(
           selected.selectedFile!, selected.selectedTemplate!);

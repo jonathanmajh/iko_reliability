@@ -214,23 +214,32 @@ List<Widget> buildPMList(
   }
   if (list.isEmpty) {
     list.addAll(instructionListItem(
-        'Open PM Template - Select and parse template files', context));
+        'Drag PM template files into list to process',
+        context,
+        Icons.file_upload));
     list.addAll(instructionListItem(
-        'Clear Templates - Clears all templates from program', context));
-    list.addAll(
-        instructionListItem('Parsed PMs will appear in below list', context));
-    list.addAll(
-        instructionListItem('Click on PMs in list to view details', context));
+        'Click on the Plus button to view all options',
+        context,
+        Icons.add_circle));
     list.addAll(instructionListItem(
-        'Drag and drop PM template files to parse', context));
+        'Upload all PM templates to Maximo', context, Icons.cloud_upload));
+    list.addAll(instructionListItem(
+        'Copy all PM numbers with template file name', context, Icons.copy));
+    list.addAll(instructionListItem(
+        'Open file picker to select PM template files',
+        context,
+        Icons.file_open));
+    list.addAll(instructionListItem(
+        'Remove all PM templates', context, Icons.delete_sweep));
   }
   return list;
 }
 
-List<Widget> instructionListItem(String instruction, BuildContext context) {
+List<Widget> instructionListItem(
+    String instruction, BuildContext context, IconData? icon) {
   return [
     SizedBox(
-      height: 100,
+      height: 70,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -241,9 +250,9 @@ List<Widget> instructionListItem(String instruction, BuildContext context) {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     SizedBox(
-                      width: 100,
+                      width: 70,
                       child: Icon(
-                        Icons.info_rounded,
+                        icon,
                         color: Theme.of(context).colorScheme.onSurface,
                         size: 35,
                       ),
