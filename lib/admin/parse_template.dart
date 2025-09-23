@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:intl/intl.dart';
@@ -184,9 +185,8 @@ class ParsedTemplate {
             String nextDate = '';
             if (nextRow[2] != null) {
               if (nextRow[2] is String) {
-                DateFormat formatter = DateFormat('MM/dd/yyyy');
-                nextDate =
-                    formatter.parse(nextRow[2]).toString().substring(0, 10);
+                String temp = nextRow[2];
+                nextDate = temp.substring(0, (min(10, temp.length)));
               } else {
                 nextDate = DateTime.fromMillisecondsSinceEpoch(
                         (nextRow[2] - 25569) * 86400000,
