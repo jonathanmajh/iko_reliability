@@ -161,48 +161,64 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
             ? Colors.green
             : (percent > 0.4 ? Colors.orange : Colors.red);
         return Card(
-            child: ListTile(
-                // minTileHeight: 200,
-                leading: CircularPercentIndicator(
-                  percent: percent,
-                  center: Text('${(percent * 100).toStringAsFixed(0)}%'),
-                  progressColor: colour,
-                  radius: 24,
+          child: ExpansionTile(
+            title: Text(items[index]),
+            leading: Row(mainAxisSize: MainAxisSize.min, children: [
+              CircularPercentIndicator(
+                percent: percent,
+                center: Text('${(percent * 100).toStringAsFixed(0)}%'),
+                progressColor: colour,
+                radius: 24,
+              ),
+              IconButton(
+                onPressed: () {},
+                tooltip: inventoryDetails.containsKey(items[index])
+                    ? 'Item in Storeroom'
+                    : 'Item not in Storeroom',
+                icon: const Icon(Icons.warehouse),
+                color: inventoryDetails.containsKey(items[index])
+                    ? Colors.green
+                    : Colors.red,
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy),
+                tooltip: 'Copy Item Number',
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: items[index]));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Copied ${items[index]} to clipboard'),
+                  ));
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.open_in_new),
+                tooltip: 'Open in Maximo',
+                onPressed: () {
+                  // TODO openInIKO(items[index]);
+                },
+              ),
+            ]),
+            subtitle: Text.rich(
+              TextSpan(
+                  children: itemDetails.containsKey(items[index])
+                      ? formattedText
+                      : null),
+            ),
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    'UOM: ${itemDetails[items[index]]!.uom ?? ''}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-                title: Text(items[index]),
-                subtitle: Text.rich(
-                  TextSpan(
-                      children: itemDetails.containsKey(items[index])
-                          ? formattedText
-                          : null),
-                ),
-                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                  // show issue unit
-                  Icon(
-                    Icons.warehouse,
-                    color: inventoryDetails.containsKey(items[index])
-                        ? Colors.green
-                        : Colors.red,
-                  ),
-                  Text(itemDetails[items[index]]!.uom ?? ''),
-                  IconButton(
-                    icon: const Icon(Icons.copy),
-                    tooltip: 'Copy Item Number',
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: items[index]));
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Copied ${items[index]} to clipboard'),
-                      ));
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.open_in_new),
-                    tooltip: 'Open in Maximo',
-                    onPressed: () {
-                      // TODO openInIKO(items[index]);
-                    },
-                  ),
-                ])));
+              ),
+            ],
+          ),
+        );
       },
     );
   }
