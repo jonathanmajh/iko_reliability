@@ -10,6 +10,7 @@ import 'package:iko_reliability_flutter/main.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart' show launchUrl;
 
 /// Intent to perform search
 class Search extends Intent {
@@ -194,7 +195,8 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
                 icon: const Icon(Icons.open_in_new),
                 tooltip: 'Open in Maximo',
                 onPressed: () {
-                  // TODO openInIKO(items[index]);
+                  launchUrl(Uri.parse(
+                      'https://prod.manage.prod.iko.max-it-eam.com/maximo/oslc/graphite/manage-shell/index.html?event=loadapp&value=item&additionalevent=useqbe&additionaleventvalue=itemnum%3D${items[index]}'));
                 },
               ),
             ]),
