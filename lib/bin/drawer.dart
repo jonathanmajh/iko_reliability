@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:iko_reliability_flutter/items/item.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -91,9 +92,14 @@ class NavDrawer extends StatelessWidget {
               leading: const Icon(Icons.warehouse),
               title: const Text('Item Tool'),
               onTap: () {
-                context.router.replacePath("/item");
-                // change app state...
-                Navigator.pop(context); // close the drawer
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return const AlertDialog(
+                        title: Text('Loading...'),
+                        content: ItemLoadingIndicator(),
+                      );
+                    });
               },
             ),
           ],

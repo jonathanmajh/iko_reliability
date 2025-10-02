@@ -69,6 +69,11 @@ Future<Map<String, dynamic>> getUserMaximo(
         newSetting:
             Setting(key: 'isAdmin', value: parsed['inactiveSites'].toString()),
       );
+      // database!.setSettings(
+      //   newSetting: Setting(
+      //       key: 'selectedSite',
+      //       value: parsed['defaultSite'].toString().toUpperCase()),
+      // );
       Provider.of<SettingsNotifier>(navigatorKey.currentContext!, listen: false)
           .setAdmin(parsed['inactiveSites']);
       return parsed;

@@ -7,6 +7,7 @@ import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/items/item_db.dart';
 import 'package:iko_reliability_flutter/items/item_notifier.dart';
 import 'package:iko_reliability_flutter/main.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
 
@@ -66,7 +67,7 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
   final ScrollController _controller = ScrollController();
   List<String> items = [];
   Map<String, ItemCache> itemDetails = {};
-  Map<String, ItemCache> inventoryDetails = {};
+  Map<String, InventoryCache> inventoryDetails = {};
   bool _isLoading = false;
   bool _hasMore = true;
   ItemNotifier? _itemNotifier;
@@ -102,11 +103,17 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
   void _loadMore() async {
     setState(() => _isLoading = true);
     var nextItems = context.read<ItemNotifier>().getResults();
+    final selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
     final details = await itemDatabase!.getItemDetails(items: nextItems);
+    final invDetails = await itemDatabase!
+        .getInventoryDetails(items: nextItems, site: selectedSite);
+    if (!mounted) return;
     setState(() {
       items.addAll(nextItems);
       itemDetails.addAll(details);
+      inventoryDetails.addAll(invDetails);
       _isLoading = false;
+      print('Loaded ${nextItems.length} items, total: ${items.length}');
       if (nextItems.isEmpty) {
         _hasMore = false;
         return;
@@ -171,6 +178,12 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
                 ),
                 trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                   // show issue unit
+                  Icon(
+                    Icons.warehouse,
+                    color: inventoryDetails.containsKey(items[index])
+                        ? Colors.green
+                        : Colors.red,
+                  ),
                   Text(itemDetails[items[index]]!.uom ?? ''),
                   IconButton(
                     icon: const Icon(Icons.copy),
@@ -308,5 +321,28 @@ class _ItemSearchWidgetState extends State<ItemSearchWidget> {
       ranked: await itemDatabase!.rankResults(phrases: searchTerms),
       searchTerm: searchTerms,
     );
+  }
+}
+
+class ItemLoadingIndicator extends StatefulWidget {
+  const ItemLoadingIndicator({super.key});
+
+  @override
+  State<ItemLoadingIndicator> createState() => _ItemLoadingIndicatorState();
+}
+
+class _ItemLoadingIndicatorState extends State<ItemLoadingIndicator> {
+  String message = '';
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.watch<SelectedSiteNotifier>().selectedSite.isEmpty) {
+      return const SiteToggle();
+    } else {
+      Navigator.pop(navigatorKey.currentContext!);
+      navigatorKey.currentContext!.router.replacePath("/item");
+      Navigator.pop(navigatorKey.currentContext!);
+    }
+    return Text(message);
   }
 }

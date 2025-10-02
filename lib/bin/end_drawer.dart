@@ -542,33 +542,72 @@ class ThemeToggle extends StatelessWidget {
   }
 }
 
-class SiteToggle extends StatelessWidget {
+class SiteToggle extends StatefulWidget {
   const SiteToggle({super.key});
+
+  @override
+  State<SiteToggle> createState() => _SiteToggleState();
+}
+
+class _SiteToggleState extends State<SiteToggle> {
+  bool loading = false;
+  List<String> messages = [];
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: const Text('Selected Site'),
+      title: const Text('Selecte Site'),
       trailing: DropdownButton(
         value: context.watch<SelectedSiteNotifier>().selectedSite,
         items: () {
           List<DropdownMenuItem<String>> list = [
             const DropdownMenuItem(value: '', child: Text('Select a site'))
           ];
-          List<String> loadedSettings = (context
-                  .read<SettingsNotifier>()
-                  .getSetting(ApplicationSetting.loadedSites) as Set<String>)
-              .toList();
-          loadedSettings
-              .sort((a, b) => a.compareTo(b)); //put them in alphabetical order
-          list.addAll(loadedSettings.map((e) => DropdownMenuItem(
+          list.addAll(siteIDAndDescription.keys.map((e) => DropdownMenuItem(
               value: e, child: Text(siteIDAndDescription[e] ?? ''))));
           return list;
         }(),
-        onChanged: (newValue) {
-          context.read<SelectedSiteNotifier>().setSite(newValue!);
+        onChanged: (newValue) async {
+          await loadSite(newValue!);
+          if (context.mounted) {
+            context.read<SelectedSiteNotifier>().setSite(newValue);
+          }
         },
       ),
     );
+  }
+
+  Future<void> loadSite(String siteid) async {
+    setState(() {
+      loading = true;
+    });
+    if (siteid != '') {
+      var processNotifier =
+          Provider.of<ProcessStateNotifier>(context, listen: false);
+      try {
+        processNotifier.addTask(
+          'loadAssetState',
+        );
+        setState(() {
+          messages.add('Attempting to Load Assets from : $siteid');
+        });
+
+        List<String> result = await maximoAssetCaller(siteid,
+            context.read<MaximoServerNotifier>().maximoServerSelected, context);
+        setState(() {
+          if (messages.isNotEmpty) {
+            showDataAlert(
+                navigatorKey.currentContext!, messages, 'Site Assets Loaded');
+          } else {
+            messages.addAll(result);
+          }
+        });
+      } finally {
+        processNotifier.removeTask('loadAssetState');
+      }
+    }
+    setState(() {
+      loading = false;
+    });
   }
 }

@@ -12,9 +12,9 @@ class ItemNotifier extends ChangeNotifier {
     required Map<int, List<String>> ranked,
     required List<String> searchTerm,
   }) {
-    results = ranked;
     for (var item in ranked.entries) {
       allItems.addAll(item.value);
+      results[item.key] = item.value.reversed.toList();
     }
     if (ranked.isEmpty) {
       currentLevel = -1;
