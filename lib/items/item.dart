@@ -1,12 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:iko_reliability_flutter/admin/upload_maximo.dart'
+    show maximoRequest;
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/bin/drawer.dart';
 import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/items/item_db.dart';
 import 'package:iko_reliability_flutter/items/item_notifier.dart';
 import 'package:iko_reliability_flutter/main.dart';
+import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart'
+    show MaximoServerNotifier;
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -210,11 +214,40 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Text(
-                    'UOM: ${itemDetails[items[index]]!.uom ?? ''}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0.0),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'UOM: ${itemDetails[items[index]]!.uom ?? ''}',
+                          ),
+                          Text(
+                              'Details: ${itemDetails[items[index]]!.extDescription ?? ''}')
+                        ])),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: inventoryDetails.containsKey(items[index])
+                        ? [
+                            Text(
+                              'Storeroom: ${inventoryDetails[items[index]]!.location} | Default Bin: ${inventoryDetails[items[index]]!.binnum ?? '[Blank]'}',
+                            ),
+                            Text(
+                              'Vendor: ${inventoryDetails[items[index]]!.vendor ?? '[Blank]'} | Catalog: ${inventoryDetails[items[index]]!.catalogcode ?? '[Blank]'}',
+                            ),
+                            Text(
+                              'Manufacturer: ${inventoryDetails[items[index]]!.manufacturer ?? '[Blank]'} | Model: ${inventoryDetails[items[index]]!.modelnum ?? '[Blank]'}',
+                            ),
+                            InventoryQuantity(
+                              itemnum: items[index],
+                              siteID: inventoryDetails[items[index]]!.siteid,
+                            ),
+                          ]
+                        : [],
                   ),
                 ),
               ),
@@ -359,8 +392,58 @@ class _ItemLoadingIndicatorState extends State<ItemLoadingIndicator> {
     } else {
       Navigator.pop(navigatorKey.currentContext!);
       navigatorKey.currentContext!.router.replacePath("/item");
-      Navigator.pop(navigatorKey.currentContext!);
+      Future.delayed(Duration.zero, () {
+        Navigator.pop(navigatorKey.currentContext!);
+      });
     }
     return Text(message);
+  }
+}
+
+class InventoryQuantity extends StatefulWidget {
+  final String itemnum;
+  final String siteID;
+  const InventoryQuantity(
+      {super.key, required this.itemnum, required this.siteID});
+
+  @override
+  State<InventoryQuantity> createState() => _InventoryQuantityState();
+}
+
+class _InventoryQuantityState extends State<InventoryQuantity> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<double>(
+      future: getQuantity(
+        widget.itemnum,
+        widget.siteID,
+        context.read<MaximoServerNotifier>().maximoServerSelected,
+      ), // a previously-obtained Future<int> or null
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          return Text('Quantity on Hand: ${snapshot.data}');
+        }
+      },
+    );
+  }
+
+  Future<double> getQuantity(String itemnum, String siteID, String env) async {
+    double quantity = 0;
+    final url =
+        'mxapiinvbal?lean=1&oslc.select=curbal&oslc.where=itemnum="$itemnum"%20and%20siteid="$siteID"';
+    final result = await maximoRequest(url, 'get', env);
+    if (!result.containsKey('member')) {
+      throw Exception('Invalid response from Maximo');
+    }
+    for (var entry in result['member']) {
+      if (entry['curbal'] != null) {
+        quantity += double.parse(entry['curbal'].toString());
+      }
+    }
+    return quantity;
   }
 }
