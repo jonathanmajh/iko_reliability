@@ -15,8 +15,8 @@ DatabaseConnection connect({required String name}) {
       debugPrint('Importing remote DB');
       WasmDatabaseResult db = await WasmDatabase.open(
         databaseName: name,
-        sqlite3Uri: Uri.parse('/sqlite3.wasm'),
-        driftWorkerUri: Uri.parse('/drift_worker.js'),
+        sqlite3Uri: Uri.parse('/flutter/sqlite3.wasm'),
+        driftWorkerUri: Uri.parse('/flutter/drift_worker.js'),
         initializeDatabase: () async {
           return await fetchAndUnzipDb(
               'https://raw.githubusercontent.com/jonathanmajh/iko_proxy/refs/heads/main/program.zip',
@@ -28,8 +28,8 @@ DatabaseConnection connect({required String name}) {
     } else {
       WasmDatabaseResult db = await WasmDatabase.open(
         databaseName: name,
-        sqlite3Uri: Uri.parse('/sqlite3.wasm'),
-        driftWorkerUri: Uri.parse('/drift_worker.js'),
+        sqlite3Uri: Uri.parse('/flutter/sqlite3.wasm'),
+        driftWorkerUri: Uri.parse('/flutter/drift_worker.js'),
       );
 
       if (db.missingFeatures.isNotEmpty) {

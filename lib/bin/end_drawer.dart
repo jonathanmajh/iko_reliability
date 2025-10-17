@@ -568,9 +568,8 @@ class _SiteToggleState extends State<SiteToggle> {
           return list;
         }(),
         onChanged: (newValue) async {
-          await loadSite(newValue!);
           if (context.mounted) {
-            context.read<SelectedSiteNotifier>().setSite(newValue);
+            context.read<SelectedSiteNotifier>().setSite(newValue!);
           }
         },
       ),
