@@ -19,7 +19,7 @@ DatabaseConnection connect({required String name}) {
         driftWorkerUri: Uri.parse('/flutter/drift_worker.js'),
         initializeDatabase: () async {
           return await fetchAndUnzipDb(
-              'https://raw.githubusercontent.com/jonathanmajh/iko_proxy/refs/heads/main/program.zip',
+              'https://iko-proxy.jonathanmajh.workers.dev/program.zip',
               'program.db');
         },
       );
