@@ -18,3 +18,13 @@ Future<Uint8List> fetchAndUnzipDb(String url, String dbFileName) async {
   }
   throw Exception('Database file not found in ZIP');
 }
+
+Future<String> fetchRemoteVersion() async {
+  final response = await http
+      .get(Uri.parse('https://iko-proxy.jonathanmajh.workers.dev/.version'));
+  if (response.statusCode == 200) {
+    return response.body.trim();
+  } else {
+    throw Exception('Failed to fetch remote version');
+  }
+}

@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:iko_reliability_flutter/admin/connections/common.dart';
 import 'package:iko_reliability_flutter/bin/fetch_remote_db.dart';
 import 'package:intl/intl.dart';
 
@@ -16,18 +18,33 @@ Future<File> databaseFile({required String name}) async {
   String dbPath = p.join(appDir.path, 'ReliabilityApp', 'iko_$name');
   dbPath = '$dbPath.db';
   final file = File(dbPath);
-  // auto-backup function, runs every 10 minutes
+
   if (name == 'item') {
+    var serverVersion = await fetchRemoteVersion();
+    debugPrint('Remote DB version: $serverVersion');
+
+    var localVersion = await getDbVersion();
+    debugPrint('Local DB version: $localVersion');
+
+    if (localVersion != serverVersion) {
+      debugPrint('Updating local version to $serverVersion');
+      if (file.existsSync()) {
+        await file.delete();
+        await saveDbVersion(serverVersion);
+      }
+    }
+
     if (!file.existsSync()) {
       // copy prepopulated database
       final bytes = await fetchAndUnzipDb(
-          'https://raw.githubusercontent.com/jonathanmajh/iko_proxy/refs/heads/main/program.zip',
+          'https://iko-proxy.jonathanmajh.workers.dev/program.zip',
           'program.db');
       await file.create(recursive: true);
       await file.writeAsBytes(bytes);
     }
   }
   if (name == 'reliability') {
+    // auto-backup function, runs every 10 minutes
     Timer.periodic(const Duration(minutes: 5), (arg) async {
       (File(dbPath)).copy(
           '$dbPath-${DateFormat('yyyyMMddHHmmSS').format(DateTime.now())}.db');

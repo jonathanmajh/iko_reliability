@@ -39,6 +39,7 @@ dependencies:
     archive: ^3.6.1
     percent_indicator: ^4.2.5
     super_drag_and_drop: ^0.9.1
+    shared_preferences: ^2.5.3
 
 dev_dependencies:
     flutter_test:
