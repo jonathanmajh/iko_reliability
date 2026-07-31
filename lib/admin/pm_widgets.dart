@@ -9,7 +9,9 @@ Widget templateDescription(
   BuildContext context,
 ) {
   Color vertCol = Colors.grey;
-  BoxDecoration? boxDecoration;
+  var boxDecoration = BoxDecoration(
+      border: Border.all(),
+      borderRadius: const BorderRadius.all(Radius.circular(20)));
   final selected = templateNotifier.getSelectedTemplate();
   if (selected.selectedFile == filename &&
       selected.selectedTemplate == templateNumber) {
@@ -213,12 +215,82 @@ List<Widget> buildPMList(
         ]));
   }
   if (list.isEmpty) {
-    list.add(const Text('Open PM Template - Select and parse template files'));
-    list.add(const Text('Clear Templates - Clears all templates from program'));
-    list.add(const Text('Parsed PMs will appear in below list'));
-    list.add(const Text('Click on PMs in list to view details'));
+    list.addAll(instructionListItem(
+        'Drag PM template files into list to process',
+        context,
+        Icons.file_upload));
+    list.addAll(instructionListItem(
+        'Click on the Plus button to view all options',
+        context,
+        Icons.add_circle));
+    list.addAll(instructionListItem(
+        'Upload all PM templates to Maximo', context, Icons.cloud_upload));
+    list.addAll(instructionListItem(
+        'Copy all PM numbers with template file name', context, Icons.copy));
+    list.addAll(instructionListItem(
+        'Open file picker to select PM template files',
+        context,
+        Icons.file_open));
+    list.addAll(instructionListItem(
+        'Remove all PM templates', context, Icons.delete_sweep));
   }
   return list;
+}
+
+List<Widget> instructionListItem(
+    String instruction, BuildContext context, IconData? icon) {
+  return [
+    SizedBox(
+      height: 70,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      width: 70,
+                      child: Icon(
+                        icon,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 35,
+                      ),
+                    ),
+                    VerticalDivider(
+                      width: 20,
+                      thickness: 1,
+                      indent: 10,
+                      endIndent: 10,
+                      color: Colors.redAccent,
+                    ),
+                    Expanded(
+                      child: Text(
+                        instruction,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ],
+                )),
+          ),
+        ],
+      ),
+    ),
+    Divider(
+      height: 5,
+      thickness: 1,
+      indent: 20,
+      endIndent: 20,
+      color: Theme.of(context).dividerColor,
+    )
+  ];
 }
 
 Widget templateListItem(

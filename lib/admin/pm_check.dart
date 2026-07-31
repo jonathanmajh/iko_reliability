@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:auto_route/auto_route.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -5,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
+import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:provider/provider.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../bin/drawer.dart';
 import '../main.dart';
@@ -40,9 +44,10 @@ class PmCheckPage extends StatefulWidget {
 
 /// State for the PM Check page, manages template uploads and FAB actions.
 class _PmCheckPageState extends State<PmCheckPage> {
-  List<PlatformFile> templates = [];
+  List<FileDetails> templates = [];
   String uploadDetails = '';
   List<Widget> fabList = [];
+  bool dropHover = false;
 
   @override
   void initState() {
@@ -116,7 +121,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                   listen: false); //for recording PM file loading process state
               try {
                 processNotifier.addTask('loadPMFilesState');
-                await pickTemplates(context);
+                await pickTemplates();
                 _updateFab();
               } finally {
                 processNotifier.removeTask('loadPMFilesState');
@@ -232,9 +237,99 @@ class _PmCheckPageState extends State<PmCheckPage> {
                             width: 550,
                             child: Consumer<TemplateNotifier>(
                                 builder: (context, value, child) {
-                              return ListView(
-                                children: buildPMList(value, context),
-                              );
+                              return DropRegion(
+                                  // Formats this region can accept.
+                                  formats: Formats.standardFormats,
+                                  hitTestBehavior: HitTestBehavior.opaque,
+                                  onDropOver: (event) {
+                                    // You can inspect local data here, as well as formats of each item.
+                                    // However on certain platforms (mobile / web) the actual data is
+                                    // only available when the drop is accepted (onPerformDrop).
+                                    final item = event.session.items.first;
+                                    if (item.localData is Map) {
+                                      // This is a drag within the app and has custom local data set.
+                                    }
+                                    if (item.canProvide(Formats.plainText)) {
+                                      // this item contains plain text.
+                                    }
+                                    // This drop region only supports copy operation.
+                                    if (event.session.allowedOperations
+                                        .contains(DropOperation.copy)) {
+                                      return DropOperation.copy;
+                                    } else {
+                                      return DropOperation.none;
+                                    }
+                                  },
+                                  onDropEnter: (event) {
+                                    setState(() {
+                                      dropHover = true;
+                                    });
+                                    // This is called when region first accepts a drag. You can use this
+                                    // to display a visual indicator that the drop is allowed.
+                                  },
+                                  onDropLeave: (event) {
+                                    setState(() {
+                                      dropHover = false;
+                                    });
+                                    // Called when drag leaves the region. Will also be called after
+                                    // drag completion.
+                                    // This is a good place to remove any visual indicators.
+                                  },
+                                  onPerformDrop: (event) async {
+                                    // Called when user dropped the item. You can now request the data.
+                                    // Note that data must be requested before the performDrop callback
+                                    // is over.
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text(
+                                          'Processing ${event.session.items.length} dropped files'),
+                                    ));
+                                    for (final item in event.session.items) {
+                                      // data reader is available now
+                                      final reader = item.dataReader;
+
+                                      if (reader != null) {
+                                        reader.getFile(null, (file) async {
+                                          var fileDetails = FileDetails(
+                                              name: file.fileName!,
+                                              bytes: await file.readAll());
+                                          processDroppedFiles(
+                                              value, [fileDetails]);
+                                        });
+                                      }
+                                    }
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      ListView(
+                                        children: buildPMList(value, context),
+                                      ),
+                                      dropHover
+                                          ? BackdropFilter(
+                                              filter: ImageFilter.blur(
+                                                  sigmaX: 5,
+                                                  sigmaY: 5), // Blur effect
+                                              child: Container(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .surface
+                                                    .withValues(
+                                                        alpha:
+                                                            0.2), // Slight dark overlay
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  'Drop Files Here',
+                                                  style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface,
+                                                      fontSize: 24),
+                                                ),
+                                              ),
+                                            )
+                                          : const SizedBox(),
+                                    ],
+                                  ));
                             })),
                         VerticalDivider(
                           width: 20,
@@ -280,53 +375,67 @@ class _PmCheckPageState extends State<PmCheckPage> {
     });
   }
 
-  Future<void> pickTemplates(BuildContext context) async {
+  /// Opens file picker to select PM template files.
+  Future<void> pickTemplates() async {
     final template = context.read<TemplateNotifier>();
-    final maximo = context.read<MaximoServerNotifier>();
-    Stopwatch stopwatch = Stopwatch()..start();
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(allowMultiple: true, withData: true);
     List<PlatformFile> files = [];
     String msg = '';
     if (result != null) {
       files = result.files.map((files) => (files)).toList();
-      msg = 'Selected ${files.length} files';
+      msg = 'Processing ${files.length} selected files';
     } else {
       msg = 'File selector cancelled';
     }
+    if (msg.isNotEmpty) {
+      _show(msg);
+    }
+    List<FileDetails> filesDetails = [];
+    for (var file in files) {
+      filesDetails.add(FileDetails(
+        name: file.name,
+        bytes: file.bytes!,
+      ));
+    }
+    processDroppedFiles(template, filesDetails);
+  }
+
+  /// process files selected by file picker or dropped
+  Future<void> processDroppedFiles(
+      TemplateNotifier templateNotifier, List<FileDetails> files) async {
+    final maximo = context.read<MaximoServerNotifier>();
     setState(() {
       templates = files;
-      _show(msg);
     });
-    debugPrint('loaded files in ${stopwatch.elapsedMilliseconds} milliseconds');
     if (files.isEmpty) {
       setState(() {
-        debugPrint('No files selected files...');
+        debugPrint('No files selected...');
       });
     } else {
       setState(() {
         debugPrint('Processing files...');
       });
-      processAllTemplates(template, files, maximo.maximoServerSelected);
+      processAllTemplates(templateNotifier, files, maximo.maximoServerSelected);
     }
   }
 }
 
 ///parsing spreadsheets for PMs
-Future<List<dynamic>> parseSpreadsheets(List<PlatformFile> files) async {
+Future<List<dynamic>> parseSpreadsheets(List<FileDetails> files) async {
   List<Future> futures = [];
   for (var file in files) {
     futures.add(compute(
         ParsedTemplate(pmName: 'Error', pmNumber: 'Error', nextDueDate: '')
             .fromExcel,
-        [file.bytes!, file.name]));
+        file));
   }
   return await Future.wait(futures);
 }
 
 ///processes loaded PM template files
 void processAllTemplates(TemplateNotifier templateNotifier,
-    List<PlatformFile> files, String maximoServerSelected) async {
+    List<FileDetails> files, String maximoServerSelected) async {
   templateNotifier.setLoading(true);
   var parsedTmpts = await parseSpreadsheets(files);
   for (var thing in parsedTmpts) {

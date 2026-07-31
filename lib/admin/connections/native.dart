@@ -35,7 +35,11 @@ Future<File> databaseFile({required String name}) async {
       final myDir = Directory(p.join(appDir.path, 'ReliabilityApp'));
       final files = myDir.listSync();
       if (files.length > 101) {
-        files[1].delete();
+        if (files[1].path.contains('reliability')) {
+          files[1].delete();
+        } else {
+          files[2].delete();
+        }
       }
     });
   }
