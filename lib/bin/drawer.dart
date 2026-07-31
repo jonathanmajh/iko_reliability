@@ -143,6 +143,14 @@ class NavDrawer extends StatelessWidget {
                       Navigator.pop(context); // close the drawer
                     },
                   ),
+                  ListTile(
+                    leading: const Icon(Icons.picture_as_pdf),
+                    title: const Text('PDF Link Tool'),
+                    onTap: () {
+                      context.router.replacePath("/pdf-link-tool");
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
                 ],
               )
             : const SizedBox.shrink()

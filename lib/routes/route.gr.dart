@@ -91,6 +91,22 @@ class ItemRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [PdfLinkToolPage]
+class PdfLinkToolRoute extends PageRouteInfo<void> {
+  const PdfLinkToolRoute({List<PageRouteInfo>? children})
+      : super(PdfLinkToolRoute.name, initialChildren: children);
+
+  static const String name = 'PdfLinkToolRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PdfLinkToolPage();
+    },
+  );
+}
+
+/// generated route for
 /// [PmCheckPage]
 class PmCheckRoute extends PageRouteInfo<void> {
   const PmCheckRoute({List<PageRouteInfo>? children})
