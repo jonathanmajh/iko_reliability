@@ -29,10 +29,10 @@ packages:
     dependency: "direct main"
     description:
       name: archive
-      sha256: cb6a278ef2dbb298455e1a713bda08524a175630ec643a242c399c932a0a1f7d
+      sha256: a96e8b390886ee8abb49b7bd3ac8df6f451c621619f52a26e815fdcf568959ff
       url: "https://pub.dev"
     source: hosted
-    version: "3.6.1"
+    version: "4.0.9"
   args:
     dependency: transitive
     description:
@@ -508,10 +508,10 @@ packages:
     dependency: transitive
     description:
       name: image
-      sha256: f31d52537dc417fdcde36088fdf11d191026fd5e4fae742491ebd40e5a8bea7d
+      sha256: f9881ff4998044947ec38d098bc7c8316ae1186fa786eddffdb867b9bc94dfce
       url: "https://pub.dev"
     source: hosted
-    version: "4.3.0"
+    version: "4.8.0"
   intl:
     dependency: "direct main"
     description:
@@ -753,21 +753,29 @@ packages:
     source: hosted
     version: "2.3.0"
   pdf:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: pdf
       sha256: e47a275b267873d5944ad5f5ff0dcc7ac2e36c02b3046a0ffac9b72fd362c44b
       url: "https://pub.dev"
     source: hosted
     version: "3.12.0"
-  pdf_text_extract:
-    dependency: "direct main"
+  pdf_cos:
+    dependency: transitive
     description:
-      name: pdf_text_extract
-      sha256: "830e1508035efe360aec8c00f922c62216b97154d8bc3b53c192d4639aa03c8d"
+      name: pdf_cos
+      sha256: "82463d65fc821a84248ef605821945a6e5644a01e6ac5dae0f6003d8fd284476"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "3.2.0"
+  pdf_document:
+    dependency: "direct main"
+    description:
+      name: pdf_document
+      sha256: bba18b3049a5273fb1779b45d4d21d8a7cebfffb92a9ad703440561e56f4e804
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.0"
   percent_indicator:
     dependency: "direct main"
     description:
@@ -816,6 +824,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.2"
+  posix:
+    dependency: transitive
+    description:
+      name: posix
+      sha256: bc1bad54ad2b735816e31f8d4600cfde6c7839975085ddfbca48b6c9f7c4044e
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.5.2"
   provider:
     dependency: "direct main"
     description:
@@ -957,14 +973,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.1"
-  spreadsheet_decoder:
-    dependency: "direct main"
-    description:
-      name: spreadsheet_decoder
-      sha256: "1370af9802bf14c7bdd9f24609294bbba0dbe715413922ce8e927d6d37aeefc6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0"
   sqlite3:
     dependency: transitive
     description:
