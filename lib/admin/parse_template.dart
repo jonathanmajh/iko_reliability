@@ -2,7 +2,35 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:iko_reliability_flutter/bin/consts.dart';
-import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
+import 'package:excel_plus/excel_plus.dart';
+
+dynamic _excelCellValueToNative(CellValue? value) {
+  if (value == null) return null;
+  if (value is IntCellValue) return value.value;
+  if (value is DoubleCellValue) return value.value;
+  if (value is BoolCellValue) return value.value;
+  if (value is DateCellValue) return value.asDateTimeUtc();
+  if (value is FormulaCellValue) return value.cachedValue ?? value.formula;
+  return value.toString();
+}
+
+dynamic _toNativeString(dynamic value) {
+  return value?.toString();
+}
+
+double? _toNativeDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
+int? _toNativeInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  return int.tryParse(value.toString());
+}
 
 const frequencyUnits = ['D', 'W', 'M', 'Y', 'J']; // J for job plan
 
@@ -142,7 +170,7 @@ class ParsedTemplate {
   Map<dynamic, dynamic> fromExcel(FileDetails stuff) {
     Uint8List bytes = stuff.bytes;
     String filename = stuff.name;
-    var decoder = SpreadsheetDecoder.decodeBytes(bytes); //Takes a LONG time
+    var excel = Excel.decodeBytes(bytes); //Takes a LONG time
     var pmTemplates = {};
     var pmNumber = 0;
     var readTasks = false;
@@ -152,14 +180,18 @@ class ParsedTemplate {
     var readRouteAsset = false;
     var errors = [];
     pmTemplates[filename] = {};
-    for (var sheet in decoder.tables.keys) {
-      if (sheet != 'Main') {
+    for (var sheetName in excel.tables.keys) {
+      if (sheetName != 'Main') {
         continue; //ignore the non template sheets
       }
-      for (var i = 0; i < decoder.tables[sheet]!.maxRows; i++) {
+      final sheet = excel.tables[sheetName]!;
+      for (var i = 0; i < sheet.maxRows; i++) {
         //read spreadsheet row by row
         try {
-          var row = decoder.tables[sheet]!.rows[i];
+          var row = sheet
+              .row(i)
+              .map((cell) => _excelCellValueToNative(cell?.value))
+              .toList();
           if (row[0] == "DON’T REMOVE THIS LINE") {
             continue;
           }
@@ -172,11 +204,18 @@ class ParsedTemplate {
             readService = false;
             readRouteAsset = false;
 
-            var nextRow = decoder.tables[sheet]!.rows[i + 1];
-            var nextNextRow = decoder.tables[sheet]!.rows[i + 2];
+            var nextRow = sheet
+                .row(i + 1)
+                .map((cell) => _excelCellValueToNative(cell?.value))
+                .toList();
+            var nextNextRow = sheet
+                .row(i + 2)
+                .map((cell) => _excelCellValueToNative(cell?.value))
+                .toList();
             pmNumber++;
             //read work order type
-            String workOrderType = nextRow[6].substring(0, 3);
+            String workOrderType =
+                _toNativeString(nextRow[6])?.substring(0, 3) ?? '';
             if (workOrderType == 'LC1') {
               workOrderType = 'LIF';
               //replace work order types of 'LC1' with 'LIF'
@@ -187,9 +226,14 @@ class ParsedTemplate {
               if (nextRow[2] is String) {
                 String temp = nextRow[2];
                 nextDate = temp.substring(0, (min(10, temp.length)));
-              } else {
+              } else if (nextRow[2] is DateTime) {
+                nextDate = (nextRow[2] as DateTime)
+                    .toUtc()
+                    .toString()
+                    .substring(0, 10);
+              } else if (nextRow[2] is num) {
                 nextDate = DateTime.fromMillisecondsSinceEpoch(
-                        (nextRow[2] - 25569) * 86400000,
+                        (((nextRow[2] as num) - 25569) * 86400000).toInt(),
                         isUtc: true)
                     .toString()
                     .substring(0, 10);
@@ -198,42 +242,48 @@ class ParsedTemplate {
             //write to template object
             pmTemplates[filename][pmNumber] = ParsedTemplate(
               nextDueDate: nextDate,
-              siteId: nextRow[3].toString().toUpperCase(),
+              siteId: _toNativeString(nextRow[3])?.toUpperCase(),
               frequencyUnit:
-                  nextRow[4]?.substring(0, 1)?.toString().toUpperCase(),
-              frequency: nextRow[5],
+                  _toNativeString(nextRow[4])?.substring(0, 1).toUpperCase(),
+              frequency: _toNativeInt(nextRow[5]),
               workOrderType: workOrderType,
-              processCondition: nextRow[7].substring(0, 4),
-              pmAsset: nextRow[0]?.toString().toUpperCase(),
-              pmName: nextRow[8] ?? 'Generating Name...',
-              pmNumber: nextNextRow[8] ?? 'Generating Number...',
-              suggestedPmName: nextRow[8],
-              suggestedPmNumber: nextNextRow[8],
+              processCondition: _toNativeString(nextRow[7])?.substring(0, 4),
+              pmAsset: _toNativeString(nextRow[0])?.toUpperCase(),
+              pmName: _toNativeString(nextRow[8]) ?? 'Generating Name...',
+              pmNumber:
+                  _toNativeString(nextNextRow[8]) ?? 'Generating Number...',
+              suggestedPmName: _toNativeString(nextRow[8]),
+              suggestedPmNumber: _toNativeString(nextNextRow[8]),
               routeName:
-                  (nextRow[9] == 'Select Route (Optional)' ? null : nextRow[9]),
-              routeCode:
-                  (nextRow[9] == 'Select Route (Optional)' || nextRow[9] == null
+                  (_toNativeString(nextRow[9]) == 'Select Route (Optional)'
                       ? null
-                      : nextNextRow[9].toString()),
+                      : _toNativeString(nextRow[9])),
+              routeCode:
+                  (_toNativeString(nextRow[9]) == 'Select Route (Optional)' ||
+                          nextRow[9] == null
+                      ? null
+                      : _toNativeString(nextNextRow[9])),
             );
           }
           if (row[7] != null && readTasks) {
             //reading job task info of current PM, writing data to [ParsedTemplate] object(s)
             pmTemplates[filename][pmNumber].tasks.add(JobTask(
-                jptask: row[6],
-                description: row[7],
-                assetNumber: row[4]?.toString().toUpperCase(),
-                metername: row[5],
-                longdescription: row[8]));
+                jptask: _toNativeInt(row[6]),
+                description: _toNativeString(row[7]),
+                assetNumber: _toNativeString(row[4])?.toUpperCase(),
+                metername: _toNativeString(row[5]),
+                longdescription: _toNativeString(row[8])));
             if (row[4] != null) {
-              pmTemplates[filename][pmNumber].assets.add(row[4]);
+              pmTemplates[filename][pmNumber]
+                  .assets
+                  .add(_toNativeString(row[4])!);
             }
           }
           if (row[3] != null && readRouteAsset) {
             //reading task rout asset data of current PM and write it to [ParsedTemplate] object
             pmTemplates[filename][pmNumber]
                 .assets
-                .add(row[3].toString().toUpperCase());
+                .add(_toNativeString(row[3])!.toUpperCase());
           }
           if (row[0] == 'Materials (Mapics Number)') {
             //check if current row has materials/mapics # header for PM. If so, read the data next iteration(s)
@@ -252,7 +302,7 @@ class ParsedTemplate {
           if (row[1] != null && readCraft) {
             //read/write craft data
             //parse craft line
-            String str = row[0];
+            String str = _toNativeString(row[0]) ?? '';
             String laborType = str.substring(0, 1).toUpperCase();
             // Patch for Production which is code O, but starts with P
             if (laborType == 'P') {
@@ -267,23 +317,23 @@ class ParsedTemplate {
 
             pmTemplates[filename][pmNumber].crafts.add(JobCraft(
                 laborType: laborType,
-                quantity: row[1],
+                quantity: _toNativeInt(row[1]) ?? 0,
                 hours: parseTime(row[2]),
                 laborCode: laborCode));
           }
           if (row[0] != null && readMaterials) {
             //read/write material data
             pmTemplates[filename][pmNumber].materials.add(JobMaterial(
-                itemNumber: row[0].toString(),
-                quantity: row[1]?.toDouble() ?? 1.0,
-                cost: row[2]?.toDouble()));
+                itemNumber: _toNativeString(row[0]) ?? '',
+                quantity: _toNativeDouble(row[1]) ?? 1.0,
+                cost: _toNativeDouble(row[2])));
           }
           if (row[0] != null && readService) {
             //read/write service data
             pmTemplates[filename][pmNumber].services.add(JobService(
-                itemNumber: row[0].toString(),
-                vendorId: row[2],
-                cost: row[1]?.toDouble()));
+                itemNumber: _toNativeString(row[0]) ?? '',
+                vendorId: _toNativeString(row[2]) ?? '',
+                cost: _toNativeDouble(row[1])));
           }
           if (row[0] == 'Craft @ (Optional) Labour Code' ||
               row[0] == 'Craft (Labour Code(Optional))') {

@@ -76,7 +76,6 @@ void main() {
 
       expect(result, p.join(outputDir.path, 'sample_updated.pdf'));
       final outputBytes = await File(result).readAsBytes();
-      print(String.fromCharCodes(outputBytes));
       expect(
           outputBytes, contains(utf8.encode('https://new.example.com/path')));
       expect(outputBytes, contains([0x00, 0xFF, 0x01]));

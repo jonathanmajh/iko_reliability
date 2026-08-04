@@ -9,6 +9,7 @@ import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.d
 import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
+import 'package:iko_reliability_flutter/admin/template_notifier.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:provider/provider.dart';
 import '../criticality/criticality_db_export_import.dart';
@@ -63,6 +64,27 @@ class _EndDrawerState extends State<EndDrawer> {
         child: ListView(
       children: <Widget>[
         const ThemeToggle(),
+        Consumer<SettingsNotifier>(builder: (context, settingsNotifier, child) {
+          final includeFrequency = settingsNotifier.getSetting(
+              ApplicationSetting.includeFrequencyInDescriptions) as bool?;
+          return SwitchListTile(
+            title: const Text('Include frequency in generated descriptions'),
+            subtitle: const Text(
+                'Clearing templates when changed requires reloading files'),
+            value: includeFrequency ?? true,
+            onChanged: (bool value) {
+              settingsNotifier.changeSettings({
+                ApplicationSetting.includeFrequencyInDescriptions: value,
+              });
+              context.read<TemplateNotifier>().clearTemplates();
+              context.read<UploadNotifier>().clearTemplates();
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    'Templates cleared. Re-select a file to process templates again.'),
+              ));
+            },
+          );
+        }),
         ListTile(
           //load observation from spreadsheet/excel
           title: const Text('Load Observation'),

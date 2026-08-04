@@ -26,11 +26,13 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
   PdfLinkReplacementMode _mode = PdfLinkReplacementMode.replaceAll;
   final TextEditingController _findController = TextEditingController();
   final TextEditingController _replacementController = TextEditingController();
+  final TextEditingController _siteController = TextEditingController();
 
   @override
   void dispose() {
     _findController.dispose();
     _replacementController.dispose();
+    _siteController.dispose();
     super.dispose();
   }
 
@@ -47,7 +49,7 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
   }
 
   Future<void> _pickFolder() async {
-    final result = await FilePicker.platform.getDirectoryPath();
+    final result = await FilePicker.getDirectoryPath();
     if (result == null || result.isEmpty) {
       return;
     }
@@ -64,7 +66,7 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
   }
 
   Future<void> _pickOutputFolder() async {
-    final result = await FilePicker.platform.getDirectoryPath();
+    final result = await FilePicker.getDirectoryPath();
     if (result == null || result.isEmpty) {
       return;
     }
@@ -118,7 +120,7 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
 
         if (mounted) {
           setState(() => _status =
-              'Replaced links in ${index + 1}/${_selectedFiles.length} file(s)');
+              'Processed ${index + 1}/${_selectedFiles.length} file(s)');
         }
       }
     } finally {
@@ -128,8 +130,7 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
           if (_cancelRequested) {
             _status = 'Replacement stopped';
           } else if (outputs.isNotEmpty) {
-            _status =
-                'Completed replacement for ${outputs.length} file(s): ${outputs.join(', ')}';
+            _status = 'Completed replacement for ${outputs.length} file(s)';
           } else {
             _status = 'No replacement files generated';
           }
@@ -193,6 +194,78 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
           _isRunning = false;
           if (_cancelRequested) {
             _status = 'Export stopped';
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> _exportAssetNumbers() async {
+    if (_isRunning) {
+      return;
+    }
+
+    if (_selectedFiles.isEmpty) {
+      setState(() => _status = 'Select at least one PDF file first');
+      return;
+    }
+
+    if (_outputFolder.isEmpty) {
+      setState(() => _status = 'Choose an output folder first');
+      return;
+    }
+
+    setState(() {
+      _isRunning = true;
+      _cancelRequested = false;
+      _status = 'Generating DNA asset CSV...';
+    });
+
+    final rows = <Map<String, String>>[];
+    try {
+      for (int index = 0; index < _selectedFiles.length; index++) {
+        if (!mounted) {
+          return;
+        }
+
+        if (_cancelRequested) {
+          break;
+        }
+
+        final file = _selectedFiles[index];
+        final links = await _service.extractLinksFromPdf(file);
+        for (final link in links) {
+          final assetNumber = _service.extractAssetNumber(link);
+          if (assetNumber == null || assetNumber.isEmpty) {
+            continue;
+          }
+
+          rows.add({
+            'site': _siteController.text,
+            'assetNumber': assetNumber,
+            'fileName': p.basename(file.path),
+            'link': link,
+          });
+        }
+
+        if (mounted) {
+          setState(() => _status =
+              'Scanned ${index + 1}/${_selectedFiles.length} file(s)');
+        }
+      }
+
+      final outputPath =
+          await _service.exportAssetNumbersCsv(rows, _outputFolder);
+      if (mounted) {
+        setState(() => _status =
+            'Exported ${rows.length} asset reference(s) to $outputPath');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRunning = false;
+          if (_cancelRequested) {
+            _status = 'DNA export stopped';
           }
         });
       }
@@ -284,6 +357,12 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
               controller: _replacementController,
               decoration: const InputDecoration(labelText: 'Replacement text'),
             ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _siteController,
+              decoration:
+                  const InputDecoration(labelText: 'Site name (optional)'),
+            ),
             const SizedBox(height: 16),
             Wrap(
               spacing: 12,
@@ -298,6 +377,11 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
                   onPressed: _isRunning ? null : _exportDiscoveredLinks,
                   icon: const Icon(Icons.download),
                   label: const Text('Export discovered links'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _isRunning ? null : _exportAssetNumbers,
+                  icon: const Icon(Icons.analytics),
+                  label: const Text('Generate DNA asset CSV'),
                 ),
                 OutlinedButton.icon(
                   onPressed: _isRunning ? _stopProcessing : null,
@@ -317,8 +401,7 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
                       Text('Selected files (${_selectedFiles.length})'),
                       const SizedBox(height: 8),
                       ..._selectedFiles
-                          .map((file) => Text(p.basename(file.path)))
-                          .toList(),
+                          .map((file) => Text(p.basename(file.path))),
                     ],
                   ),
                 ),

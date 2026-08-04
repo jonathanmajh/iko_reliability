@@ -13,7 +13,7 @@ Future<Uint8List> fetchAndUnzipDb(String url, String dbFileName) async {
   // Find the SQLite file in the archive
   for (final file in archive) {
     if (file.name == dbFileName) {
-      return file.content as Uint8List;
+      return file.content;
     }
   }
   throw Exception('Database file not found in ZIP');

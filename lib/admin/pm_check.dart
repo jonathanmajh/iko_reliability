@@ -10,6 +10,7 @@ import 'package:iko_reliability_flutter/admin/pm_name_generator.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/bin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
@@ -378,8 +379,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
   /// Opens file picker to select PM template files.
   Future<void> pickTemplates() async {
     final template = context.read<TemplateNotifier>();
-    FilePickerResult? result = await FilePicker.platform
-        .pickFiles(allowMultiple: true, withData: true);
+    FilePickerResult? result =
+        await FilePicker.pickFiles(allowMultiple: true, withData: true);
     List<PlatformFile> files = [];
     String msg = '';
     if (result != null) {
@@ -405,6 +406,9 @@ class _PmCheckPageState extends State<PmCheckPage> {
   Future<void> processDroppedFiles(
       TemplateNotifier templateNotifier, List<FileDetails> files) async {
     final maximo = context.read<MaximoServerNotifier>();
+    final includeFrequency = context
+        .read<SettingsNotifier>()
+        .getSetting(ApplicationSetting.includeFrequencyInDescriptions) as bool?;
     setState(() {
       templates = files;
     });
@@ -416,7 +420,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
       setState(() {
         debugPrint('Processing files...');
       });
-      processAllTemplates(templateNotifier, files, maximo.maximoServerSelected);
+      processAllTemplates(templateNotifier, files, maximo.maximoServerSelected,
+          includeFrequency ?? true);
     }
   }
 }
@@ -434,8 +439,11 @@ Future<List<dynamic>> parseSpreadsheets(List<FileDetails> files) async {
 }
 
 ///processes loaded PM template files
-void processAllTemplates(TemplateNotifier templateNotifier,
-    List<FileDetails> files, String maximoServerSelected) async {
+void processAllTemplates(
+    TemplateNotifier templateNotifier,
+    List<FileDetails> files,
+    String maximoServerSelected,
+    bool includeFrequency) async {
   templateNotifier.setLoading(true);
   var parsedTmpts = await parseSpreadsheets(files);
   for (var thing in parsedTmpts) {
@@ -455,6 +463,7 @@ void processAllTemplates(TemplateNotifier templateNotifier,
           final value = await generateName(
             templateNotifier.getParsedTemplate(ws, templateNumber),
             maximoServerSelected,
+            includeFrequency,
           );
           templateNotifier.setNameTemplate(ws, templateNumber, value);
           final value2 = await generatePM(

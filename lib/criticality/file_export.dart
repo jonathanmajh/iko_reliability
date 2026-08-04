@@ -23,7 +23,7 @@ Future<dynamic> saveFileFromString(String contents,
     String? savePath;
     String? fileName;
     do {
-      savePath = await FilePicker.platform.saveFile(
+      savePath = await FilePicker.saveFile(
         dialogTitle: 'Save As',
         lockParentWindow: true,
         type: (allowedExtensions != null) ? FileType.custom : FileType.any,
@@ -82,8 +82,7 @@ Future<dynamic> saveFileFromString(String contents,
 Future<void> exportAssetCriticalityAsCSV(
     {required TrinaGridStateManager stateManager,
     required BuildContext context}) async {
-  String contents = const ListToCsvConverter().convert(generateTrinagrid(
-      stateManager,
+  String contents = const CsvEncoder().convert(generateTrinagrid(stateManager,
       excludeFields: const ['hierarchy', 'action']));
   saveFileFromString(contents, allowedExtensions: ['csv'], context: context)
       .then((result) {

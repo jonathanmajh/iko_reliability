@@ -665,11 +665,9 @@ Future<bool> uploadGeneric(
   String table,
   String url,
 ) async {
-  final result = await maximoRequest(
-      '$url?action=importfile',
-      'post',
-      maximoEnvironment,
-      const ListToCsvConverter().convert([tableHeaders[table], data]));
+  final rows = [tableHeaders[table]!.cast<dynamic>(), data.cast<dynamic>()];
+  final result = await maximoRequest('$url?action=importfile', 'post',
+      maximoEnvironment, CsvEncoder().convert(rows));
   if (result['status'] == 'uploaded') {
     debugPrint('uploaded');
     return true;

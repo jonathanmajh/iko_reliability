@@ -74,12 +74,16 @@ class SettingsNotifier extends ChangeNotifier {
         databaseKeys[i] = databaseSettings[i].key;
       }
 
+      List<Setting> missingSettings = [];
       for (ApplicationSetting setting in ApplicationSetting.values) {
         int index = databaseKeys.indexOf(setting.keyString);
 
         if (index == -1) {
-          //database is in improper format if does not contain all settings
-          return false;
+          // Add missing settings using their default values.
+          currentSettings[setting] = setting.defaultValue;
+          missingSettings.add(Setting(
+              key: setting.toString(), value: setting.defaultValue.toString()));
+          continue;
         }
 
         Setting tempSetting = databaseSettings[index];
@@ -151,6 +155,9 @@ class SettingsNotifier extends ChangeNotifier {
             throw Exception(
                 'Unexpected type [${setting.dataType}] for setting [${setting.keyString}]');
         }
+      }
+      if (missingSettings.isNotEmpty) {
+        await database!.setSettings(newSettings: missingSettings);
       }
       return true;
     } catch (e) {

@@ -813,6 +813,12 @@ enum ApplicationSetting {
   updateWindowOff(
       keyString: 'update window off', dataType: 'bool', defaultValue: false),
 
+  ///TRUE FALSE for including frequency text in generated PM / JP / Route descriptions
+  includeFrequencyInDescriptions(
+      keyString: 'include frequency in generated descriptions',
+      dataType: 'bool',
+      defaultValue: true),
+
   ///int for asset criticality RPN risk distribution percentage (very low)
   rpnPercentVL(
       keyString: 'RPN percent very low', dataType: 'int', defaultValue: 30),

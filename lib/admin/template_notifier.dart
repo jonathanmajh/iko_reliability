@@ -236,7 +236,7 @@ class TemplateNotifier extends ChangeNotifier {
   }
 
   void setRouteInfo(String code, String description, String file, int template,
-      String maximoServerSelected) async {
+      String maximoServerSelected, bool includeFrequency) async {
     final parsedTemplate = allTemplates[file]![template]!.parsedTemplate;
     parsedTemplate.routeCode = code;
     parsedTemplate.routeName = description;
@@ -245,6 +245,7 @@ class TemplateNotifier extends ChangeNotifier {
       final value = await generateName(
         parsedTemplate,
         maximoServerSelected,
+        includeFrequency,
       );
       setNameTemplate(file, template, value);
       final value2 = await generatePM(
