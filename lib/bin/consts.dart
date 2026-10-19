@@ -1,5 +1,36 @@
 import 'dart:typed_data' show Uint8List;
 
+/// Reads a Maximo record field (JSON keys are lowercase) as a String.
+String? fieldOf(Map<dynamic, dynamic> record, String name) {
+  final value = record[name.toLowerCase()] ?? record[name.toUpperCase()];
+  if (value == null) {
+    return null;
+  }
+  return value.toString();
+}
+
+/// Strips HTML tags from Maximo long description text for display/export.
+String stripHtml(String? text) {
+  if (text == null) {
+    return '';
+  }
+  return text.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+}
+
+/// Reads a table-header style column (e.g. 'JP_JPNUM', 'CRAFT') from a raw
+/// Maximo child row.
+String rowValue(dynamic row, String header) {
+  if (row is! Map) {
+    return '';
+  }
+  String name = header.toLowerCase();
+  if (name.startsWith('jp_')) {
+    name = name.substring(3);
+  }
+  final value = row[name] ?? row[header] ?? row[header.toUpperCase()];
+  return value == null ? '' : value.toString();
+}
+
 /// Maps person group codes to their string representations.
 final personGroups = {
   'O': 'PRODSUP',

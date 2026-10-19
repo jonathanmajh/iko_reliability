@@ -112,3 +112,76 @@ Base: `https://test2.manage.test2.iko.max-it-eam.com/maximo/api/os/`
    the template stores the meter 'inspect' value. Meter names are mapped
    back via the local meter DB (strip trailing digits -> code -> inspect).
 5. **Route tab** now shows each stop's linked job plan description.
+
+## Addendum 2 — feedback round 2 (blank request template as base)
+
+User feedback after trying the import-template export:
+1. Base the export on the blank request template saved at repo root
+   (`PM Request Template.xlsm`): keep the 'Main' sheet formatting and row
+   layout, VBA not needed.
+2. The template's 'Route:' dropdown (None / Task / Child) was missed.
+3. `GS C8025LUBM001` has child job plans with MULTIPLE tasks but only one
+   task row was written.
+4. The viewer does not show the job plans linked to route stops.
+
+Template layout facts (verified against the .xlsm):
+- `Main` rows 0-5 = 'DON'T REMOVE THIS LINE' (once, at the top). The first
+  PM block lives in rows 6-21: label row 6, data row 7, number row 8, blank
+  9, section labels 10, craft header 11, content 12-21. Every further PM
+  block repeats the same 16-row form (the template's `Template Copy` sheet,
+  without the DON'T REMOVE rows), starting past row 21.
+- Data row (7): col 0 asset, **col 1 route type** ('None'/'Task'/'Child' -
+  Option List col 5-6 dropdown), col 2 next due date, col 3 site, col 4
+  frequency word ('Days'...), col 5 frequency, col 6 work type option
+  ('INR (Routine Inspection)'), col 7 condition option ('CR01 (Running)'),
+  col 8 PM name, col 9 route NAME (or 'Select Route (Optional)').
+- Number row (8): col 8 PM number, col 9 route CODE (template has an
+  XLOOKUP formula there; the export overwrites it with the literal code
+  because the parser reads the cell value, not the formula result).
+- Craft header (11) 'Craft @ (Optional) Labour Code' enables task/craft
+  reading. Content rows: labour = col 0 'ELECT: E' style option (or
+  'ELECT@code'), col 1 qty, col 2 hours (Hours cell must be non-null -
+  parser's parseTime throws on null); tasks = col 4 asset, col 5 meter
+  inspect value, col 6 jptask, col 7 desc, col 8 longdesc; first task row
+  carries the 'Task Route Assets (one per cell):' marker in col 3 (PM1:
+  the template's own marker on row 12 is reused); plain stops get asset
+  rows in col 3. Parser checks: task check runs BEFORE the materials
+  header check; marker check has no `continue`; parse throws on any row
+  error, so cells must never hold short/empty strings where the parser
+  calls substring (fallbacks write the template's own unfilled dropdown
+  texts, e.g. 'Select Work Order').
+- Dropdown values are matched against the template's 'Option List' sheet
+  ('INR (Routine Inspection)', 'PROD: O', 'CR01 (Running)', route names)
+  so the workbook lookups stay valid.
+
+Implementation:
+- Template bundled as asset `assets/PM Request Template.xlsm` (pubspec).
+- New pure-Dart module `lib/admin/extract_import_template.dart`:
+  `buildImportTemplateWorkbook(stores, templateBytes, resolveMeter)` -
+  loads the template via excel_plus, writes PM1 into the template block
+  and later PMs as repeated form blocks, clones cell styles from
+  'Template Copy' for appended rows, overwrites the J9 formula with the
+  route code, and CLEARS (style-preserving) any default template cells in
+  rows 12-21 that PM data did not overwrite (per-cell tracking - leftover
+  default text mid-block would corrupt the parse).
+  Route type: Maximo `ROUTESTOPSBECOME` ('CHILD'/'TASK') -> 'Child'/'Task',
+  computed from stop jpnums as fallback, 'None' without route.
+- ALL tasks of each stop's child job plan are written (multi-task fix,
+  feedback 3) - also in `populateTemplateFromExtract` for the editor
+  round trip (generatePM groups tasks per stop asset into one child JP).
+- `lib/admin/extract_store.dart` (pure Dart) now holds ExtractStore +
+  FetchedJobPlan; extract_notifier re-exports it; fieldOf/rowValue/
+  stripHtml moved to `lib/bin/consts.dart` so the builder module stays
+  Flutter-free.
+- Import-template export output renamed `PM_Request_yyyyMMdd_HHmmss.xlsx`.
+- Route tab rebuilt: one expandable card per stop showing the stop's job
+  plan (jpnum/description) with its tasks, labour, materials and services
+  (feedback 4).
+- Round-trip test `test/extract_import_template_test.dart` (pure dart run)
+  drives the real builder with the bundled template and parses the result
+  with the real `ParsedTemplate.fromExcel`: sheet inventory intact, PM1/Pm2
+  block layout, option strings, all stop tasks present, no leftover
+  template defaults, full data round trip. ALL CHECKS PASSED.
+- NOTE: the TEST2 API key started returning 403 BMXAA7901E (login
+  restricted) mid-session, so the `GS C8025LUBM001` structure could not be
+  verified live; the multi-task child-JP shape is covered by the test.

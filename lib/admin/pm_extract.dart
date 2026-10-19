@@ -858,47 +858,79 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
       rows.add(
           _fieldRow(header, fieldOf(route, header.toLowerCase()) ?? '', context));
     }
-    // shows the extracted stop job plan description under each stop
-    List<Widget> stopDescription(dynamic row) {
-      final jpnum = fieldOf(row as Map, 'jpnum') ?? '';
-      final stopJp = jpnum.isEmpty ? null : store.stopJobPlans[jpnum];
-      String description;
-      if (stopJp == null) {
-        description = jpnum.isEmpty
-            ? 'No linked job plan'
-            : 'linked job plan not extracted';
-      } else {
-        description = 'JP: $jpnum - ${stopJp.description ?? ''}';
-      }
-      return [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4.0, 0.0, 4.0, 4.0),
-          child: SelectableText(
-            description,
-            style: TextStyle(
-              fontSize: 11,
-              fontStyle: FontStyle.italic,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ),
-      ];
+    // one card per stop; stops with an extracted job plan show its details
+    rows.add(Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text('Stops (${store.routeStops.length})',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+    ));
+    for (final stop in store.routeStops) {
+      rows.add(_stopCard(store, stop));
     }
-
-    rows.add(_childTableCard(
-        'Stops (${store.routeStops.length})',
-        ['STOPSEQUENCE', 'ASSETNUM', 'JPNUM'],
-        store.routeStops,
-        extraRowBuilder: stopDescription));
     return ListView(
       padding: const EdgeInsets.all(10),
       children: rows,
     );
   }
 
-  /// Expandable card listing child rows (tasks / labor / materials / stops).
-  Widget _childTableCard(String title, List<String> headers, List<dynamic> rows,
-      {List<Widget> Function(dynamic row)? extraRowBuilder}) {
+  /// Card for a single route stop. The job plan linked to the stop (if
+  /// extracted) is shown with its tasks, labour, materials and services.
+  Widget _stopCard(ExtractStore store, dynamic stop) {
+    final jpnum = fieldOf(stop, 'jpnum') ?? '';
+    final plan = jpnum.isEmpty ? null : store.stopJobPlans[jpnum];
+    final seq = fieldOf(stop, 'stopsequence') ?? '';
+    final asset = fieldOf(stop, 'assetnum') ?? '';
+    String title;
+    if (plan != null) {
+      title = 'Stop $seq: $asset - ${plan.description?.isNotEmpty == true ? plan.description : jpnum}';
+    } else if (jpnum.isEmpty) {
+      title = 'Stop $seq: $asset (no job plan)';
+    } else {
+      title = 'Stop $seq: $asset - $jpnum (job plan not extracted)';
+    }
+    return Card(
+      child: ExpansionTile(
+        title: Text(title),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (plan != null) ...[
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: SelectableText(
+                  'JP: ${plan.jpnum ?? jpnum} - ${plan.description ?? ''}',
+                  style: const TextStyle(fontFamily: 'RobotoMono', fontSize: 12)),
+            ),
+          ] else ...[
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: SelectableText(jpnum.isEmpty
+                  ? 'No linked job plan'
+                  : 'Linked job plan $jpnum was not extracted',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                      color: Theme.of(context).colorScheme.onSurface)),
+            ),
+          ],
+          if (plan != null && plan.jobtasks.isNotEmpty)
+            _childTableCard('Job Plan Tasks',
+                ['JPTASK', 'DESCRIPTION', 'METERNAME'], plan.jobtasks),
+          if (plan != null && plan.joblabors.isNotEmpty)
+            _childTableCard('Job Plan Labour',
+                ['CRAFT', 'QUANTITY', 'LABORHRS'], plan.joblabors),
+          if (plan != null && plan.jobmaterials.isNotEmpty)
+            _childTableCard('Job Plan Materials',
+                ['ITEMNUM', 'ITEMQTY', 'COST'], plan.jobmaterials),
+          if (plan != null && plan.jobservices.isNotEmpty)
+            _childTableCard('Job Plan Services',
+                ['ITEMNUM', 'COST', 'COMPANY'], plan.jobservices),
+        ],
+      ),
+    );
+  }
+
+  /// Expandable card listing child rows (tasks / labor / materials).
+  Widget _childTableCard(String title, List<String> headers, List<dynamic> rows) {
     return Card(
       child: ExpansionTile(
         title: Text(title),
@@ -907,16 +939,10 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
           for (final row in rows)
             Padding(
               padding: const EdgeInsets.all(4.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SelectableText(
-                    stripHtml(headers.map((h) => rowValue(row, h)).join(', ')),
-                    style: const TextStyle(
-                        fontFamily: 'RobotoMono', fontSize: 12),
-                  ),
-                  if (extraRowBuilder != null) ...extraRowBuilder(row),
-                ],
+              child: SelectableText(
+                stripHtml(headers.map((h) => rowValue(row, h)).join(', ')),
+                style: const TextStyle(
+                    fontFamily: 'RobotoMono', fontSize: 12),
               ),
             ),
         ],
