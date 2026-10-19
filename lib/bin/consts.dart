@@ -362,6 +362,8 @@ Map<String, String> maximoServerDomains = {
   'MASPROD': 'https://prod.manage.prod.iko.max-it-eam.com/maximo/api/os/',
   'DEV 8.11': 'https://dev.manage.dev.iko.max-it-eam.com/maximo/api/os/',
   'TEST2 8.11': 'https://test2.manage.test2.iko.max-it-eam.com/maximo/api/os/',
+  'Dev 9.1': 'https://mas.manage.dev.ikona-np.naviam.app/maximo/api/os/',
+  'Test 9.1': 'https://mas.manage.uat.ikona-np.naviam.app/maximo/api/os/',
 };
 
 /// Contains API keys for different Maximo environments.
@@ -369,6 +371,8 @@ Map<String, String> apiKeys = {
   'MASPROD': '',
   'DEV 8.11': '',
   'TEST2 8.11': '',
+  'Dev 9.1': '',
+  'Test 9.1': '',
 };
 
 /// Contains frequency rating information for different levels of maintenance.

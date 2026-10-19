@@ -20,13 +20,15 @@ class PdfLinkToolService {
     if (input.isEmpty || find.isEmpty) return input;
     if (!input.toLowerCase().contains(find.toLowerCase())) return input;
 
+    final pattern = RegExp(RegExp.escape(find), caseSensitive: false);
+
     switch (mode) {
       case PdfLinkReplacementMode.replaceAll:
-        return input.replaceAll(find, replacement);
+        return input.replaceAll(pattern, replacement);
       case PdfLinkReplacementMode.prefix:
-        return input.replaceFirst(find, replacement);
+        return input.replaceFirstMapped(pattern, (m) => '$replacement${m[0]}');
       case PdfLinkReplacementMode.suffix:
-        return input.replaceFirst(find, '$find$replacement');
+        return input.replaceFirstMapped(pattern, (m) => '${m[0]}$replacement');
     }
   }
 
@@ -125,6 +127,7 @@ class PdfLinkToolService {
       final doc = PdfDocument.open(bytes);
       final editor = PdfEditor(doc);
       var changed = false;
+      var changedCount = 0;
 
       for (var pageIndex = 0; pageIndex < doc.pageCount; pageIndex++) {
         final page = doc.page(pageIndex);
@@ -145,6 +148,7 @@ class PdfLinkToolService {
           editor.removeAnnotation(pageIndex, annotation);
           editor.addLinkToUri(pageIndex, [annotation.rect], uri: updatedUri);
           changed = true;
+          changedCount++;
         }
       }
 
@@ -158,7 +162,6 @@ class PdfLinkToolService {
         if (updatedBytes == null || _listsEqual(updatedBytes, bytes)) {
           return pdfFile.path;
         }
-
         await outputFile.parent.create(recursive: true);
         await outputFile.writeAsBytes(updatedBytes);
         return outputFile.path;
@@ -166,6 +169,7 @@ class PdfLinkToolService {
 
       await outputFile.parent.create(recursive: true);
       await outputFile.writeAsBytes(editor.save());
+      print('Number of links changed ${changedCount.toString()}');
       return outputFile.path;
     } on Object {
       final updatedBytes = _replaceInBytes(bytes, find, replacement, mode);
