@@ -14,7 +14,7 @@ import 'package:iko_reliability_flutter/bin/common.dart';
 import 'package:iko_reliability_flutter/criticality/functions.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart' as prov;
-import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
+import 'package:excel_plus/excel_plus.dart';
 import 'package:statistics/statistics.dart';
 import '../admin/connections/connection.dart' as impl;
 import '../criticality/spare_criticality.dart';
@@ -23,6 +23,20 @@ import 'consts.dart';
 import '../admin/upload_maximo.dart';
 
 part 'db_drift.g.dart';
+
+dynamic _excelCellValueToNative(CellValue? value) {
+  if (value == null) return null;
+  if (value is IntCellValue) return value.value;
+  if (value is DoubleCellValue) return value.value;
+  if (value is BoolCellValue) return value.value;
+  if (value is DateCellValue) return value.asDateTimeUtc();
+  if (value is FormulaCellValue) return value.cachedValue ?? value.formula;
+  return value.toString();
+}
+
+dynamic _toNativeString(dynamic value) {
+  return value?.toString();
+}
 
 class Settings extends Table {
   TextColumn get key => text()();
@@ -945,11 +959,14 @@ class MyDatabase extends _$MyDatabase {
   Future<void> loadSystems(String siteid) async {
     http.Response response = await http.get(Uri.parse(
         'https://raw.githubusercontent.com/jonathanmajh/iko_reliability/master/lib/criticality/CriticalityData.xlsx'));
-    final decoder = SpreadsheetDecoder.decodeBytes(response.bodyBytes);
-    final sheet = decoder.tables.values.first;
+    final excel = Excel.decodeBytes(response.bodyBytes);
+    final sheet = excel.tables.values.first;
     List<SystemCriticalitysCompanion> inserts = [];
     for (var i = 2; i < sheet.maxRows; i++) {
-      var row = sheet.rows[i];
+      var row = sheet
+          .row(i)
+          .map((cell) => _excelCellValueToNative(cell?.value))
+          .toList();
       if (row[1] != null) {
         inserts.add(
           SystemCriticalitysCompanion.insert(
@@ -978,7 +995,7 @@ class MyDatabase extends _$MyDatabase {
       material
           .debugPrint('Error inserting System Criticality, ${e.toString()}');
     }
-    final associateSheet = decoder.tables.values.elementAt(1);
+    final associateSheet = excel.tables.values.elementAt(1);
     List<AssetCriticalitysCompanion> assetInserts = [];
     var temp = await select(systemCriticalitys).get();
     var systems = {};
@@ -992,7 +1009,10 @@ class MyDatabase extends _$MyDatabase {
       assets[asset.assetnum] = asset;
     }
     for (var i = 2; i < associateSheet.maxRows; i++) {
-      var row = associateSheet.rows[i];
+      var row = associateSheet
+          .row(i)
+          .map((cell) => _excelCellValueToNative(cell?.value))
+          .toList();
       if (row[0] != null) {
         SystemCriticality system;
         if (systems.containsKey('${row[2]}|${row[3]}|${row[1]}')) {
@@ -1022,33 +1042,37 @@ class MyDatabase extends _$MyDatabase {
 
   Future<void> addMeters() async {
     List<String> messages = [];
-    FilePickerResult? result = await FilePicker.platform
-        .pickFiles(allowMultiple: false, withData: true);
+    FilePickerResult? result =
+        await FilePicker.pickFiles(allowMultiple: false, withData: true);
     List<PlatformFile> files = [];
     if (result == null) {
       return;
     }
     files = result.files.map((files) => (files)).toList();
-    var decoder = SpreadsheetDecoder.decodeBytes(files.first.bytes!);
-    var sheet = decoder.tables.values.first;
+    var excel = Excel.decodeBytes(files.first.bytes!);
+    var sheet = excel.tables.values.first;
     List<MeterDBsCompanion> meterInserts = [];
     List<ObservationsCompanion> observationInserts = [];
     String meterCode = '';
     List<String> meterObservationUnique = [];
     for (var i = 1; i < sheet.maxRows; i++) {
-      var row = sheet.rows[i];
+      var row = sheet
+          .row(i)
+          .map((cell) => _excelCellValueToNative(cell?.value))
+          .toList();
       try {
         if (row[0] != null) {
-          row[10] = row[10].toString().trim();
-          meterCode = row[0];
+          var freqText = _toNativeString(row[10])?.trim() ?? '';
+          row[10] = freqText;
+          meterCode = _toNativeString(row[0]) ?? '';
           meterInserts.add(MeterDBsCompanion.insert(
-            condition: row[12].toString().trim(),
+            condition: _toNativeString(row[12])?.trim() ?? '',
             description: row[4],
-            freqUnit: row[10].substring(row[10].length - 1, 1),
-            frequency: int.parse(row[10].substring(0, row[10].length - 1)),
-            inspect: row[2].toString().trim(),
-            meter: row[0].toString().trim(),
-            craft: row[11].substring(0, 1),
+            freqUnit: freqText.substring(freqText.length - 1, freqText.length),
+            frequency: int.parse(freqText.substring(0, freqText.length - 1)),
+            inspect: _toNativeString(row[2])?.trim() ?? '',
+            meter: _toNativeString(row[0])?.trim() ?? '',
+            craft: _toNativeString(row[11])?.substring(0, 1) ?? '',
           ));
         }
         if (row[5] != null) {

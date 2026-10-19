@@ -13,8 +13,18 @@ Future<Uint8List> fetchAndUnzipDb(String url, String dbFileName) async {
   // Find the SQLite file in the archive
   for (final file in archive) {
     if (file.name == dbFileName) {
-      return file.content as Uint8List;
+      return file.content;
     }
   }
   throw Exception('Database file not found in ZIP');
+}
+
+Future<String> fetchRemoteVersion() async {
+  final response = await http
+      .get(Uri.parse('https://iko-proxy.jonathanmajh.workers.dev/.version'));
+  if (response.statusCode == 200) {
+    return response.body.trim();
+  } else {
+    throw Exception('Failed to fetch remote version');
+  }
 }

@@ -1,14 +1,20 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:iko_reliability_flutter/admin/upload_maximo.dart'
+    show maximoRequest;
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/bin/drawer.dart';
 import 'package:iko_reliability_flutter/bin/end_drawer.dart';
 import 'package:iko_reliability_flutter/items/item_db.dart';
 import 'package:iko_reliability_flutter/items/item_notifier.dart';
 import 'package:iko_reliability_flutter/main.dart';
+import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart'
+    show MaximoServerNotifier;
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart' show launchUrl;
 
 /// Intent to perform search
 class Search extends Intent {
@@ -66,7 +72,7 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
   final ScrollController _controller = ScrollController();
   List<String> items = [];
   Map<String, ItemCache> itemDetails = {};
-  Map<String, ItemCache> inventoryDetails = {};
+  Map<String, InventoryCache> inventoryDetails = {};
   bool _isLoading = false;
   bool _hasMore = true;
   ItemNotifier? _itemNotifier;
@@ -102,11 +108,17 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
   void _loadMore() async {
     setState(() => _isLoading = true);
     var nextItems = context.read<ItemNotifier>().getResults();
+    final selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
     final details = await itemDatabase!.getItemDetails(items: nextItems);
+    final invDetails = await itemDatabase!
+        .getInventoryDetails(items: nextItems, site: selectedSite);
+    if (!mounted) return;
     setState(() {
       items.addAll(nextItems);
       itemDetails.addAll(details);
+      inventoryDetails.addAll(invDetails);
       _isLoading = false;
+      print('Loaded ${nextItems.length} items, total: ${items.length}');
       if (nextItems.isEmpty) {
         _hasMore = false;
         return;
@@ -154,42 +166,94 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
             ? Colors.green
             : (percent > 0.4 ? Colors.orange : Colors.red);
         return Card(
-            child: ListTile(
-                // minTileHeight: 200,
-                leading: CircularPercentIndicator(
-                  percent: percent,
-                  center: Text('${(percent * 100).toStringAsFixed(0)}%'),
-                  progressColor: colour,
-                  radius: 24,
-                ),
-                title: Text(items[index]),
-                subtitle: Text.rich(
-                  TextSpan(
-                      children: itemDetails.containsKey(items[index])
-                          ? formattedText
-                          : null),
-                ),
-                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                  // show issue unit
-                  Text(itemDetails[items[index]]!.uom ?? ''),
-                  IconButton(
-                    icon: const Icon(Icons.copy),
-                    tooltip: 'Copy Item Number',
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: items[index]));
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Copied ${items[index]} to clipboard'),
-                      ));
-                    },
+          child: ExpansionTile(
+            title: Text(items[index]),
+            leading: Row(mainAxisSize: MainAxisSize.min, children: [
+              CircularPercentIndicator(
+                percent: percent,
+                center: Text('${(percent * 100).toStringAsFixed(0)}%'),
+                progressColor: colour,
+                radius: 24,
+              ),
+              IconButton(
+                onPressed: () {},
+                tooltip: inventoryDetails.containsKey(items[index])
+                    ? 'Item in Storeroom'
+                    : 'Item not in Storeroom',
+                icon: const Icon(Icons.warehouse),
+                color: inventoryDetails.containsKey(items[index])
+                    ? Colors.green
+                    : Colors.red,
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy),
+                tooltip: 'Copy Item Number',
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: items[index]));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Copied ${items[index]} to clipboard'),
+                  ));
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.open_in_new),
+                tooltip: 'Open in Maximo',
+                onPressed: () {
+                  launchUrl(Uri.parse(
+                      'https://prod.manage.prod.iko.max-it-eam.com/maximo/oslc/graphite/manage-shell/index.html?event=loadapp&value=item&additionalevent=useqbe&additionaleventvalue=itemnum%3D${items[index]}'));
+                },
+              ),
+            ]),
+            subtitle: Text.rich(
+              TextSpan(
+                  children: itemDetails.containsKey(items[index])
+                      ? formattedText
+                      : null),
+            ),
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0.0),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'UOM: ${itemDetails[items[index]]!.uom ?? ''}',
+                          ),
+                          Text(
+                              'Details: ${itemDetails[items[index]]!.extDescription ?? ''}')
+                        ])),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: inventoryDetails.containsKey(items[index])
+                        ? [
+                            Text(
+                              'Storeroom: ${inventoryDetails[items[index]]!.location} | Default Bin: ${inventoryDetails[items[index]]!.binnum ?? '[Blank]'}',
+                            ),
+                            Text(
+                              'Vendor: ${inventoryDetails[items[index]]!.vendor ?? '[Blank]'} | Catalog: ${inventoryDetails[items[index]]!.catalogcode ?? '[Blank]'}',
+                            ),
+                            Text(
+                              'Manufacturer: ${inventoryDetails[items[index]]!.manufacturer ?? '[Blank]'} | Model: ${inventoryDetails[items[index]]!.modelnum ?? '[Blank]'}',
+                            ),
+                            InventoryQuantity(
+                              itemnum: items[index],
+                              siteID: inventoryDetails[items[index]]!.siteid,
+                            ),
+                          ]
+                        : [],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.open_in_new),
-                    tooltip: 'Open in Maximo',
-                    onPressed: () {
-                      // TODO openInIKO(items[index]);
-                    },
-                  ),
-                ])));
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
@@ -308,5 +372,78 @@ class _ItemSearchWidgetState extends State<ItemSearchWidget> {
       ranked: await itemDatabase!.rankResults(phrases: searchTerms),
       searchTerm: searchTerms,
     );
+  }
+}
+
+class ItemLoadingIndicator extends StatefulWidget {
+  const ItemLoadingIndicator({super.key});
+
+  @override
+  State<ItemLoadingIndicator> createState() => _ItemLoadingIndicatorState();
+}
+
+class _ItemLoadingIndicatorState extends State<ItemLoadingIndicator> {
+  String message = '';
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.watch<SelectedSiteNotifier>().selectedSite.isEmpty) {
+      return const SiteToggle();
+    } else {
+      Navigator.pop(navigatorKey.currentContext!);
+      navigatorKey.currentContext!.router.replacePath("/item");
+      Future.delayed(Duration.zero, () {
+        Navigator.pop(navigatorKey.currentContext!);
+      });
+    }
+    return Text(message);
+  }
+}
+
+class InventoryQuantity extends StatefulWidget {
+  final String itemnum;
+  final String siteID;
+  const InventoryQuantity(
+      {super.key, required this.itemnum, required this.siteID});
+
+  @override
+  State<InventoryQuantity> createState() => _InventoryQuantityState();
+}
+
+class _InventoryQuantityState extends State<InventoryQuantity> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<double>(
+      future: getQuantity(
+        widget.itemnum,
+        widget.siteID,
+        context.read<MaximoServerNotifier>().maximoServerSelected,
+      ), // a previously-obtained Future<int> or null
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          return Text('Quantity on Hand: ${snapshot.data}');
+        }
+      },
+    );
+  }
+
+  Future<double> getQuantity(String itemnum, String siteID, String env) async {
+    double quantity = 0;
+    final url =
+        'mxapiinvbal?lean=1&oslc.select=curbal&oslc.where=itemnum="$itemnum"%20and%20siteid="$siteID"';
+    final result = await maximoRequest(url, 'get', env);
+    if (!result.containsKey('member')) {
+      throw Exception('Invalid response from Maximo');
+    }
+    for (var entry in result['member']) {
+      if (entry['curbal'] != null) {
+        quantity += double.parse(entry['curbal'].toString());
+      }
+    }
+    return quantity;
   }
 }

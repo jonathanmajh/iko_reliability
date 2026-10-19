@@ -407,8 +407,10 @@ List<List<String>> generateTrinagrid(TrinaGridStateManager stateManager,
 String writeToCSV(Map<String, List<List<String>>> generated) {
   String allData = '';
   for (final tables in generated.keys) {
-    allData =
-        '$allData\n$tables\n${const ListToCsvConverter().convert(generated[tables])}';
+    final rows = generated[tables]!
+        .map((row) => row.cast<dynamic>())
+        .toList(growable: false);
+    allData = '$allData\n$tables\n${CsvEncoder().convert(rows)}';
   }
   return allData;
 }

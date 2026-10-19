@@ -57,6 +57,7 @@ class Abbreviations extends Table {
 @DriftDatabase(
   tables: [
     ItemCaches,
+    InventoryCaches,
     Manufacturers,
     Abbreviations,
   ],
@@ -128,6 +129,19 @@ class ItemDatabase extends _$ItemDatabase {
     final result =
         await (select(itemCaches)..where((a) => a.itemnum.isIn(items))).get();
     Map<String, ItemCache> details = {};
+    for (var item in result) {
+      details[item.itemnum] = item;
+    }
+    return details;
+  }
+
+  Future<Map<String, InventoryCache>> getInventoryDetails(
+      {required List<String> items, required String site}) async {
+    final result = await (select(inventoryCaches)
+          ..where((a) =>
+              a.itemnum.isIn(items) & a.siteid.equals(site.toUpperCase())))
+        .get();
+    Map<String, InventoryCache> details = {};
     for (var item in result) {
       details[item.itemnum] = item;
     }

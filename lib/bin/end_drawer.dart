@@ -9,6 +9,7 @@ import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.d
 import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
 import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
+import 'package:iko_reliability_flutter/admin/template_notifier.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:provider/provider.dart';
 import '../criticality/criticality_db_export_import.dart';
@@ -63,6 +64,27 @@ class _EndDrawerState extends State<EndDrawer> {
         child: ListView(
       children: <Widget>[
         const ThemeToggle(),
+        Consumer<SettingsNotifier>(builder: (context, settingsNotifier, child) {
+          final includeFrequency = settingsNotifier.getSetting(
+              ApplicationSetting.includeFrequencyInDescriptions) as bool?;
+          return SwitchListTile(
+            title: const Text('Include frequency in generated descriptions'),
+            subtitle: const Text(
+                'Clearing templates when changed requires reloading files'),
+            value: includeFrequency ?? true,
+            onChanged: (bool value) {
+              settingsNotifier.changeSettings({
+                ApplicationSetting.includeFrequencyInDescriptions: value,
+              });
+              context.read<TemplateNotifier>().clearTemplates();
+              context.read<UploadNotifier>().clearTemplates();
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    'Templates cleared. Re-select a file to process templates again.'),
+              ));
+            },
+          );
+        }),
         ListTile(
           //load observation from spreadsheet/excel
           title: const Text('Load Observation'),
@@ -542,33 +564,71 @@ class ThemeToggle extends StatelessWidget {
   }
 }
 
-class SiteToggle extends StatelessWidget {
+class SiteToggle extends StatefulWidget {
   const SiteToggle({super.key});
+
+  @override
+  State<SiteToggle> createState() => _SiteToggleState();
+}
+
+class _SiteToggleState extends State<SiteToggle> {
+  bool loading = false;
+  List<String> messages = [];
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: const Text('Selected Site'),
+      title: const Text('Selecte Site'),
       trailing: DropdownButton(
         value: context.watch<SelectedSiteNotifier>().selectedSite,
         items: () {
           List<DropdownMenuItem<String>> list = [
             const DropdownMenuItem(value: '', child: Text('Select a site'))
           ];
-          List<String> loadedSettings = (context
-                  .read<SettingsNotifier>()
-                  .getSetting(ApplicationSetting.loadedSites) as Set<String>)
-              .toList();
-          loadedSettings
-              .sort((a, b) => a.compareTo(b)); //put them in alphabetical order
-          list.addAll(loadedSettings.map((e) => DropdownMenuItem(
+          list.addAll(siteIDAndDescription.keys.map((e) => DropdownMenuItem(
               value: e, child: Text(siteIDAndDescription[e] ?? ''))));
           return list;
         }(),
-        onChanged: (newValue) {
-          context.read<SelectedSiteNotifier>().setSite(newValue!);
+        onChanged: (newValue) async {
+          if (context.mounted) {
+            context.read<SelectedSiteNotifier>().setSite(newValue!);
+          }
         },
       ),
     );
+  }
+
+  Future<void> loadSite(String siteid) async {
+    setState(() {
+      loading = true;
+    });
+    if (siteid != '') {
+      var processNotifier =
+          Provider.of<ProcessStateNotifier>(context, listen: false);
+      try {
+        processNotifier.addTask(
+          'loadAssetState',
+        );
+        setState(() {
+          messages.add('Attempting to Load Assets from : $siteid');
+        });
+
+        List<String> result = await maximoAssetCaller(siteid,
+            context.read<MaximoServerNotifier>().maximoServerSelected, context);
+        setState(() {
+          if (messages.isNotEmpty) {
+            showDataAlert(
+                navigatorKey.currentContext!, messages, 'Site Assets Loaded');
+          } else {
+            messages.addAll(result);
+          }
+        });
+      } finally {
+        processNotifier.removeTask('loadAssetState');
+      }
+    }
+    setState(() {
+      loading = false;
+    });
   }
 }

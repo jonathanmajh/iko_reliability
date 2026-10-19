@@ -33,8 +33,8 @@ class PMName {
 }
 
 ///Auto-generate name for PM
-Future<PMName> generateName(
-    ParsedTemplate pmdetails, String maximoServerSelected) async {
+Future<PMName> generateName(ParsedTemplate pmdetails,
+    String maximoServerSelected, bool includeFrequency) async {
   String number = '';
   String name = '';
   String? routeNumber;
@@ -67,7 +67,7 @@ Future<PMName> generateName(
   String wotype = pmdetails.workOrderType!.substring(0, 3);
 
 // add frequency details if pm
-  if (pmdetails.frequency != null) {
+  if (pmdetails.frequency != null && includeFrequency) {
     replaceable[1] =
         '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
     name =

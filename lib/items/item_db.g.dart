@@ -539,6 +539,526 @@ class ItemCachesCompanion extends UpdateCompanion<ItemCache> {
   }
 }
 
+class $InventoryCachesTable extends InventoryCaches
+    with TableInfo<$InventoryCachesTable, InventoryCache> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryCachesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _itemnumMeta =
+      const VerificationMeta('itemnum');
+  @override
+  late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
+      'itemnum', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
+  @override
+  late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
+      'siteid', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _catalogcodeMeta =
+      const VerificationMeta('catalogcode');
+  @override
+  late final GeneratedColumn<String> catalogcode = GeneratedColumn<String>(
+      'catalogcode', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _modelnumMeta =
+      const VerificationMeta('modelnum');
+  @override
+  late final GeneratedColumn<String> modelnum = GeneratedColumn<String>(
+      'modelnum', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
+  @override
+  late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
+      'vendor', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _manufacturerMeta =
+      const VerificationMeta('manufacturer');
+  @override
+  late final GeneratedColumn<String> manufacturer = GeneratedColumn<String>(
+      'manufacturer', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _companynameMeta =
+      const VerificationMeta('companyname');
+  @override
+  late final GeneratedColumn<String> companyname = GeneratedColumn<String>(
+      'companyname', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _rowstampMeta =
+      const VerificationMeta('rowstamp');
+  @override
+  late final GeneratedColumn<String> rowstamp = GeneratedColumn<String>(
+      'rowstamp', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _locationMeta =
+      const VerificationMeta('location');
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+      'location', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _binnumMeta = const VerificationMeta('binnum');
+  @override
+  late final GeneratedColumn<String> binnum = GeneratedColumn<String>(
+      'binnum', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        itemnum,
+        siteid,
+        catalogcode,
+        modelnum,
+        vendor,
+        manufacturer,
+        companyname,
+        rowstamp,
+        location,
+        binnum
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventoryCache';
+  @override
+  VerificationContext validateIntegrity(Insertable<InventoryCache> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('itemnum')) {
+      context.handle(_itemnumMeta,
+          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+    } else if (isInserting) {
+      context.missing(_itemnumMeta);
+    }
+    if (data.containsKey('siteid')) {
+      context.handle(_siteidMeta,
+          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+    } else if (isInserting) {
+      context.missing(_siteidMeta);
+    }
+    if (data.containsKey('catalogcode')) {
+      context.handle(
+          _catalogcodeMeta,
+          catalogcode.isAcceptableOrUnknown(
+              data['catalogcode']!, _catalogcodeMeta));
+    }
+    if (data.containsKey('modelnum')) {
+      context.handle(_modelnumMeta,
+          modelnum.isAcceptableOrUnknown(data['modelnum']!, _modelnumMeta));
+    }
+    if (data.containsKey('vendor')) {
+      context.handle(_vendorMeta,
+          vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta));
+    }
+    if (data.containsKey('manufacturer')) {
+      context.handle(
+          _manufacturerMeta,
+          manufacturer.isAcceptableOrUnknown(
+              data['manufacturer']!, _manufacturerMeta));
+    }
+    if (data.containsKey('companyname')) {
+      context.handle(
+          _companynameMeta,
+          companyname.isAcceptableOrUnknown(
+              data['companyname']!, _companynameMeta));
+    }
+    if (data.containsKey('rowstamp')) {
+      context.handle(_rowstampMeta,
+          rowstamp.isAcceptableOrUnknown(data['rowstamp']!, _rowstampMeta));
+    }
+    if (data.containsKey('location')) {
+      context.handle(_locationMeta,
+          location.isAcceptableOrUnknown(data['location']!, _locationMeta));
+    } else if (isInserting) {
+      context.missing(_locationMeta);
+    }
+    if (data.containsKey('binnum')) {
+      context.handle(_binnumMeta,
+          binnum.isAcceptableOrUnknown(data['binnum']!, _binnumMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {itemnum, location};
+  @override
+  InventoryCache map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryCache(
+      itemnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
+      siteid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
+      catalogcode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}catalogcode']),
+      modelnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}modelnum']),
+      vendor: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}vendor']),
+      manufacturer: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}manufacturer']),
+      companyname: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}companyname']),
+      rowstamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}rowstamp']),
+      location: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}location'])!,
+      binnum: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}binnum']),
+    );
+  }
+
+  @override
+  $InventoryCachesTable createAlias(String alias) {
+    return $InventoryCachesTable(attachedDatabase, alias);
+  }
+}
+
+class InventoryCache extends DataClass implements Insertable<InventoryCache> {
+  final String itemnum;
+  final String siteid;
+  final String? catalogcode;
+  final String? modelnum;
+  final String? vendor;
+  final String? manufacturer;
+  final String? companyname;
+  final String? rowstamp;
+  final String location;
+  final String? binnum;
+  const InventoryCache(
+      {required this.itemnum,
+      required this.siteid,
+      this.catalogcode,
+      this.modelnum,
+      this.vendor,
+      this.manufacturer,
+      this.companyname,
+      this.rowstamp,
+      required this.location,
+      this.binnum});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['itemnum'] = Variable<String>(itemnum);
+    map['siteid'] = Variable<String>(siteid);
+    if (!nullToAbsent || catalogcode != null) {
+      map['catalogcode'] = Variable<String>(catalogcode);
+    }
+    if (!nullToAbsent || modelnum != null) {
+      map['modelnum'] = Variable<String>(modelnum);
+    }
+    if (!nullToAbsent || vendor != null) {
+      map['vendor'] = Variable<String>(vendor);
+    }
+    if (!nullToAbsent || manufacturer != null) {
+      map['manufacturer'] = Variable<String>(manufacturer);
+    }
+    if (!nullToAbsent || companyname != null) {
+      map['companyname'] = Variable<String>(companyname);
+    }
+    if (!nullToAbsent || rowstamp != null) {
+      map['rowstamp'] = Variable<String>(rowstamp);
+    }
+    map['location'] = Variable<String>(location);
+    if (!nullToAbsent || binnum != null) {
+      map['binnum'] = Variable<String>(binnum);
+    }
+    return map;
+  }
+
+  InventoryCachesCompanion toCompanion(bool nullToAbsent) {
+    return InventoryCachesCompanion(
+      itemnum: Value(itemnum),
+      siteid: Value(siteid),
+      catalogcode: catalogcode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(catalogcode),
+      modelnum: modelnum == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modelnum),
+      vendor:
+          vendor == null && nullToAbsent ? const Value.absent() : Value(vendor),
+      manufacturer: manufacturer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(manufacturer),
+      companyname: companyname == null && nullToAbsent
+          ? const Value.absent()
+          : Value(companyname),
+      rowstamp: rowstamp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rowstamp),
+      location: Value(location),
+      binnum:
+          binnum == null && nullToAbsent ? const Value.absent() : Value(binnum),
+    );
+  }
+
+  factory InventoryCache.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryCache(
+      itemnum: serializer.fromJson<String>(json['itemnum']),
+      siteid: serializer.fromJson<String>(json['siteid']),
+      catalogcode: serializer.fromJson<String?>(json['catalogcode']),
+      modelnum: serializer.fromJson<String?>(json['modelnum']),
+      vendor: serializer.fromJson<String?>(json['vendor']),
+      manufacturer: serializer.fromJson<String?>(json['manufacturer']),
+      companyname: serializer.fromJson<String?>(json['companyname']),
+      rowstamp: serializer.fromJson<String?>(json['rowstamp']),
+      location: serializer.fromJson<String>(json['location']),
+      binnum: serializer.fromJson<String?>(json['binnum']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'itemnum': serializer.toJson<String>(itemnum),
+      'siteid': serializer.toJson<String>(siteid),
+      'catalogcode': serializer.toJson<String?>(catalogcode),
+      'modelnum': serializer.toJson<String?>(modelnum),
+      'vendor': serializer.toJson<String?>(vendor),
+      'manufacturer': serializer.toJson<String?>(manufacturer),
+      'companyname': serializer.toJson<String?>(companyname),
+      'rowstamp': serializer.toJson<String?>(rowstamp),
+      'location': serializer.toJson<String>(location),
+      'binnum': serializer.toJson<String?>(binnum),
+    };
+  }
+
+  InventoryCache copyWith(
+          {String? itemnum,
+          String? siteid,
+          Value<String?> catalogcode = const Value.absent(),
+          Value<String?> modelnum = const Value.absent(),
+          Value<String?> vendor = const Value.absent(),
+          Value<String?> manufacturer = const Value.absent(),
+          Value<String?> companyname = const Value.absent(),
+          Value<String?> rowstamp = const Value.absent(),
+          String? location,
+          Value<String?> binnum = const Value.absent()}) =>
+      InventoryCache(
+        itemnum: itemnum ?? this.itemnum,
+        siteid: siteid ?? this.siteid,
+        catalogcode: catalogcode.present ? catalogcode.value : this.catalogcode,
+        modelnum: modelnum.present ? modelnum.value : this.modelnum,
+        vendor: vendor.present ? vendor.value : this.vendor,
+        manufacturer:
+            manufacturer.present ? manufacturer.value : this.manufacturer,
+        companyname: companyname.present ? companyname.value : this.companyname,
+        rowstamp: rowstamp.present ? rowstamp.value : this.rowstamp,
+        location: location ?? this.location,
+        binnum: binnum.present ? binnum.value : this.binnum,
+      );
+  InventoryCache copyWithCompanion(InventoryCachesCompanion data) {
+    return InventoryCache(
+      itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
+      siteid: data.siteid.present ? data.siteid.value : this.siteid,
+      catalogcode:
+          data.catalogcode.present ? data.catalogcode.value : this.catalogcode,
+      modelnum: data.modelnum.present ? data.modelnum.value : this.modelnum,
+      vendor: data.vendor.present ? data.vendor.value : this.vendor,
+      manufacturer: data.manufacturer.present
+          ? data.manufacturer.value
+          : this.manufacturer,
+      companyname:
+          data.companyname.present ? data.companyname.value : this.companyname,
+      rowstamp: data.rowstamp.present ? data.rowstamp.value : this.rowstamp,
+      location: data.location.present ? data.location.value : this.location,
+      binnum: data.binnum.present ? data.binnum.value : this.binnum,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryCache(')
+          ..write('itemnum: $itemnum, ')
+          ..write('siteid: $siteid, ')
+          ..write('catalogcode: $catalogcode, ')
+          ..write('modelnum: $modelnum, ')
+          ..write('vendor: $vendor, ')
+          ..write('manufacturer: $manufacturer, ')
+          ..write('companyname: $companyname, ')
+          ..write('rowstamp: $rowstamp, ')
+          ..write('location: $location, ')
+          ..write('binnum: $binnum')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(itemnum, siteid, catalogcode, modelnum,
+      vendor, manufacturer, companyname, rowstamp, location, binnum);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryCache &&
+          other.itemnum == this.itemnum &&
+          other.siteid == this.siteid &&
+          other.catalogcode == this.catalogcode &&
+          other.modelnum == this.modelnum &&
+          other.vendor == this.vendor &&
+          other.manufacturer == this.manufacturer &&
+          other.companyname == this.companyname &&
+          other.rowstamp == this.rowstamp &&
+          other.location == this.location &&
+          other.binnum == this.binnum);
+}
+
+class InventoryCachesCompanion extends UpdateCompanion<InventoryCache> {
+  final Value<String> itemnum;
+  final Value<String> siteid;
+  final Value<String?> catalogcode;
+  final Value<String?> modelnum;
+  final Value<String?> vendor;
+  final Value<String?> manufacturer;
+  final Value<String?> companyname;
+  final Value<String?> rowstamp;
+  final Value<String> location;
+  final Value<String?> binnum;
+  final Value<int> rowid;
+  const InventoryCachesCompanion({
+    this.itemnum = const Value.absent(),
+    this.siteid = const Value.absent(),
+    this.catalogcode = const Value.absent(),
+    this.modelnum = const Value.absent(),
+    this.vendor = const Value.absent(),
+    this.manufacturer = const Value.absent(),
+    this.companyname = const Value.absent(),
+    this.rowstamp = const Value.absent(),
+    this.location = const Value.absent(),
+    this.binnum = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryCachesCompanion.insert({
+    required String itemnum,
+    required String siteid,
+    this.catalogcode = const Value.absent(),
+    this.modelnum = const Value.absent(),
+    this.vendor = const Value.absent(),
+    this.manufacturer = const Value.absent(),
+    this.companyname = const Value.absent(),
+    this.rowstamp = const Value.absent(),
+    required String location,
+    this.binnum = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : itemnum = Value(itemnum),
+        siteid = Value(siteid),
+        location = Value(location);
+  static Insertable<InventoryCache> custom({
+    Expression<String>? itemnum,
+    Expression<String>? siteid,
+    Expression<String>? catalogcode,
+    Expression<String>? modelnum,
+    Expression<String>? vendor,
+    Expression<String>? manufacturer,
+    Expression<String>? companyname,
+    Expression<String>? rowstamp,
+    Expression<String>? location,
+    Expression<String>? binnum,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (itemnum != null) 'itemnum': itemnum,
+      if (siteid != null) 'siteid': siteid,
+      if (catalogcode != null) 'catalogcode': catalogcode,
+      if (modelnum != null) 'modelnum': modelnum,
+      if (vendor != null) 'vendor': vendor,
+      if (manufacturer != null) 'manufacturer': manufacturer,
+      if (companyname != null) 'companyname': companyname,
+      if (rowstamp != null) 'rowstamp': rowstamp,
+      if (location != null) 'location': location,
+      if (binnum != null) 'binnum': binnum,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryCachesCompanion copyWith(
+      {Value<String>? itemnum,
+      Value<String>? siteid,
+      Value<String?>? catalogcode,
+      Value<String?>? modelnum,
+      Value<String?>? vendor,
+      Value<String?>? manufacturer,
+      Value<String?>? companyname,
+      Value<String?>? rowstamp,
+      Value<String>? location,
+      Value<String?>? binnum,
+      Value<int>? rowid}) {
+    return InventoryCachesCompanion(
+      itemnum: itemnum ?? this.itemnum,
+      siteid: siteid ?? this.siteid,
+      catalogcode: catalogcode ?? this.catalogcode,
+      modelnum: modelnum ?? this.modelnum,
+      vendor: vendor ?? this.vendor,
+      manufacturer: manufacturer ?? this.manufacturer,
+      companyname: companyname ?? this.companyname,
+      rowstamp: rowstamp ?? this.rowstamp,
+      location: location ?? this.location,
+      binnum: binnum ?? this.binnum,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (itemnum.present) {
+      map['itemnum'] = Variable<String>(itemnum.value);
+    }
+    if (siteid.present) {
+      map['siteid'] = Variable<String>(siteid.value);
+    }
+    if (catalogcode.present) {
+      map['catalogcode'] = Variable<String>(catalogcode.value);
+    }
+    if (modelnum.present) {
+      map['modelnum'] = Variable<String>(modelnum.value);
+    }
+    if (vendor.present) {
+      map['vendor'] = Variable<String>(vendor.value);
+    }
+    if (manufacturer.present) {
+      map['manufacturer'] = Variable<String>(manufacturer.value);
+    }
+    if (companyname.present) {
+      map['companyname'] = Variable<String>(companyname.value);
+    }
+    if (rowstamp.present) {
+      map['rowstamp'] = Variable<String>(rowstamp.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
+    if (binnum.present) {
+      map['binnum'] = Variable<String>(binnum.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryCachesCompanion(')
+          ..write('itemnum: $itemnum, ')
+          ..write('siteid: $siteid, ')
+          ..write('catalogcode: $catalogcode, ')
+          ..write('modelnum: $modelnum, ')
+          ..write('vendor: $vendor, ')
+          ..write('manufacturer: $manufacturer, ')
+          ..write('companyname: $companyname, ')
+          ..write('rowstamp: $rowstamp, ')
+          ..write('location: $location, ')
+          ..write('binnum: $binnum, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ManufacturersTable extends Manufacturers
     with TableInfo<$ManufacturersTable, Manufacturer> {
   @override
@@ -980,6 +1500,8 @@ abstract class _$ItemDatabase extends GeneratedDatabase {
   _$ItemDatabase(QueryExecutor e) : super(e);
   $ItemDatabaseManager get managers => $ItemDatabaseManager(this);
   late final $ItemCachesTable itemCaches = $ItemCachesTable(this);
+  late final $InventoryCachesTable inventoryCaches =
+      $InventoryCachesTable(this);
   late final $ManufacturersTable manufacturers = $ManufacturersTable(this);
   late final $AbbreviationsTable abbreviations = $AbbreviationsTable(this);
   Selectable<String> findItems(String search) {
@@ -1022,7 +1544,7 @@ abstract class _$ItemDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [itemCaches, manufacturers, abbreviations];
+      [itemCaches, inventoryCaches, manufacturers, abbreviations];
 }
 
 typedef $$ItemCachesTableCreateCompanionBuilder = ItemCachesCompanion Function({
@@ -1269,6 +1791,256 @@ typedef $$ItemCachesTableProcessedTableManager = ProcessedTableManager<
     $$ItemCachesTableUpdateCompanionBuilder,
     (ItemCache, BaseReferences<_$ItemDatabase, $ItemCachesTable, ItemCache>),
     ItemCache,
+    PrefetchHooks Function()>;
+typedef $$InventoryCachesTableCreateCompanionBuilder = InventoryCachesCompanion
+    Function({
+  required String itemnum,
+  required String siteid,
+  Value<String?> catalogcode,
+  Value<String?> modelnum,
+  Value<String?> vendor,
+  Value<String?> manufacturer,
+  Value<String?> companyname,
+  Value<String?> rowstamp,
+  required String location,
+  Value<String?> binnum,
+  Value<int> rowid,
+});
+typedef $$InventoryCachesTableUpdateCompanionBuilder = InventoryCachesCompanion
+    Function({
+  Value<String> itemnum,
+  Value<String> siteid,
+  Value<String?> catalogcode,
+  Value<String?> modelnum,
+  Value<String?> vendor,
+  Value<String?> manufacturer,
+  Value<String?> companyname,
+  Value<String?> rowstamp,
+  Value<String> location,
+  Value<String?> binnum,
+  Value<int> rowid,
+});
+
+class $$InventoryCachesTableFilterComposer
+    extends Composer<_$ItemDatabase, $InventoryCachesTable> {
+  $$InventoryCachesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get itemnum => $composableBuilder(
+      column: $table.itemnum, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get siteid => $composableBuilder(
+      column: $table.siteid, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get catalogcode => $composableBuilder(
+      column: $table.catalogcode, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get modelnum => $composableBuilder(
+      column: $table.modelnum, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get vendor => $composableBuilder(
+      column: $table.vendor, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get manufacturer => $composableBuilder(
+      column: $table.manufacturer, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get companyname => $composableBuilder(
+      column: $table.companyname, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get rowstamp => $composableBuilder(
+      column: $table.rowstamp, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get location => $composableBuilder(
+      column: $table.location, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get binnum => $composableBuilder(
+      column: $table.binnum, builder: (column) => ColumnFilters(column));
+}
+
+class $$InventoryCachesTableOrderingComposer
+    extends Composer<_$ItemDatabase, $InventoryCachesTable> {
+  $$InventoryCachesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get itemnum => $composableBuilder(
+      column: $table.itemnum, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get siteid => $composableBuilder(
+      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get catalogcode => $composableBuilder(
+      column: $table.catalogcode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get modelnum => $composableBuilder(
+      column: $table.modelnum, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get vendor => $composableBuilder(
+      column: $table.vendor, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get manufacturer => $composableBuilder(
+      column: $table.manufacturer,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get companyname => $composableBuilder(
+      column: $table.companyname, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get rowstamp => $composableBuilder(
+      column: $table.rowstamp, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get location => $composableBuilder(
+      column: $table.location, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get binnum => $composableBuilder(
+      column: $table.binnum, builder: (column) => ColumnOrderings(column));
+}
+
+class $$InventoryCachesTableAnnotationComposer
+    extends Composer<_$ItemDatabase, $InventoryCachesTable> {
+  $$InventoryCachesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get itemnum =>
+      $composableBuilder(column: $table.itemnum, builder: (column) => column);
+
+  GeneratedColumn<String> get siteid =>
+      $composableBuilder(column: $table.siteid, builder: (column) => column);
+
+  GeneratedColumn<String> get catalogcode => $composableBuilder(
+      column: $table.catalogcode, builder: (column) => column);
+
+  GeneratedColumn<String> get modelnum =>
+      $composableBuilder(column: $table.modelnum, builder: (column) => column);
+
+  GeneratedColumn<String> get vendor =>
+      $composableBuilder(column: $table.vendor, builder: (column) => column);
+
+  GeneratedColumn<String> get manufacturer => $composableBuilder(
+      column: $table.manufacturer, builder: (column) => column);
+
+  GeneratedColumn<String> get companyname => $composableBuilder(
+      column: $table.companyname, builder: (column) => column);
+
+  GeneratedColumn<String> get rowstamp =>
+      $composableBuilder(column: $table.rowstamp, builder: (column) => column);
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
+  GeneratedColumn<String> get binnum =>
+      $composableBuilder(column: $table.binnum, builder: (column) => column);
+}
+
+class $$InventoryCachesTableTableManager extends RootTableManager<
+    _$ItemDatabase,
+    $InventoryCachesTable,
+    InventoryCache,
+    $$InventoryCachesTableFilterComposer,
+    $$InventoryCachesTableOrderingComposer,
+    $$InventoryCachesTableAnnotationComposer,
+    $$InventoryCachesTableCreateCompanionBuilder,
+    $$InventoryCachesTableUpdateCompanionBuilder,
+    (
+      InventoryCache,
+      BaseReferences<_$ItemDatabase, $InventoryCachesTable, InventoryCache>
+    ),
+    InventoryCache,
+    PrefetchHooks Function()> {
+  $$InventoryCachesTableTableManager(
+      _$ItemDatabase db, $InventoryCachesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryCachesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryCachesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryCachesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> itemnum = const Value.absent(),
+            Value<String> siteid = const Value.absent(),
+            Value<String?> catalogcode = const Value.absent(),
+            Value<String?> modelnum = const Value.absent(),
+            Value<String?> vendor = const Value.absent(),
+            Value<String?> manufacturer = const Value.absent(),
+            Value<String?> companyname = const Value.absent(),
+            Value<String?> rowstamp = const Value.absent(),
+            Value<String> location = const Value.absent(),
+            Value<String?> binnum = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryCachesCompanion(
+            itemnum: itemnum,
+            siteid: siteid,
+            catalogcode: catalogcode,
+            modelnum: modelnum,
+            vendor: vendor,
+            manufacturer: manufacturer,
+            companyname: companyname,
+            rowstamp: rowstamp,
+            location: location,
+            binnum: binnum,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String itemnum,
+            required String siteid,
+            Value<String?> catalogcode = const Value.absent(),
+            Value<String?> modelnum = const Value.absent(),
+            Value<String?> vendor = const Value.absent(),
+            Value<String?> manufacturer = const Value.absent(),
+            Value<String?> companyname = const Value.absent(),
+            Value<String?> rowstamp = const Value.absent(),
+            required String location,
+            Value<String?> binnum = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryCachesCompanion.insert(
+            itemnum: itemnum,
+            siteid: siteid,
+            catalogcode: catalogcode,
+            modelnum: modelnum,
+            vendor: vendor,
+            manufacturer: manufacturer,
+            companyname: companyname,
+            rowstamp: rowstamp,
+            location: location,
+            binnum: binnum,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$InventoryCachesTableProcessedTableManager = ProcessedTableManager<
+    _$ItemDatabase,
+    $InventoryCachesTable,
+    InventoryCache,
+    $$InventoryCachesTableFilterComposer,
+    $$InventoryCachesTableOrderingComposer,
+    $$InventoryCachesTableAnnotationComposer,
+    $$InventoryCachesTableCreateCompanionBuilder,
+    $$InventoryCachesTableUpdateCompanionBuilder,
+    (
+      InventoryCache,
+      BaseReferences<_$ItemDatabase, $InventoryCachesTable, InventoryCache>
+    ),
+    InventoryCache,
     PrefetchHooks Function()>;
 typedef $$ManufacturersTableCreateCompanionBuilder = ManufacturersCompanion
     Function({
@@ -1550,6 +2322,8 @@ class $ItemDatabaseManager {
   $ItemDatabaseManager(this._db);
   $$ItemCachesTableTableManager get itemCaches =>
       $$ItemCachesTableTableManager(_db, _db.itemCaches);
+  $$InventoryCachesTableTableManager get inventoryCaches =>
+      $$InventoryCachesTableTableManager(_db, _db.inventoryCaches);
   $$ManufacturersTableTableManager get manufacturers =>
       $$ManufacturersTableTableManager(_db, _db.manufacturers);
   $$AbbreviationsTableTableManager get abbreviations =>

@@ -6,6 +6,7 @@ import '../creation/asset.dart';
 import '../admin/contractor.dart';
 import '../admin/pm_check.dart';
 import '../admin/pm_meter_update.dart';
+import '../admin/pdf_link_tool_page.dart';
 import '../criticality/asset_criticality.dart';
 import '../criticality/spare_criticality.dart';
 import '../criticality/system_criticality.dart';
@@ -34,5 +35,6 @@ class AppRouter extends RootStackRouter {
         AutoRoute(path: '/criticality/spare', page: SpareCriticalityRoute.page),
         AutoRoute(path: "/timesheet", page: TimesheetRoute.page),
         AutoRoute(path: "/item", page: ItemRoute.page),
+        AutoRoute(path: "/pdf-link-tool", page: PdfLinkToolRoute.page),
       ];
 }

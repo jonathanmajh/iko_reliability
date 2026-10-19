@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
 import 'package:iko_reliability_flutter/notifiers/maximo_server_notifier.dart';
+import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -450,6 +451,12 @@ class _PMDetailsState extends State<PMDetails> {
                             Provider.of<MaximoServerNotifier>(context,
                                     listen: false)
                                 .maximoServerSelected,
+                            Provider.of<SettingsNotifier>(context,
+                                            listen: false)
+                                        .getSetting(ApplicationSetting
+                                            .includeFrequencyInDescriptions)
+                                    as bool? ??
+                                true,
                           );
                         }
                       },
@@ -619,11 +626,15 @@ void copyExportDetails(
       selected.selectedFile!, selected.selectedTemplate!);
   String allData = '';
   for (final tables in details.keys) {
+    final headerRow = tableHeaders[tables]!.cast<dynamic>();
+    final detailRows = details[tables]!
+        .map((row) => row.cast<dynamic>())
+        .toList(growable: false);
     allData = '''
 $allData\n
 $tables
-${const ListToCsvConverter().convert([tableHeaders[tables]])}
-${const ListToCsvConverter().convert(details[tables])}
+${CsvEncoder().convert([headerRow])}
+${CsvEncoder().convert(detailRows)}
 ''';
   }
   Clipboard.setData(ClipboardData(text: allData)).then((_) {
