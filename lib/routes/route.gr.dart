@@ -123,6 +123,22 @@ class PmCheckRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [PmExtractPage]
+class PmExtractRoute extends PageRouteInfo<void> {
+  const PmExtractRoute({List<PageRouteInfo>? children})
+      : super(PmExtractRoute.name, initialChildren: children);
+
+  static const String name = 'PmExtractRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PmExtractPage();
+    },
+  );
+}
+
+/// generated route for
 /// [PmMeterUpdatePage]
 class PmMeterUpdateRoute extends PageRouteInfo<void> {
   const PmMeterUpdateRoute({List<PageRouteInfo>? children})

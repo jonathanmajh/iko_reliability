@@ -16,6 +16,7 @@ import 'package:window_size/window_size.dart';
 
 import 'bin/db_drift.dart';
 import 'admin/template_notifier.dart';
+import 'admin/extract_notifier.dart';
 import 'bin/check_update.dart';
 import 'criticality/asset_criticality_notifier.dart';
 import 'creation/asset_creation_notifier.dart';
@@ -123,6 +124,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => TemplateNotifier()),
+          ChangeNotifierProvider(create: (context) => ExtractNotifier()),
           ChangeNotifierProvider(create: (context) => UploadNotifier()),
           ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
           ChangeNotifierProvider(create: (context) => settingsNotifier),

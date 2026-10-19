@@ -118,6 +118,14 @@ class NavDrawer extends StatelessWidget {
                     },
                   ),
                   ListTile(
+                    leading: const Icon(Icons.file_download),
+                    title: const Text('PM Extract'),
+                    onTap: () {
+                      context.router.replacePath("/pm/extract");
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                  ListTile(
                     leading: const Icon(Icons.precision_manufacturing),
                     title: const Text('Create Assets'),
                     onTap: () {
