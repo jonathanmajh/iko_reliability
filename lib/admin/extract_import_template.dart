@@ -255,23 +255,18 @@ Future<Uint8List> buildImportTemplateWorkbook(
   /// Writes labour, task, route asset, materials and services rows of one PM
   /// starting at [row], returns the next free row.
   Future<int> writeContent(ExtractStore store, int row) async {
-    // whether any stop will be written as a 'Task Route Assets' entry
-    var routeAssetsNeeded = false;
-    for (final stop in store.routeStops) {
-      final stopJpnum = fieldOf(stop, 'jpnum') ?? '';
-      final stopAsset = fieldOf(stop, 'assetnum') ?? '';
-      if (stopAsset.isEmpty ||
-          (stopJpnum.isNotEmpty &&
-              store.stopJobPlans[stopJpnum] != null &&
-              store.stopJobPlans[stopJpnum]!.jobtasks.isNotEmpty)) {
-        continue;
-      }
-      routeAssetsNeeded = true;
-    }
-
     // right side notes of the form (first two content rows)
     put(row, 9, TextCellValue('PM Options'), styles.label);
     put(row + 1, 9, TextCellValue('Safety Device (Y/N)'), styles.label);
+
+    // the route asset header sits in its fixed form slot on the first
+    // content row (D13 of the first template block); every later cell in
+    // the block that holds a value in this column is then parsed as a
+    // route asset
+    if (store.routeStops.isNotEmpty) {
+      put(row, 3, TextCellValue('Task Route Assets (one per cell):'),
+          styles.label);
+    }
 
     // labour (craft) rows
     for (final labor in store.joblabors) {
@@ -295,16 +290,8 @@ Future<Uint8List> buildImportTemplateWorkbook(
       row++;
     }
 
-    // tasks of the PM's own job plan (no asset -> main job plan);
-    // the first task row carries the route asset marker when route asset
-    // rows follow
-    var markerPlaced = false;
+    // tasks of the PM's own job plan (no asset -> main job plan)
     for (final task in store.jobtasks) {
-      if (!markerPlaced && routeAssetsNeeded) {
-        markerPlaced = true;
-        put(row, 3, TextCellValue('Task Route Assets (one per cell):'),
-            styles.label);
-      }
       putTaskCells(row, Map<String, dynamic>.from(task as Map), null);
       row++;
     }
@@ -322,22 +309,11 @@ Future<Uint8List> buildImportTemplateWorkbook(
         if (stopAsset.isEmpty) {
           continue;
         }
-        if (!markerPlaced) {
-          put(row, 3, TextCellValue('Task Route Assets (one per cell):'),
-              styles.label);
-          markerPlaced = true;
-          row++;
-        }
         put(row, 3, TextCellValue(stopAsset), styles.free);
         row++;
         continue;
       }
       for (final t in stopTasks) {
-        if (!markerPlaced) {
-          put(row, 3, TextCellValue('Task Route Assets (one per cell):'),
-              styles.label);
-          markerPlaced = true;
-        }
         final task = Map<String, dynamic>.from(t as Map);
         await putTaskCells(row, task, stopAsset.isEmpty ? null : stopAsset);
         // ensure a task number / description exists even if the child job
@@ -388,8 +364,7 @@ Future<Uint8List> buildImportTemplateWorkbook(
     return row;
   }
 
-  /// Writes the label / data / number rows of a PM block (base row = label
-  /// row).
+  /// Writes the label / data rows of a PM block (base row = label row).
   void writeHead(ExtractStore store, int base) {
     final route = fieldOf(store.route ?? {}, 'route');
     put(base, 0, TextCellValue('PM Asset/ Parent (Route)*:'), styles.label);
@@ -402,6 +377,7 @@ Future<Uint8List> buildImportTemplateWorkbook(
     put(base, 7, TextCellValue('Stopped/Running'), styles.label);
     put(base, 8, TextCellValue('Suggested PM Name'), styles.label);
     put(base, 9, TextCellValue('Route Name'), styles.label);
+    put(base, 10, TextCellValue('PM Number'), styles.label);
 
     final dataRow = base + _pmBlockDataRow;
     final workType = fieldOf(store.jobplan ?? {}, 'iko_worktype') ?? '';
@@ -455,10 +431,13 @@ Future<Uint8List> buildImportTemplateWorkbook(
             : fieldOf(store.route!, 'description') ?? ''),
         styles.route);
 
-    // PM number (and route code) row used by the parser
-    put(base + 2, 8, TextCellValue(store.pmnum), styles.plain);
-    if (route != null && route.isNotEmpty) {
-      put(base + 2, 9, TextCellValue(route), styles.route);
+    // the existing PM number as reference beside the name (K8, col 10);
+    // nothing is written on the number row below (I9/J9): a route code
+    // there makes generateName look for a non-existing route number and
+    // pm_check errors out; the number is purely informational for knowing
+    // which PM a template came from
+    if (store.pmnum.isNotEmpty) {
+      put(dataRow, 10, TextCellValue(store.pmnum), styles.plain);
     }
   }
 

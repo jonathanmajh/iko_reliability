@@ -240,6 +240,14 @@ class ParsedTemplate {
               }
             }
             //write to template object
+            //PM number: new exports put it beside the name on the data row
+            //(K8, col 10) as a reference; older conventions keep it below
+            //the name on the number row (I9, col 8 of row i+2)
+            String? suggestedNumber =
+                nextRow.length > 10 ? _toNativeString(nextRow[10]) : null;
+            if (suggestedNumber == null || suggestedNumber.isEmpty) {
+              suggestedNumber = _toNativeString(nextNextRow[8]);
+            }
             pmTemplates[filename][pmNumber] = ParsedTemplate(
               nextDueDate: nextDate,
               siteId: _toNativeString(nextRow[3])?.toUpperCase(),
@@ -250,10 +258,9 @@ class ParsedTemplate {
               processCondition: _toNativeString(nextRow[7])?.substring(0, 4),
               pmAsset: _toNativeString(nextRow[0])?.toUpperCase(),
               pmName: _toNativeString(nextRow[8]) ?? 'Generating Name...',
-              pmNumber:
-                  _toNativeString(nextNextRow[8]) ?? 'Generating Number...',
+              pmNumber: suggestedNumber ?? 'Generating Number...',
               suggestedPmName: _toNativeString(nextRow[8]),
-              suggestedPmNumber: _toNativeString(nextNextRow[8]),
+              suggestedPmNumber: suggestedNumber,
               routeName:
                   (_toNativeString(nextRow[9]) == 'Select Route (Optional)'
                       ? null

@@ -178,9 +178,13 @@ void main() async {
   _expect(fill(7, 9) == hex(paleYellow) &&
       style(7, 9)?.fontColor.colorHex == hex('#FF9C6500'),
       'route cell style (pale yellow, brown font)');
-  _expect(fill(8, 9) == hex(paleYellow), 'route code cell styled like route');
-  _expect(cell(8, 8) == 'A0001D1INRE', 'PM1 number in number row');
-  _expect(cell(8, 9) == 'A0001D1INRE', 'PM1 route code literal');
+  _expect(fill(8, 9) == 'none' || fill(8, 9) == '',
+      'number row not styled as route anymore');
+  _expect(cell(6, 10) == 'PM Number', 'PM Number label at K7');
+  _expect(cell(7, 10) == 'A0001D1INRE',
+      'PM1 existing number as reference at K8');
+  _expect(cell(8, 8) == '' && cell(8, 9) == '',
+      'PM1 number row (I9/J9) left empty - no route code reaches the parser');
 
   // form annotations reproduced from the template
   _expect(cell(10, 0) == 'Craft', 'section label Craft');
@@ -195,10 +199,10 @@ void main() async {
   // 16-17, stop tasks 18-19, materials header 20, services header 21
   _expect(cell(12, 0) == 'MECH-MW: M', 'PM1 craft cell (option string)');
   _expect(fill(12, 0) == hex(paleGreen), 'craft cell pale green (dropdown look)');
-  _expect(cell(12, 3) == '', 'no marker on labour row');
-  _expect(cell(13, 3) == 'Task Route Assets (one per cell):',
-      'PM1 route asset marker on first task row');
-  _expect(fill(13, 3) == hex(gray), 'marker styled as label');
+  _expect(cell(12, 3) == 'Task Route Assets (one per cell):',
+      'PM1 marker in its fixed slot on the first content row (D13)');
+  _expect(fill(12, 3) == hex(gray), 'marker styled as label');
+  _expect(cell(13, 3) == '', 'no duplicate marker on task rows');
   _expect(fill(13, 4) != hex(gray) && fill(13, 4) != hex(paleGreen),
       'task cells stay plain (no fill)');
   _expect(cell(13, 6) == '10' && cell(13, 7) == 'General', 'PM1 task 10 at row 13');
@@ -221,8 +225,9 @@ void main() async {
   _expect(cell(23, 0) == 'C8025', 'PM2 asset');
   _expect(cell(23, 1) == 'Child', 'PM2 route type');
   _expect(cell(23, 6) == 'LUB (Lubrication)', 'PM2 work type option string');
-  _expect(cell(24, 8) == 'C8025LUBM001', 'PM2 number');
-  _expect(cell(24, 9) == 'C8025LUBM001', 'PM2 route code');
+  _expect(cell(22, 10) == 'PM Number', 'PM2 PM Number label at K7');
+  _expect(cell(23, 10) == 'C8025LUBM001', 'PM2 number at K8');
+  _expect(cell(25, 8) == '' && cell(25, 9) == '', 'PM2 number row left empty');
   _expect(cell(25, 0) == '', 'PM2 blank row left empty');
   _expect(cell(26, 0) == 'Craft', 'PM2 section labels row');
   _expect(cell(27, 0) == 'Craft @ (Optional) Labour Code', 'PM2 craft header row');
@@ -230,8 +235,8 @@ void main() async {
   // content: labour 28, stop tasks 29-34 (marker on first task row 29),
   // materials header 35 + 1 row, services header 37 + 1 row
   _expect(cell(28, 0) == 'PROD: O', 'PM2 craft cell (Production = O)');
-  _expect(cell(29, 3) == 'Task Route Assets (one per cell):',
-      'PM2 marker on first stop task row');
+  _expect(cell(28, 3) == 'Task Route Assets (one per cell):',
+      'PM2 marker in its fixed slot on the first content row');
   _expect(cell(29, 4) == 'SC01', 'PM2 stop 1 asset');
   _expect(cell(29, 5) == 'Lubrication Points', 'PM2 meter 1 mapped to inspect');
   _expect(cell(29, 6) == '10', 'PM2 first task 10');
@@ -278,7 +283,8 @@ void main() async {
   _expect(parsed1.processCondition == 'CR01', 'parsed PM1 condition');
   _expect(parsed1.frequency == 1, 'parsed PM1 frequency');
   _expect(parsed1.frequencyUnit == 'D', 'parsed PM1 frequency unit');
-  _expect(parsed1.routeCode == 'A0001D1INRE', 'parsed PM1 route code');
+  _expect(parsed1.routeCode == null,
+      'parsed PM1 route code null (nothing written at J9 -> pm_check generates cleanly)');
   _expect(parsed1.routeName != null && parsed1.routeName != 'Select Route (Optional)',
       'parsed PM1 route name');
   _expect(parsed1.crafts.length == 1, 'parsed PM1 crafts');

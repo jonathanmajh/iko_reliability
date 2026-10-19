@@ -198,6 +198,27 @@ Fix:
   gone since there are no defaults.
 - Test no longer reads the template: it builds + parses purely from scratch
   and also asserts the styling.
+
+## Addendum 4 - round trip feedback (PM number at K8, fixed marker slot)
+User feedback round 4 (2026-10-19, export PM_Request_20261019_153321.xlsx):
+1. Importing the export into PM Check errored. Cause: the route CODE was
+   written below the route name (J9) - generateName treats that cell as a
+   NEW route's base code and does `int.parse(number.substring(3))` on
+   'C8000INRM001' + counter -> FormatException per PM. The parser's PM
+   number itself is never used downstream.
+   Fix: the PM number is now written ONLY as a reference beside the PM
+   name (K8 = data row col 10, with a 'PM Number' label at K7). The number
+   row below (I9/J9) is left empty so no route code reaches the parser
+   (routeCode null -> generateName takes the no-route-code branch and
+   pm_check generates cleanly). parse_template reads the number from K8
+   (guarded index) with the old I9 number row as fallback for manually
+   filled templates.
+2. The 'Task Route Assets (one per cell):' header now sits in its fixed
+   form slot on the FIRST content row of every block (D13 of the first
+   template, base+6) instead of riding on whichever row the content
+   reached it. Written whenever the PM has route stops; asset rows get
+   ingested correctly (the marker row itself is never ingested - the asset
+   check runs before the flag is set on the same row).
 - Import-template export output renamed `PM_Request_yyyyMMdd_HHmmss.xlsx`.
 - Route tab rebuilt: one expandable card per stop showing the stop's job
   plan (jpnum/description) with its tasks, labour, materials and services
