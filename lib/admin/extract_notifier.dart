@@ -16,6 +16,8 @@ class ExtractStore {
   List<dynamic> jobservices = []; // nested iko_jobservice rows
   Map<String, dynamic>? route; // raw iko_route record
   List<dynamic> routeStops = []; // nested iko_route_stop rows
+  Map<String, FetchedJobPlan> stopJobPlans =
+      {}; // job plans linked to route stops, keyed by jpnum
 
   ExtractStore({
     required this.siteid,
@@ -29,6 +31,23 @@ class ExtractStore {
 
   String? get description => pm.containsKey('description')
       ? pm['description']?.toString()
+      : null;
+}
+
+/// Job plan fetched from Maximo with its nested child collections.
+class FetchedJobPlan {
+  final Map<String, dynamic> jobplan;
+  List<dynamic> jobtasks = [];
+  List<dynamic> joblabors = [];
+  List<dynamic> jobmaterials = [];
+  List<dynamic> jobservices = [];
+
+  FetchedJobPlan(this.jobplan);
+
+  String? get jpnum =>
+      jobplan.containsKey('jpnum') ? jobplan['jpnum']?.toString() : null;
+  String? get description => jobplan.containsKey('description')
+      ? jobplan['description']?.toString()
       : null;
 }
 

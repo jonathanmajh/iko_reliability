@@ -84,3 +84,31 @@ Base: `https://test2.manage.test2.iko.max-it-eam.com/maximo/api/os/`
 - Uploading anything back to Maximo from the new page (existing PM Check page
   remains the upload path).
 - Editing of fetched records.
+
+## Addendum - feedback round 1 (PM Extract)
+1. **Stop job plans are now extracted.** Route stops hold jpnum links to child
+   job plans; these are fetched in batches and kept in
+   ExtractStore.stopJobPlans (FetchedJobPlan with nested jobtask /
+   joblabor / jobmaterial / jobservice arrays). OSLC grouped-OR batching on
+   jobplan objects requires one pair of parentheses per value
+   \(jpnum=\"A\") or (jpnum=\"B\")\ - bare \jpnum=\"A\" or jpnum=\"B\"\ and shared
+   parens fail with BMXAA8744E on iko_jobplan (grouped pairs with \nd\
+   inside parens remain valid on iko_pm). Stops are sorted by stopsequence.
+2. **Stop sheets in the Excel export:** 'Stop JobPlan', 'Stop Tasks',
+   'Stop Labor', 'Stop Materials', 'Stop Services' (deduped across PMs).
+3. **New 'Import' button** exports all extracted PMs to a 'Main' sheet in the
+   same layout as the PM import template, so the file can be re-loaded by the
+   PM Check page. Layout constraints discovered (parse_template.fromExcel):
+   PM header row -> detail row -> number row, then 'Craft @ (Optional)
+   Labour Code' row (this row is what enables BOTH task and craft reading;
+   tasks must appear after it), craft rows, task rows (col 4 asset, 5 meter,
+   6 jptask, 7 description, 8 longdescription; null cells required for
+   'no asset' main-JP tasks), optional 'Route Assets (one per cell):' rows
+   for stops without a job plan, 'Materials (Mapics Number)' rows
+   (item/qty/cost) and 'Services (Mapics Number)' rows (item/cost/vendor).
+   Round-trip validated against TEST2 data through the real
+   ParsedTemplate.fromExcel.
+4. **Meter names:** Maximo stores generated meter numbers (e.g. LNWK01);
+   the template stores the meter 'inspect' value. Meter names are mapped
+   back via the local meter DB (strip trailing digits -> code -> inspect).
+5. **Route tab** now shows each stop's linked job plan description.

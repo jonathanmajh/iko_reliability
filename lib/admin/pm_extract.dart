@@ -91,6 +91,18 @@ class _PmExtractPageState extends State<PmExtractPage> {
           child: FloatingActionButton.extended(
             heroTag: UniqueKey(),
             onPressed: () async {
+              await _exportToImportTemplate();
+            },
+            label: const Text('Import'),
+            tooltip: 'Export extracted PMs in the PM import template format',
+            icon: const Icon(Icons.upload_outlined),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+          child: FloatingActionButton.extended(
+            heroTag: UniqueKey(),
+            onPressed: () async {
               await _loadSelectedToTemplates();
             },
             label: const Text('Load'),
@@ -196,6 +208,13 @@ class _PmExtractPageState extends State<PmExtractPage> {
   Future<void> _exportToExcel() async {
     final notifier = context.read<ExtractNotifier>();
     final result = await exportExtractsToExcel(notifier.extracts);
+    _show(result);
+  }
+
+  // Writer for all extracted PMs in the PM import template format.
+  Future<void> _exportToImportTemplate() async {
+    final notifier = context.read<ExtractNotifier>();
+    final result = await exportExtractsToImportTemplate(notifier.extracts);
     _show(result);
   }
 
@@ -839,10 +858,38 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
       rows.add(
           _fieldRow(header, fieldOf(route, header.toLowerCase()) ?? '', context));
     }
+    // shows the extracted stop job plan description under each stop
+    List<Widget> stopDescription(dynamic row) {
+      final jpnum = fieldOf(row as Map, 'jpnum') ?? '';
+      final stopJp = jpnum.isEmpty ? null : store.stopJobPlans[jpnum];
+      String description;
+      if (stopJp == null) {
+        description = jpnum.isEmpty
+            ? 'No linked job plan'
+            : 'linked job plan not extracted';
+      } else {
+        description = 'JP: $jpnum - ${stopJp.description ?? ''}';
+      }
+      return [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4.0, 0.0, 4.0, 4.0),
+          child: SelectableText(
+            description,
+            style: TextStyle(
+              fontSize: 11,
+              fontStyle: FontStyle.italic,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ];
+    }
+
     rows.add(_childTableCard(
         'Stops (${store.routeStops.length})',
         ['STOPSEQUENCE', 'ASSETNUM', 'JPNUM'],
-        store.routeStops));
+        store.routeStops,
+        extraRowBuilder: stopDescription));
     return ListView(
       padding: const EdgeInsets.all(10),
       children: rows,
@@ -850,8 +897,8 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
   }
 
   /// Expandable card listing child rows (tasks / labor / materials / stops).
-  Widget _childTableCard(
-      String title, List<String> headers, List<dynamic> rows) {
+  Widget _childTableCard(String title, List<String> headers, List<dynamic> rows,
+      {List<Widget> Function(dynamic row)? extraRowBuilder}) {
     return Card(
       child: ExpansionTile(
         title: Text(title),
@@ -860,9 +907,16 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
           for (final row in rows)
             Padding(
               padding: const EdgeInsets.all(4.0),
-              child: SelectableText(
-                stripHtml(headers.map((h) => rowValue(row, h)).join(', ')),
-                style: const TextStyle(fontFamily: 'RobotoMono', fontSize: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SelectableText(
+                    stripHtml(headers.map((h) => rowValue(row, h)).join(', ')),
+                    style: const TextStyle(
+                        fontFamily: 'RobotoMono', fontSize: 12),
+                  ),
+                  if (extraRowBuilder != null) ...extraRowBuilder(row),
+                ],
               ),
             ),
         ],

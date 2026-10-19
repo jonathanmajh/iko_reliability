@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 import '../bin/consts.dart';
+import '../main.dart';
 import 'extract_notifier.dart';
 import 'generate_job_plans.dart' show generatePM;
 import 'parse_template.dart';
@@ -162,6 +163,18 @@ Future<void> _fetchPmDetails(
       store.route = await _fetchSingle('iko_route', where, env);
       store.routeStops =
           await _fetchChildren('iko_route_stop', 'route_stop', where, env);
+      // order the stops by sequence
+      store.routeStops.sort(_compareByStopSequence);
+      // fetch the job plans that the route stops link to (child job plans)
+      final stopJpnums = store.routeStops
+          .map((row) => fieldOf(row as Map, 'jpnum') ?? '')
+          .where((jpnum) =>
+              jpnum.isNotEmpty && jpnum != fieldOf(store.pm, 'jpnum'))
+          .toSet()
+          .toList();
+      if (stopJpnums.isNotEmpty) {
+        store.stopJobPlans = await _fetchStopJobPlans(stopJpnums, env);
+      }
     }
     store.status = 'extracted';
   } catch (e) {
@@ -169,6 +182,74 @@ Future<void> _fetchPmDetails(
     store.errorMessage = e.toString();
   }
   notifier.update();
+}
+
+/// Compares two raw route stop rows by stopsequence.
+int _compareByStopSequence(dynamic a, dynamic b) {
+  final av = int.tryParse(fieldOf(a as Map, 'stopsequence') ?? '') ?? 0;
+  final bv = int.tryParse(fieldOf(b as Map, 'stopsequence') ?? '') ?? 0;
+  return av.compareTo(bv);
+}
+
+/// Fetches the job plans linked to route stops (child job plans) in batches,
+/// including their nested task / labor / material / service collections.
+Future<Map<String, FetchedJobPlan>> _fetchStopJobPlans(
+    List<String> jpnums, String env) async {
+  final result = <String, FetchedJobPlan>{};
+  for (var i = 0; i < jpnums.length; i += pmExtractBatchSize) {
+    final end =
+        i + pmExtractBatchSize > jpnums.length ? jpnums.length : i + pmExtractBatchSize;
+    final chunk = jpnums.sublist(i, end);
+    final where = chunk.map((jpnum) => '(jpnum="$jpnum")').join(' or ');
+    // job plan headers
+    final url = 'iko_jobplan?oslc.select=*&oslc.where=${encodeOslcWhere(where)}';
+    final headers = await maximoRequest(url, 'get', env);
+    if (headers['member'] == null) {
+      throw Exception('Invalid Response from Maximo (iko_jobplan)');
+    }
+    final members = headers['member'] as List<dynamic>;
+    for (final row in members) {
+      final plan = FetchedJobPlan(Map<String, dynamic>.from(row as Map));
+      final jpnum = plan.jpnum ?? '';
+      if (jpnum.isNotEmpty) {
+        result[jpnum] = plan;
+      }
+    }
+    // nested child collections per object
+    for (final object in const [
+      'iko_jobtask', 'iko_joblabor', 'iko_jobmaterial', 'iko_jobservice'
+    ]) {
+      final childUrl =
+          '$object?oslc.select=*&oslc.where=${encodeOslcWhere(where)}';
+      final childResult = await maximoRequest(childUrl, 'get', env);
+      if (childResult['member'] == null) {
+        throw Exception('Invalid Response from Maximo ($object)');
+      }
+      for (final row in childResult['member'] as List<dynamic>) {
+        final record = Map<String, dynamic>.from(row as Map);
+        final jpnum = fieldOf(record, 'jpnum') ?? '';
+        final plan = result[jpnum];
+        if (plan == null) {
+          continue;
+        }
+        final childKey = object.substring('iko_'.length);
+        final nested = record[childKey];
+        if (nested is List) {
+          switch (childKey) {
+            case 'jobtask':
+              plan.jobtasks = nested;
+            case 'joblabor':
+              plan.joblabors = nested;
+            case 'jobmaterial':
+              plan.jobmaterials = nested;
+            case 'jobservice':
+              plan.jobservices = nested;
+          }
+        }
+      }
+    }
+  }
+  return result;
 }
 
 /// GET a single Maximo record; returns null when nothing matches [where].
@@ -221,7 +302,7 @@ Future<List<dynamic>> _fetchChildren(
 }
 
 /// Reads a Maximo record field (JSON keys are lowercase) as a String.
-String? fieldOf(Map<String, dynamic> record, String name) {
+String? fieldOf(Map<dynamic, dynamic> record, String name) {
   final value = record[name.toLowerCase()] ?? record[name.toUpperCase()];
   if (value == null) {
     return null;
@@ -320,6 +401,37 @@ Future<String> exportExtractsToExcel(List<ExtractStore> stores) async {
         tableHeaders['Route_Stop']!.map((h) => rowValue(row, h)).toList()
   ]);
 
+  // job plans linked to route stops (child job plans)
+  final allStopJps = <String, FetchedJobPlan>{};
+  for (final s in extracted) {
+    allStopJps.addAll(s.stopJobPlans);
+  }
+  final stopPlans = allStopJps.values.toList();
+  writeSheet('Stop JobPlan', tableHeaders['JobPlan']!, [
+    for (final plan in stopPlans)
+      tableHeaders['JobPlan']!.map((h) => rowValue(plan.jobplan, h)).toList()
+  ]);
+  writeSheet('Stop Tasks', tableHeaders['JobTask']!, [
+    for (final plan in stopPlans)
+      for (final row in plan.jobtasks)
+        tableHeaders['JobTask']!.map((h) => rowValue(row, h)).toList()
+  ]);
+  writeSheet('Stop Labor', tableHeaders['JobLabor']!, [
+    for (final plan in stopPlans)
+      for (final row in plan.joblabors)
+        tableHeaders['JobLabor']!.map((h) => rowValue(row, h)).toList()
+  ]);
+  writeSheet('Stop Materials', tableHeaders['JobMaterial']!, [
+    for (final plan in stopPlans)
+      for (final row in plan.jobmaterials)
+        tableHeaders['JobMaterial']!.map((h) => rowValue(row, h)).toList()
+  ]);
+  writeSheet('Stop Services', tableHeaders['JobService']!, [
+    for (final plan in stopPlans)
+      for (final row in plan.jobservices)
+        tableHeaders['JobService']!.map((h) => rowValue(row, h)).toList()
+  ]);
+
   final bytes = excel.encode();
   if (bytes == null) {
     return 'Failed to encode Excel file';
@@ -375,6 +487,234 @@ double _hoursFromRow(dynamic row) {
     return parseTime(value);
   }
   return double.tryParse(value) ?? 0.0;
+}
+
+/// Maps a Maximo meter name (e.g. 'LNWK01') back to the template meter field
+///
+/// The PM import template stores the meter 'inspect' value which is used to
+/// look up the meter in the local database when generating meter numbers.
+/// Maximo stores the generated number 'code counter' so the trailing digits
+/// are stripped and the local meter DB is queried for the inspect value.
+Future<String?> _meterInspectFromMaximo(String? metername) async {
+  if (metername == null || metername.isEmpty) {
+    return null;
+  }
+  final code = metername.replaceFirst(RegExp(r'\d+$'), '');
+  try {
+    final meter = await database!.getMeter(code);
+    return meter.inspect;
+  } catch (e) {
+    debugPrint('meter lookup failed for $metername: $e');
+    // best effort: fall back to the meter code without counter digits
+    return code;
+  }
+}
+
+/// Exports all extracted PMs to an Excel file in the same format as the PM
+/// import template ('Main' sheet) so it can be re-loaded by the PM Check page.
+///
+/// Best effort: child route job plans are written as task rows with asset
+/// numbers, TASK-type route stops become route asset rows.
+Future<String> exportExtractsToImportTemplate(List<ExtractStore> stores) async {
+  final extracted = stores.where((s) => s.pm.isNotEmpty).toList();
+  if (extracted.isEmpty) {
+    return 'Nothing to export, no PMs extracted';
+  }
+  final excel = Excel.createExcel();
+  excel.rename(excel.getDefaultSheet() ?? 'Sheet1', 'Main');
+  final sheet = excel['Main'];
+
+  // meter lookups can repeat across PMs, cache per export run
+  final meterInspects = <String, String?>{};
+
+  Future<String?> meterInspect(String? metername) async {
+    if (metername == null || metername.isEmpty) {
+      return null;
+    }
+    if (!meterInspects.containsKey(metername)) {
+      meterInspects[metername] = await _meterInspectFromMaximo(metername);
+    }
+    return meterInspects[metername];
+  }
+
+  // appends a job task row matching the import template task layout
+  Future<void> writeTaskRow({
+    required String? jptask,
+    required String? description,
+    required String? longdescription,
+    required String? assetNumber,
+    required String? metername,
+  }) async {
+    sheet.appendRow([
+      null, // col 0
+      null, // col 1
+      null, // col 2
+      null, // col 3
+      assetNumber == null || assetNumber.isEmpty
+          ? null
+          : TextCellValue(assetNumber), // col 4 asset
+      metername == null || metername.isEmpty
+          ? null
+          : TextCellValue((await meterInspect(metername)) ?? ''), // col 5 meter
+      jptask == null || jptask.isEmpty
+          ? null
+          : IntCellValue(int.tryParse(jptask) ?? 0), // col 6 task number
+      TextCellValue(description ?? ''), // col 7 description
+      TextCellValue(stripHtml(longdescription)), // col 8 long description
+    ]);
+  }
+
+  for (final store in extracted) {
+    // new PM template header row, parsed by ParsedTemplate.fromExcel
+    sheet.appendRow([TextCellValue('PM Asset/ Parent (Route)*:')]);
+    final route = fieldOf(store.route ?? {}, 'route');
+    sheet.appendRow([
+      TextCellValue(fieldOf(store.pm, 'assetnum') ?? ''), // PM asset
+      null,
+      TextCellValue(_dateOnly(fieldOf(store.pm, 'nextdate'))), // next due date
+      TextCellValue(store.siteid),
+      TextCellValue(_freqUnitFromMaximo(fieldOf(store.pm, 'frequnit')) ?? ''),
+      IntCellValue(int.tryParse(fieldOf(store.pm, 'frequency') ?? '') ?? 0),
+      TextCellValue(fieldOf(store.jobplan ?? {}, 'iko_worktype') ?? ''), // PM type
+      TextCellValue(
+          fieldOf(store.jobplan ?? {}, 'iko_conditions') ?? ''), // condition
+      TextCellValue(fieldOf(store.pm, 'description') ?? store.pmnum), // PM name
+      TextCellValue(route == null || route.isEmpty
+          ? 'Select Route (Optional)'
+          : fieldOf(store.route!, 'description') ?? ''),
+    ]);
+    sheet.appendRow([
+      null, null, null, null, null, null, null, null,
+      TextCellValue(store.pmnum), // PM number
+      route == null || route.isEmpty
+          ? null
+          : TextCellValue(route), // route code
+    ]);
+
+    // craft section header, row[3] is the (unused here) job plan replacement
+    sheet.appendRow(
+        [TextCellValue('Craft @ (Optional) Labour Code'), null, null, TextCellValue('')]);
+    for (final row in store.joblabors) {
+      final craft = rowValue(row, 'CRAFT');
+      if (craft.isEmpty) {
+        continue;
+      }
+      final laborType = _laborTypeFromCraft(craft);
+      final craftName = crafts[laborType] ?? laborType;
+      sheet.appendRow([
+        TextCellValue('$craftName@${rowValue(row, 'LABORCODE')}'),
+        IntCellValue(int.tryParse(rowValue(row, 'QUANTITY')) ?? 1),
+        DoubleCellValue(_hoursFromRow(row)),
+      ]);
+    }
+
+    // tasks of the PM's own job plan (no asset number -> main job plan)
+    for (final row in store.jobtasks) {
+      await writeTaskRow(
+        jptask: fieldOf(row as Map, 'jptask'),
+        description: fieldOf(row, 'description'),
+        longdescription: fieldOf(row, 'description_longdescription'),
+        assetNumber: fieldOf(row, 'assetnum'),
+        metername: fieldOf(row, 'metername'),
+      );
+    }
+
+    // route stops: children job plans become tasks with asset numbers,
+    // plain stops become route asset rows
+    var routeAssetHeaderWritten = false;
+    for (final row in store.routeStops) {
+      final stopJpnum = fieldOf(row as Map, 'jpnum') ?? '';
+      final stopAsset = fieldOf(row, 'assetnum') ?? '';
+      if (stopJpnum.isEmpty) {
+        if (stopAsset.isEmpty) {
+          continue;
+        }
+        if (!routeAssetHeaderWritten) {
+          sheet.appendRow([
+            null, null, null,
+            TextCellValue('Route Assets (one per cell):'),
+          ]);
+          routeAssetHeaderWritten = true;
+        }
+        sheet.appendRow([null, null, null, TextCellValue(stopAsset)]);
+        continue;
+      }
+      final plan = store.stopJobPlans[stopJpnum];
+      if (plan == null || plan.jobtasks.isEmpty) {
+        // stop job plan was not fetched, fall back to route asset row
+        if (stopAsset.isNotEmpty) {
+          if (!routeAssetHeaderWritten) {
+            sheet.appendRow([
+              null, null, null,
+              TextCellValue('Route Assets (one per cell):'),
+            ]);
+            routeAssetHeaderWritten = true;
+          }
+          sheet.appendRow([null, null, null, TextCellValue(stopAsset)]);
+        }
+        continue;
+      }
+      await writeTaskRow(
+        jptask:
+            fieldOf(plan.jobtasks.first as Map, 'jptask') ?? fieldOf(row, 'stopsequence'),
+        description:
+            fieldOf(plan.jobtasks.first as Map, 'description') ?? fieldOf(row, 'description'),
+        longdescription: fieldOf(plan.jobtasks.first as Map, 'description_longdescription'),
+        assetNumber: stopAsset,
+        metername: fieldOf(plan.jobtasks.first as Map, 'metername'),
+      );
+    }
+
+    // materials section
+    sheet.appendRow([TextCellValue('Materials (Mapics Number)')]);
+    for (final row in store.jobmaterials) {
+      sheet.appendRow([
+        TextCellValue(rowValue(row, 'ITEMNUM')),
+        DoubleCellValue(double.tryParse(rowValue(row, 'ITEMQTY')) ?? 1),
+        DoubleCellValue(double.tryParse(rowValue(row, 'COST')) ?? 0),
+      ]);
+    }
+
+    // services section
+    sheet.appendRow([TextCellValue('Services (Mapics Number)')]);
+    for (final row in store.jobservices) {
+      sheet.appendRow([
+        TextCellValue(rowValue(row, 'ITEMNUM')),
+        DoubleCellValue(double.tryParse(rowValue(row, 'COST')) ?? 0), // cost
+        TextCellValue(rowValue(row, 'COMPANY')), // vendor / company
+      ]);
+    }
+  }
+
+  final bytes = excel.encode();
+  if (bytes == null) {
+    return 'Failed to encode Excel file';
+  }
+  final now = DateTime.now();
+  final fileName =
+      'PM_Import_${DateFormat('yyyyMMdd_HHmmss').format(now)}.xlsx';
+  final FileSaveLocation? location = await getSaveLocation(
+    initialDirectory: null,
+    suggestedName: fileName,
+  );
+  if (location == null) {
+    return 'Export cancelled';
+  }
+  final file = XFile.fromData(
+    Uint8List.fromList(bytes),
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    name: fileName,
+  );
+  await file.saveTo(location.path);
+  return 'Exported ${extracted.length} PMs to ${location.path}';
+}
+
+/// Formats a Maximo ISO datetime (yyyy-MM-ddTHH...) as yyyy-MM-dd.
+String _dateOnly(String? isoDate) {
+  if (isoDate == null || isoDate.isEmpty) {
+    return '';
+  }
+  return isoDate.length > 10 ? isoDate.substring(0, 10) : isoDate;
 }
 
 /// Best effort mapping of an extracted PM into a [ParsedTemplate] which is
@@ -440,8 +780,35 @@ Future<void> populateTemplateFromExtract(
       jptask: int.tryParse(fieldOf(task, 'jptask') ?? ''),
       description: taskDescription,
       assetNumber: assetNumber,
-      metername: fieldOf(task, 'metername'),
+      metername: await _meterInspectFromMaximo(fieldOf(task, 'metername')),
       longdescription: stripHtml(fieldOf(task, 'description_longdescription')),
+    ));
+  }
+  // route stops: children job plans become tasks with asset numbers,
+  // plain stops become route assets of the PM
+  for (final row in store.routeStops) {
+    final stopJpnum = fieldOf(row as Map, 'jpnum') ?? '';
+    final stopAsset = fieldOf(row, 'assetnum')?.toUpperCase() ?? '';
+    if (stopAsset.isEmpty) {
+      continue;
+    }
+    final plan = stopJpnum.isEmpty ? null : store.stopJobPlans[stopJpnum];
+    if (plan == null || plan.jobtasks.isEmpty) {
+      // plain route stop (or stop job plan not fetched)
+      parsed.assets.add(stopAsset);
+      continue;
+    }
+    final stopTask = Map<String, dynamic>.from(plan.jobtasks.first as Map);
+    final stopSeq =
+        int.tryParse(fieldOf(row, 'stopsequence') ?? '') ?? 0;
+    parsed.assets.add(stopAsset);
+    parsed.tasks.add(JobTask(
+      jptask: int.tryParse(fieldOf(stopTask, 'jptask') ?? '') ?? stopSeq,
+      description:
+          fieldOf(stopTask, 'description') ?? fieldOf(row, 'description'),
+      assetNumber: stopAsset,
+      metername: await _meterInspectFromMaximo(fieldOf(stopTask, 'metername')),
+      longdescription: stripHtml(fieldOf(stopTask, 'description_longdescription')),
     ));
   }
 
