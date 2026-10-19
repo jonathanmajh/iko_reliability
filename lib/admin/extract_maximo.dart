@@ -1,6 +1,7 @@
 import 'package:excel_plus/excel_plus.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 import '../bin/consts.dart';
 import 'extract_notifier.dart';
@@ -323,7 +324,9 @@ Future<String> exportExtractsToExcel(List<ExtractStore> stores) async {
   if (bytes == null) {
     return 'Failed to encode Excel file';
   }
-  const fileName = 'PM_Extract.xlsx';
+  final now = DateTime.now();
+  final fileName =
+      'PM_Extract_${DateFormat('yyyyMMdd_HHmmss').format(now)}.xlsx';
   final FileSaveLocation? location = await getSaveLocation(
     initialDirectory: null,
     suggestedName: fileName,
