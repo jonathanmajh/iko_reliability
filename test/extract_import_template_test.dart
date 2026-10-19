@@ -1,10 +1,9 @@
 // Round-trip check for the PM request template export:
-// builds a workbook from extracted stores through the real
-// buildImportTemplateWorkbook with the bundled template, verifies the file
-// integrity, and parses it back with the real ParsedTemplate.fromExcel.
+// builds a brand-new workbook from extracted stores through the real
+// buildImportTemplateWorkbook (no bundled template involved), verifies the
+// layout and template look, and parses it back with the real
+// ParsedTemplate.fromExcel.
 // Run: dart run test/extract_import_template_test.dart
-import 'dart:io';
-
 import 'package:excel_plus/excel_plus.dart';
 import 'package:iko_reliability_flutter/admin/extract_import_template.dart';
 import 'package:iko_reliability_flutter/admin/extract_store.dart';
@@ -12,8 +11,6 @@ import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart' show FileDetails;
 
 void main() async {
-  final templateBytes =
-      File('assets/PM Request Template.xlsm').readAsBytesSync();
   final inspects = {'LNWK': 'Line Walk', 'LUBP': 'Lubrication Points'};
   Future<String?> resolveMeter(String? metername) async {
     if (metername == null || metername.isEmpty) {
@@ -133,24 +130,39 @@ void main() async {
         ], craft: 'PROD', hours: '1:00'),
     };
 
-  final bytes =
-      await buildImportTemplateWorkbook([pm1, pm2], templateBytes, resolveMeter);
+  final bytes = await buildImportTemplateWorkbook([pm1, pm2], resolveMeter);
   final excel = Excel.decodeBytes(bytes);
 
-  for (final name in ['Main', 'Template Copy', 'List of Assets', 'Parent Finder', 'Observation List', 'Option List']) {
-    _expect(excel.tables.keys.contains(name), 'template sheet preserved: $name');
-  }
-  _expect(excel.tables['List of Assets']!.maxRows >= 25179,
-      'List of Assets data preserved');
+  _expect(excel.tables.keys.toList().join(',') == 'Main', 'workbook holds only Main');
 
   final main = excel.tables['Main']!;
   String cell(int row, int col) => _cell(main, row, col);
+  CellStyle? style(int row, int col) {
+    final prow = main.row(row);
+    return prow.length > col ? prow[col]?.cellStyle : null;
+  }
 
-  // template head untouched
-  _expect(cell(0, 0).contains('DON\u2019T REMOVE'), 'DON\u2019T REMOVE rows intact');
+  String fill(int row, int col) =>
+      style(row, col)?.backgroundColor.colorHex ?? '';
+  String hex(String argb) =>
+      ExcelColor.fromHexString(argb.replaceFirst('#', '')).colorHex;
+  const gray = '#FFD9D9D9';
+  const paleGreen = '#FFEBF1DE';
+  const paleYellow = '#FFFFEB9C';
+
+  // template head reproduction (rows 0-5 + first PM block starts at row 6)
+  for (var i = 0; i < 6; i++) {
+    _expect(cell(i, 0).contains('DON\u2019T REMOVE'), 'DON\u2019T REMOVE row $i');
+  }
   _expect(cell(6, 0) == 'PM Asset/ Parent (Route)*:', 'label row 6 intact');
+  _expect(fill(6, 0) == hex(gray) && style(6, 0)?.isBold == true,
+      'label style (gray fill, bold)');
+  _expect(fill(11, 0) == hex(gray) && style(11, 0)?.isBold == true,
+      'craft header label style');
+  _expect(fill(11, 1) == hex(gray) && style(11, 1)?.isBold == false,
+      'quantity header style (gray, not bold)');
 
-  // --- PM 1 block (rows 6-21 of the template) ---
+  // --- PM 1 block (rows 6-21) ---
   _expect(cell(7, 0) == 'A0001', 'PM1 asset at row 7');
   _expect(cell(7, 1) == 'Child', 'PM1 route type col1 = Child');
   _expect(cell(7, 2) == '2026-07-01', 'PM1 next due date');
@@ -158,24 +170,40 @@ void main() async {
   _expect(cell(7, 4) == 'Days', 'PM1 frequency unit word');
   _expect(cell(7, 6) == 'INR (Routine Inspection)', 'PM1 work type option string');
   _expect(cell(7, 7) == 'CR01 (Running)', 'PM1 condition option string');
+  _expect(fill(7, 7) == hex(paleGreen), 'condition cell pale green (dropdown look)');
+  _expect(cell(7, 8) == 'Inspection Child Route with Job Plan Child Route',
+      'PM1 name');
   _expect(cell(7, 9) == 'Line Walk Inspection - 1 Days - Routine Inspection - Electrical',
       'PM1 route name');
+  _expect(fill(7, 9) == hex(paleYellow) &&
+      style(7, 9)?.fontColor.colorHex == hex('#FF9C6500'),
+      'route cell style (pale yellow, brown font)');
+  _expect(fill(8, 9) == hex(paleYellow), 'route code cell styled like route');
   _expect(cell(8, 8) == 'A0001D1INRE', 'PM1 number in number row');
-  _expect(cell(8, 9) == 'A0001D1INRE', 'PM1 route code literal (formula replaced)');
+  _expect(cell(8, 9) == 'A0001D1INRE', 'PM1 route code literal');
 
-  // content: labour 12, tasks 13-15, route assets 16-17, stop tasks 18-19,
-  // materials header 20, services header 21
+  // form annotations reproduced from the template
+  _expect(cell(10, 0) == 'Craft', 'section label Craft');
+  _expect(cell(10, 3) == 'Replacement (ONLY for LC1)', 'section label Replacement');
+  _expect(cell(10, 4) == 'Job Task:', 'section label Job Task');
+  _expect(cell(10, 9) == 'IKO PM History Notes', 'right note IKO PM History Notes');
+  _expect(cell(12, 9) == 'PM Options', 'right note PM Options on first content row');
+  _expect(cell(13, 9) == 'Safety Device (Y/N)', 'right note Safety Device');
+  _expect(cell(11, 2) == 'Hours', 'craft header Hours');
+
+  // content: labour 12, tasks 13-15 (marker on first task row), route assets
+  // 16-17, stop tasks 18-19, materials header 20, services header 21
   _expect(cell(12, 0) == 'MECH-MW: M', 'PM1 craft cell (option string)');
-  _expect(cell(12, 3) == 'Task Route Assets (one per cell):',
-      'PM1 route asset marker on first content row');
-  _expect(cell(12, 7) != 'General', 'PM1 default task text cleared');
-  _expect(cell(13, 3) != 'Task Route Assets (one per cell):',
-      'no duplicate marker at row 13');
+  _expect(fill(12, 0) == hex(paleGreen), 'craft cell pale green (dropdown look)');
+  _expect(cell(12, 3) == '', 'no marker on labour row');
+  _expect(cell(13, 3) == 'Task Route Assets (one per cell):',
+      'PM1 route asset marker on first task row');
+  _expect(fill(13, 3) == hex(gray), 'marker styled as label');
+  _expect(fill(13, 4) != hex(gray) && fill(13, 4) != hex(paleGreen),
+      'task cells stay plain (no fill)');
   _expect(cell(13, 6) == '10' && cell(13, 7) == 'General', 'PM1 task 10 at row 13');
   _expect(cell(14, 6) == '20', 'PM1 task 20 at row 14');
   _expect(cell(15, 6) == '30', 'PM1 task 30 at row 15');
-  _expect(cell(15, 0) != 'Materials (Mapics Number)',
-      'PM1 default materials header cleared off task row');
   _expect(cell(13, 8) == 'Follow safety rules', 'PM1 long description (html stripped)');
   _expect(cell(16, 3) == 'C6105', 'PM1 route asset C6105');
   _expect(cell(17, 3) == 'C6115', 'PM1 route asset C6115');
@@ -183,14 +211,13 @@ void main() async {
   _expect(cell(18, 5) == 'Line Walk', 'PM1 stop meter mapped to inspect value');
   _expect(cell(19, 4) == 'H2125', 'PM1 stop task asset H2125');
   _expect(cell(20, 0) == 'Materials (Mapics Number)', 'PM1 materials header');
+  _expect(fill(20, 0) == hex(gray) && style(20, 0)?.isBold == false,
+      'materials header style (gray, not bold)');
+  _expect(cell(20, 9) == 'Urgency Level (1-4)', 'right note Urgency Level');
   _expect(cell(21, 0) == 'Services (Mapics Number)', 'PM1 services header');
-  for (var i = 11; i <= 21; i++) {
-    _expect(cell(i, 0) != 'Add another labour (Optional)',
-        'PM1 area row ${i + 1} has no leftover filler');
-  }
 
   // --- PM 2 block (starts at row 22, PM1 content ended within rows 12-21) ---
-  _expect(cell(22, 0) == 'PM Asset/ Parent (Route)*:', 'PM2 label row at row 23');
+  _expect(cell(22, 0) == 'PM Asset/ Parent (Route)*:', 'PM2 label row at row 22');
   _expect(cell(23, 0) == 'C8025', 'PM2 asset');
   _expect(cell(23, 1) == 'Child', 'PM2 route type');
   _expect(cell(23, 6) == 'LUB (Lubrication)', 'PM2 work type option string');
@@ -218,7 +245,7 @@ void main() async {
   _expect(cell(38, 0) == '22001', 'PM2 service item');
   _expect(cell(38, 2) == 'ACME', 'PM2 service vendor');
 
-  // no duplicated/leftover section markers anywhere
+  // no duplicated section markers anywhere
   int occurrences(String text, int col) {
     var count = 0;
     for (var i = 0; i < main.maxRows; i++) {
@@ -233,9 +260,9 @@ void main() async {
       'exactly one materials header per PM');
   _expect(occurrences('Task Route Assets (one per cell):', 3) == 2,
       'exactly one route asset marker per PM');
-  _expect(occurrences('Add another labour (Optional)', 0) == 0,
-      'no leftover labour fillers');
-  _expect(occurrences('Select Labour*', 0) == 0, 'no leftover labour placeholders');
+  _expect(occurrences('PM Options', 9) == 2, 'exactly one PM Options note per PM');
+  _expect(occurrences('DON\u2019T REMOVE THIS LINE', 0) == 6,
+      'exactly the six top protection rows');
 
   // --- parse back with the real parser (counter keyed per PM) ---
   final perPm = ParsedTemplate(nextDueDate: '', pmNumber: '', pmName: '')

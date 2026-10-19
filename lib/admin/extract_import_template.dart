@@ -1,5 +1,13 @@
 // Pure Dart module: builds a PM request template workbook from extracted
-// PM data. No Flutter/an DB imports so it can be unit tested directly.
+// PM data. No Flutter/DB imports so it can be unit tested directly.
+//
+// The workbook is generated from scratch (a modified template re-encoded by
+// excel_plus opened as corrupt in Excel) but reproduces the layout and look
+// of the blank PM request template: rows 0-5 'DON'T REMOVE THIS LINE', then
+// one 16-row form per PM (label / data / number / blank / section labels /
+// craft header rows followed by the labour, task, route asset, materials and
+// services rows). The parser contract of ParsedTemplate.fromExcel must keep
+// holding - see the round trip test.
 import 'dart:typed_data';
 
 import 'package:excel_plus/excel_plus.dart';
@@ -7,41 +15,23 @@ import 'package:iko_reliability_flutter/admin/extract_store.dart';
 import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart';
 
-/// Asset path of the bundled blank PM request template (.xlsm; the VBA is
-/// not kept, saving produces a macro free .xlsx).
-const pmRequestTemplateAsset = 'assets/PM Request Template.xlsm';
+/// Row the first PM block starts at (rows 0-5 hold the DON'T REMOVE lines).
+const _pmTemplateFirstBlockRow = 6;
 
-/// Row of the PM data (asset, route type, due date, ...) inside the first
-/// template block on the 'Main' sheet of the PM request template.
-const _pmTemplateMainDataRow = 7;
+/// Row of the PM data (asset, route type, due date, ...) inside a PM block,
+/// relative to the block's base row (the label row).
+const _pmBlockDataRow = 1;
 
-/// First row the first PM block's content (labour/tasks/materials/services)
-/// may occupy, and last row of the template's first block.
-const _pmTemplateMainContentFirstRow = 12;
-const _pmTemplateMainContentLastRow = 21;
+/// Rows of one PM form block: label, data, number, blank, section labels,
+/// craft header, then 10 content rows.
+const _pmBlockHeight = 16;
 
-/// Where subsequent PM block skeletons start (first 22 rows hold the
-/// template's own first block).
-const _pmTemplateSecondBlockRow = 22;
-
-/// Row on the template's 'Template Copy' sheet holding the content-row /
-/// material header / material row / service header styles.
-const _pmTemplateStyleSourceSheet = 'Template Copy';
-
-/// A default template cell whose text can be removed when unused.
-class _TemplateDefaultCell {
-  final int row;
-  final int col;
-  final CellStyle? style;
-  _TemplateDefaultCell(this.row, this.col, this.style);
-}
-
-/// Dropdown option strings of the PM request template, read from its
-/// 'Option List' sheet so written values stay valid for its lookups.
+/// Dropdown option strings of the PM request template ('Option List' sheet)
+/// so written values stay valid when the request template is used.
 class TemplateOptions {
-  final workTypes = <String, String>{}; // 'PPM' -> 'PPM (Preventative Maintenance)'
-  final crafts = <String, String>{}; // 'E' -> 'ELECT: E'
-  final conditions = <String, String>{}; // 'CR01' -> 'CR01 (Running)'
+  final workTypes = <String, String>{};
+  final crafts = <String, String>{};
+  final conditions = <String, String>{};
 
   /// Craft prefix (ELECT/MECH-MW/PROD) used by the template for a labor type.
   String craftPrefix(String letter) {
@@ -57,39 +47,27 @@ class TemplateOptions {
   }
 }
 
-/// Reads the dropdown option strings from the template's 'Option List' sheet.
-TemplateOptions readTemplateOptions(Excel excel) {
+/// The PM request template's dropdown options (from its 'Option List' sheet).
+TemplateOptions templateOptions() {
   final options = TemplateOptions();
-  final sheet = excel.tables['Option List'];
-  if (sheet == null) {
-    return options;
-  }
-  final typePattern = RegExp(r'^(?:[A-Z0-9]{3}) \(');
-  final craftPattern = RegExp(r'^([A-Z][A-Z-]*):\s*([EMO])$');
-  final conditionPattern = RegExp(r'^([A-Z]{2}\d{2}) \(');
-  for (var i = 0; i < sheet.maxRows; i++) {
-    final row = sheet.row(i);
-    // column G (6) is the full work order type option, e.g. 'INR (Routine Inspection)'
-    if (row.length > 6) {
-      final full = row[6]?.value?.toString() ?? '';
-      if (typePattern.hasMatch(full)) {
-        options.workTypes[full.substring(0, 3)] = full;
-      }
-    }
-    // column D (3) holds process condition and craft options
-    if (row.length > 4) {
-      final value = row[3]?.value?.toString() ?? '';
-      final craftMatch = craftPattern.firstMatch(value);
-      if (craftMatch != null) {
-        options.crafts[craftMatch.group(2)!] = value;
-        continue;
-      }
-      final conditionMatch = conditionPattern.firstMatch(value);
-      if (conditionMatch != null) {
-        options.conditions[conditionMatch.group(1)!] = value;
-      }
-    }
-  }
+  const workTypes = {
+    'PPM': 'PPM (Preventative Maintenance)',
+    'CAL': 'CAL (Calibration)',
+    'ENV': 'ENV (Environmental)',
+    'HKG': 'HKG (Housekeeping)',
+    'INR': 'INR (Routine Inspection)',
+    'LC1': 'LC1 (Life Cycle)',
+    'LUB': 'LUB (Lubrication)',
+    'PDM': 'PDM (Predictive Maintenance)',
+    'PEM': 'PEM (Pre-emptive Maintenance)',
+    'PRO': 'PRO (Process Maintenance)',
+    'SAF': 'SAF (Safety)',
+  };
+  options.workTypes.addAll(workTypes);
+  const crafts = {'E': 'ELECT: E', 'M': 'MECH-MW: M', 'O': 'PROD: O'};
+  options.crafts.addAll(crafts);
+  const conditions = {'CR01': 'CR01 (Running)', 'CS01': 'CS01 (Stopped)'};
+  options.conditions.addAll(conditions);
   return options;
 }
 
@@ -146,64 +124,99 @@ String routeTypeLabel(ExtractStore store) {
   return 'Task';
 }
 
-/// Builds the 'Main' sheet of a copy of the blank PM request template filled
-/// with [stores].
+/// Styles matching the blank PM request template's 'Main' sheet.
+class _FormStyles {
+  final gray = ExcelColor.fromHexString('#FFD9D9D9');
+  final paleGreen = ExcelColor.fromHexString('#FFEBF1DE');
+  final paleYellow = ExcelColor.fromHexString('#FFFFEB9C');
+  final brown = ExcelColor.fromHexString('#FF9C6500');
+
+  late final plain = CellStyle(
+    leftBorder: _thin(),
+    rightBorder: _thin(),
+    topBorder: _thin(),
+    bottomBorder: _thin(),
+  );
+
+  /// Filled label cell (bold by default, as in the template's label rows).
+  late final label = CellStyle(
+    bold: true,
+    backgroundColorHex: gray,
+    leftBorder: _thin(),
+    rightBorder: _thin(),
+    topBorder: _thin(),
+    bottomBorder: _thin(),
+  );
+
+  /// Filled label cell without bold (quantity / cost headers, services).
+  late final labelPlain = CellStyle(
+    backgroundColorHex: gray,
+    leftBorder: _thin(),
+    rightBorder: _thin(),
+    topBorder: _thin(),
+    bottomBorder: _thin(),
+  );
+
+  /// Dropdown-style cell (pale green fill like the template's work order,
+  /// process condition and labour cells).
+  late final dropdown = CellStyle(
+    backgroundColorHex: paleGreen,
+    leftBorder: _thin(),
+    rightBorder: _thin(),
+    topBorder: _thin(),
+    bottomBorder: _thin(),
+  );
+
+  /// Route cell (pale yellow fill, brown font, like the template's route
+  /// name / code cells).
+  late final route = CellStyle(
+    backgroundColorHex: paleYellow,
+    fontColorHex: brown,
+    leftBorder: _thin(),
+    rightBorder: _thin(),
+    topBorder: _thin(),
+    bottomBorder: _thin(),
+  );
+
+  /// Free (borderless) cell for task/route asset/material/service rows, as
+  /// in the template's content area.
+  late final free = CellStyle();
+
+  Border _thin() => Border(borderStyle: BorderStyle.Thin);
+}
+
+/// Builds a PM request workbook filled with [stores], one 16-row form block
+/// per PM on the 'Main' sheet.
 ///
-/// The template's formatting and row layout is preserved: the first PM is
-/// written into the template's own first block (rows 6-21) and every further
-/// PM repeats the blank form layout (see the template's 'Template Copy'
-/// sheet). Child route job plans become task rows with asset numbers (all of
-/// their tasks), plain stops become 'Task Route Assets' rows.
+/// Child route job plans become task rows with asset numbers (all of their
+/// tasks), plain stops become 'Task Route Assets (one per cell)' rows.
 /// [resolveMeter] maps an extracted Maximo meter name (e.g. 'LNWK01') to the
 /// meter text the template expects.
 /// Returns the encoded .xlsx bytes.
 Future<Uint8List> buildImportTemplateWorkbook(
   List<ExtractStore> stores,
-  Uint8List templateBytes,
   Future<String?> Function(String? metername) resolveMeter,
 ) async {
-  final excel = Excel.decodeBytes(templateBytes);
+  final excel = Excel.createExcel();
+  excel.rename(excel.getDefaultSheet() ?? 'Sheet1', 'Main');
   final main = excel.tables['Main'];
   if (main == null) {
-    throw ArgumentError('Invalid PM Request Template (missing Main sheet)');
+    throw StateError('Failed to create the Main sheet');
   }
-  final options = readTemplateOptions(excel);
-  final form = excel.tables[_pmTemplateStyleSourceSheet];
+  final options = templateOptions();
+  final styles = _FormStyles();
 
-  // cell style of the blank form (source row of the 'Template Copy' sheet)
-  CellStyle? formStyle(int formRow, int column) {
-    if (form == null) {
-      return null;
-    }
-    final prow = form.row(formRow);
-    return prow.length > column ? prow[column]?.cellStyle : null;
-  }
-
-  // default texts of the template's own content area (rows 12-21); cells not
-  // overwritten by PM data are cleared after the export while keeping the
-  // style, so no leftover template defaults corrupt the parsed data
-  final templateDefaults = <_TemplateDefaultCell>[];
-  final writtenCells = <String>{};
-
-  // write helper: write a single cell, cloning the blank form style
-  void put(int row, int column, CellValue? value, int formRow) {
-    writtenCells.add('$row:$column');
+  void put(int row, int column, CellValue? value, CellStyle style) {
     main.updateCell(
       CellIndex.indexByColumnRow(columnIndex: column, rowIndex: row),
       value,
-      cellStyle: formStyle(formRow, column),
+      cellStyle: style,
     );
   }
 
-  for (var row = _pmTemplateMainContentFirstRow;
-      row <= _pmTemplateMainContentLastRow;
-      row++) {
-    final prow = main.row(row);
-    for (var col = 0; col < prow.length; col++) {
-      if (prow[col]?.value != null) {
-        templateDefaults.add(_TemplateDefaultCell(row, col, prow[col]?.cellStyle));
-      }
-    }
+  // the template's header protection rows
+  for (var row = 0; row < _pmTemplateFirstBlockRow; row++) {
+    put(row, 0, TextCellValue('DON\u2019T REMOVE THIS LINE'), styles.plain);
   }
 
   // meter lookups can repeat across PMs, cache per export run
@@ -220,25 +233,23 @@ Future<Uint8List> buildImportTemplateWorkbook(
       int row, Map<dynamic, dynamic> task, String? stopAsset) async {
     final asset = stopAsset ?? fieldOf(task, 'assetnum');
     if (asset != null && asset.toString().isNotEmpty) {
-      put(row, 4, TextCellValue(asset.toString().toUpperCase()), 6);
+      put(row, 4, TextCellValue(asset.toString().toUpperCase()), styles.free);
     }
     final meter = fieldOf(task, 'metername');
     if (meter != null && meter.toString().isNotEmpty) {
       final inspect = await meterInspect(meter.toString());
       if (inspect != null && inspect.isNotEmpty) {
-        put(row, 5, TextCellValue(inspect), 6);
+        put(row, 5, TextCellValue(inspect), styles.dropdown);
       }
     }
     final jptask = fieldOf(task, 'jptask');
     if (jptask != null) {
-      put(row, 6, IntCellValue(int.tryParse(jptask.toString()) ?? 0), 6);
+      put(row, 6, IntCellValue(int.tryParse(jptask.toString()) ?? 0), styles.free);
     }
-    put(row, 7, TextCellValue(fieldOf(task, 'description') ?? ''), 6);
-    put(
-        row,
-        8,
+    put(row, 7, TextCellValue(fieldOf(task, 'description') ?? ''), styles.free);
+    put(row, 8,
         TextCellValue(stripHtml(fieldOf(task, 'description_longdescription'))),
-        6);
+        styles.free);
   }
 
   /// Writes labour, task, route asset, materials and services rows of one PM
@@ -258,14 +269,9 @@ Future<Uint8List> buildImportTemplateWorkbook(
       routeAssetsNeeded = true;
     }
 
-    // the template's own first block carries the task route asset marker on
-    // its first content row (row 12); write it there explicitly so it
-    // survives the unused-default cleanup and precedes the labour rows
-    var markerPlaced = false;
-    if (routeAssetsNeeded && row == _pmTemplateMainContentFirstRow) {
-      put(row, 3, TextCellValue('Task Route Assets (one per cell):'), 6);
-      markerPlaced = true;
-    }
+    // right side notes of the form (first two content rows)
+    put(row, 9, TextCellValue('PM Options'), styles.label);
+    put(row + 1, 9, TextCellValue('Safety Device (Y/N)'), styles.label);
 
     // labour (craft) rows
     for (final labor in store.joblabors) {
@@ -282,23 +288,22 @@ Future<Uint8List> buildImportTemplateWorkbook(
           TextCellValue(laborCode.isEmpty
               ? (option ?? '${options.craftPrefix(letter)}: $letter')
               : '${options.craftPrefix(letter)}@$laborCode'),
-          6);
-      put(row, 1, IntCellValue(int.tryParse(rowValue(labor, 'QUANTITY')) ?? 1), 6);
-      put(row, 2, DoubleCellValue(hoursFromRow(labor)), 6);
+          styles.dropdown);
+      put(row, 1, IntCellValue(int.tryParse(rowValue(labor, 'QUANTITY')) ?? 1),
+          styles.plain);
+      put(row, 2, DoubleCellValue(hoursFromRow(labor)), styles.plain);
       row++;
     }
 
-    // tasks of the PM's own job plan (no asset -> main job plan)
-    var firstTaskRow = -1;
+    // tasks of the PM's own job plan (no asset -> main job plan);
+    // the first task row carries the route asset marker when route asset
+    // rows follow
+    var markerPlaced = false;
     for (final task in store.jobtasks) {
-      if (firstTaskRow < 0) {
-        firstTaskRow = row;
-        // the template places the task route asset marker on the task row;
-        // only needed when route assets follow and not placed already
-        if (!markerPlaced && routeAssetsNeeded) {
-          markerPlaced = true;
-          put(row, 3, TextCellValue('Task Route Assets (one per cell):'), 6);
-        }
+      if (!markerPlaced && routeAssetsNeeded) {
+        markerPlaced = true;
+        put(row, 3, TextCellValue('Task Route Assets (one per cell):'),
+            styles.label);
       }
       putTaskCells(row, Map<String, dynamic>.from(task as Map), null);
       row++;
@@ -318,17 +323,19 @@ Future<Uint8List> buildImportTemplateWorkbook(
           continue;
         }
         if (!markerPlaced) {
-          put(row, 3, TextCellValue('Task Route Assets (one per cell):'), 6);
+          put(row, 3, TextCellValue('Task Route Assets (one per cell):'),
+              styles.label);
           markerPlaced = true;
           row++;
         }
-        put(row, 3, TextCellValue(stopAsset), 6);
+        put(row, 3, TextCellValue(stopAsset), styles.free);
         row++;
         continue;
       }
       for (final t in stopTasks) {
         if (!markerPlaced) {
-          put(row, 3, TextCellValue('Task Route Assets (one per cell):'), 6);
+          put(row, 3, TextCellValue('Task Route Assets (one per cell):'),
+              styles.label);
           markerPlaced = true;
         }
         final task = Map<String, dynamic>.from(t as Map);
@@ -336,66 +343,67 @@ Future<Uint8List> buildImportTemplateWorkbook(
         // ensure a task number / description exists even if the child job
         // task row lacks them
         if (int.tryParse(fieldOf(task, 'jptask') ?? '') == null) {
-          put(row, 6, IntCellValue(taskSeq), 6);
+          put(row, 6, IntCellValue(taskSeq), styles.free);
         }
         if (fieldOf(task, 'description') == null) {
-          put(row, 7, TextCellValue(fieldOf(stop, 'description') ?? ''), 6);
+          put(row, 7, TextCellValue(fieldOf(stop, 'description') ?? ''),
+              styles.free);
         }
         row++;
       }
     }
 
     // materials section
-    put(row, 0, TextCellValue('Materials (Mapics Number)'), 9);
-    put(row, 1, TextCellValue('Quantity'), 9);
-    put(row, 2, TextCellValue('Cost (Optional)'), 9);
-    put(row, 9, TextCellValue('Urgency Level (1-4)'), 9);
+    put(row, 0, TextCellValue('Materials (Mapics Number)'), styles.labelPlain);
+    put(row, 1, TextCellValue('Quantity'), styles.labelPlain);
+    put(row, 2, TextCellValue('Cost (Optional)'), styles.labelPlain);
+    put(row, 9, TextCellValue('Urgency Level (1-4)'), styles.label);
     row++;
     for (final material in store.jobmaterials) {
-      put(row, 0, TextCellValue(rowValue(material, 'ITEMNUM')), 10);
-      put(
-          row,
-          1,
+      put(row, 0, TextCellValue(rowValue(material, 'ITEMNUM')), styles.plain);
+      put(row, 1,
           DoubleCellValue(double.tryParse(rowValue(material, 'ITEMQTY')) ?? 1),
-          10);
+          styles.plain);
       final cost = double.tryParse(rowValue(material, 'COST'));
       if (cost != null) {
-        put(row, 2, DoubleCellValue(cost), 10);
+        put(row, 2, DoubleCellValue(cost), styles.plain);
       }
       row++;
     }
 
     // services section
-    put(row, 0, TextCellValue('Services (Mapics Number)'), 15);
-    put(row, 1, TextCellValue('Cost (Optional)'), 15);
-    put(row, 2, TextCellValue('Vendor #'), 15);
+    put(row, 0, TextCellValue('Services (Mapics Number)'), styles.labelPlain);
+    put(row, 1, TextCellValue('Cost (Optional)'), styles.labelPlain);
+    put(row, 2, TextCellValue('Vendor #'), styles.labelPlain);
     row++;
     for (final service in store.jobservices) {
-      put(row, 0, TextCellValue(rowValue(service, 'ITEMNUM')), 15);
+      put(row, 0, TextCellValue(rowValue(service, 'ITEMNUM')), styles.plain);
       final cost = double.tryParse(rowValue(service, 'COST'));
       if (cost != null) {
-        put(row, 1, DoubleCellValue(cost), 15);
+        put(row, 1, DoubleCellValue(cost), styles.plain);
       }
-      put(row, 2, TextCellValue(rowValue(service, 'COMPANY')), 15);
+      put(row, 2, TextCellValue(rowValue(service, 'COMPANY')), styles.plain);
       row++;
     }
     return row;
   }
 
-  /// Writes the label / data / number rows of a PM block.
-  void writeHead(ExtractStore store, int dataRow) {
+  /// Writes the label / data / number rows of a PM block (base row = label
+  /// row).
+  void writeHead(ExtractStore store, int base) {
     final route = fieldOf(store.route ?? {}, 'route');
-    put(dataRow - 1, 0, TextCellValue('PM Asset/ Parent (Route)*:'), 0);
-    put(dataRow - 1, 1, TextCellValue('Route:'), 0);
-    put(dataRow - 1, 2, TextCellValue('Next Due Date (MM/DD/YYYY):'), 0);
-    put(dataRow - 1, 3, TextCellValue('Site ID*:'), 0);
-    put(dataRow - 1, 4, TextCellValue('Frequency Unit*:'), 0);
-    put(dataRow - 1, 5, TextCellValue('Frequency*:'), 0);
-    put(dataRow - 1, 6, TextCellValue('Work Order Types*:'), 0);
-    put(dataRow - 1, 7, TextCellValue('Stopped/Running'), 0);
-    put(dataRow - 1, 8, TextCellValue('Suggested PM Name'), 0);
-    put(dataRow - 1, 9, TextCellValue('Route Name'), 0);
+    put(base, 0, TextCellValue('PM Asset/ Parent (Route)*:'), styles.label);
+    put(base, 1, TextCellValue('Route:'), styles.label);
+    put(base, 2, TextCellValue('Next Due Date (MM/DD/YYYY):'), styles.label);
+    put(base, 3, TextCellValue('Site ID*:'), styles.label);
+    put(base, 4, TextCellValue('Frequency Unit*:'), styles.label);
+    put(base, 5, TextCellValue('Frequency*:'), styles.label);
+    put(base, 6, TextCellValue('Work Order Types*:'), styles.label);
+    put(base, 7, TextCellValue('Stopped/Running'), styles.label);
+    put(base, 8, TextCellValue('Suggested PM Name'), styles.label);
+    put(base, 9, TextCellValue('Route Name'), styles.label);
 
+    final dataRow = base + _pmBlockDataRow;
     final workType = fieldOf(store.jobplan ?? {}, 'iko_worktype') ?? '';
     final condition = fieldOf(store.jobplan ?? {}, 'iko_conditions') ?? '';
     const freqWords = {
@@ -408,19 +416,20 @@ Future<Uint8List> buildImportTemplateWorkbook(
         (fieldOf(store.pm, 'frequnit') ?? '').toString().toUpperCase();
     // fall back to the template's own unfilled dropdowns for missing values
     // so the parser's substring calls never fail on empty cells
-    final freqWord =
-        freqWords[rawFreqUnit] ?? (rawFreqUnit.isEmpty ? 'Select Frequency' : rawFreqUnit);
+    final freqWord = freqWords[rawFreqUnit] ??
+        (rawFreqUnit.isEmpty ? 'Select Frequency' : rawFreqUnit);
     final asset = fieldOf(store.pm, 'assetnum') ?? '';
     if (asset.isNotEmpty) {
-      put(dataRow, 0, TextCellValue(asset), 1);
+      put(dataRow, 0, TextCellValue(asset), styles.plain);
     }
-    put(dataRow, 1, TextCellValue(routeTypeLabel(store)), 1);
-    put(dataRow, 2, TextCellValue(_dateOnly(fieldOf(store.pm, 'nextdate'))), 1);
-    put(dataRow, 3, TextCellValue(store.siteid), 1);
-    put(dataRow, 4, TextCellValue(freqWord), 1);
+    put(dataRow, 1, TextCellValue(routeTypeLabel(store)), styles.dropdown);
+    put(dataRow, 2, TextCellValue(_dateOnly(fieldOf(store.pm, 'nextdate'))),
+        styles.plain);
+    put(dataRow, 3, TextCellValue(store.siteid), styles.plain);
+    put(dataRow, 4, TextCellValue(freqWord), styles.plain);
     final frequency = int.tryParse(fieldOf(store.pm, 'frequency') ?? '');
     if (frequency != null) {
-      put(dataRow, 5, IntCellValue(frequency), 1);
+      put(dataRow, 5, IntCellValue(frequency), styles.plain);
     }
     put(
         dataRow,
@@ -428,76 +437,59 @@ Future<Uint8List> buildImportTemplateWorkbook(
         TextCellValue(workType.isEmpty
             ? 'Select Work Order'
             : options.workTypes[workType] ?? workType),
-        1);
+        styles.dropdown);
     put(
         dataRow,
         7,
         TextCellValue(condition.isEmpty
             ? 'Select Process Condition'
             : options.conditions[condition] ?? condition),
-        1);
+        styles.dropdown);
     final pmName = fieldOf(store.pm, 'description') ?? store.pmnum;
     if (pmName.isNotEmpty) {
-      put(dataRow, 8, TextCellValue(pmName), 1);
+      put(dataRow, 8, TextCellValue(pmName), styles.plain);
     }
     put(dataRow, 9,
         TextCellValue(route == null || route.isEmpty
             ? 'Select Route (Optional)'
             : fieldOf(store.route!, 'description') ?? ''),
-        1);
+        styles.route);
 
     // PM number (and route code) row used by the parser
-    put(dataRow + 1, 8, TextCellValue(store.pmnum), 2);
+    put(base + 2, 8, TextCellValue(store.pmnum), styles.plain);
     if (route != null && route.isNotEmpty) {
-      put(dataRow + 1, 9, TextCellValue(route), 2);
+      put(base + 2, 9, TextCellValue(route), styles.route);
     }
   }
 
   /// Writes the static form rows between the number row and the content
   /// rows of a PM block (blank row, section labels and the craft header).
-  void writeFormExtras(int baseRow) {
+  void writeFormExtras(int base) {
     // base + 3 is left blank, mirroring the template
-    put(baseRow + 4, 0, TextCellValue('Craft'), 4);
-    put(baseRow + 4, 3, TextCellValue('Replacement (ONLY for LC1)'), 4);
-    put(baseRow + 4, 4, TextCellValue('Job Task:'), 4);
-    put(baseRow + 4, 9, TextCellValue('IKO PM History Notes'), 4);
-    put(baseRow + 5, 0, TextCellValue('Craft @ (Optional) Labour Code'), 5);
-    put(baseRow + 5, 1, TextCellValue('Quantity'), 5);
-    put(baseRow + 5, 2, TextCellValue('Hours'), 5);
-    put(baseRow + 5, 4, TextCellValue('Child Route Assets:'), 5);
-    put(baseRow + 5, 5, TextCellValue('Inspect:'), 5);
-    put(baseRow + 5, 6, TextCellValue('Task Order:'), 5);
-    put(baseRow + 5, 7, TextCellValue('Short Description '), 5);
-    put(baseRow + 5, 8, TextCellValue('Long Description'), 5);
+    put(base + 4, 0, TextCellValue('Craft'), styles.label);
+    put(base + 4, 3, TextCellValue('Replacement (ONLY for LC1)'), styles.label);
+    put(base + 4, 4, TextCellValue('Job Task:'), styles.label);
+    put(base + 4, 9, TextCellValue('IKO PM History Notes'), styles.label);
+    put(base + 5, 0, TextCellValue('Craft @ (Optional) Labour Code'),
+        styles.label);
+    put(base + 5, 1, TextCellValue('Quantity'), styles.labelPlain);
+    put(base + 5, 2, TextCellValue('Hours'), styles.labelPlain);
+    put(base + 5, 4, TextCellValue('Child Route Assets:'), styles.free);
+    put(base + 5, 5, TextCellValue('Inspect:'), styles.free);
+    put(base + 5, 6, TextCellValue('Task Order:'), styles.free);
+    put(base + 5, 7, TextCellValue('Short Description '), styles.free);
+    put(base + 5, 8, TextCellValue('Long Description'), styles.free);
   }
 
-  // first PM goes into the template's own first block, which already has
-  // the label / number / craft header rows (rows 6-11)
-  writeHead(stores.first, _pmTemplateMainDataRow);
-  var cursor = _pmTemplateMainContentFirstRow;
-  cursor = await writeContent(stores.first, cursor);
-  // later blocks start on a fresh form, past the template's first block
-  if (cursor <= _pmTemplateMainContentLastRow) {
-    cursor = _pmTemplateSecondBlockRow;
-  }
-  for (final store in stores.skip(1)) {
-    writeHead(store, cursor + 1);
-    writeFormExtras(cursor);
-    cursor = await writeContent(store, cursor + 6);
-  }
-
-  // clear default template texts that no PM data overwrote, keep their style,
-  // so leftovers (default task text, section headers, fillers) corrupt neither
-  // the parse nor the look of the form
-  for (final cell in templateDefaults) {
-    if (writtenCells.contains('${cell.row}:${cell.col}')) {
-      continue;
-    }
-    main.updateCell(
-      CellIndex.indexByColumnRow(columnIndex: cell.col, rowIndex: cell.row),
-      null,
-      cellStyle: cell.style,
-    );
+  // one form block per PM, the first starting where the template's starts
+  var base = _pmTemplateFirstBlockRow;
+  for (final store in stores) {
+    writeHead(store, base);
+    writeFormExtras(base);
+    final end = await writeContent(store, base + 6);
+    // the next form starts where the template would place it (base + block
+    // height) unless this PM's content overflowed past that
+    base = end > base + _pmBlockHeight ? end : base + _pmBlockHeight;
   }
 
   return Uint8List.fromList(excel.encode()!);

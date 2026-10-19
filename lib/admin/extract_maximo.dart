@@ -1,13 +1,12 @@
 import 'package:excel_plus/excel_plus.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:intl/intl.dart';
 
 import '../bin/consts.dart';
 import '../main.dart';
 import 'extract_import_template.dart'
-    show buildImportTemplateWorkbook, hoursFromRow, laborTypeFromCraft, pmRequestTemplateAsset;
+    show buildImportTemplateWorkbook, hoursFromRow, laborTypeFromCraft;
 import 'extract_notifier.dart';
 import 'generate_job_plans.dart' show generatePM;
 import 'parse_template.dart';
@@ -458,28 +457,20 @@ Future<String?> _meterInspectFromMaximo(String? metername) async {
   }
 }
 
-/// Exports all extracted PMs into a copy of the PM request template
-/// (assets/PM Request Template.xlsm). The workbook building lives in
+/// Exports all extracted PMs as a brand-new PM request workbook generated
+/// from scratch (an excel_plus re-encoding of the original .xlsm template
+/// opened as corrupt in Excel). The workbook building lives in
 /// extract_import_template.dart (pure Dart, unit-testable); this wrapper
-/// only loads the template asset and saves the file.
+/// only saves the file.
 Future<String> exportExtractsToImportTemplate(List<ExtractStore> stores) async {
   final extracted = stores.where((s) => s.pm.isNotEmpty).toList();
   if (extracted.isEmpty) {
     return 'Nothing to export, no PMs extracted';
   }
-  final ByteData templateData;
-  try {
-    templateData = await rootBundle.load(pmRequestTemplateAsset);
-  } catch (e) {
-    debugPrint('PM request template asset missing: $e');
-    return 'PM Request Template is not bundled with the app ($e)';
-  }
   final Uint8List bytes;
   try {
     bytes = await buildImportTemplateWorkbook(
       extracted,
-      templateData.buffer
-          .asUint8List(templateData.offsetInBytes, templateData.lengthInBytes),
       _meterInspectFromMaximo,
     );
   } catch (e) {

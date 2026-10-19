@@ -173,6 +173,31 @@ Implementation:
   FetchedJobPlan; extract_notifier re-exports it; fieldOf/rowValue/
   stripHtml moved to `lib/bin/consts.dart` so the builder module stays
   Flutter-free.
+
+## Addendum 3 - generate the request workbook from scratch (corrupt fix)
+User feedback round 3 (2026-10-19): Excel reported the exported file as
+corrupt. The excel_plus decode -> edit -> re-encode round trip of the heavy
+.xlsm template produced a package Excel refuses to open (25k-row sheets,
+validations, VBA relationships get re-written by the lib).
+
+Fix:
+- The import-template export now generates a BRAND-NEW workbook via
+  `Excel.createExcel()` (single 'Main' sheet) that reproduces the template's
+  layout and look: rows 0-5 'DON'T REMOVE THIS LINE', identical row numbers
+  (first block 6-21, drafting errors keep them for later blocks), gray
+  bold label rows (D9D9D9), pale green dropdown cells (EBF1DE), pale yellow
+  route cells (FFEB9C with brown font 9C6500), thin borders, and the
+  template's right-side notes (PM Options, Safety Device (Y/N),
+  Urgency Level (1-4), IKO PM History Notes).
+- Option strings (work types, crafts, conditions) are hardcoded in
+  `templateOptions()` (previously read from the template's Option List).
+- `assets/PM Request Template.xlsm` is no longer bundled (removed from
+  pubspec and disk); the repo-root template remains the user's reference.
+- The route-asset marker is now written on the first task row of each PM
+  (the template no longer supplies one); cleanup of template defaults is
+  gone since there are no defaults.
+- Test no longer reads the template: it builds + parses purely from scratch
+  and also asserts the styling.
 - Import-template export output renamed `PM_Request_yyyyMMdd_HHmmss.xlsx`.
 - Route tab rebuilt: one expandable card per stop showing the stop's job
   plan (jpnum/description) with its tasks, labour, materials and services
