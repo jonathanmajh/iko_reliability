@@ -222,40 +222,44 @@ void main() async {
   _expect(cell(20, 9) == 'Urgency Level (1-4)', 'right note Urgency Level');
   _expect(cell(21, 0) == 'Services (Mapics Number)', 'PM1 services header');
 
-  // --- PM 2 block (starts at row 22, PM1 content ended within rows 12-21) ---
-  _expect(cell(22, 0) == 'PM Asset/ Parent (Route)*:', 'PM2 label row at row 22');
-  _expect(cell(23, 0) == 'C8025', 'PM2 asset');
-  _expect(cell(23, 1) == 'Child', 'PM2 route type');
+  // blank separator row between the forms (line the user edits by hand)
+  _expect(cell(22, 0) == '' && cell(22, 10) == '',
+      'blank separator row between PM1 and PM2');
+
+  // --- PM 2 block (starts at row 23, PM1 content ended within rows 12-21) ---
+  _expect(cell(23, 0) == 'PM Asset/ Parent (Route)*:', 'PM2 label row at row 23');
+  _expect(cell(24, 0) == 'C8025', 'PM2 asset');
+  _expect(cell(24, 1) == 'Child', 'PM2 route type');
   _expect(
-      cell(23, 6) == '' && fill(23, 6) == hex(paleGreen),
+      cell(24, 6) == '' && fill(24, 6) == hex(paleGreen),
       'PM2 blank work type stays a blank dropdown cell (no placeholder)');
   _expect(
-      cell(23, 7) == '' && fill(23, 7) == hex(paleGreen),
+      cell(24, 7) == '' && fill(24, 7) == hex(paleGreen),
       'PM2 blank condition stays a blank dropdown cell (no placeholder)');
-  _expect(cell(22, 10) == 'PM Number', 'PM2 PM Number label at K7');
-  _expect(cell(23, 10) == 'C8025LUBM001', 'PM2 number at K8');
-  _expect(cell(25, 8) == '' && cell(25, 9) == '', 'PM2 number row left empty');
-  _expect(cell(25, 0) == '', 'PM2 blank row left empty');
-  _expect(cell(26, 0) == 'Craft', 'PM2 section labels row');
-  _expect(cell(27, 0) == 'Craft @ (Optional) Labour Code', 'PM2 craft header row');
+  _expect(cell(23, 10) == 'PM Number', 'PM2 PM Number label at K24');
+  _expect(cell(24, 10) == 'C8025LUBM001', 'PM2 number at K25');
+  _expect(cell(26, 8) == '' && cell(26, 9) == '', 'PM2 number row left empty');
+  _expect(cell(26, 0) == '', 'PM2 blank row left empty');
+  _expect(cell(27, 0) == 'Craft', 'PM2 section labels row');
+  _expect(cell(28, 0) == 'Craft @ (Optional) Labour Code', 'PM2 craft header row');
 
-  // content: labour 28, stop tasks 29-34 (marker on first task row 29),
-  // materials header 35 + 1 row, services header 37 + 1 row
-  _expect(cell(28, 0) == 'PROD: O', 'PM2 craft cell (Production = O)');
-  _expect(cell(28, 3) == 'Task Route Assets (one per cell):',
+  // content: labour 29, stop tasks 30-35 (marker on first task row 30),
+  // materials header 36 + 1 row, services header 38 + 1 row
+  _expect(cell(29, 0) == 'PROD: O', 'PM2 craft cell (Production = O)');
+  _expect(cell(29, 3) == 'Task Route Assets (one per cell):',
       'PM2 marker in its fixed slot on the first content row');
-  _expect(cell(29, 4) == 'SC01', 'PM2 stop 1 asset');
-  _expect(cell(29, 5) == 'Lubrication Points', 'PM2 meter 1 mapped to inspect');
-  _expect(cell(29, 6) == '10', 'PM2 first task 10');
-  _expect(cell(30, 5) == 'Lubrication Points', 'PM2 meter 2 mapped to inspect');
-  _expect(cell(30, 6) == '20', 'PM2 second task 20');
-  _expect(cell(31, 4) == 'SC02', 'PM2 stop 2 asset');
-  _expect(cell(33, 4) == 'SC03', 'PM2 stop 3 asset');
-  _expect(cell(35, 0) == 'Materials (Mapics Number)', 'PM2 materials header');
-  _expect(cell(36, 0) == '12345', 'PM2 material item');
-  _expect(cell(37, 0) == 'Services (Mapics Number)', 'PM2 services header');
-  _expect(cell(38, 0) == '22001', 'PM2 service item');
-  _expect(cell(38, 2) == 'ACME', 'PM2 service vendor');
+  _expect(cell(30, 4) == 'SC01', 'PM2 stop 1 asset');
+  _expect(cell(30, 5) == 'Lubrication Points', 'PM2 meter 1 mapped to inspect');
+  _expect(cell(30, 6) == '10', 'PM2 first task 10');
+  _expect(cell(31, 5) == 'Lubrication Points', 'PM2 meter 2 mapped to inspect');
+  _expect(cell(31, 6) == '20', 'PM2 second task 20');
+  _expect(cell(32, 4) == 'SC02', 'PM2 stop 2 asset');
+  _expect(cell(34, 4) == 'SC03', 'PM2 stop 3 asset');
+  _expect(cell(36, 0) == 'Materials (Mapics Number)', 'PM2 materials header');
+  _expect(cell(37, 0) == '12345', 'PM2 material item');
+  _expect(cell(38, 0) == 'Services (Mapics Number)', 'PM2 services header');
+  _expect(cell(39, 0) == '22001', 'PM2 service item');
+  _expect(cell(39, 2) == 'ACME', 'PM2 service vendor');
 
   // no duplicated section markers anywhere
   int occurrences(String text, int col) {

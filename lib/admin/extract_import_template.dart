@@ -468,8 +468,11 @@ Future<Uint8List> buildImportTemplateWorkbook(
     writeFormExtras(base);
     final end = await writeContent(store, base + 6);
     // the next form starts where the template would place it (base + block
-    // height) unless this PM's content overflowed past that
-    base = end > base + _pmBlockHeight ? end : base + _pmBlockHeight;
+    // height) unless this PM's content overflowed past that; one blank row
+    // is always kept between the end of a form and the next one so the
+    // file stays easy to edit manually
+    final next = end > base + _pmBlockHeight ? end : base + _pmBlockHeight;
+    base = next + 1;
   }
 
   return Uint8List.fromList(excel.encode()!);
