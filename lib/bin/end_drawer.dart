@@ -70,7 +70,7 @@ class _EndDrawerState extends State<EndDrawer> {
           return SwitchListTile(
             title: const Text('Include frequency in generated descriptions'),
             subtitle: const Text(
-                'Clearing templates when changed requires reloading files'),
+                'Clears templates when changed, requires reloading files'),
             value: includeFrequency ?? true,
             onChanged: (bool value) {
               settingsNotifier.changeSettings({
