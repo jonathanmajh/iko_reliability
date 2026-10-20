@@ -42,6 +42,7 @@ class PmExtractPage extends StatefulWidget {
 /// State for the PM Extract page, manages input parsing, fetching and export.
 class _PmExtractPageState extends State<PmExtractPage> {
   final TextEditingController _inputController = TextEditingController();
+  final ScrollController _listController = ScrollController();
   String fallbackSite = '';
   bool dropHover = false;
   List<Widget> fabList = [];
@@ -55,7 +56,68 @@ class _PmExtractPageState extends State<PmExtractPage> {
   @override
   void dispose() {
     _inputController.dispose();
+    _listController.dispose();
     super.dispose();
+  }
+
+  // Moves the selection to the previous PM and keeps the row visible.
+  void _selectPrevious() {
+    final notifier = context.read<ExtractNotifier>();
+    final before = _selectedRowTop();
+    notifier.selectPrevious();
+    if (_selectedRowTop() != before) {
+      _ensureSelectedVisible();
+    }
+  }
+
+  // Moves the selection to the next PM and keeps the row visible.
+  void _selectNext() {
+    final notifier = context.read<ExtractNotifier>();
+    final before = _selectedRowTop();
+    notifier.selectNext();
+    if (_selectedRowTop() != before) {
+      _ensureSelectedVisible();
+    }
+  }
+
+  /// Pixel offset of the top of the selected row in the extract list. Rows
+  /// are a fixed height of 105 px (100 px item + 5 px divider), with a
+  /// 100 px spinner row at the top while fetching.
+  double? _selectedRowTop() {
+    final notifier = context.read<ExtractNotifier>();
+    final index = notifier.extracts
+        .indexWhere((element) => element.key == notifier.selectedKey);
+    if (index < 0) {
+      return null;
+    }
+    return (notifier.fetching ? 100.0 : 0.0) + index * 105.0;
+  }
+
+  // Scrolls the extract list so the selected row is in view (used when
+  // navigating with the arrow keys).
+  void _ensureSelectedVisible() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_listController.hasClients) {
+        return;
+      }
+      final top = _selectedRowTop();
+      if (top == null) {
+        return;
+      }
+      const rowHeight = 105.0;
+      final position = _listController.position;
+      final offset = _listController.offset;
+      if (top >= offset && top + rowHeight <= offset + position.viewportDimension) {
+        return; // row is already fully visible
+      }
+      final target = (top + rowHeight / 2 - position.viewportDimension / 2)
+          .clamp(0.0, position.maxScrollExtent);
+      _listController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.ease,
+      );
+    });
   }
 
   void _updateFab() {
@@ -68,6 +130,7 @@ class _PmExtractPageState extends State<PmExtractPage> {
             heroTag: UniqueKey(),
             onPressed: () async {
               await _fetchExtracts();
+              _updateFab();
             },
             label: const Text('Fetch'),
             tooltip: 'Extract the listed PMs from Maximo',
@@ -80,6 +143,7 @@ class _PmExtractPageState extends State<PmExtractPage> {
             heroTag: UniqueKey(),
             onPressed: () async {
               await _exportToExcel();
+              _updateFab();
             },
             label: const Text('Export'),
             tooltip: 'Export extracted PMs to Excel',
@@ -92,6 +156,7 @@ class _PmExtractPageState extends State<PmExtractPage> {
             heroTag: UniqueKey(),
             onPressed: () async {
               await _exportToImportTemplate();
+              _updateFab();
             },
             label: const Text('Import'),
             tooltip: 'Export extracted PMs in the PM import template format',
@@ -104,6 +169,7 @@ class _PmExtractPageState extends State<PmExtractPage> {
             heroTag: UniqueKey(),
             onPressed: () async {
               await _loadSelectedToTemplates();
+              _updateFab();
             },
             label: const Text('Load'),
             tooltip: 'Load selected PM into the PM Check template editor',
@@ -185,7 +251,6 @@ class _PmExtractPageState extends State<PmExtractPage> {
     } finally {
       processNotifier.removeTask('extractPMState');
     }
-    _updateFab();
   }
 
   String _summarize(ExtractNotifier notifier) {
@@ -272,12 +337,10 @@ class _PmExtractPageState extends State<PmExtractPage> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           PreviousExtractIntent: CallbackAction<PreviousExtractIntent>(
-            onInvoke: (PreviousExtractIntent intent) =>
-                {context.read<ExtractNotifier>().selectPrevious()},
+            onInvoke: (PreviousExtractIntent intent) => {_selectPrevious()},
           ),
           NextExtractIntent: CallbackAction<NextExtractIntent>(
-            onInvoke: (NextExtractIntent intent) =>
-                {context.read<ExtractNotifier>().selectNext()},
+            onInvoke: (NextExtractIntent intent) => {_selectNext()},
           ),
         },
         child: Focus(
@@ -447,6 +510,7 @@ class _PmExtractPageState extends State<PmExtractPage> {
                         child: Consumer<ExtractNotifier>(
                           builder: (context, notifier, child) {
                             return ListView(
+                              controller: _listController,
                               children: buildExtractList(notifier, context),
                             );
                           },
@@ -590,7 +654,8 @@ Widget extractListItem(
   );
 }
 
-/// Status icon + text for an extracted PM pair.
+/// Status icon + text for an extracted PM pair. Styled like the status
+/// indicator used on the PM Check page (pm_widgets.statusIndicator).
 Widget extractStatusIndicator(ExtractStore store, BuildContext context) {
   Widget icon;
   String text;
@@ -626,11 +691,12 @@ Widget extractStatusIndicator(ExtractStore store, BuildContext context) {
       icon = Icon(Icons.schedule, color: textColor, size: 35);
   }
   return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       icon,
       Text(
         text,
-        style: TextStyle(fontSize: 12.0, color: textColor),
+        style: TextStyle(fontSize: 20.0, color: textColor),
       )
     ],
   );
@@ -929,20 +995,30 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
     );
   }
 
-  /// Expandable card listing child rows (tasks / labor / materials).
+  /// Expandable card listing child rows (tasks / labor / materials) with a
+  /// column header row, styled like the upload detail tables in pm_details.
   Widget _childTableCard(String title, List<String> headers, List<dynamic> rows) {
+    final themeData = Theme.of(context);
     return Card(
       child: ExpansionTile(
         title: Text(title),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (rows.isNotEmpty)
+            Container(
+              width: double.maxFinite,
+              color: themeData.colorScheme.onSurface,
+              child: Text(headers.join(','),
+                  style: TextStyle(color: themeData.colorScheme.surface)),
+            ),
           for (final row in rows)
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: SelectableText(
-                stripHtml(headers.map((h) => rowValue(row, h)).join(', ')),
-                style: const TextStyle(
-                    fontFamily: 'RobotoMono', fontSize: 12),
+                stripHtml(headers.map((h) => rowValue(row, h)).join(',')),
+                style: TextStyle(
+                    fontFamily: 'RobotoMono',
+                    color: themeData.colorScheme.onSurface),
               ),
             ),
         ],
