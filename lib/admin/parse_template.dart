@@ -212,10 +212,20 @@ class ParsedTemplate {
                 .row(i + 2)
                 .map((cell) => _excelCellValueToNative(cell?.value))
                 .toList();
+            //read Stopped/Running; a blank (or shorter-than-4) cell stays
+            //as its own value for per-template validation
+            String processCondition = _toNativeString(nextRow[7]) ?? '';
+            processCondition = processCondition.length >= 4
+                ? processCondition.substring(0, 4)
+                : processCondition;
             pmNumber++;
-            //read work order type
-            String workOrderType =
-                _toNativeString(nextRow[6])?.substring(0, 3) ?? '';
+            //read work order type; a blank (or shorter-than-3) cell stays
+            //as its own value so pm_check can reject it per template with
+            //a value list error instead of erroring the whole file
+            String workOrderType = _toNativeString(nextRow[6]) ?? '';
+            workOrderType = workOrderType.length >= 3
+                ? workOrderType.substring(0, 3)
+                : workOrderType;
             if (workOrderType == 'LC1') {
               workOrderType = 'LIF';
               //replace work order types of 'LC1' with 'LIF'
@@ -255,7 +265,7 @@ class ParsedTemplate {
                   _toNativeString(nextRow[4])?.substring(0, 1).toUpperCase(),
               frequency: _toNativeInt(nextRow[5]),
               workOrderType: workOrderType,
-              processCondition: _toNativeString(nextRow[7])?.substring(0, 4),
+              processCondition: processCondition,
               pmAsset: _toNativeString(nextRow[0])?.toUpperCase(),
               pmName: _toNativeString(nextRow[8]) ?? 'Generating Name...',
               pmNumber: suggestedNumber ?? 'Generating Number...',

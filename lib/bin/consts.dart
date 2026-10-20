@@ -126,6 +126,10 @@ const workType = {
   'LCH': 'Line Change',
 };
 
+/// Stopped/Running process condition (IKO_CONDITIONS) codes valid for PM
+/// job plans.
+const processConditions = ['CR01', 'CS01'];
+
 /// Contains asset work type information for different job plans.
 const assetWorkType = {
   "BDE": AssetWorkType("BDE", "Breakdown - Electrical", 4),

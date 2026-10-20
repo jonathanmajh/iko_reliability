@@ -105,7 +105,9 @@ void main() async {
       'frequency': '30',
       'description': 'Lubrication Walk',
     }
-    ..jobplan = {'jpnum': 'GSC8025LUBM001', 'iko_worktype': 'LUB', 'iko_conditions': 'CR01'}
+    ..jobplan = {
+      'jpnum': 'GSC8025LUBM001',
+    }
     ..route = {'route': 'C8025LUBM001', 'description': 'Lubrication Walk', 'routestopsbecome': 'CHILD'}
     ..joblabors = [
       {'craft': 'PROD', 'quantity': 1, 'laborhrs': '4:00', 'laborcode': ''},
@@ -224,7 +226,12 @@ void main() async {
   _expect(cell(22, 0) == 'PM Asset/ Parent (Route)*:', 'PM2 label row at row 22');
   _expect(cell(23, 0) == 'C8025', 'PM2 asset');
   _expect(cell(23, 1) == 'Child', 'PM2 route type');
-  _expect(cell(23, 6) == 'LUB (Lubrication)', 'PM2 work type option string');
+  _expect(
+      cell(23, 6) == '' && fill(23, 6) == hex(paleGreen),
+      'PM2 blank work type stays a blank dropdown cell (no placeholder)');
+  _expect(
+      cell(23, 7) == '' && fill(23, 7) == hex(paleGreen),
+      'PM2 blank condition stays a blank dropdown cell (no placeholder)');
   _expect(cell(22, 10) == 'PM Number', 'PM2 PM Number label at K7');
   _expect(cell(23, 10) == 'C8025LUBM001', 'PM2 number at K8');
   _expect(cell(25, 8) == '' && cell(25, 9) == '', 'PM2 number row left empty');
@@ -307,7 +314,9 @@ void main() async {
 
   _expect(parsed2.pmNumber == 'C8025LUBM001', 'parsed PM2 number');
   _expect(parsed2.siteId == 'GS', 'parsed PM2 site');
-  _expect(parsed2.workOrderType == 'LUB', 'parsed PM2 work type');
+  _expect(parsed2.workOrderType == '', 'parsed PM2 blank work type stays blank');
+  _expect(parsed2.processCondition == '',
+      'parsed PM2 blank condition stays blank');
   _expect(parsed2.tasks.length == 6, 'parsed PM2 all 6 child tasks (multi task stop JPs)');
   _expect(parsed2.tasks.where((t) => t.assetNumber == 'SC01').length == 2,
       'parsed PM2 stop 1 child JP carries BOTH of its tasks');

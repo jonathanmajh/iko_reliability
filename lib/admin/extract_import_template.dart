@@ -407,18 +407,19 @@ Future<Uint8List> buildImportTemplateWorkbook(
     if (frequency != null) {
       put(dataRow, 5, IntCellValue(frequency), styles.plain);
     }
+    // a blank Work Order Type / Stopped-Running stays a blank dropdown
+    // cell: placeholder texts like 'Select Work Order' would parse as
+    // bogus 'Sel'/'Sele' codes when the file is loaded into pm_check
     put(
         dataRow,
         6,
-        TextCellValue(workType.isEmpty
-            ? 'Select Work Order'
-            : options.workTypes[workType] ?? workType),
+        TextCellValue(workType.isEmpty ? '' : options.workTypes[workType] ?? workType),
         styles.dropdown);
     put(
         dataRow,
         7,
         TextCellValue(condition.isEmpty
-            ? 'Select Process Condition'
+            ? ''
             : options.conditions[condition] ?? condition),
         styles.dropdown);
     final pmName = fieldOf(store.pm, 'description') ?? store.pmnum;
