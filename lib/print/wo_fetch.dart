@@ -9,7 +9,9 @@
 
 import 'package:iko_reliability_flutter/admin/upload_maximo.dart'
     show maximoRequest;
+import 'package:iko_reliability_flutter/main.dart' show logger;
 
+import '../bin/consts.dart' show maximoServerDomains;
 import 'wo_assemble.dart';
 
 export 'wo_assemble.dart' show WoPrintBatch, assembleWoPrintBatch;
@@ -33,6 +35,12 @@ class WoPrintFetcher {
 
   /// Number of values per `in [...]` chunk (keeps OSLC URLs reasonable).
   static const int chunkSize = 100;
+
+  /// Rows fetched per OSLC page. Larger result sets are paged by following
+  /// Maximo's `responseInfo.nextPage` links until the result is complete,
+  /// so sites with thousands of released work orders load fully and in
+  /// smaller chunks than the default server page size.
+  static const int pageSize = 200;
 
   /// Fields fetched for parent headers (print covers + picker grid).
   static const List<String> _parentSelect = [
@@ -88,7 +96,11 @@ class WoPrintFetcher {
   ];
 
   /// Queries `structure` for rows where [field] is in [values], adding
-  /// `and siteid="$site"[extraWhere]`. Chunks [values] and concatenates.
+  /// `and siteid="$site"[extraWhere]`. Chunks [values] (to keep OSLC URLs
+  /// reasonable), requests [pageSize] rows at a time and follows Maximo's
+  /// `responseInfo.nextPage` links, so result sets larger than one page
+  /// are fetched completely instead of being cut off. [onStatus] receives
+  /// progress text ('... page 2 of 17') between pages.
   Future<List<Map<String, dynamic>>> _queryIn(
     String structure,
     String field,
@@ -96,6 +108,7 @@ class WoPrintFetcher {
     String extraWhere = '',
     List<String> select = const ['*'],
     String step = 'query',
+    void Function(String status)? onStatus,
   }) async {
     final rows = <Map<String, dynamic>>[];
     for (var i = 0; i < values.length; i += chunkSize) {
@@ -103,31 +116,96 @@ class WoPrintFetcher {
       final inList =
           values.sublist(i, end).map((v) => '"$v"').join(',');
       final where = '$field in [$inList] and siteid="$site"$extraWhere';
-      final url = '$structure?oslc.where=$where&oslc.select=${select.join(',')}';
-      Map<String, dynamic> res;
-      try {
-        res = await maximoRequest(url, 'get', env);
-      } catch (e) {
-        throw WoPrintFetchException('Maximo error while fetching $step: $e');
+      var url = '$structure?oslc.where=$where&oslc.select=${select.join(',')}'
+          '&oslc.pageSize=$pageSize';
+      // collectioncount=1 makes responseInfo carry totalPages, used for
+      // live progress when [onStatus] is given
+      if (onStatus != null) {
+        url = '$url&collectioncount=1';
       }
-      if (res['status'] == 'Failed to Connect') {
-        throw WoPrintFetchException(
-            'Failed to connect to Maximo ($env) while fetching $step.');
+      var page = 1;
+      var totalPages = 0;
+      final followedHrefs = <String>{};
+      while (true) {
+        onStatus?.call('Fetching $step (page $page of '
+            '${totalPages == 0 ? '?' : totalPages})...');
+        Map<String, dynamic> res;
+        try {
+          res = await maximoRequest(url, 'get', env);
+        } catch (e) {
+          throw WoPrintFetchException('Maximo error while fetching $step: $e');
+        }
+        if (res['status'] == 'Failed to Connect') {
+          throw WoPrintFetchException(
+              'Failed to connect to Maximo ($env) while fetching $step.');
+        }
+        final member = res['member'] as List<dynamic>? ?? const [];
+        rows.addAll(member.cast<Map<String, dynamic>>());
+        final info = res['responseInfo'] as Map<String, dynamic>? ?? const {};
+        totalPages = int.tryParse('${info['totalPages'] ?? ''}') ?? totalPages;
+        // follow Maximo's next-page link while one exists (Test2/MAS returns
+        // it as an object `{href: ...}`, other versions as a plain string)
+        final nextHref = _pagingHref(info['nextPage']);
+        if (member.isEmpty || nextHref.isEmpty) {
+          break;
+        }
+        final nextUrl = _relativePagingUrl(nextHref);
+        if (nextUrl == null || !followedHrefs.add(nextHref)) {
+          // a next page exists but cannot be followed - fail loudly instead
+          // of silently returning a truncated list
+          logger?.e('Maximo paging: could not follow next page link while '
+              'fetching "$step" (page $page). Next page URL: $nextHref');
+          throw WoPrintFetchException(
+              'Could not follow the Maximo next page link while fetching '
+              '$step (page $page). Next page URL: $nextHref');
+        }
+        logger?.i('Maximo paging: "$step" following next page link '
+            '(page $page -> ${page + 1}, ${rows.length} rows so far)');
+        url = nextUrl;
+        page++;
       }
-      final member = res['member'] as List<dynamic>? ?? const [];
-      rows.addAll(member.cast<Map<String, dynamic>>());
     }
+    logger?.i(
+        'Maximo query "$step" fetched ${rows.length} row(s).');
     return rows;
+  }
+
+  /// Maximo versions differ in where they put the paging link: some return
+  /// a plain URL string under `nextPage`, MAS/Test2 returns an object like
+  /// `{href: ...}`. Normalizes both to the URL string (empty when absent).
+  String _pagingHref(dynamic nextPage) {
+    if (nextPage == null) return '';
+    if (nextPage is Map) {
+      return '${nextPage['href'] ?? ''}';
+    }
+    return '$nextPage';
+  }
+
+  /// Maximo OSLC paging links (`responseInfo.nextPage`) are absolute URLs.
+  /// [maximoRequest] expects a URL relative to the environment's domain
+  /// (it re-adds the domain, auth and lean=1). Returns null when the href
+  /// does not start with the configured domain for [env].
+  String? _relativePagingUrl(String href) {
+    final domain = maximoServerDomains[env] ?? '';
+    if (domain.isNotEmpty && href.startsWith(domain)) {
+      return href.substring(domain.length);
+    }
+    return null;
   }
 
   /// Picker rows for the grid: released parent work orders for [site].
   /// Rows that are children of another WO are filtered out (they are
-  /// covered by their parent's packet).
-  Future<List<Map<String, dynamic>>> fetchReleasedWorkOrderRows() async {
+  /// covered by their parent's packet). The query is paged for sites with
+  /// many released work orders; [onStatus] receives progress text for the
+  /// UI between pages.
+  Future<List<Map<String, dynamic>>> fetchReleasedWorkOrderRows({
+    void Function(String status)? onStatus,
+  }) async {
     final rows = await _queryIn('mxwo', 'status', const ['RELEASED'],
         extraWhere: ' and istask=0',
         select: _parentSelect,
-        step: 'the released work order list');
+        step: 'the released work order list',
+        onStatus: onStatus);
     return rows.where((r) => '${r['parent'] ?? ''}'.isEmpty).toList();
   }
 

@@ -174,15 +174,17 @@ class _WoPrintPageState extends State<WoPrintPage> {
     });
     try {
       final raw = await WoPrintFetcher(env: _env, site: _site)
-          .fetchReleasedWorkOrderRows();
+          .fetchReleasedWorkOrderRows(onStatus: (s) {
+        if (mounted) setState(() => _status = s);
+      });
       raw.sort((a, b) => '${a['wonum']}'.compareTo('${b['wonum']}'));
       final loaded = raw.map(WoListRow.new).toList();
       final printable = loaded.where((r) => r.printable).length;
       setState(() {
         _rows = loaded;
         _status =
-            'Loaded ${loaded.length} work order(s) for site $_site '
-            '($printable released and printable).';
+            'Loaded ${loaded.length} parent WO(s) from ${raw.length} fetched '
+            'rows for site $_site ($printable released and printable).';
       });
     } on WoPrintFetchException catch (e) {
       setState(() => _status = 'Failed: $e');
@@ -458,6 +460,11 @@ class _WoPrintPageState extends State<WoPrintPage> {
             _buildStatsRow(),
             const Divider(height: 1),
             Expanded(child: _buildRowsArea()),
+            if (_loadingList)
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: LinearProgressIndicator(),
+              ),
             const Divider(height: 1),
             const SizedBox(height: 8),
             _buildActionBar(),

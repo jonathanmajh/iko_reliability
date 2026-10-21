@@ -14,7 +14,9 @@ class AppFileOutput extends LogOutput {
 
   @override
   void output(OutputEvent event) async {
-    if (navigatorKey.currentContext != null) {
+    // "Error" dialogs are reserved for real errors; info/notice level logs
+    // only end up in the log file.
+    if (event.level >= Level.error && navigatorKey.currentContext != null) {
       showDialog(
           context: navigatorKey.currentContext!,
           builder: (context) {
