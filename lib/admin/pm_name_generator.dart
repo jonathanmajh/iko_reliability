@@ -35,6 +35,24 @@ class PMName {
 ///Auto-generate name for PM
 Future<PMName> generateName(ParsedTemplate pmdetails,
     String maximoServerSelected, bool includeFrequency) async {
+// validate the template's dropdown fields against the value lists: a
+// blank field (unfilled dropdown, e.g. where the extracted PM had no Work
+// Order Type / Stopped-Running) or an unknown value must not run through
+// generation, pm_check reports it as a template error instead
+  if (pmdetails.workOrderType == 'LC1') {
+    // the PM request template lists life cycle as 'LC1', Maximo uses 'LIF'
+    pmdetails.workOrderType = 'LIF';
+  }
+  final workOrderType = pmdetails.workOrderType ?? '';
+  if (!workType.containsKey(workOrderType)) {
+    throw Exception(
+        'Work Order Type "${workOrderType.isEmpty ? '(blank)' : workOrderType}" is not in the value list, must be one of: ${workType.keys.join(', ')}');
+  }
+  final processCondition = pmdetails.processCondition ?? '';
+  if (!processConditions.contains(processCondition)) {
+    throw Exception(
+        'Stopped/Running "${processCondition.isEmpty ? '(blank)' : processCondition}" is not in the value list, must be one of: ${processConditions.join(', ')}');
+  }
   String number = '';
   String name = '';
   String? routeNumber;

@@ -6720,8 +6720,7 @@ final class $$AssetsTableReferences
   static MultiTypedResultKey<$AssetCriticalitysTable, List<AssetCriticality>>
       _assetCriticalitysRefsTable(_$MyDatabase db) =>
           MultiTypedResultKey.fromTable(db.assetCriticalitys,
-              aliasName: $_aliasNameGenerator(
-                  db.assets.id, db.assetCriticalitys.asset));
+              aliasName: 'assets__id__asset_criticalitys__asset');
 
   $$AssetCriticalitysTableProcessedTableManager get assetCriticalitysRefs {
     final manager =
@@ -6735,9 +6734,9 @@ final class $$AssetsTableReferences
   }
 
   static MultiTypedResultKey<$AssetUploadsTable, List<AssetUpload>>
-      _assetUploadsRefsTable(_$MyDatabase db) => MultiTypedResultKey.fromTable(
-          db.assetUploads,
-          aliasName: $_aliasNameGenerator(db.assets.id, db.assetUploads.asset));
+      _assetUploadsRefsTable(_$MyDatabase db) =>
+          MultiTypedResultKey.fromTable(db.assetUploads,
+              aliasName: 'assets__id__asset_uploads__asset');
 
   $$AssetUploadsTableProcessedTableManager get assetUploadsRefs {
     final manager = $$AssetUploadsTableTableManager($_db, $_db.assetUploads)
@@ -7363,8 +7362,7 @@ final class $$SystemCriticalitysTableReferences extends BaseReferences<
   static MultiTypedResultKey<$AssetCriticalitysTable, List<AssetCriticality>>
       _assetCriticalitysRefsTable(_$MyDatabase db) =>
           MultiTypedResultKey.fromTable(db.assetCriticalitys,
-              aliasName: $_aliasNameGenerator(
-                  db.systemCriticalitys.id, db.assetCriticalitys.system));
+              aliasName: 'system_criticalitys__id__asset_criticalitys__system');
 
   $$AssetCriticalitysTableProcessedTableManager get assetCriticalitysRefs {
     final manager =
@@ -7696,8 +7694,8 @@ final class $$AssetCriticalitysTableReferences extends BaseReferences<
   $$AssetCriticalitysTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $AssetsTable _assetTable(_$MyDatabase db) => db.assets.createAlias(
-      $_aliasNameGenerator(db.assetCriticalitys.asset, db.assets.id));
+  static $AssetsTable _assetTable(_$MyDatabase db) =>
+      db.assets.createAlias('asset_criticalitys__asset__assets__id');
 
   $$AssetsTableProcessedTableManager get asset {
     final $_column = $_itemColumn<String>('asset')!;
@@ -7711,8 +7709,8 @@ final class $$AssetCriticalitysTableReferences extends BaseReferences<
   }
 
   static $SystemCriticalitysTable _systemTable(_$MyDatabase db) =>
-      db.systemCriticalitys.createAlias($_aliasNameGenerator(
-          db.assetCriticalitys.system, db.systemCriticalitys.id));
+      db.systemCriticalitys
+          .createAlias('asset_criticalitys__system__system_criticalitys__id');
 
   $$SystemCriticalitysTableProcessedTableManager get system {
     final $_column = $_itemColumn<int>('system')!;
@@ -8137,8 +8135,8 @@ final class $$AssetUploadsTableReferences
     extends BaseReferences<_$MyDatabase, $AssetUploadsTable, AssetUpload> {
   $$AssetUploadsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $AssetsTable _assetTable(_$MyDatabase db) => db.assets
-      .createAlias($_aliasNameGenerator(db.assetUploads.asset, db.assets.id));
+  static $AssetsTable _assetTable(_$MyDatabase db) =>
+      db.assets.createAlias('asset_uploads__asset__assets__id');
 
   $$AssetsTableProcessedTableManager get asset {
     final $_column = $_itemColumn<String>('asset')!;

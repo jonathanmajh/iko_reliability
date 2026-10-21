@@ -49,11 +49,85 @@ class _PmCheckPageState extends State<PmCheckPage> {
   String uploadDetails = '';
   List<Widget> fabList = [];
   bool dropHover = false;
+  final ScrollController _listController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _updateFab();
+  }
+
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
+  }
+
+  // Moves the selection to the previous PM and keeps the row visible.
+  void _selectPrevious() {
+    final notifier = Provider.of<TemplateNotifier>(context, listen: false);
+    final before = _selectedRowTop();
+    notifier.selectPreviousTemplate();
+    if (_selectedRowTop() != before) {
+      _ensureSelectedVisible();
+    }
+  }
+
+  // Moves the selection to the next PM and keeps the row visible.
+  void _selectNext() {
+    final notifier = Provider.of<TemplateNotifier>(context, listen: false);
+    final before = _selectedRowTop();
+    notifier.selectNextTemplate();
+    if (_selectedRowTop() != before) {
+      _ensureSelectedVisible();
+    }
+  }
+
+  /// Pixel offset of the top of the selected row in the PM list. Rows are a
+  /// fixed height of 105 px (100 px item + 5 px divider).
+  double? _selectedRowTop() {
+    final notifier = Provider.of<TemplateNotifier>(context, listen: false);
+    final selected = notifier.selectedTemplate;
+    if (selected.selectedFile == null || selected.selectedTemplate == null) {
+      return null;
+    }
+    double top = 0;
+    for (final file in notifier.getFiles()) {
+      final templates = notifier.getTemplates(file);
+      if (file == selected.selectedFile) {
+        final index = templates.indexOf(selected.selectedTemplate!);
+        return index < 0 ? null : top + index * 105.0;
+      }
+      top += templates.length * 105.0;
+    }
+    return null;
+  }
+
+  // Scrolls the PM list so the selected row is in view (used when navigating
+  // with the arrow keys).
+  void _ensureSelectedVisible() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_listController.hasClients) {
+        return;
+      }
+      final top = _selectedRowTop();
+      if (top == null) {
+        return;
+      }
+      const rowHeight = 105.0;
+      final position = _listController.position;
+      final offset = _listController.offset;
+      if (top >= offset && top + rowHeight <= offset + position.viewportDimension) {
+        return; // row is already fully visible
+      }
+      final target = (top + rowHeight / 2 - position.viewportDimension / 2)
+          .clamp(0.0, position.maxScrollExtent);
+      _listController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.ease,
+      );
+    });
   }
 
   void _updateFab() {
@@ -181,16 +255,10 @@ class _PmCheckPageState extends State<PmCheckPage> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           PreviousPMIntent: CallbackAction<PreviousPMIntent>(
-            onInvoke: (PreviousPMIntent intent) => {
-              Provider.of<TemplateNotifier>(context, listen: false)
-                  .selectPreviousTemplate()
-            },
+            onInvoke: (PreviousPMIntent intent) => {_selectPrevious()},
           ),
           NextPMIntent: CallbackAction<NextPMIntent>(
-            onInvoke: (NextPMIntent intent) => {
-              Provider.of<TemplateNotifier>(context, listen: false)
-                  .selectNextTemplate()
-            },
+            onInvoke: (NextPMIntent intent) => {_selectNext()},
           ),
         },
         child: Focus(
@@ -303,6 +371,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
                                   child: Stack(
                                     children: [
                                       ListView(
+                                        controller: _listController,
                                         children: buildPMList(value, context),
                                       ),
                                       dropHover

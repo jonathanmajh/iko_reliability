@@ -42,6 +42,15 @@ class NavDrawer extends StatelessWidget {
                 ),
               ],
             )),
+        // top-level print tool, available to all users
+        ListTile(
+          leading: const Icon(Icons.print),
+          title: const Text('Work Order Print'),
+          onTap: () {
+            context.router.replacePath("/wo-print");
+            Navigator.pop(context); // close the drawer
+          },
+        ),
         ExpansionTile(
           initiallyExpanded: true,
           title: const Text("Criticality"),
@@ -114,6 +123,14 @@ class NavDrawer extends StatelessWidget {
                     title: const Text('Validate PMs'),
                     onTap: () {
                       context.router.replacePath("/pm/check");
+                      Navigator.pop(context); // close the drawer
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.file_download),
+                    title: const Text('PM Extract'),
+                    onTap: () {
+                      context.router.replacePath("/pm/extract");
                       Navigator.pop(context); // close the drawer
                     },
                   ),

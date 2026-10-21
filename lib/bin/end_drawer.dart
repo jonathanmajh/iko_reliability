@@ -49,6 +49,8 @@ class _EndDrawerState extends State<EndDrawer> {
       return homeRouteEndDrawer(context, themeManager);
     } else if (ModalRoute.of(context)!.settings.name == 'PmCheckRoute') {
       return pmCheckRouteEndDrawer(context, themeManager);
+    } else if (ModalRoute.of(context)!.settings.name == 'WoPrintRoute') {
+      return woPrintRouteEndDrawer(context, themeManager);
     } else if (ModalRoute.of(context)!.settings.name ==
         'SpareCriticalityRoute') {
       return spareCriticalityEndDrawer(context, themeManager);
@@ -70,7 +72,7 @@ class _EndDrawerState extends State<EndDrawer> {
           return SwitchListTile(
             title: const Text('Include frequency in generated descriptions'),
             subtitle: const Text(
-                'Clearing templates when changed requires reloading files'),
+                'Clears templates when changed, requires reloading files'),
             value: includeFrequency ?? true,
             onChanged: (bool value) {
               settingsNotifier.changeSettings({
@@ -254,6 +256,47 @@ class _EndDrawerState extends State<EndDrawer> {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Close Drawer'),
           )),
+        ],
+      ),
+    );
+  }
+
+  ///End drawer for the Work Order Print page: environment + site selection.
+  Widget woPrintRouteEndDrawer(
+      BuildContext context, ThemeManager themeManager) {
+    return Drawer(
+      child: ListView(
+        children: [
+          const ThemeToggle(),
+          Consumer<MaximoServerNotifier>(
+              builder: (context, maximo, child) {
+            return ListTile(
+              title: const Text('Maximo Environment'),
+              subtitle: DropdownButton(
+                isExpanded: true,
+                value: maximo.maximoServerSelected,
+                onChanged: (String? newValue) => maximo.setServer(newValue!),
+                items: maximoServerDomains.keys
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            );
+          }),
+          const SiteToggle(),
+          ListTile(
+            title: const Text('Work Order Print'),
+            subtitle: Consumer<SelectedSiteNotifier>(
+                builder: (context, selectedSite, child) {
+              final site = selectedSite.selectedSite;
+              return Text(site.isEmpty
+                  ? 'No site selected'
+                  : 'Printing released work orders for site $site');
+            }),
+          ),
         ],
       ),
     );
@@ -578,7 +621,7 @@ class _SiteToggleState extends State<SiteToggle> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: const Text('Selecte Site'),
+      title: const Text('Select Site'),
       trailing: DropdownButton(
         value: context.watch<SelectedSiteNotifier>().selectedSite,
         items: () {

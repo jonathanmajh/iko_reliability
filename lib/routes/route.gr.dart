@@ -123,6 +123,22 @@ class PmCheckRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [PmExtractPage]
+class PmExtractRoute extends PageRouteInfo<void> {
+  const PmExtractRoute({List<PageRouteInfo>? children})
+      : super(PmExtractRoute.name, initialChildren: children);
+
+  static const String name = 'PmExtractRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PmExtractPage();
+    },
+  );
+}
+
+/// generated route for
 /// [PmMeterUpdatePage]
 class PmMeterUpdateRoute extends PageRouteInfo<void> {
   const PmMeterUpdateRoute({List<PageRouteInfo>? children})
@@ -182,6 +198,22 @@ class TimesheetRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const TimesheetPage();
+    },
+  );
+}
+
+/// generated route for
+/// [WoPrintPage]
+class WoPrintRoute extends PageRouteInfo<void> {
+  const WoPrintRoute({List<PageRouteInfo>? children})
+      : super(WoPrintRoute.name, initialChildren: children);
+
+  static const String name = 'WoPrintRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const WoPrintPage();
     },
   );
 }

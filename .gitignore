@@ -45,3 +45,8 @@ app.*.map.json
 /android/app/release
 
 /releases/
+
+# WO Print: PROD data must never be committed
+lib/print/*.pdf
+samples/W26J17417_print_pack.pdf
+tool/prod_data/
