@@ -116,10 +116,8 @@ class WoPacket {
   });
 }
 
-/// Characters the standard PDF base fonts cannot encode (combining
-/// diacritics, zero-width and other invisible marks, symbols) would render
-/// as empty boxes in the print pack. This maps common look-alikes to ASCII
-/// and drops anything else outside cp1252.
+/// Maps characters the fonts may not have (or that render poorly) to plain
+/// ASCII equivalents.
 const Map<int, String> _charReplacements = {
   0x00A0: ' ', // no-break space
   0x2010: '-',
@@ -139,36 +137,75 @@ const Map<int, String> _charReplacements = {
   0x2265: '>=',
 };
 
-/// Code points in the cp1252 upper range (curly quotes, dash, tm, oe...)
-/// that the standard fonts do encode.
+/// Code points in the cp1252 upper range (curly quotes, dashes, tm, oe...)
+/// that standard PDF fonts encode.
 const Set<int> _cp1252Extras = {
   0x20AC, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030,
   0x0160, 0x2039, 0x0152, 0x017D, 0x2018, 0x2019, 0x201C, 0x201D, 0x02DC,
   0x2122, 0x0161, 0x203A, 0x0153, 0x017E, 0x0178,
 };
 
-/// Flattens text so it renders in the PDF without box glyphs (see
-/// [_charReplacements]); combining marks etc. are dropped.
+/// True for characters that never render well in the print pack and are
+/// dropped: control characters, combining diacritics (the pdf package does
+/// no OpenType shaping, so they would render detached), zero-width /
+/// bidi marks, and variation selectors.
+bool _isDroppedCodePoint(int r) {
+  if (r == 0x0A) return false; // newline is meaningful
+  if (r < 0x20) return true; // control
+  if (r >= 0x7F && r <= 0x9F) return true; // C1 control
+  if (r >= 0x0300 && r <= 0x036F) return true; // combining diacritics
+  if (r >= 0x0483 && r <= 0x0489) return true; // combining marks
+  if (r >= 0x0591 && r <= 0x05BD) return true; // hebrew points
+  if (r >= 0x064B && r <= 0x065F) return true; // arabic points
+  if (r == 0x00AD || r == 0x180E) return true; // soft hyphen etc.
+  if (r >= 0x200B && r <= 0x200F) return true; // zero width + dir marks
+  if (r >= 0x202A && r <= 0x202E) return true; // bidi controls
+  if (r >= 0x2060 && r <= 0x2064) return true; // word joiner etc.
+  if (r >= 0xFE00 && r <= 0xFE0F) return true; // variation selectors
+  if (r == 0xFFFE || r == 0xFFFF) return true; // non-characters
+  return false;
+}
+
+/// Flattens text so it renders reliably in the PDF: drops the characters
+/// from [_isDroppedCodePoint], maps [_charReplacements], and keeps the
+/// ranges the embedded Roboto font covers well (ASCII, Latin-1, Latin
+/// Extended-A for Polish/Czech/Slovak etc., cp1252 extras). Anything else
+/// (geometric shapes, emoji, CJK) is dropped — missing glyphs would render
+/// as empty boxes.
 String sanitizePdfText(String src) {
-  var asciiOnly = true;
+  var needsWork = false;
   for (final r in src.runes) {
-    if (r > 0x7E) {
-      asciiOnly = false;
+    if (r > 0x7E || _isDroppedCodePoint(r) || _charReplacements.containsKey(r)) {
+      needsWork = true;
       break;
     }
   }
-  if (asciiOnly) return src;
+  if (!needsWork) return src;
   final sb = StringBuffer();
   for (final r in src.runes) {
     final repl = _charReplacements[r];
     if (repl != null) {
       sb.write(repl);
-    } else if (_cp1252Extras.contains(r) ||
-        (r >= 0x20 && r <= 0x7E) ||
-        (r >= 0xA0 && r <= 0xFF)) {
-      sb.writeCharCode(r);
+      continue;
     }
-    // anything else (combining marks, zero-width, symbols): dropped
+    if (_isDroppedCodePoint(r)) continue;
+    if (r >= 0x20 && r <= 0x7E) {
+      sb.writeCharCode(r); // ASCII
+      continue;
+    }
+    if (r >= 0xA0 && r <= 0xFF) {
+      sb.writeCharCode(r); // Latin-1
+      continue;
+    }
+    if (r >= 0x0100 && r <= 0x017F) {
+      sb.writeCharCode(r); // Latin Extended-A (European)
+      continue;
+    }
+    if (_cp1252Extras.contains(r)) {
+      sb.writeCharCode(r); // curly quotes etc.
+      continue;
+    }
+    // anything else: dropped (would render as a box)
   }
   return sb.toString();
 }
@@ -203,6 +240,23 @@ String htmlToPlainText(String? src) {
       .where((l) => l.isNotEmpty)
       .toList();
   return sanitizePdfText(lines.join('\n'));
+}
+
+/// Typeface set used by the print pack. Pass one loaded from the bundled
+/// Roboto TTFs (see the app page / CLI tools); null falls back to the
+/// built-in Helvetica (cp1252 only).
+class WoPrintFonts {
+  final pw.Font base;
+  final pw.Font bold;
+  final pw.Font italic;
+  final pw.Font boldItalic;
+
+  const WoPrintFonts({
+    required this.base,
+    required this.bold,
+    required this.italic,
+    required this.boldItalic,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -677,22 +731,29 @@ Future<({Uint8List bytes, int pages})> _renderAll(
   List<WoPacket> packets,
   String printedDate,
   int? totalPages,
+  WoPrintFonts? fonts,
 ) async {
   final doc = pw.Document(
     theme: pw.ThemeData.withFont(
-      base: pw.Font.helvetica(),
-      bold: pw.Font.helveticaBold(),
-      italic: pw.Font.helveticaOblique(),
+      base: fonts?.base ?? pw.Font.helvetica(),
+      bold: fonts?.bold ?? pw.Font.helveticaBold(),
+      italic: fonts?.italic ?? pw.Font.helveticaOblique(),
+      boldItalic: fonts?.boldItalic ?? pw.Font.helveticaBoldOblique(),
     ),
   );
 
   for (final packet in packets) {
     final wonum = _v(packet.header, 'wonum');
+    // Guard against runaway layout, but scale with the tree: a parent with
+    // hundreds of child WOs legitimately produces hundreds of pages.
+    final taskCount = packet.tasks.length +
+        packet.children.fold<int>(0, (n, c) => n + c.tasks.length);
+    final maxPages = 100 + packet.children.length * 3 + taskCount;
 
     doc.addPage(pw.MultiPage(
       pageFormat: PdfPageFormat.letter,
       margin: pw.EdgeInsets.fromLTRB(32, 30, 32, 36),
-      maxPages: 500,
+      maxPages: maxPages,
       build: (ctx) => [
         _coverSection(packet, printedDate),
         for (final child in packet.children) ...[
@@ -728,20 +789,22 @@ Future<({Uint8List bytes, int pages})> _renderAll(
 Future<Uint8List> buildWoPacketPdf(
   WoPacket packet, {
   DateTime? printed,
+  WoPrintFonts? fonts,
 }) =>
-    buildWoBatchPdf([packet], printed: printed);
+    buildWoBatchPdf([packet], printed: printed, fonts: fonts);
 
 /// Builds one merged PDF for a batch of work order packets (each packet is
 /// a cover + one page per child WO, pages numbered continuously).
 Future<Uint8List> buildWoBatchPdf(
   List<WoPacket> packets, {
   DateTime? printed,
+  WoPrintFonts? fonts,
 }) async {
   if (packets.isEmpty) {
     throw ArgumentError('buildWoBatchPdf: no packets to render.');
   }
   final printedDate = _fmtDateOnly(printed ?? DateTime.now());
-  final first = await _renderAll(packets, printedDate, null);
-  final second = await _renderAll(packets, printedDate, first.pages);
+  final first = await _renderAll(packets, printedDate, null, fonts);
+  final second = await _renderAll(packets, printedDate, first.pages, fonts);
   return second.bytes;
 }

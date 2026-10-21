@@ -56,6 +56,11 @@ dev_dependencies:
 
 flutter:
     uses-material-design: true
+    assets:
+      - fonts/Roboto-Regular.ttf
+      - fonts/Roboto-Bold.ttf
+      - fonts/Roboto-Italic.ttf
+      - fonts/Roboto-BoldItalic.ttf
     fonts:
       - family: RobotoMono
         fonts:

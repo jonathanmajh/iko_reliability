@@ -10,7 +10,9 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:intl/intl.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
@@ -84,6 +86,28 @@ class _WoPrintPageState extends State<WoPrintPage> {
   bool _loadingList = false;
   bool _generating = false;
   String _status = 'Ready';
+
+  /// Bundled Roboto TTFs for the PDF (loaded once, cached). Null = the
+  /// renderer falls back to built-in Helvetica.
+  WoPrintFonts? _fonts;
+  bool _fontsFailed = false;
+
+  Future<WoPrintFonts?> _loadFonts() async {
+    if (_fonts != null || _fontsFailed) return _fonts;
+    try {
+      Future<pw.Font> load(String asset) async =>
+          pw.Font.ttf(await rootBundle.load(asset));
+      _fonts = WoPrintFonts(
+        base: await load('fonts/Roboto-Regular.ttf'),
+        bold: await load('fonts/Roboto-Bold.ttf'),
+        italic: await load('fonts/Roboto-Italic.ttf'),
+        boldItalic: await load('fonts/Roboto-BoldItalic.ttf'),
+      );
+    } catch (e) {
+      _fontsFailed = true; // Helvetica fallback (cp1252)
+    }
+    return _fonts;
+  }
 
   @override
   void dispose() {
@@ -301,7 +325,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
     if (packets == null || !mounted) return;
     setState(() => _status = 'Rendering print pack PDF...');
     try {
-      final bytes = await buildWoBatchPdf(packets);
+      final fonts = await _loadFonts();
+      final bytes = await buildWoBatchPdf(packets, fonts: fonts);
       await Printing.layoutPdf(onLayout: (format) async => bytes);
       if (mounted) {
         setState(
@@ -319,7 +344,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
     if (packets == null || !mounted) return;
     setState(() => _status = 'Rendering print pack PDF...');
     try {
-      final merged = await buildWoBatchPdf(packets);
+      final fonts = await _loadFonts();
+      final merged = await buildWoBatchPdf(packets, fonts: fonts);
       final dir = await FilePicker.getDirectoryPath(
           dialogTitle: 'Choose a folder for the PDF files');
       if (dir == null || !mounted) {
@@ -332,7 +358,7 @@ class _WoPrintPageState extends State<WoPrintPage> {
       var written = 1;
       for (final packet in packets) {
         final wonum = '${packet.header['wonum']}';
-        final bytes = await buildWoPacketPdf(packet);
+        final bytes = await buildWoPacketPdf(packet, fonts: fonts);
         await File('$dir\\$wonum.pdf').writeAsBytes(bytes);
         written++;
       }

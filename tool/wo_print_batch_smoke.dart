@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:iko_reliability_flutter/print/wo_packet.dart';
 
+import 'wo_print_fonts.dart';
+
 Future<void> main() async {
   final p1 = WoPacket(
     header: {
@@ -39,11 +41,11 @@ Future<void> main() async {
     },
     tasks: const [],
   );
-  final bytes = await buildWoBatchPdf([p1, p2]);
+  final bytes = await buildWoBatchPdf([p1, p2], fonts: loadWoPrintFontsFromDirectory());
   final s = String.fromCharCodes(bytes);
   final pages = RegExp(r'/Type\s*/Page[^s]').allMatches(s).length;
   stdout.writeln('batch pages: $pages (expect 3)');
-  final single = await buildWoPacketPdf(p2);
+  final single = await buildWoPacketPdf(p2, fonts: loadWoPrintFontsFromDirectory());
   final sp = RegExp(r'/Type\s*/Page[^s]')
       .allMatches(String.fromCharCodes(single))
       .length;
@@ -57,6 +59,9 @@ Future<void> main() async {
     '250\u25A0 x 225\u25A0': '250 x 225',
     'Joya\u0308e\u200B instructions': 'Joyae instructions',
     'cafe\u0301 \u2013 done \u2014 ok': 'cafe - done - ok',
+    // precomposed European characters are kept for the embedded Roboto font
+    'Zkou\u0161ka lo\u010F - na\u0142\u0105dowy':
+        'Zkou\u0161ka lo\u010F - na\u0142\u0105dowy',
   };
   for (final e in cases.entries) {
     final out = sanitizePdfText(e.key);

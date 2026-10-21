@@ -17,6 +17,8 @@ import 'dart:io';
 
 import 'package:iko_reliability_flutter/print/wo_packet.dart';
 
+import 'wo_print_fonts.dart';
+
 const _base = 'https://test2.manage.test2.iko.max-it-eam.com/maximo/api/os/';
 const _site = 'AA';
 const _defaultWonum = 'W24J12811';
@@ -274,7 +276,7 @@ Future<void> main(List<String> args) async {
   );
 
   // ---- render ---------------------------------------------------------------
-  final bytes = await buildWoPacketPdf(packet);
+  final bytes = await buildWoPacketPdf(packet, fonts: loadWoPrintFontsFromDirectory());
   final out = File('samples/${wonum}_print_pack.pdf')
     ..createSync(recursive: true)
     ..writeAsBytesSync(bytes);
