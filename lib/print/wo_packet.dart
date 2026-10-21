@@ -443,25 +443,18 @@ pw.Widget _signature(String label) => pw.Column(
       ],
     );
 
-// dart_pdf's Table cannot split *within* a row, and paints nothing when the
-// first row doesn't fit the remaining space — a tall task cell would defer
-// wholesale to the next page and leave the previous page mostly blank.
-// Cap every row around a third of a page by chunking long task text into
-// continuation rows (blank task number; notes column stays blank).
-const _taskLinesPerRow = 22;
-const _taskCharsPerLine = 64; // slightly under the real wrap, on the safe side
+// dart_pdf's Table splits tables BETWEEN rows only, and defers a row that
+// doesn't fit the remaining space to the next page. That's fine visually as
+// long as rows are task-sized — one row per task (readers see one task).
+// The only exception: a task tall enough to exceed a whole page would defer
+// forever (the maxPages crash), so it is subdivided into continuation rows
+// marked with '…' in the # column.
+const _taskMaxLinesPerRow = 45; // ≈ 460pt — well under a page
+const _taskCharsPerLine = 64; // conservative vs the real wrap (~79)
 
 List<List<String>> _tasksRows(List<WoTask> tasks) {
   return [
-    for (final t in tasks)
-      ...[
-        for (var i = 0; i < _taskChunks(t).length; i++)
-          [
-            i == 0 ? (t.taskid ?? '') : '',
-            _taskChunks(t)[i],
-            '', // blank column for the technician's notes / measurements
-          ],
-      ],
+    for (final t in tasks) ..._taskRowFragments(t),
   ];
 }
 
@@ -472,12 +465,46 @@ String _taskText(WoTask t) =>
         ? '${t.description}\n${htmlToPlainText(t.longDesc!)}'
         : t.description;
 
-/// The task's text wrapped softly (word boundaries; hard-breaking rare
-/// unbreakable tokens over a full line), grouped into chunks of at most
-/// [_taskLinesPerRow] lines.
-List<String> _taskChunks(WoTask t) {
+/// Fragments of one task in the table: one row for normal tasks; numbered
+/// continuation rows marked `…` only when a single task would overflow a
+/// full page.
+List<List<String>> _taskRowFragments(WoTask t) {
+  final text = _taskText(t);
+  if (_estimateLines(text) <= _taskMaxLinesPerRow) {
+    return [
+      [t.taskid ?? '', text, ''],
+    ]; // blank column for the technician's notes / measurements
+  }
+  final lines = _wrapLines(text);
+  final rows = <List<String>>[];
+  for (var i = 0; i < lines.length; i += _taskMaxLinesPerRow) {
+    final end = (i + _taskMaxLinesPerRow) < lines.length
+        ? i + _taskMaxLinesPerRow
+        : lines.length;
+    rows.add([
+      i == 0 ? (t.taskid ?? '') : '…',
+      lines.sublist(i, end).join('\n'),
+      '',
+    ]);
+  }
+  return rows;
+}
+
+/// Lines the text would occupy in the task column at a conservative
+/// ~[_taskCharsPerLine] chars per line (the real column fits ~79, so this
+/// over-counts height and never under-triggers the full-page guard).
+int _estimateLines(String text) {
+  var n = 0;
+  for (final para in text.split('\n')) {
+    n += para.isEmpty ? 1 : (para.length + _taskCharsPerLine - 1) ~/ _taskCharsPerLine;
+  }
+  return n;
+}
+
+/// Word-boundary wrap (hard-breaking rare tokens over a line).
+List<String> _wrapLines(String text) {
   final lines = <String>[];
-  for (final para in _taskText(t).split('\n')) {
+  for (final para in text.split('\n')) {
     if (para.isEmpty) {
       lines.add('');
       continue;
@@ -504,15 +531,7 @@ List<String> _taskChunks(WoTask t) {
     }
     if (line.isNotEmpty) lines.add(line);
   }
-  final chunks = <String>[];
-  for (var i = 0; i < lines.length; i += _taskLinesPerRow) {
-    final end = (i + _taskLinesPerRow) < lines.length
-        ? i + _taskLinesPerRow
-        : lines.length;
-    final chunk = lines.sublist(i, end).join('\n');
-    if (chunk.trim().isNotEmpty) chunks.add(chunk);
-  }
-  return chunks;
+  return lines;
 }
 
 const _taskTableSpec = (
