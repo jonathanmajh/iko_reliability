@@ -41,6 +41,15 @@ class WoListRow {
   String get assetnum => '${record['assetnum'] ?? ''}';
   String get parent => '${record['parent'] ?? ''}';
 
+  /// When the WO last changed status (ISO datetime or '').
+  String get statusDate => '${record['statusdate'] ?? ''}';
+
+  /// When the WO is scheduled to start (ISO datetime or '').
+  String get schedStart => '${record['schedstart'] ?? ''}';
+
+  /// Target start (ISO datetime or '').
+  String get targetStart => '${record['targstartdate'] ?? ''}';
+
   String get target {
     final t = '${record['targstartdate'] ?? ''}';
     final dt = DateTime.tryParse(t);
@@ -65,6 +74,12 @@ class _WoPrintPageState extends State<WoPrintPage> {
 
   List<WoListRow> _rows = <WoListRow>[];
   final Set<String> _selected = <String>{};
+
+  // optional date filters (picked in a date selector, matched on the
+  // date portion of the work order fields)
+  DateTime? _releasedOn; // WORKORDER.STATUSDATE (+ status RELEASED)
+  DateTime? _targetOn; // WORKORDER.TARGSTARTDATE
+  DateTime? _scheduledOn; // WORKORDER.SCHEDSTART
 
   bool _loadingList = false;
   bool _generating = false;
@@ -92,12 +107,29 @@ class _WoPrintPageState extends State<WoPrintPage> {
 
   List<WoListRow> get _filteredRows {
     final q = _searchController.text.trim().toLowerCase();
-    if (q.isEmpty) return _rows;
-    return _rows
-        .where((r) =>
-            r.wonum.toLowerCase().contains(q) ||
-            r.description.toLowerCase().contains(q))
-        .toList();
+    Iterable<WoListRow> result = _rows;
+    if (q.isNotEmpty) {
+      result = result.where((r) =>
+          r.wonum.toLowerCase().contains(q) ||
+          r.description.toLowerCase().contains(q));
+    }
+    if (_releasedOn != null) {
+      result = result.where((r) => _sameDate(r.statusDate, _releasedOn!));
+    }
+    if (_targetOn != null) {
+      result = result.where((r) => _sameDate(r.targetStart, _targetOn!));
+    }
+    if (_scheduledOn != null) {
+      result = result.where((r) => _sameDate(r.schedStart, _scheduledOn!));
+    }
+    return result.toList();
+  }
+
+  /// True when [iso] falls on the same calendar day as [picked].
+  bool _sameDate(String iso, DateTime picked) {
+    final dt = DateTime.tryParse(iso);
+    if (dt == null) return false;
+    return dt.year == picked.year && dt.month == picked.month && dt.day == picked.day;
   }
 
   // ---- list loading ---------------------------------------------------------
@@ -340,6 +372,7 @@ class _WoPrintPageState extends State<WoPrintPage> {
             const SizedBox(height: 12),
             _buildSelectionPanel(),
             const SizedBox(height: 8),
+            _buildDateFilters(),
             _buildStatsRow(),
             const Divider(height: 1),
             Expanded(child: _buildRowsArea()),
@@ -441,6 +474,47 @@ class _WoPrintPageState extends State<WoPrintPage> {
     );
   }
 
+  /// One optional date filter chip: pick a date in the selector, WOs whose
+  /// field falls on that calendar day stay in the list. Delete icon clears.
+  Widget _dateFilterChip(
+      String label, DateTime? value, void Function(DateTime?) onPicked) {
+    return FilterChip(
+      label: Text(value == null
+          ? '$label: any'
+          : '$label: ${DateFormat('MMM d, y').format(value)}'),
+      selected: value != null,
+      onSelected: (_) async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: value ?? DateTime.now(),
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2030),
+        );
+        if (picked != null) onPicked(picked);
+      },
+      onDeleted: value == null ? null : () => onPicked(null),
+      deleteIcon: const Icon(Icons.close, size: 16),
+    );
+  }
+
+  Widget _buildDateFilters() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: [
+          _dateFilterChip('Released on', _releasedOn,
+              (d) => setState(() => _releasedOn = d)),
+          _dateFilterChip('Target start', _targetOn,
+              (d) => setState(() => _targetOn = d)),
+          _dateFilterChip('Scheduled', _scheduledOn,
+              (d) => setState(() => _scheduledOn = d)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatsRow() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -454,7 +528,7 @@ class _WoPrintPageState extends State<WoPrintPage> {
           const Spacer(),
           TextButton(
             onPressed: _filteredRows.isEmpty ? null : _selectShownPrintable,
-            child: const Text('Select shown printable'),
+            child: const Text('Select all'),
           ),
           TextButton(
             onPressed: _selected.isEmpty ? null : _selectNone,

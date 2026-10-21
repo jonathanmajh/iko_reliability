@@ -116,6 +116,63 @@ class WoPacket {
   });
 }
 
+/// Characters the standard PDF base fonts cannot encode (combining
+/// diacritics, zero-width and other invisible marks, symbols) would render
+/// as empty boxes in the print pack. This maps common look-alikes to ASCII
+/// and drops anything else outside cp1252.
+const Map<int, String> _charReplacements = {
+  0x00A0: ' ', // no-break space
+  0x2010: '-',
+  0x2011: '-',
+  0x2012: '-',
+  0x2013: '-',
+  0x2014: '-',
+  0x2015: '-',
+  0x2022: '-',
+  0x2032: "'",
+  0x2033: '"',
+  0x2190: '<-',
+  0x2192: '->',
+  0x2248: '~',
+  0x2260: '!=',
+  0x2264: '<=',
+  0x2265: '>=',
+};
+
+/// Code points in the cp1252 upper range (curly quotes, dash, tm, oe...)
+/// that the standard fonts do encode.
+const Set<int> _cp1252Extras = {
+  0x20AC, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030,
+  0x0160, 0x2039, 0x0152, 0x017D, 0x2018, 0x2019, 0x201C, 0x201D, 0x02DC,
+  0x2122, 0x0161, 0x203A, 0x0153, 0x017E, 0x0178,
+};
+
+/// Flattens text so it renders in the PDF without box glyphs (see
+/// [_charReplacements]); combining marks etc. are dropped.
+String sanitizePdfText(String src) {
+  var asciiOnly = true;
+  for (final r in src.runes) {
+    if (r > 0x7E) {
+      asciiOnly = false;
+      break;
+    }
+  }
+  if (asciiOnly) return src;
+  final sb = StringBuffer();
+  for (final r in src.runes) {
+    final repl = _charReplacements[r];
+    if (repl != null) {
+      sb.write(repl);
+    } else if (_cp1252Extras.contains(r) ||
+        (r >= 0x20 && r <= 0x7E) ||
+        (r >= 0xA0 && r <= 0xFF)) {
+      sb.writeCharCode(r);
+    }
+    // anything else (combining marks, zero-width, symbols): dropped
+  }
+  return sb.toString();
+}
+
 /// Flattens Maximo CKHTML long descriptions to plain text.
 String htmlToPlainText(String? src) {
   if (src == null) return '';
@@ -145,7 +202,7 @@ String htmlToPlainText(String? src) {
       .map((l) => l.replaceAll(RegExp(r'[ \t]+'), ' ').trim())
       .where((l) => l.isNotEmpty)
       .toList();
-  return lines.join('\n');
+  return sanitizePdfText(lines.join('\n'));
 }
 
 // ---------------------------------------------------------------------------
@@ -167,8 +224,7 @@ const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
 String _v(WoRecord m, String key) {
   final v = m[key];
   if (v == null) return '';
-  if (v is num) return v.toString();
-  return v.toString();
+  return sanitizePdfText(v.toString());
 }
 
 String _fmtDate(String? iso) {
@@ -221,7 +277,7 @@ pw.Widget _chip(String text) => pw.Container(
         borderRadius: pw.BorderRadius.circular(2.5),
         color: PdfColors.white,
       ),
-      child: pw.Text(text.toUpperCase(),
+      child: pw.Text(sanitizePdfText(text).toUpperCase(),
           style: const pw.TextStyle(
               fontSize: 7.6,
               fontWeight: pw.FontWeight.bold,
@@ -244,7 +300,8 @@ pw.Widget _kvGrid(List<(String, String)> kv) {
       ));
       cells.add(pw.Padding(
         padding: pw.EdgeInsets.only(right: 10, top: 2.5, bottom: 2.5),
-        child: pw.Text(value.isEmpty ? '-' : value,
+        child: pw.Text(
+            value.isEmpty ? '-' : sanitizePdfText(value),
             style: const pw.TextStyle(fontSize: 8.4, color: _ink)),
       ));
     }
@@ -276,7 +333,7 @@ pw.Widget _table({
       for (final h in headers)
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 4),
-          child: pw.Text(h.toUpperCase(),
+          child: pw.Text(sanitizePdfText(h).toUpperCase(),
               style: const pw.TextStyle(
                   fontSize: 7.4,
                   fontWeight: pw.FontWeight.bold,
@@ -293,7 +350,7 @@ pw.Widget _table({
         for (final cell in e.value)
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 3.5),
-            child: pw.Text(cell,
+            child: pw.Text(sanitizePdfText(cell),
                 style: pw.TextStyle(fontSize: fontSize, color: _ink, lineSpacing: 2.2)),
           ),
       ],
@@ -495,7 +552,7 @@ pw.Widget _coverSection(WoPacket packet, String printedDate) {
           border: pw.Border.all(color: _rule, width: 0.5),
           color: _fillRow,
         ),
-        child: pw.Text(packet.demoNote!,
+        child: pw.Text(sanitizePdfText(packet.demoNote!),
             style: pw.TextStyle(fontSize: 7.6, color: _muted, fontStyle: pw.FontStyle.italic)),
       ),
     ));

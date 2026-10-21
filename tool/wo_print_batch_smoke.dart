@@ -1,6 +1,8 @@
 // Smoke test: batch render of two synthetic packets (no Maximo calls).
 // Expect 3 pages for the batch (cover + child + second cover) and 1 for a
 // single packet. Run: dart run tool/wo_print_batch_smoke.dart
+import 'dart:io';
+
 import 'package:iko_reliability_flutter/print/wo_packet.dart';
 
 Future<void> main() async {
@@ -40,10 +42,25 @@ Future<void> main() async {
   final bytes = await buildWoBatchPdf([p1, p2]);
   final s = String.fromCharCodes(bytes);
   final pages = RegExp(r'/Type\s*/Page[^s]').allMatches(s).length;
-  print('batch pages: $pages (expect 3)');
+  stdout.writeln('batch pages: $pages (expect 3)');
   final single = await buildWoPacketPdf(p2);
   final sp = RegExp(r'/Type\s*/Page[^s]')
       .allMatches(String.fromCharCodes(single))
       .length;
-  print('single pages: $sp (expect 1)');
+  stdout.writeln('single pages: $sp (expect 1)');
+
+  // sanitizer: combining marks / boxes / zero-width chars are stripped
+  const cases = {
+    'hau\u0308l off topsol\u0308': 'haul off topsol',
+    'Equipment/Process I\u200E\u030Amprovement - Mechanica\u0308l':
+        'Equipment/Process Improvement - Mechanical',
+    '250\u25A0 x 225\u25A0': '250 x 225',
+    'Joya\u0308e\u200B instructions': 'Joyae instructions',
+    'cafe\u0301 \u2013 done \u2014 ok': 'cafe - done - ok',
+  };
+  for (final e in cases.entries) {
+    final out = sanitizePdfText(e.key);
+    stdout.writeln(
+        '${out == e.value ? 'OK  ' : 'FAIL'} "$out" (expect "${e.value}")');
+  }
 }

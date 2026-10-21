@@ -71,6 +71,7 @@ class WoPrintFetcher {
     'estdur',
     'schedstart',
     'schedfinish',
+    'statusdate',
     'parent',
   ];
 
