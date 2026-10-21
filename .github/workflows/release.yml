@@ -17,6 +17,20 @@ jobs:
         channel: 'stable'
     - name: building for windows
       run: flutter build windows
+    - name: verify sqlite3 is bundled (prevents broken installers)
+      run: |
+        $dll = 'build\windows\x64\runner\Release\sqlite3.dll'
+        if (-not (Test-Path $dll)) {
+          # Defensive copy from the native-assets staging dir in case the
+          # CMake install step changes format.
+          $staged = Get-ChildItem -Recurse -Filter 'sqlite3.dll' build\native_assets -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if ($staged) { Copy-Item $staged.FullName $dll }
+        }
+        if (-not (Test-Path $dll)) {
+          throw "sqlite3.dll is missing from the release bundle; the app would crash on startup with 'Couldn't resolve native function sqlite3_initialize' (see https://github.com/simolus3/sqlite3.dart/issues/353)"
+        }
+        Write-Host "sqlite3.dll present in bundle: $dll"
     - name: packaging in squirrel
       run: flutter pub run squirrel:installer_windows
     - name: get version name

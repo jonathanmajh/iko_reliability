@@ -86,6 +86,18 @@ if(PLUGIN_BUNDLED_LIBRARIES)
     COMPONENT Runtime)
 endif()
 
+# Copy the native assets provided by the build.dart from all packages.
+# Without this, build hooks (e.g. sqlite3 3.x) register the asset in the
+# NativeAssetsManifest but the DLL is never bundled, and release builds crash
+# at startup with: Couldn't resolve native function 'sqlite3_initialize' ...
+# Failed to load dynamic library 'sqlite3.dll' (error code 126).
+# See https://github.com/simolus3/sqlite3.dart/issues/353
+set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/windows/")
+install(DIRECTORY "${NATIVE_ASSETS_DIR}"
+  DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime
+  FILES_MATCHING PATTERN "*.dll")
+
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.
 set(FLUTTER_ASSET_DIR_NAME "flutter_assets")

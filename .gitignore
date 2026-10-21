@@ -46,6 +46,10 @@ app.*.map.json
 
 /releases/
 
+# Local diagnostics / saved installer artifacts
+/build.logs
+/Setup.exe
+
 # WO Print: PROD data must never be committed
 lib/print/*.pdf
 samples/W26J17417_print_pack.pdf
