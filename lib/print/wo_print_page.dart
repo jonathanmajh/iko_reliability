@@ -3,7 +3,8 @@
 // Replaces the OOTB BIRT report (woprint2.rptdesign) for normal users:
 // pick released parent work orders (by site filter or a pasted list),
 // fetch their full trees (child WOs, tasks, planned data), then either
-// print the merged pack directly or save a merged + per-WO PDFs.
+// print the merged pack directly, save a merged + per-WO PDFs, or save
+// just the merged pack as a single PDF.
 
 import 'dart:io';
 
@@ -18,6 +19,7 @@ import 'package:provider/provider.dart';
 
 import '../bin/consts.dart';
 import '../bin/drawer.dart';
+import '../bin/end_drawer.dart';
 import '../notifiers/maximo_server_notifier.dart';
 import '../settings/settings_notifier.dart';
 import 'wo_fetch.dart';
@@ -338,7 +340,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
     }
   }
 
-  /// Saves the merged pack + one PDF per work order into a chosen folder.
+  /// Saves the merged pack + one PDF per work order into a chosen folder,
+  /// then opens the folder in File Explorer.
   Future<void> _savePdfs() async {
     final packets = await _generatePackets();
     if (packets == null || !mounted) return;
@@ -362,7 +365,59 @@ class _WoPrintPageState extends State<WoPrintPage> {
         await File('$dir\\$wonum.pdf').writeAsBytes(bytes);
         written++;
       }
-      setState(() => _status = 'Wrote $written PDF file(s) to $dir');
+      final opened = await _openWithDefaultHandler(dir);
+      if (mounted) {
+        setState(() => _status = 'Wrote $written PDF file(s) to $dir'
+            '${opened ? ' - folder opened' : ' (could not open the folder)'}');
+      }
+    } catch (e) {
+      setState(() => _status = 'Save failed: $e');
+    }
+  }
+
+  /// Opens [path] with the Windows default handler: a folder opens in
+  /// File Explorer, a file opens in its associated application (e.g. the
+  /// PDF viewer). Returns false if the launch failed — Explorer returns
+  /// a non-zero exit code even on success, so the code is not checked.
+  Future<bool> _openWithDefaultHandler(String path) async {
+    try {
+      await Process.run('explorer.exe', [path]);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Saves the merged pack of all selected work orders as a single PDF
+  /// file picked in a Save As dialog, then opens the PDF in its default
+  /// viewer.
+  Future<void> _saveSinglePdf() async {
+    final packets = await _generatePackets();
+    if (packets == null || !mounted) return;
+    setState(() => _status = 'Rendering print pack PDF...');
+    try {
+      final fonts = await _loadFonts();
+      final bytes = await buildWoBatchPdf(packets, fonts: fonts);
+      final ts = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final path = await FilePicker.saveFile(
+        dialogTitle: 'Save all selected work orders as one PDF',
+        lockParentWindow: true,
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        fileName: 'WO_Print_Pack_$ts.pdf',
+      );
+      if (path == null || !mounted) {
+        setState(() => _status = 'Save cancelled');
+        return;
+      }
+      setState(() => _status = 'Writing PDF file...');
+      final file = path.toLowerCase().endsWith('.pdf') ? path : '$path.pdf';
+      await File(file).writeAsBytes(bytes);
+      final opened = await _openWithDefaultHandler(file);
+      if (mounted) {
+        setState(() => _status = 'Wrote 1 PDF file: $file'
+            '${opened ? ' - opened' : ' (could not open it)'}');
+      }
     } catch (e) {
       setState(() => _status = 'Save failed: $e');
     }
@@ -377,6 +432,7 @@ class _WoPrintPageState extends State<WoPrintPage> {
         //navigation drawer
         child: NavDrawer(),
       ),
+      endDrawer: const EndDrawer(),
       appBar: AppBar(
         title: const Text('Work Order Print'),
         actions: [
@@ -705,6 +761,12 @@ class _WoPrintPageState extends State<WoPrintPage> {
             onPressed: _generating ? null : _savePdfs,
             icon: const Icon(Icons.save),
             label: const Text('Save PDFs...'),
+          ),
+          const SizedBox(width: 12),
+          OutlinedButton.icon(
+            onPressed: _generating ? null : _saveSinglePdf,
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Save PDF...'),
           ),
           const SizedBox(width: 16),
           Expanded(

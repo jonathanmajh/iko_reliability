@@ -234,6 +234,9 @@ class WoPrintFetcher {
           'wpmaterial',
           'wptool',
           'assignment',
+          // Reserved-material storeroom bins (BINNUM) live on INVRESERVE;
+          // each WPMATERIAL row links to its reservation via reserveid.
+          'invreserve',
         ],
         step: 'planned labor and materials');
 

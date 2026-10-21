@@ -16,7 +16,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:iko_reliability_flutter/print/wo_assemble.dart'
-    show assembleWoPrintBatch;
+    show assembleWoPrintBatch, invReserveBinsOf;
 import 'package:iko_reliability_flutter/print/wo_packet.dart';
 
 import 'wo_print_fonts.dart';
@@ -38,9 +38,15 @@ const _demoNote =
 
 const _demoMaterials = [
   PlannedMaterialRow('13252258',
-      description: 'Plastic film wrap 16" x 1500m (demo)', qty: '1 RL', storeroom: 'PKG-AA'),
+      description: 'Plastic film wrap 16" x 1500m (demo)',
+      qty: '1 RL',
+      binnum: 'AA-B12',
+      storeroom: 'PKG-AA'),
   PlannedMaterialRow('C-440012',
-      description: 'Dry film lubricant spray (demo)', qty: '1 EA', storeroom: 'SB-AA'),
+      description: 'Dry film lubricant spray (demo)',
+      qty: '1 EA',
+      binnum: 'SB-01',
+      storeroom: 'SB-AA'),
 ];
 
 const _demoTools = [
@@ -167,6 +173,8 @@ Future<void> main(List<String> args) async {
     'wpmaterial',
     'wptool',
     'assignment',
+    // same reason as the app: bins come from INVRESERVE
+    'invreserve',
   ]);
   final planByWonum = <String, Map<String, dynamic>>{
     for (final r in plan) '${r['wonum']}': r,
@@ -183,15 +191,23 @@ Future<void> main(List<String> args) async {
     return PlannedLaborRow(code, craft: craft, skilllevel: skill, hours: hours);
   }
 
-  PlannedMaterialRow? materialFrom(Map<String, dynamic> m) {
+  PlannedMaterialRow? materialFrom(Map<String, dynamic> m,
+      [Map<String, String> bins = const {}]) {
     final item = m['itemnum'] == null ? '' : '${m['itemnum']}';
     final desc = m['description'] == null ? '' : '${m['description']}';
     if (item.isEmpty && desc.isEmpty) return null;
+    final loc = m['location'] == null ? '' : '${m['location']}';
+    final rid = '${m['reserveid'] ?? ''}';
+    // BINNUM is on INVRESERVE, not WPMATERIAL (see wo_assemble.dart).
+    final bin = (rid.isNotEmpty && rid != '0' ? bins[rid] : null) ??
+        bins['$item|$loc'] ??
+        '';
     return PlannedMaterialRow(
       item,
       description: desc,
       qty: m['itemqty'] == null ? '' : _fmtVal(m['itemqty']),
-      storeroom: m['location'] == null ? '' : '${m['location']}',
+      binnum: bin,
+      storeroom: loc,
     );
   }
 
@@ -212,11 +228,16 @@ Future<void> main(List<String> args) async {
             .cast<Map<String, dynamic>>())
           if (laborFrom(l) != null) laborFrom(l)!,
       ];
-  List<PlannedMaterialRow> liveMaterials(Map<String, dynamic>? rec) => [
-        for (final m in (rec?['wpmaterial'] as List<dynamic>? ?? const [])
-            .cast<Map<String, dynamic>>())
-          if (materialFrom(m) != null) materialFrom(m)!,
-      ];
+  List<PlannedMaterialRow> liveMaterials(Map<String, dynamic>? rec) {
+    final bins = invReserveBinsOf(
+        (rec?['invreserve'] as List<dynamic>? ?? const [])
+            .cast<Map<String, dynamic>>());
+    return [
+      for (final m in (rec?['wpmaterial'] as List<dynamic>? ?? const [])
+          .cast<Map<String, dynamic>>())
+        if (materialFrom(m, bins) != null) materialFrom(m, bins)!,
+    ];
+  }
   List<PlannedToolRow> liveTools(Map<String, dynamic>? rec) => [
         for (final t in (rec?['wptool'] as List<dynamic>? ?? const [])
             .cast<Map<String, dynamic>>())

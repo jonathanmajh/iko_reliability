@@ -69,8 +69,11 @@ if ($assetNums.Count -gt 0) {
     Get-Oslc 'mxasset' ("assetnum in [$ain] and siteid=`"$Site`"") @('assetnum','description') 'assets'
 }
 
-# 5. planned labor / materials / tools / assignments for the whole tree
+# 5. planned labor / materials / tools / assignments for the whole tree.
+#    INVRESERVE comes along too: BINNUM (storeroom bin) is on INVRESERVE,
+#    linked from each WPMATERIAL row via reserveid — not on WPMATERIAL.
 Get-Oslc 'ikomxwodetail' ("wonum in [$in] and siteid=`"$Site`"") @(
-    'wonum','istask','wplabor','wpmaterial','wptool','assignment') 'plan'
+    'wonum','istask','wplabor','wpmaterial','wptool','assignment',
+    'invreserve') 'plan'
 
 Write-Host "`nDone - JSON files are in $out"

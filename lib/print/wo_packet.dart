@@ -51,14 +51,19 @@ class PlannedLaborRow {
       {this.name, this.craft, this.skilllevel, this.hours});
 }
 
-/// Planned material row (WPITEM).
+/// Planned material row (WPMATERIAL).
 class PlannedMaterialRow {
   final String item;
   final String? description;
   final String? qty;
+
+  /// Storeroom bin holding the item (INVRESERVE.BINNUM, resolved through
+  /// the row's reservation), e.g. `A-9-3`.
+  final String? binnum;
   final String? storeroom;
 
-  const PlannedMaterialRow(this.item, {this.description, this.qty, this.storeroom});
+  const PlannedMaterialRow(this.item,
+      {this.description, this.qty, this.binnum, this.storeroom});
 }
 
 /// Planned tool row (WPTOOL).
@@ -653,11 +658,18 @@ List<pw.Widget> _coverWidgets(WoPacket packet, String printedDate) {
     body.add(_emptyNote('No planned materials.'));
   } else {
     body.add(_table(
-      headers: ['Item', 'Description', 'Qty', 'Storeroom'],
-      widths: [70, -1, 46, 88],
+      headers: ['Item', 'Description', 'Qty', 'Qty Used', 'Bin', 'Storeroom'],
+      widths: [70, -1, 40, 42, 56, 76],
       rows: [
         for (final m in packet.materials)
-          [m.item, m.description ?? '', m.qty ?? '', m.storeroom ?? ''],
+          [
+            m.item,
+            m.description ?? '',
+            m.qty ?? '',
+            '', // blank: technician writes the quantity used
+            m.binnum ?? '',
+            m.storeroom ?? '',
+          ],
       ],
     ));
   }
@@ -785,11 +797,18 @@ List<pw.Widget> _childWidgets(WoChildPacket child) {
     parts.add(_emptyNote('No planned materials.'));
   } else {
     parts.add(_table(
-      headers: ['Item', 'Description', 'Qty', 'Storeroom'],
-      widths: [70, -1, 46, 88],
+      headers: ['Item', 'Description', 'Qty', 'Qty Used', 'Bin', 'Storeroom'],
+      widths: [70, -1, 40, 42, 56, 76],
       rows: [
         for (final m in child.materials)
-          [m.item, m.description ?? '', m.qty ?? '', m.storeroom ?? ''],
+          [
+            m.item,
+            m.description ?? '',
+            m.qty ?? '',
+            '', // blank: technician writes the quantity used
+            m.binnum ?? '',
+            m.storeroom ?? '',
+          ],
       ],
     ));
   }
