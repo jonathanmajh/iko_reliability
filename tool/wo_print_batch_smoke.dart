@@ -84,9 +84,9 @@ Future<void> main() async {
       fonts: loadWoPrintFontsFromDirectory());
   final s = String.fromCharCodes(bytes);
   final pages = RegExp(r'/Type\s*/Page[^s]').allMatches(s).length;
-  stdout.writeln('batch pages: $pages (expect 7: cover+child, cover, '
-      'cover+child whose task table spans 3 pages)');
-  if (pages != 7) {
+  stdout.writeln('batch pages: $pages (expect 6: cover+child, cover, '
+      'cover+child whose tasks flow across pages)');
+  if (pages != 6) {
     stderr.writeln('FAIL: unexpected batch page count');
     exitCode = 1;
   }

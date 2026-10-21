@@ -443,17 +443,76 @@ pw.Widget _signature(String label) => pw.Column(
       ],
     );
 
+// dart_pdf's Table cannot split *within* a row, and paints nothing when the
+// first row doesn't fit the remaining space — a tall task cell would defer
+// wholesale to the next page and leave the previous page mostly blank.
+// Cap every row around a third of a page by chunking long task text into
+// continuation rows (blank task number; notes column stays blank).
+const _taskLinesPerRow = 22;
+const _taskCharsPerLine = 64; // slightly under the real wrap, on the safe side
+
 List<List<String>> _tasksRows(List<WoTask> tasks) {
   return [
     for (final t in tasks)
-      [
-        t.taskid ?? '',
-        (t.longDesc != null && t.longDesc!.isNotEmpty)
-            ? '${t.description}\n${htmlToPlainText(t.longDesc)}'
-            : t.description,
-        '', // blank column for the technician's notes / measurements
+      ...[
+        for (var i = 0; i < _taskChunks(t).length; i++)
+          [
+            i == 0 ? (t.taskid ?? '') : '',
+            _taskChunks(t)[i],
+            '', // blank column for the technician's notes / measurements
+          ],
       ],
   ];
+}
+
+/// Text of a task as it renders in the table: description, then the long
+/// description below it.
+String _taskText(WoTask t) =>
+    (t.longDesc != null && t.longDesc!.isNotEmpty)
+        ? '${t.description}\n${htmlToPlainText(t.longDesc!)}'
+        : t.description;
+
+/// The task's text wrapped softly (word boundaries; hard-breaking rare
+/// unbreakable tokens over a full line), grouped into chunks of at most
+/// [_taskLinesPerRow] lines.
+List<String> _taskChunks(WoTask t) {
+  final lines = <String>[];
+  for (final para in _taskText(t).split('\n')) {
+    if (para.isEmpty) {
+      lines.add('');
+      continue;
+    }
+    var line = '';
+    for (final word in para.split(' ')) {
+      var rest = word;
+      while (rest.length > _taskCharsPerLine) {
+        if (line.isNotEmpty) {
+          lines.add(line);
+          line = '';
+        }
+        lines.add(rest.substring(0, _taskCharsPerLine));
+        rest = rest.substring(_taskCharsPerLine);
+      }
+      if (line.isEmpty) {
+        line = rest;
+      } else if (line.length + 1 + rest.length <= _taskCharsPerLine) {
+        line = '$line $rest';
+      } else {
+        lines.add(line);
+        line = rest;
+      }
+    }
+    if (line.isNotEmpty) lines.add(line);
+  }
+  final chunks = <String>[];
+  for (var i = 0; i < lines.length; i += _taskLinesPerRow) {
+    final end = (i + _taskLinesPerRow) < lines.length
+        ? i + _taskLinesPerRow
+        : lines.length;
+    final chunk = lines.sublist(i, end).join('\n');
+    if (chunk.trim().isNotEmpty) chunks.add(chunk);
+  }
+  return chunks;
 }
 
 const _taskTableSpec = (
@@ -467,7 +526,7 @@ const _taskTableSpec = (
 // cover (parent) section
 // ---------------------------------------------------------------------------
 
-pw.Widget _coverSection(WoPacket packet, String printedDate) {
+List<pw.Widget> _coverWidgets(WoPacket packet, String printedDate) {
   final h = packet.header;
   final wonum = _v(h, 'wonum');
   final status = _v(h, 'status');
@@ -631,14 +690,16 @@ pw.Widget _coverSection(WoPacket packet, String printedDate) {
     ]),
   ));
 
-  return pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: body);
+  // Flat list, NOT a Column — same reason as the child section: the tables
+  // must negotiate page breaks directly with the MultiPage.
+  return body;
 }
 
 // ---------------------------------------------------------------------------
 // child section
 // ---------------------------------------------------------------------------
 
-pw.Widget _childSection(WoChildPacket child) {
+List<pw.Widget> _childWidgets(WoChildPacket child) {
   final h = child.header;
   final longDesc = htmlToPlainText(h['longdesc'] as String?);
   final parts = <pw.Widget>[];
@@ -720,7 +781,10 @@ pw.Widget _childSection(WoChildPacket child) {
         style: pw.TextStyle(fontSize: 7.4, color: _muted)),
   ));
 
-  return pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: parts);
+  // Flat list, NOT a Column: MultiPage's page-break negotiation must reach
+  // the tasks/materials tables directly. Inside a Column they'd be deferred
+  // whole to the next page, leaving the previous page mostly blank.
+  return parts;
 }
 
 // ---------------------------------------------------------------------------
@@ -758,10 +822,10 @@ Future<({Uint8List bytes, int pages})> _renderAll(
       margin: pw.EdgeInsets.fromLTRB(32, 30, 32, 36),
       maxPages: maxPages,
       build: (ctx) => [
-        _coverSection(packet, printedDate),
+        ..._coverWidgets(packet, printedDate),
         for (final child in packet.children) ...[
           pw.NewPage(),
-          _childSection(child),
+          ..._childWidgets(child),
         ],
       ],
       footer: (ctx) => pw.Row(
