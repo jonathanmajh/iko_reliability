@@ -39,6 +39,7 @@ dependencies:
     super_drag_and_drop: ^0.9.1
     shared_preferences: ^2.5.3
     pdf_document: ^3.2.0
+    pdf: ^3.11.0
     excel_plus: ^2.12.4
 
 dev_dependencies:
