@@ -155,7 +155,9 @@ class _WoPrintPageState extends State<WoPrintPage> {
   bool _sameDate(String iso, DateTime picked) {
     final dt = DateTime.tryParse(iso);
     if (dt == null) return false;
-    return dt.year == picked.year && dt.month == picked.month && dt.day == picked.day;
+    return dt.year == picked.year &&
+        dt.month == picked.month &&
+        dt.day == picked.day;
   }
 
   // ---- list loading ---------------------------------------------------------
@@ -229,8 +231,7 @@ class _WoPrintPageState extends State<WoPrintPage> {
       setState(() {
         _rows = display.map(WoListRow.new).toList();
         final printable = _rows.where((r) => r.printable).length;
-        _status =
-            'Checked ${wonums.length} work order(s) - '
+        _status = 'Checked ${wonums.length} work order(s) - '
             '$printable released and printable.';
       });
     } on WoPrintFetchException catch (e) {
@@ -333,9 +334,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
       final bytes = await buildWoBatchPdf(packets, fonts: fonts);
       await Printing.layoutPdf(onLayout: (format) async => bytes);
       if (mounted) {
-        setState(
-            () => _status = 'Print dialog closed - '
-                '${packets.length} work order packet(s) in the pack.');
+        setState(() => _status = 'Print dialog closed - '
+            '${packets.length} work order packet(s) in the pack.');
       }
     } catch (e) {
       if (mounted) setState(() => _status = 'Print failed: $e');
@@ -488,9 +488,13 @@ class _WoPrintPageState extends State<WoPrintPage> {
         SegmentedButton<bool>(
           segments: const [
             ButtonSegment(
-                value: false, icon: Icon(Icons.filter_alt), label: Text('Filter')),
+                value: false,
+                icon: Icon(Icons.filter_alt),
+                label: Text('Filter')),
             ButtonSegment(
-                value: true, icon: Icon(Icons.paste), label: Text('Pasted list')),
+                value: true,
+                icon: Icon(Icons.paste),
+                label: Text('Pasted list')),
           ],
           selected: {_pasteMode},
           onSelectionChanged: (s) => setState(() => _pasteMode = s.first),
@@ -522,7 +526,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 isDense: true,
-                labelText: 'Work order numbers (comma, space or newline separated)',
+                labelText:
+                    'Work order numbers (comma, space or newline separated)',
                 hintText: 'W24J12811, W24J12812',
               ),
             ),
@@ -595,8 +600,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
         children: [
           _dateFilterChip('Released on', _releasedOn,
               (d) => setState(() => _releasedOn = d)),
-          _dateFilterChip('Target start', _targetOn,
-              (d) => setState(() => _targetOn = d)),
+          _dateFilterChip(
+              'Target start', _targetOn, (d) => setState(() => _targetOn = d)),
           _dateFilterChip('Scheduled', _scheduledOn,
               (d) => setState(() => _scheduledOn = d)),
         ],
@@ -645,9 +650,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
     final filtered = _filteredRows;
     return ListView.builder(
       itemCount: filtered.length + 1,
-      itemBuilder: (context, i) => i == 0
-          ? _rowHeader()
-          : _rowTile(filtered[i - 1]),
+      itemBuilder: (context, i) =>
+          i == 0 ? _rowHeader() : _rowTile(filtered[i - 1]),
     );
   }
 
@@ -661,20 +665,16 @@ class _WoPrintPageState extends State<WoPrintPage> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         border: Border(
-            bottom: BorderSide(color: Theme.of(context).dividerColor, width: 1)),
+            bottom:
+                BorderSide(color: Theme.of(context).dividerColor, width: 1)),
       ),
       child: Row(
         children: [
           const SizedBox(width: 40),
           SizedBox(width: 110, child: Text('WONUM', style: headerStyle)),
-          Expanded(
-              flex: 4,
-              child: Text('DESCRIPTION', style: headerStyle)),
-          Expanded(
-              flex: 1,
-              child: Text('ASSET', style: headerStyle)),
-          SizedBox(
-              width: 70, child: Text('TARGET', style: headerStyle)),
+          Expanded(flex: 4, child: Text('DESCRIPTION', style: headerStyle)),
+          Expanded(flex: 1, child: Text('ASSET', style: headerStyle)),
+          SizedBox(width: 70, child: Text('TARGET', style: headerStyle)),
           SizedBox(width: 130, child: Text('STATUS', style: headerStyle)),
         ],
       ),
@@ -698,8 +698,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
                   .withValues(alpha: 0.35)
               : null,
           border: Border(
-              bottom:
-                  BorderSide(color: Theme.of(context).dividerColor, width: 0.5)),
+              bottom: BorderSide(
+                  color: Theme.of(context).dividerColor, width: 0.5)),
         ),
         child: Row(
           children: [
@@ -713,7 +713,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
             SizedBox(
               width: 110,
               child: Text(row.wonum,
-                  style: const TextStyle(fontFamily: 'RobotoMono', fontSize: 12)),
+                  style:
+                      const TextStyle(fontFamily: 'RobotoMono', fontSize: 12)),
             ),
             Expanded(
               flex: 4,
@@ -721,7 +722,9 @@ class _WoPrintPageState extends State<WoPrintPage> {
                 row.description,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: printable ? null : muted?.copyWith(fontStyle: FontStyle.italic),
+                style: printable
+                    ? null
+                    : muted?.copyWith(fontStyle: FontStyle.italic),
               ),
             ),
             Expanded(
@@ -732,9 +735,7 @@ class _WoPrintPageState extends State<WoPrintPage> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(
-                width: 70,
-                child: Text(row.target, style: muted)),
+            SizedBox(width: 70, child: Text(row.target, style: muted)),
             SizedBox(
               width: 130,
               child: Text(
@@ -767,13 +768,13 @@ class _WoPrintPageState extends State<WoPrintPage> {
           OutlinedButton.icon(
             onPressed: _generating ? null : _savePdfs,
             icon: const Icon(Icons.save),
-            label: const Text('Save PDFs...'),
+            label: const Text('Save As PDF (Individual Files)'),
           ),
           const SizedBox(width: 12),
           OutlinedButton.icon(
             onPressed: _generating ? null : _saveSinglePdf,
             icon: const Icon(Icons.picture_as_pdf),
-            label: const Text('Save PDF...'),
+            label: const Text('Save As PDF (One Package)'),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -790,9 +791,9 @@ class _WoPrintPageState extends State<WoPrintPage> {
                   )
                 : Text(
                     _status,
-                    style: _status.startsWith('Failed') || _status.startsWith('Fetch')
-                        ? TextStyle(
-                            color: Theme.of(context).colorScheme.error)
+                    style: _status.startsWith('Failed') ||
+                            _status.startsWith('Fetch')
+                        ? TextStyle(color: Theme.of(context).colorScheme.error)
                         : null,
                   ),
           ),
