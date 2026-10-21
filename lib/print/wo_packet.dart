@@ -404,8 +404,11 @@ pw.Widget _table({
         for (final cell in e.value)
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 3.5),
+            // No `lineSpacing` here: with it, dart_pdf's row splitter loops
+            // forever when a row has to break across pages — regression
+            // covered by the page-spanning packet in wo_print_batch_smoke.
             child: pw.Text(sanitizePdfText(cell),
-                style: pw.TextStyle(fontSize: fontSize, color: _ink, lineSpacing: 2.2)),
+                style: pw.TextStyle(fontSize: fontSize, color: _ink)),
           ),
       ],
     );

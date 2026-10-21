@@ -15,6 +15,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:iko_reliability_flutter/print/wo_assemble.dart'
+    show assembleWoPrintBatch;
 import 'package:iko_reliability_flutter/print/wo_packet.dart';
 
 import 'wo_print_fonts.dart';
@@ -60,6 +62,11 @@ String _fmtVal(dynamic v) {
 }
 
 Future<void> main(List<String> args) async {
+  final dataDir = _arg('--data', args);
+  if (dataDir != null) {
+    await _runFromData(dataDir);
+    return;
+  }
   final key = Platform.environment['IKO_TEST2_APIKEY'] ?? _arg('--key', args) ?? '';
   if (key.isEmpty) {
     stderr.writeln('Missing API key: set IKO_TEST2_APIKEY or pass --key <key>.');
@@ -289,4 +296,55 @@ String? _arg(String name, List<String> args) {
     if (args[i].startsWith('$name=')) return args[i].substring(name.length + 1);
   }
   return null;
+}
+
+/// Renders from the JSON files produced by tool/prod_wo_dump.ps1 —
+/// no Maximo access or API key needed. Usage:
+///   dart run tool/wo_print_sample.dart --data tool/prod_data
+Future<void> _runFromData(String dir) async {
+  List<Map<String, dynamic>> rows(String name) {
+    final root = jsonDecode(File('$dir/$name.json').readAsStringSync());
+    if (root is Map && root['member'] is List) {
+      return (root['member'] as List).cast<Map<String, dynamic>>();
+    }
+    if (root is List) return root.cast<Map<String, dynamic>>();
+    if (root is Map) return [root.cast<String, dynamic>()];
+    throw FormatException('Unrecognized shape in $dir/$name.json');
+  }
+
+  final parentRows = rows('parent');
+  final wonum = '${parentRows.first['wonum']}';
+  final site = '${parentRows.first['siteid']}';
+  stdout.writeln('Rendering $wonum (site $site) from dumped data ...');
+
+  final childRows = rows('children')
+      .where((r) => r['istask'].toString() != 'true')
+      .toList();
+  final batch = assembleWoPrintBatch(
+    parents: [wonum],
+    validParentRows: parentRows
+        .where((r) => '${r['parent'] ?? ''}'.isEmpty)
+        .toList(),
+    childRows: childRows,
+    taskRows: rows('tasks'),
+    assetRows:
+        File('$dir/assets.json').existsSync() ? rows('assets') : const [],
+    planRows: rows('plan'),
+    site: site,
+  );
+  if (batch.packets.isEmpty) {
+    stderr.writeln('No packet assembled from $dir');
+    exit(2);
+  }
+  stdout.writeln(
+      'packet: ${batch.packets.first.children.length} child WOs, '
+      '${batch.packets.first.tasks.length} parent tasks');
+  final bytes = await buildWoPacketPdf(
+    batch.packets.first,
+    fonts: loadWoPrintFontsFromDirectory(),
+  );
+  final out = File('samples/${wonum}_print_pack.pdf')
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(bytes);
+  stdout.writeln('Wrote ${out.path} (${bytes.length} bytes)');
 }

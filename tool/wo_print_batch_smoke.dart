@@ -1,6 +1,7 @@
-// Smoke test: batch render of two synthetic packets (no Maximo calls).
-// Expect 3 pages for the batch (cover + child + second cover) and 1 for a
-// single packet. Run: dart run tool/wo_print_batch_smoke.dart
+// Smoke test: batch render of three synthetic packets (no Maximo calls):
+// cover + child, second cover, and a child whose task table must split
+// across a page boundary (regression for the lineSpacing row-split hang).
+// Run: dart run tool/wo_print_batch_smoke.dart
 import 'dart:io';
 
 import 'package:iko_reliability_flutter/print/wo_packet.dart';
@@ -41,10 +42,54 @@ Future<void> main() async {
     },
     tasks: const [],
   );
-  final bytes = await buildWoBatchPdf([p1, p2], fonts: loadWoPrintFontsFromDirectory());
+  // Regression: a table row that must break ACROSS a page boundary hangs
+  // forever when its text uses `lineSpacing` (dart_pdf bug). The filler
+  // tasks push the long-description task to the bottom of the child page,
+  // forcing an in-row split. Must render to a small finite page count.
+  final longLd = List.filled(30, 'Inspect the motor housing, fan, power '
+          'cable and bolts for dust, dirt buildup, damage, kinks or '
+          'looseness; clean/replace as required before release.')
+      .join(' ');
+  const fillerTask = WoTask(
+      wonum: 'WOA-2', taskid: '', description: 'filler: verify guards and '
+      'access covers are in place before applying test power.');
+  final p3 = WoPacket(
+    header: {
+      'wonum': 'WOC',
+      'description': 'row split regression',
+      'status': 'RELEASED',
+      'siteid': 'AA',
+    },
+    tasks: const [],
+    children: [
+      WoChildPacket(
+        header: {
+          'wonum': 'WOC-1',
+          'description': 'child with a page-spanning task table',
+          'status': 'RELEASED',
+          'parent': 'WOC',
+        },
+        tasks: [
+          fillerTask, fillerTask, fillerTask, fillerTask,
+          fillerTask, fillerTask, fillerTask, fillerTask,
+          fillerTask, fillerTask, fillerTask, fillerTask,
+          WoTask(wonum: 'WOC-1', taskid: '20', description: 'long LD task',
+              longDesc: longLd),
+        ],
+      ),
+    ],
+  );
+  final bytes = await buildWoBatchPdf(
+      [p1, p2, p3],
+      fonts: loadWoPrintFontsFromDirectory());
   final s = String.fromCharCodes(bytes);
   final pages = RegExp(r'/Type\s*/Page[^s]').allMatches(s).length;
-  stdout.writeln('batch pages: $pages (expect 3)');
+  stdout.writeln('batch pages: $pages (expect 7: cover+child, cover, '
+      'cover+child whose task table spans 3 pages)');
+  if (pages != 7) {
+    stderr.writeln('FAIL: unexpected batch page count');
+    exitCode = 1;
+  }
   final single = await buildWoPacketPdf(p2, fonts: loadWoPrintFontsFromDirectory());
   final sp = RegExp(r'/Type\s*/Page[^s]')
       .allMatches(String.fromCharCodes(single))
