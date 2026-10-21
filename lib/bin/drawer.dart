@@ -42,6 +42,15 @@ class NavDrawer extends StatelessWidget {
                 ),
               ],
             )),
+        // top-level print tool, available to all users
+        ListTile(
+          leading: const Icon(Icons.print),
+          title: const Text('Work Order Print'),
+          onTap: () {
+            context.router.replacePath("/wo-print");
+            Navigator.pop(context); // close the drawer
+          },
+        ),
         ExpansionTile(
           initiallyExpanded: true,
           title: const Text("Criticality"),

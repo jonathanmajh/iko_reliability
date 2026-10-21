@@ -11,6 +11,7 @@ import '../admin/pdf_link_tool_page.dart';
 import '../criticality/asset_criticality.dart';
 import '../criticality/spare_criticality.dart';
 import '../criticality/system_criticality.dart';
+import '../print/wo_print_page.dart';
 import '../items/item.dart';
 
 part 'route.gr.dart';
@@ -38,5 +39,6 @@ class AppRouter extends RootStackRouter {
         AutoRoute(path: "/timesheet", page: TimesheetRoute.page),
         AutoRoute(path: "/item", page: ItemRoute.page),
         AutoRoute(path: "/pdf-link-tool", page: PdfLinkToolRoute.page),
+        AutoRoute(path: "/wo-print", page: WoPrintRoute.page),
       ];
 }

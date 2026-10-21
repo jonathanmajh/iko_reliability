@@ -201,3 +201,19 @@ class TimesheetRoute extends PageRouteInfo<void> {
     },
   );
 }
+
+/// generated route for
+/// [WoPrintPage]
+class WoPrintRoute extends PageRouteInfo<void> {
+  const WoPrintRoute({List<PageRouteInfo>? children})
+      : super(WoPrintRoute.name, initialChildren: children);
+
+  static const String name = 'WoPrintRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const WoPrintPage();
+    },
+  );
+}

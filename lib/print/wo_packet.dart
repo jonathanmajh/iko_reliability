@@ -613,9 +613,11 @@ pw.Widget _childSection(WoChildPacket child) {
 // entry point
 // ---------------------------------------------------------------------------
 
-/// Renders the packet once (no total page label), returns bytes + page count.
-Future<({Uint8List bytes, int pages})> _render(
-  WoPacket packet,
+/// Renders [packets] into one document (no total page label), returns bytes
+/// + page count. Each packet's cover starts on a fresh page; footer page
+/// numbers run continuously across the whole document.
+Future<({Uint8List bytes, int pages})> _renderAll(
+  List<WoPacket> packets,
   String printedDate,
   int? totalPages,
 ) async {
@@ -626,33 +628,37 @@ Future<({Uint8List bytes, int pages})> _render(
       italic: pw.Font.helveticaOblique(),
     ),
   );
-  final wonum = _v(packet.header, 'wonum');
 
-  doc.addPage(pw.MultiPage(
-    pageFormat: PdfPageFormat.letter,
-    margin: pw.EdgeInsets.fromLTRB(32, 30, 32, 36),
-    maxPages: 500,
-    build: (ctx) => [
-      _coverSection(packet, printedDate),
-      for (final child in packet.children) ...[
-        pw.NewPage(),
-        _childSection(child),
+  for (final packet in packets) {
+    final wonum = _v(packet.header, 'wonum');
+
+    doc.addPage(pw.MultiPage(
+      pageFormat: PdfPageFormat.letter,
+      margin: pw.EdgeInsets.fromLTRB(32, 30, 32, 36),
+      maxPages: 500,
+      build: (ctx) => [
+        _coverSection(packet, printedDate),
+        for (final child in packet.children) ...[
+          pw.NewPage(),
+          _childSection(child),
+        ],
       ],
-    ],
-    footer: (ctx) => pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Text(
-          totalPages == null
-              ? 'WO $wonum - Page ${ctx.pageNumber}'
-              : 'WO $wonum - Page ${ctx.pageNumber} of $totalPages',
-          style: pw.TextStyle(fontSize: 6.6, color: _muted),
-        ),
-        pw.Text('Printed $printedDate',
-            style: pw.TextStyle(fontSize: 6.6, color: _muted)),
-      ],
-    ),
-  ));
+      footer: (ctx) => pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            totalPages == null
+                ? 'WO $wonum - Page ${ctx.pageNumber}'
+                : 'WO $wonum - Page ${ctx.pageNumber} of $totalPages',
+            style: pw.TextStyle(fontSize: 6.6, color: _muted),
+          ),
+          pw.Text('Printed $printedDate',
+              style: pw.TextStyle(fontSize: 6.6, color: _muted)),
+        ],
+      ),
+    ));
+  }
+
   final bytes = await doc.save();
   final pages = doc.document.pdfPageList.pages.length;
   return (bytes: bytes, pages: pages);
@@ -665,9 +671,20 @@ Future<({Uint8List bytes, int pages})> _render(
 Future<Uint8List> buildWoPacketPdf(
   WoPacket packet, {
   DateTime? printed,
+}) =>
+    buildWoBatchPdf([packet], printed: printed);
+
+/// Builds one merged PDF for a batch of work order packets (each packet is
+/// a cover + one page per child WO, pages numbered continuously).
+Future<Uint8List> buildWoBatchPdf(
+  List<WoPacket> packets, {
+  DateTime? printed,
 }) async {
+  if (packets.isEmpty) {
+    throw ArgumentError('buildWoBatchPdf: no packets to render.');
+  }
   final printedDate = _fmtDateOnly(printed ?? DateTime.now());
-  final first = await _render(packet, printedDate, null);
-  final second = await _render(packet, printedDate, first.pages);
+  final first = await _renderAll(packets, printedDate, null);
+  final second = await _renderAll(packets, printedDate, first.pages);
   return second.bytes;
 }

@@ -40,6 +40,7 @@ dependencies:
     shared_preferences: ^2.5.3
     pdf_document: ^3.2.0
     pdf: ^3.11.0
+    printing: ^5.15.1
     excel_plus: ^2.12.4
 
 dev_dependencies:
