@@ -69,11 +69,16 @@ Future<Map<String, dynamic>> getUserMaximo(
         newSetting:
             Setting(key: 'isAdmin', value: parsed['inactiveSites'].toString()),
       );
-      // database!.setSettings(
-      //   newSetting: Setting(
-      //       key: 'selectedSite',
-      //       value: parsed['defaultSite'].toString().toUpperCase()),
-      // );
+      // set the site to the user's default site on first login, but only when
+      // no site has been selected previously
+      if ((parsed['defaultSite'] as String? ?? '').isNotEmpty) {
+        final siteNotifier = Provider.of<SelectedSiteNotifier>(
+            navigatorKey.currentContext!,
+            listen: false);
+        if (siteNotifier.selectedSite.isEmpty) {
+          siteNotifier.setSite(parsed['defaultSite'].toString().toUpperCase());
+        }
+      }
       Provider.of<SettingsNotifier>(navigatorKey.currentContext!, listen: false)
           .setAdmin(parsed['inactiveSites']);
       return parsed;
