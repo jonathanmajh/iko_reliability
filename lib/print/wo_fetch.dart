@@ -59,7 +59,11 @@ class WoPrintFetcher {
     'targstartdate',
     'targcompdate',
     'reportdate',
-    'iko_conditions_description',
+    // NOTE: must select the IKO_CONDITIONS *domain attribute*, not its
+    // `_description` synonym: Maximo OSLC silently drops
+    // `iko_conditions_description` when selected explicitly, but returns
+    // both the code and the description when `iko_conditions` is selected.
+    'iko_conditions',
     'estdur',
     'schedstart',
     'schedfinish',
