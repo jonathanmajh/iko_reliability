@@ -548,7 +548,7 @@ class _NewSystemFormState extends State<NewSystemForm> {
                     }
                     return null;
                   },
-                  value: selectedSystem,
+                  initialValue: selectedSystem,
                   items: productionLines.keys
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(

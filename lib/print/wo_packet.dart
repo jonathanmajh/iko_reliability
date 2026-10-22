@@ -12,6 +12,7 @@
 //   materials). Children are not scheduled, so there is no schedule block.
 library;
 
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
@@ -913,3 +914,44 @@ Future<Uint8List> buildWoBatchPdf(
   final second = await _renderAll(packets, printedDate, first.pages, fonts);
   return second.bytes;
 }
+
+// ---------------------------------------------------------------------------
+// background-isolate entry points
+//
+// The pdf package's layout is CPU-heavy and, called directly, it runs on the
+// callers thread — for the Flutter page that is the main (UI/platform)
+// thread, and the window freezes for the whole render. Keeping it that way
+// would also freeze any in-app progress indicator (it cannot repaint while
+// the main thread is busy). The helpers below run the same renderers on a
+// background isolate; packets and the custom fonts are plain Dart data
+// (maps, strings, ByteData), so they are copied to the isolate and the
+// Uint8List results are copied back.
+// ---------------------------------------------------------------------------
+
+/// Builds the merged print-pack PDF on a background isolate.
+Future<Uint8List> buildWoBatchPdfIsolated(
+  List<WoPacket> packets, {
+  DateTime? printed,
+  WoPrintFonts? fonts,
+}) =>
+    // run() awaits the computation's completion, so R is Uint8List.
+    Isolate.run(
+      () async =>
+          await buildWoBatchPdf(packets, printed: printed, fonts: fonts),
+    );
+
+/// Builds the merged print pack and one PDF per packet in a single
+/// background-isolate run (used by "Save As PDF (Individual Files)": one
+/// invocation produces all bytes and the caller only writes files).
+Future<({Uint8List merged, List<Uint8List> singles})> buildWoPdfKitIsolated(
+  List<WoPacket> packets, {
+  DateTime? printed,
+  WoPrintFonts? fonts,
+}) => Isolate.run(() async {
+  final merged = await buildWoBatchPdf(packets, printed: printed, fonts: fonts);
+  final singles = <Uint8List>[
+    for (final packet in packets)
+      await buildWoPacketPdf(packet, printed: printed, fonts: fonts),
+  ];
+  return (merged: merged, singles: singles);
+});

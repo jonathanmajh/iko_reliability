@@ -9,143 +9,217 @@ class $ItemCachesTable extends ItemCaches
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $ItemCachesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _itemnumMeta =
-      const VerificationMeta('itemnum');
+  static const VerificationMeta _itemnumMeta = const VerificationMeta(
+    'itemnum',
+  );
   @override
   late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
-      'itemnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'itemnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _detailsMeta =
-      const VerificationMeta('details');
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _detailsMeta = const VerificationMeta(
+    'details',
+  );
   @override
   late final GeneratedColumn<String> details = GeneratedColumn<String>(
-      'details', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _changedDateMeta =
-      const VerificationMeta('changedDate');
+    'details',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _changedDateMeta = const VerificationMeta(
+    'changedDate',
+  );
   @override
   late final GeneratedColumn<String> changedDate = GeneratedColumn<String>(
-      'changed_date', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _searchTextMeta =
-      const VerificationMeta('searchText');
+    'changed_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _searchTextMeta = const VerificationMeta(
+    'searchText',
+  );
   @override
   late final GeneratedColumn<String> searchText = GeneratedColumn<String>(
-      'search_text', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _glClassMeta =
-      const VerificationMeta('glClass');
+    'search_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _glClassMeta = const VerificationMeta(
+    'glClass',
+  );
   @override
   late final GeneratedColumn<String> glClass = GeneratedColumn<String>(
-      'gl_class', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'gl_class',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _uomMeta = const VerificationMeta('uom');
   @override
   late final GeneratedColumn<String> uom = GeneratedColumn<String>(
-      'uom', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _commodityGroupMeta =
-      const VerificationMeta('commodityGroup');
+    'uom',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _commodityGroupMeta = const VerificationMeta(
+    'commodityGroup',
+  );
   @override
   late final GeneratedColumn<String> commodityGroup = GeneratedColumn<String>(
-      'commodity_group', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _extSearchTextMeta =
-      const VerificationMeta('extSearchText');
+    'commodity_group',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _extSearchTextMeta = const VerificationMeta(
+    'extSearchText',
+  );
   @override
   late final GeneratedColumn<String> extSearchText = GeneratedColumn<String>(
-      'ext_search_text', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _extDescriptionMeta =
-      const VerificationMeta('extDescription');
+    'ext_search_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _extDescriptionMeta = const VerificationMeta(
+    'extDescription',
+  );
   @override
   late final GeneratedColumn<String> extDescription = GeneratedColumn<String>(
-      'ext_description', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'ext_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        itemnum,
-        description,
-        details,
-        changedDate,
-        searchText,
-        glClass,
-        uom,
-        commodityGroup,
-        extSearchText,
-        extDescription
-      ];
+    itemnum,
+    description,
+    details,
+    changedDate,
+    searchText,
+    glClass,
+    uom,
+    commodityGroup,
+    extSearchText,
+    extDescription,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'itemCache';
   @override
-  VerificationContext validateIntegrity(Insertable<ItemCache> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<ItemCache> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('itemnum')) {
-      context.handle(_itemnumMeta,
-          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+      context.handle(
+        _itemnumMeta,
+        itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_itemnumMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
     if (data.containsKey('details')) {
-      context.handle(_detailsMeta,
-          details.isAcceptableOrUnknown(data['details']!, _detailsMeta));
+      context.handle(
+        _detailsMeta,
+        details.isAcceptableOrUnknown(data['details']!, _detailsMeta),
+      );
     }
     if (data.containsKey('changed_date')) {
       context.handle(
+        _changedDateMeta,
+        changedDate.isAcceptableOrUnknown(
+          data['changed_date']!,
           _changedDateMeta,
-          changedDate.isAcceptableOrUnknown(
-              data['changed_date']!, _changedDateMeta));
+        ),
+      );
     }
     if (data.containsKey('search_text')) {
       context.handle(
-          _searchTextMeta,
-          searchText.isAcceptableOrUnknown(
-              data['search_text']!, _searchTextMeta));
+        _searchTextMeta,
+        searchText.isAcceptableOrUnknown(data['search_text']!, _searchTextMeta),
+      );
     }
     if (data.containsKey('gl_class')) {
-      context.handle(_glClassMeta,
-          glClass.isAcceptableOrUnknown(data['gl_class']!, _glClassMeta));
+      context.handle(
+        _glClassMeta,
+        glClass.isAcceptableOrUnknown(data['gl_class']!, _glClassMeta),
+      );
     }
     if (data.containsKey('uom')) {
       context.handle(
-          _uomMeta, uom.isAcceptableOrUnknown(data['uom']!, _uomMeta));
+        _uomMeta,
+        uom.isAcceptableOrUnknown(data['uom']!, _uomMeta),
+      );
     }
     if (data.containsKey('commodity_group')) {
       context.handle(
+        _commodityGroupMeta,
+        commodityGroup.isAcceptableOrUnknown(
+          data['commodity_group']!,
           _commodityGroupMeta,
-          commodityGroup.isAcceptableOrUnknown(
-              data['commodity_group']!, _commodityGroupMeta));
+        ),
+      );
     }
     if (data.containsKey('ext_search_text')) {
       context.handle(
+        _extSearchTextMeta,
+        extSearchText.isAcceptableOrUnknown(
+          data['ext_search_text']!,
           _extSearchTextMeta,
-          extSearchText.isAcceptableOrUnknown(
-              data['ext_search_text']!, _extSearchTextMeta));
+        ),
+      );
     }
     if (data.containsKey('ext_description')) {
       context.handle(
+        _extDescriptionMeta,
+        extDescription.isAcceptableOrUnknown(
+          data['ext_description']!,
           _extDescriptionMeta,
-          extDescription.isAcceptableOrUnknown(
-              data['ext_description']!, _extDescriptionMeta));
+        ),
+      );
     }
     return context;
   }
@@ -156,26 +230,46 @@ class $ItemCachesTable extends ItemCaches
   ItemCache map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ItemCache(
-      itemnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      details: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}details']),
-      changedDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}changed_date']),
-      searchText: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}search_text']),
-      glClass: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}gl_class']),
-      uom: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}uom']),
-      commodityGroup: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}commodity_group']),
-      extSearchText: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}ext_search_text']),
-      extDescription: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}ext_description']),
+      itemnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}itemnum'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      details: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}details'],
+      ),
+      changedDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}changed_date'],
+      ),
+      searchText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}search_text'],
+      ),
+      glClass: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gl_class'],
+      ),
+      uom: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uom'],
+      ),
+      commodityGroup: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}commodity_group'],
+      ),
+      extSearchText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ext_search_text'],
+      ),
+      extDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ext_description'],
+      ),
     );
   }
 
@@ -196,17 +290,18 @@ class ItemCache extends DataClass implements Insertable<ItemCache> {
   final String? commodityGroup;
   final String? extSearchText;
   final String? extDescription;
-  const ItemCache(
-      {required this.itemnum,
-      required this.description,
-      this.details,
-      this.changedDate,
-      this.searchText,
-      this.glClass,
-      this.uom,
-      this.commodityGroup,
-      this.extSearchText,
-      this.extDescription});
+  const ItemCache({
+    required this.itemnum,
+    required this.description,
+    this.details,
+    this.changedDate,
+    this.searchText,
+    this.glClass,
+    this.uom,
+    this.commodityGroup,
+    this.extSearchText,
+    this.extDescription,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -268,8 +363,10 @@ class ItemCache extends DataClass implements Insertable<ItemCache> {
     );
   }
 
-  factory ItemCache.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory ItemCache.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ItemCache(
       itemnum: serializer.fromJson<String>(json['itemnum']),
@@ -301,42 +398,48 @@ class ItemCache extends DataClass implements Insertable<ItemCache> {
     };
   }
 
-  ItemCache copyWith(
-          {String? itemnum,
-          String? description,
-          Value<String?> details = const Value.absent(),
-          Value<String?> changedDate = const Value.absent(),
-          Value<String?> searchText = const Value.absent(),
-          Value<String?> glClass = const Value.absent(),
-          Value<String?> uom = const Value.absent(),
-          Value<String?> commodityGroup = const Value.absent(),
-          Value<String?> extSearchText = const Value.absent(),
-          Value<String?> extDescription = const Value.absent()}) =>
-      ItemCache(
-        itemnum: itemnum ?? this.itemnum,
-        description: description ?? this.description,
-        details: details.present ? details.value : this.details,
-        changedDate: changedDate.present ? changedDate.value : this.changedDate,
-        searchText: searchText.present ? searchText.value : this.searchText,
-        glClass: glClass.present ? glClass.value : this.glClass,
-        uom: uom.present ? uom.value : this.uom,
-        commodityGroup:
-            commodityGroup.present ? commodityGroup.value : this.commodityGroup,
-        extSearchText:
-            extSearchText.present ? extSearchText.value : this.extSearchText,
-        extDescription:
-            extDescription.present ? extDescription.value : this.extDescription,
-      );
+  ItemCache copyWith({
+    String? itemnum,
+    String? description,
+    Value<String?> details = const Value.absent(),
+    Value<String?> changedDate = const Value.absent(),
+    Value<String?> searchText = const Value.absent(),
+    Value<String?> glClass = const Value.absent(),
+    Value<String?> uom = const Value.absent(),
+    Value<String?> commodityGroup = const Value.absent(),
+    Value<String?> extSearchText = const Value.absent(),
+    Value<String?> extDescription = const Value.absent(),
+  }) => ItemCache(
+    itemnum: itemnum ?? this.itemnum,
+    description: description ?? this.description,
+    details: details.present ? details.value : this.details,
+    changedDate: changedDate.present ? changedDate.value : this.changedDate,
+    searchText: searchText.present ? searchText.value : this.searchText,
+    glClass: glClass.present ? glClass.value : this.glClass,
+    uom: uom.present ? uom.value : this.uom,
+    commodityGroup: commodityGroup.present
+        ? commodityGroup.value
+        : this.commodityGroup,
+    extSearchText: extSearchText.present
+        ? extSearchText.value
+        : this.extSearchText,
+    extDescription: extDescription.present
+        ? extDescription.value
+        : this.extDescription,
+  );
   ItemCache copyWithCompanion(ItemCachesCompanion data) {
     return ItemCache(
       itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       details: data.details.present ? data.details.value : this.details,
-      changedDate:
-          data.changedDate.present ? data.changedDate.value : this.changedDate,
-      searchText:
-          data.searchText.present ? data.searchText.value : this.searchText,
+      changedDate: data.changedDate.present
+          ? data.changedDate.value
+          : this.changedDate,
+      searchText: data.searchText.present
+          ? data.searchText.value
+          : this.searchText,
       glClass: data.glClass.present ? data.glClass.value : this.glClass,
       uom: data.uom.present ? data.uom.value : this.uom,
       commodityGroup: data.commodityGroup.present
@@ -369,8 +472,18 @@ class ItemCache extends DataClass implements Insertable<ItemCache> {
   }
 
   @override
-  int get hashCode => Object.hash(itemnum, description, details, changedDate,
-      searchText, glClass, uom, commodityGroup, extSearchText, extDescription);
+  int get hashCode => Object.hash(
+    itemnum,
+    description,
+    details,
+    changedDate,
+    searchText,
+    glClass,
+    uom,
+    commodityGroup,
+    extSearchText,
+    extDescription,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -424,8 +537,8 @@ class ItemCachesCompanion extends UpdateCompanion<ItemCache> {
     this.extSearchText = const Value.absent(),
     this.extDescription = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : itemnum = Value(itemnum),
-        description = Value(description);
+  }) : itemnum = Value(itemnum),
+       description = Value(description);
   static Insertable<ItemCache> custom({
     Expression<String>? itemnum,
     Expression<String>? description,
@@ -454,18 +567,19 @@ class ItemCachesCompanion extends UpdateCompanion<ItemCache> {
     });
   }
 
-  ItemCachesCompanion copyWith(
-      {Value<String>? itemnum,
-      Value<String>? description,
-      Value<String?>? details,
-      Value<String?>? changedDate,
-      Value<String?>? searchText,
-      Value<String?>? glClass,
-      Value<String?>? uom,
-      Value<String?>? commodityGroup,
-      Value<String?>? extSearchText,
-      Value<String?>? extDescription,
-      Value<int>? rowid}) {
+  ItemCachesCompanion copyWith({
+    Value<String>? itemnum,
+    Value<String>? description,
+    Value<String?>? details,
+    Value<String?>? changedDate,
+    Value<String?>? searchText,
+    Value<String?>? glClass,
+    Value<String?>? uom,
+    Value<String?>? commodityGroup,
+    Value<String?>? extSearchText,
+    Value<String?>? extDescription,
+    Value<int>? rowid,
+  }) {
     return ItemCachesCompanion(
       itemnum: itemnum ?? this.itemnum,
       description: description ?? this.description,
@@ -545,137 +659,209 @@ class $InventoryCachesTable extends InventoryCaches
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $InventoryCachesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _itemnumMeta =
-      const VerificationMeta('itemnum');
+  static const VerificationMeta _itemnumMeta = const VerificationMeta(
+    'itemnum',
+  );
   @override
   late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
-      'itemnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'itemnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
   late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
-      'siteid', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _catalogcodeMeta =
-      const VerificationMeta('catalogcode');
+    'siteid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _catalogcodeMeta = const VerificationMeta(
+    'catalogcode',
+  );
   @override
   late final GeneratedColumn<String> catalogcode = GeneratedColumn<String>(
-      'catalogcode', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _modelnumMeta =
-      const VerificationMeta('modelnum');
+    'catalogcode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modelnumMeta = const VerificationMeta(
+    'modelnum',
+  );
   @override
   late final GeneratedColumn<String> modelnum = GeneratedColumn<String>(
-      'modelnum', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'modelnum',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
   @override
   late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
-      'vendor', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _manufacturerMeta =
-      const VerificationMeta('manufacturer');
+    'vendor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _manufacturerMeta = const VerificationMeta(
+    'manufacturer',
+  );
   @override
   late final GeneratedColumn<String> manufacturer = GeneratedColumn<String>(
-      'manufacturer', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _companynameMeta =
-      const VerificationMeta('companyname');
+    'manufacturer',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _companynameMeta = const VerificationMeta(
+    'companyname',
+  );
   @override
   late final GeneratedColumn<String> companyname = GeneratedColumn<String>(
-      'companyname', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _rowstampMeta =
-      const VerificationMeta('rowstamp');
+    'companyname',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _rowstampMeta = const VerificationMeta(
+    'rowstamp',
+  );
   @override
   late final GeneratedColumn<String> rowstamp = GeneratedColumn<String>(
-      'rowstamp', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _locationMeta =
-      const VerificationMeta('location');
+    'rowstamp',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
   @override
   late final GeneratedColumn<String> location = GeneratedColumn<String>(
-      'location', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'location',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _binnumMeta = const VerificationMeta('binnum');
   @override
   late final GeneratedColumn<String> binnum = GeneratedColumn<String>(
-      'binnum', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'binnum',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        itemnum,
-        siteid,
-        catalogcode,
-        modelnum,
-        vendor,
-        manufacturer,
-        companyname,
-        rowstamp,
-        location,
-        binnum
-      ];
+    itemnum,
+    siteid,
+    catalogcode,
+    modelnum,
+    vendor,
+    manufacturer,
+    companyname,
+    rowstamp,
+    location,
+    binnum,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'inventoryCache';
   @override
-  VerificationContext validateIntegrity(Insertable<InventoryCache> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<InventoryCache> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('itemnum')) {
-      context.handle(_itemnumMeta,
-          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+      context.handle(
+        _itemnumMeta,
+        itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_itemnumMeta);
     }
     if (data.containsKey('siteid')) {
-      context.handle(_siteidMeta,
-          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+      context.handle(
+        _siteidMeta,
+        siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta),
+      );
     } else if (isInserting) {
       context.missing(_siteidMeta);
     }
     if (data.containsKey('catalogcode')) {
       context.handle(
+        _catalogcodeMeta,
+        catalogcode.isAcceptableOrUnknown(
+          data['catalogcode']!,
           _catalogcodeMeta,
-          catalogcode.isAcceptableOrUnknown(
-              data['catalogcode']!, _catalogcodeMeta));
+        ),
+      );
     }
     if (data.containsKey('modelnum')) {
-      context.handle(_modelnumMeta,
-          modelnum.isAcceptableOrUnknown(data['modelnum']!, _modelnumMeta));
+      context.handle(
+        _modelnumMeta,
+        modelnum.isAcceptableOrUnknown(data['modelnum']!, _modelnumMeta),
+      );
     }
     if (data.containsKey('vendor')) {
-      context.handle(_vendorMeta,
-          vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta));
+      context.handle(
+        _vendorMeta,
+        vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta),
+      );
     }
     if (data.containsKey('manufacturer')) {
       context.handle(
+        _manufacturerMeta,
+        manufacturer.isAcceptableOrUnknown(
+          data['manufacturer']!,
           _manufacturerMeta,
-          manufacturer.isAcceptableOrUnknown(
-              data['manufacturer']!, _manufacturerMeta));
+        ),
+      );
     }
     if (data.containsKey('companyname')) {
       context.handle(
+        _companynameMeta,
+        companyname.isAcceptableOrUnknown(
+          data['companyname']!,
           _companynameMeta,
-          companyname.isAcceptableOrUnknown(
-              data['companyname']!, _companynameMeta));
+        ),
+      );
     }
     if (data.containsKey('rowstamp')) {
-      context.handle(_rowstampMeta,
-          rowstamp.isAcceptableOrUnknown(data['rowstamp']!, _rowstampMeta));
+      context.handle(
+        _rowstampMeta,
+        rowstamp.isAcceptableOrUnknown(data['rowstamp']!, _rowstampMeta),
+      );
     }
     if (data.containsKey('location')) {
-      context.handle(_locationMeta,
-          location.isAcceptableOrUnknown(data['location']!, _locationMeta));
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
     } else if (isInserting) {
       context.missing(_locationMeta);
     }
     if (data.containsKey('binnum')) {
-      context.handle(_binnumMeta,
-          binnum.isAcceptableOrUnknown(data['binnum']!, _binnumMeta));
+      context.handle(
+        _binnumMeta,
+        binnum.isAcceptableOrUnknown(data['binnum']!, _binnumMeta),
+      );
     }
     return context;
   }
@@ -686,26 +872,46 @@ class $InventoryCachesTable extends InventoryCaches
   InventoryCache map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return InventoryCache(
-      itemnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
-      siteid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
-      catalogcode: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}catalogcode']),
-      modelnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}modelnum']),
-      vendor: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}vendor']),
-      manufacturer: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}manufacturer']),
-      companyname: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}companyname']),
-      rowstamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}rowstamp']),
-      location: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}location'])!,
-      binnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}binnum']),
+      itemnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}itemnum'],
+      )!,
+      siteid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siteid'],
+      )!,
+      catalogcode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}catalogcode'],
+      ),
+      modelnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}modelnum'],
+      ),
+      vendor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vendor'],
+      ),
+      manufacturer: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}manufacturer'],
+      ),
+      companyname: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}companyname'],
+      ),
+      rowstamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rowstamp'],
+      ),
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      )!,
+      binnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}binnum'],
+      ),
     );
   }
 
@@ -726,17 +932,18 @@ class InventoryCache extends DataClass implements Insertable<InventoryCache> {
   final String? rowstamp;
   final String location;
   final String? binnum;
-  const InventoryCache(
-      {required this.itemnum,
-      required this.siteid,
-      this.catalogcode,
-      this.modelnum,
-      this.vendor,
-      this.manufacturer,
-      this.companyname,
-      this.rowstamp,
-      required this.location,
-      this.binnum});
+  const InventoryCache({
+    required this.itemnum,
+    required this.siteid,
+    this.catalogcode,
+    this.modelnum,
+    this.vendor,
+    this.manufacturer,
+    this.companyname,
+    this.rowstamp,
+    required this.location,
+    this.binnum,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -777,8 +984,9 @@ class InventoryCache extends DataClass implements Insertable<InventoryCache> {
       modelnum: modelnum == null && nullToAbsent
           ? const Value.absent()
           : Value(modelnum),
-      vendor:
-          vendor == null && nullToAbsent ? const Value.absent() : Value(vendor),
+      vendor: vendor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vendor),
       manufacturer: manufacturer == null && nullToAbsent
           ? const Value.absent()
           : Value(manufacturer),
@@ -789,13 +997,16 @@ class InventoryCache extends DataClass implements Insertable<InventoryCache> {
           ? const Value.absent()
           : Value(rowstamp),
       location: Value(location),
-      binnum:
-          binnum == null && nullToAbsent ? const Value.absent() : Value(binnum),
+      binnum: binnum == null && nullToAbsent
+          ? const Value.absent()
+          : Value(binnum),
     );
   }
 
-  factory InventoryCache.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory InventoryCache.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return InventoryCache(
       itemnum: serializer.fromJson<String>(json['itemnum']),
@@ -827,43 +1038,44 @@ class InventoryCache extends DataClass implements Insertable<InventoryCache> {
     };
   }
 
-  InventoryCache copyWith(
-          {String? itemnum,
-          String? siteid,
-          Value<String?> catalogcode = const Value.absent(),
-          Value<String?> modelnum = const Value.absent(),
-          Value<String?> vendor = const Value.absent(),
-          Value<String?> manufacturer = const Value.absent(),
-          Value<String?> companyname = const Value.absent(),
-          Value<String?> rowstamp = const Value.absent(),
-          String? location,
-          Value<String?> binnum = const Value.absent()}) =>
-      InventoryCache(
-        itemnum: itemnum ?? this.itemnum,
-        siteid: siteid ?? this.siteid,
-        catalogcode: catalogcode.present ? catalogcode.value : this.catalogcode,
-        modelnum: modelnum.present ? modelnum.value : this.modelnum,
-        vendor: vendor.present ? vendor.value : this.vendor,
-        manufacturer:
-            manufacturer.present ? manufacturer.value : this.manufacturer,
-        companyname: companyname.present ? companyname.value : this.companyname,
-        rowstamp: rowstamp.present ? rowstamp.value : this.rowstamp,
-        location: location ?? this.location,
-        binnum: binnum.present ? binnum.value : this.binnum,
-      );
+  InventoryCache copyWith({
+    String? itemnum,
+    String? siteid,
+    Value<String?> catalogcode = const Value.absent(),
+    Value<String?> modelnum = const Value.absent(),
+    Value<String?> vendor = const Value.absent(),
+    Value<String?> manufacturer = const Value.absent(),
+    Value<String?> companyname = const Value.absent(),
+    Value<String?> rowstamp = const Value.absent(),
+    String? location,
+    Value<String?> binnum = const Value.absent(),
+  }) => InventoryCache(
+    itemnum: itemnum ?? this.itemnum,
+    siteid: siteid ?? this.siteid,
+    catalogcode: catalogcode.present ? catalogcode.value : this.catalogcode,
+    modelnum: modelnum.present ? modelnum.value : this.modelnum,
+    vendor: vendor.present ? vendor.value : this.vendor,
+    manufacturer: manufacturer.present ? manufacturer.value : this.manufacturer,
+    companyname: companyname.present ? companyname.value : this.companyname,
+    rowstamp: rowstamp.present ? rowstamp.value : this.rowstamp,
+    location: location ?? this.location,
+    binnum: binnum.present ? binnum.value : this.binnum,
+  );
   InventoryCache copyWithCompanion(InventoryCachesCompanion data) {
     return InventoryCache(
       itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
       siteid: data.siteid.present ? data.siteid.value : this.siteid,
-      catalogcode:
-          data.catalogcode.present ? data.catalogcode.value : this.catalogcode,
+      catalogcode: data.catalogcode.present
+          ? data.catalogcode.value
+          : this.catalogcode,
       modelnum: data.modelnum.present ? data.modelnum.value : this.modelnum,
       vendor: data.vendor.present ? data.vendor.value : this.vendor,
       manufacturer: data.manufacturer.present
           ? data.manufacturer.value
           : this.manufacturer,
-      companyname:
-          data.companyname.present ? data.companyname.value : this.companyname,
+      companyname: data.companyname.present
+          ? data.companyname.value
+          : this.companyname,
       rowstamp: data.rowstamp.present ? data.rowstamp.value : this.rowstamp,
       location: data.location.present ? data.location.value : this.location,
       binnum: data.binnum.present ? data.binnum.value : this.binnum,
@@ -888,8 +1100,18 @@ class InventoryCache extends DataClass implements Insertable<InventoryCache> {
   }
 
   @override
-  int get hashCode => Object.hash(itemnum, siteid, catalogcode, modelnum,
-      vendor, manufacturer, companyname, rowstamp, location, binnum);
+  int get hashCode => Object.hash(
+    itemnum,
+    siteid,
+    catalogcode,
+    modelnum,
+    vendor,
+    manufacturer,
+    companyname,
+    rowstamp,
+    location,
+    binnum,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -943,9 +1165,9 @@ class InventoryCachesCompanion extends UpdateCompanion<InventoryCache> {
     required String location,
     this.binnum = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : itemnum = Value(itemnum),
-        siteid = Value(siteid),
-        location = Value(location);
+  }) : itemnum = Value(itemnum),
+       siteid = Value(siteid),
+       location = Value(location);
   static Insertable<InventoryCache> custom({
     Expression<String>? itemnum,
     Expression<String>? siteid,
@@ -974,18 +1196,19 @@ class InventoryCachesCompanion extends UpdateCompanion<InventoryCache> {
     });
   }
 
-  InventoryCachesCompanion copyWith(
-      {Value<String>? itemnum,
-      Value<String>? siteid,
-      Value<String?>? catalogcode,
-      Value<String?>? modelnum,
-      Value<String?>? vendor,
-      Value<String?>? manufacturer,
-      Value<String?>? companyname,
-      Value<String?>? rowstamp,
-      Value<String>? location,
-      Value<String?>? binnum,
-      Value<int>? rowid}) {
+  InventoryCachesCompanion copyWith({
+    Value<String>? itemnum,
+    Value<String>? siteid,
+    Value<String?>? catalogcode,
+    Value<String?>? modelnum,
+    Value<String?>? vendor,
+    Value<String?>? manufacturer,
+    Value<String?>? companyname,
+    Value<String?>? rowstamp,
+    Value<String>? location,
+    Value<String?>? binnum,
+    Value<int>? rowid,
+  }) {
     return InventoryCachesCompanion(
       itemnum: itemnum ?? this.itemnum,
       siteid: siteid ?? this.siteid,
@@ -1068,24 +1291,38 @@ class $ManufacturersTable extends Manufacturers
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _fullNameMeta =
-      const VerificationMeta('fullName');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _fullNameMeta = const VerificationMeta(
+    'fullName',
+  );
   @override
   late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
-      'full_name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _shortNameMeta =
-      const VerificationMeta('shortName');
+    'full_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _shortNameMeta = const VerificationMeta(
+    'shortName',
+  );
   @override
   late final GeneratedColumn<String> shortName = GeneratedColumn<String>(
-      'short_name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'short_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [id, fullName, shortName];
   @override
@@ -1094,22 +1331,28 @@ class $ManufacturersTable extends Manufacturers
   String get actualTableName => $name;
   static const String $name = 'manufacturers';
   @override
-  VerificationContext validateIntegrity(Insertable<Manufacturer> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Manufacturer> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('full_name')) {
-      context.handle(_fullNameMeta,
-          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
+      context.handle(
+        _fullNameMeta,
+        fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta),
+      );
     } else if (isInserting) {
       context.missing(_fullNameMeta);
     }
     if (data.containsKey('short_name')) {
-      context.handle(_shortNameMeta,
-          shortName.isAcceptableOrUnknown(data['short_name']!, _shortNameMeta));
+      context.handle(
+        _shortNameMeta,
+        shortName.isAcceptableOrUnknown(data['short_name']!, _shortNameMeta),
+      );
     } else if (isInserting) {
       context.missing(_shortNameMeta);
     }
@@ -1122,12 +1365,18 @@ class $ManufacturersTable extends Manufacturers
   Manufacturer map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Manufacturer(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      fullName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}full_name'])!,
-      shortName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}short_name'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      fullName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_name'],
+      )!,
+      shortName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}short_name'],
+      )!,
     );
   }
 
@@ -1141,8 +1390,11 @@ class Manufacturer extends DataClass implements Insertable<Manufacturer> {
   final int id;
   final String fullName;
   final String shortName;
-  const Manufacturer(
-      {required this.id, required this.fullName, required this.shortName});
+  const Manufacturer({
+    required this.id,
+    required this.fullName,
+    required this.shortName,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1160,8 +1412,10 @@ class Manufacturer extends DataClass implements Insertable<Manufacturer> {
     );
   }
 
-  factory Manufacturer.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Manufacturer.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Manufacturer(
       id: serializer.fromJson<int>(json['id']),
@@ -1227,8 +1481,8 @@ class ManufacturersCompanion extends UpdateCompanion<Manufacturer> {
     this.id = const Value.absent(),
     required String fullName,
     required String shortName,
-  })  : fullName = Value(fullName),
-        shortName = Value(shortName);
+  }) : fullName = Value(fullName),
+       shortName = Value(shortName);
   static Insertable<Manufacturer> custom({
     Expression<int>? id,
     Expression<String>? fullName,
@@ -1241,8 +1495,11 @@ class ManufacturersCompanion extends UpdateCompanion<Manufacturer> {
     });
   }
 
-  ManufacturersCompanion copyWith(
-      {Value<int>? id, Value<String>? fullName, Value<String>? shortName}) {
+  ManufacturersCompanion copyWith({
+    Value<int>? id,
+    Value<String>? fullName,
+    Value<String>? shortName,
+  }) {
     return ManufacturersCompanion(
       id: id ?? this.id,
       fullName: fullName ?? this.fullName,
@@ -1285,24 +1542,38 @@ class $AbbreviationsTable extends Abbreviations
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _origTextMeta =
-      const VerificationMeta('origText');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _origTextMeta = const VerificationMeta(
+    'origText',
+  );
   @override
   late final GeneratedColumn<String> origText = GeneratedColumn<String>(
-      'orig_text', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _replaceTextMeta =
-      const VerificationMeta('replaceText');
+    'orig_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _replaceTextMeta = const VerificationMeta(
+    'replaceText',
+  );
   @override
   late final GeneratedColumn<String> replaceText = GeneratedColumn<String>(
-      'replace_text', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'replace_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [id, origText, replaceText];
   @override
@@ -1311,24 +1582,31 @@ class $AbbreviationsTable extends Abbreviations
   String get actualTableName => $name;
   static const String $name = 'abbreviations';
   @override
-  VerificationContext validateIntegrity(Insertable<Abbreviation> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Abbreviation> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('orig_text')) {
-      context.handle(_origTextMeta,
-          origText.isAcceptableOrUnknown(data['orig_text']!, _origTextMeta));
+      context.handle(
+        _origTextMeta,
+        origText.isAcceptableOrUnknown(data['orig_text']!, _origTextMeta),
+      );
     } else if (isInserting) {
       context.missing(_origTextMeta);
     }
     if (data.containsKey('replace_text')) {
       context.handle(
+        _replaceTextMeta,
+        replaceText.isAcceptableOrUnknown(
+          data['replace_text']!,
           _replaceTextMeta,
-          replaceText.isAcceptableOrUnknown(
-              data['replace_text']!, _replaceTextMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_replaceTextMeta);
     }
@@ -1341,12 +1619,18 @@ class $AbbreviationsTable extends Abbreviations
   Abbreviation map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Abbreviation(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      origText: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}orig_text'])!,
-      replaceText: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}replace_text'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      origText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}orig_text'],
+      )!,
+      replaceText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}replace_text'],
+      )!,
     );
   }
 
@@ -1360,8 +1644,11 @@ class Abbreviation extends DataClass implements Insertable<Abbreviation> {
   final int id;
   final String origText;
   final String replaceText;
-  const Abbreviation(
-      {required this.id, required this.origText, required this.replaceText});
+  const Abbreviation({
+    required this.id,
+    required this.origText,
+    required this.replaceText,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1379,8 +1666,10 @@ class Abbreviation extends DataClass implements Insertable<Abbreviation> {
     );
   }
 
-  factory Abbreviation.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Abbreviation.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Abbreviation(
       id: serializer.fromJson<int>(json['id']),
@@ -1408,8 +1697,9 @@ class Abbreviation extends DataClass implements Insertable<Abbreviation> {
     return Abbreviation(
       id: data.id.present ? data.id.value : this.id,
       origText: data.origText.present ? data.origText.value : this.origText,
-      replaceText:
-          data.replaceText.present ? data.replaceText.value : this.replaceText,
+      replaceText: data.replaceText.present
+          ? data.replaceText.value
+          : this.replaceText,
     );
   }
 
@@ -1447,8 +1737,8 @@ class AbbreviationsCompanion extends UpdateCompanion<Abbreviation> {
     this.id = const Value.absent(),
     required String origText,
     required String replaceText,
-  })  : origText = Value(origText),
-        replaceText = Value(replaceText);
+  }) : origText = Value(origText),
+       replaceText = Value(replaceText);
   static Insertable<Abbreviation> custom({
     Expression<int>? id,
     Expression<String>? origText,
@@ -1461,8 +1751,11 @@ class AbbreviationsCompanion extends UpdateCompanion<Abbreviation> {
     });
   }
 
-  AbbreviationsCompanion copyWith(
-      {Value<int>? id, Value<String>? origText, Value<String>? replaceText}) {
+  AbbreviationsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? origText,
+    Value<String>? replaceText,
+  }) {
     return AbbreviationsCompanion(
       id: id ?? this.id,
       origText: origText ?? this.origText,
@@ -1500,79 +1793,80 @@ abstract class _$ItemDatabase extends GeneratedDatabase {
   _$ItemDatabase(QueryExecutor e) : super(e);
   $ItemDatabaseManager get managers => $ItemDatabaseManager(this);
   late final $ItemCachesTable itemCaches = $ItemCachesTable(this);
-  late final $InventoryCachesTable inventoryCaches =
-      $InventoryCachesTable(this);
+  late final $InventoryCachesTable inventoryCaches = $InventoryCachesTable(
+    this,
+  );
   late final $ManufacturersTable manufacturers = $ManufacturersTable(this);
   late final $AbbreviationsTable abbreviations = $AbbreviationsTable(this);
   Selectable<String> findItems(String search) {
     return customSelect(
-        'SELECT itemnum FROM itemCache WHERE search_text LIKE ?1',
-        variables: [
-          Variable<String>(search)
-        ],
-        readsFrom: {
-          itemCaches,
-        }).map((QueryRow row) => row.read<String>('itemnum'));
+      'SELECT itemnum FROM itemCache WHERE search_text LIKE ?1',
+      variables: [Variable<String>(search)],
+      readsFrom: {this.itemCaches},
+    ).map((QueryRow row) => row.read<String>('itemnum'));
   }
 
   Selectable<String> findItemsExt(String search) {
     return customSelect(
-        'SELECT itemnum FROM itemCache WHERE ext_search_text LIKE ?1',
-        variables: [
-          Variable<String>(search)
-        ],
-        readsFrom: {
-          itemCaches,
-        }).map((QueryRow row) => row.read<String>('itemnum'));
+      'SELECT itemnum FROM itemCache WHERE ext_search_text LIKE ?1',
+      variables: [Variable<String>(search)],
+      readsFrom: {this.itemCaches},
+    ).map((QueryRow row) => row.read<String>('itemnum'));
   }
 
   Selectable<GetReplacementsResult> getReplacements() {
     return customSelect(
-        'SELECT upper(orig_text) AS orig_text, upper(replace_text) AS replace_text FROM abbreviations UNION SELECT upper(full_name) AS orig_text, upper(short_name) AS replace_text FROM manufacturers',
-        variables: [],
-        readsFrom: {
-          abbreviations,
-          manufacturers,
-        }).map((QueryRow row) => GetReplacementsResult(
-          origText: row.read<String>('orig_text'),
-          replaceText: row.read<String>('replace_text'),
-        ));
+      'SELECT upper(orig_text) AS orig_text, upper(replace_text) AS replace_text FROM abbreviations UNION SELECT upper(full_name) AS orig_text, upper(short_name) AS replace_text FROM manufacturers',
+      variables: [],
+      readsFrom: {this.abbreviations, this.manufacturers},
+    ).map(
+      (QueryRow row) => GetReplacementsResult(
+        origText: row.read<String>('orig_text'),
+        replaceText: row.read<String>('replace_text'),
+      ),
+    );
   }
 
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [itemCaches, inventoryCaches, manufacturers, abbreviations];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    itemCaches,
+    inventoryCaches,
+    manufacturers,
+    abbreviations,
+  ];
 }
 
-typedef $$ItemCachesTableCreateCompanionBuilder = ItemCachesCompanion Function({
-  required String itemnum,
-  required String description,
-  Value<String?> details,
-  Value<String?> changedDate,
-  Value<String?> searchText,
-  Value<String?> glClass,
-  Value<String?> uom,
-  Value<String?> commodityGroup,
-  Value<String?> extSearchText,
-  Value<String?> extDescription,
-  Value<int> rowid,
-});
-typedef $$ItemCachesTableUpdateCompanionBuilder = ItemCachesCompanion Function({
-  Value<String> itemnum,
-  Value<String> description,
-  Value<String?> details,
-  Value<String?> changedDate,
-  Value<String?> searchText,
-  Value<String?> glClass,
-  Value<String?> uom,
-  Value<String?> commodityGroup,
-  Value<String?> extSearchText,
-  Value<String?> extDescription,
-  Value<int> rowid,
-});
+typedef $$ItemCachesTableCreateCompanionBuilder =
+    ItemCachesCompanion Function({
+      required String itemnum,
+      required String description,
+      Value<String?> details,
+      Value<String?> changedDate,
+      Value<String?> searchText,
+      Value<String?> glClass,
+      Value<String?> uom,
+      Value<String?> commodityGroup,
+      Value<String?> extSearchText,
+      Value<String?> extDescription,
+      Value<int> rowid,
+    });
+typedef $$ItemCachesTableUpdateCompanionBuilder =
+    ItemCachesCompanion Function({
+      Value<String> itemnum,
+      Value<String> description,
+      Value<String?> details,
+      Value<String?> changedDate,
+      Value<String?> searchText,
+      Value<String?> glClass,
+      Value<String?> uom,
+      Value<String?> commodityGroup,
+      Value<String?> extSearchText,
+      Value<String?> extDescription,
+      Value<int> rowid,
+    });
 
 class $$ItemCachesTableFilterComposer
     extends Composer<_$ItemDatabase, $ItemCachesTable> {
@@ -1584,36 +1878,54 @@ class $$ItemCachesTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnFilters(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get details => $composableBuilder(
-      column: $table.details, builder: (column) => ColumnFilters(column));
+    column: $table.details,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get changedDate => $composableBuilder(
-      column: $table.changedDate, builder: (column) => ColumnFilters(column));
+    column: $table.changedDate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get searchText => $composableBuilder(
-      column: $table.searchText, builder: (column) => ColumnFilters(column));
+    column: $table.searchText,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get glClass => $composableBuilder(
-      column: $table.glClass, builder: (column) => ColumnFilters(column));
+    column: $table.glClass,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get uom => $composableBuilder(
-      column: $table.uom, builder: (column) => ColumnFilters(column));
+    column: $table.uom,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get commodityGroup => $composableBuilder(
-      column: $table.commodityGroup,
-      builder: (column) => ColumnFilters(column));
+    column: $table.commodityGroup,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get extSearchText => $composableBuilder(
-      column: $table.extSearchText, builder: (column) => ColumnFilters(column));
+    column: $table.extSearchText,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get extDescription => $composableBuilder(
-      column: $table.extDescription,
-      builder: (column) => ColumnFilters(column));
+    column: $table.extDescription,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ItemCachesTableOrderingComposer
@@ -1626,37 +1938,54 @@ class $$ItemCachesTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnOrderings(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get details => $composableBuilder(
-      column: $table.details, builder: (column) => ColumnOrderings(column));
+    column: $table.details,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get changedDate => $composableBuilder(
-      column: $table.changedDate, builder: (column) => ColumnOrderings(column));
+    column: $table.changedDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get searchText => $composableBuilder(
-      column: $table.searchText, builder: (column) => ColumnOrderings(column));
+    column: $table.searchText,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get glClass => $composableBuilder(
-      column: $table.glClass, builder: (column) => ColumnOrderings(column));
+    column: $table.glClass,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get uom => $composableBuilder(
-      column: $table.uom, builder: (column) => ColumnOrderings(column));
+    column: $table.uom,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get commodityGroup => $composableBuilder(
-      column: $table.commodityGroup,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.commodityGroup,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get extSearchText => $composableBuilder(
-      column: $table.extSearchText,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.extSearchText,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get extDescription => $composableBuilder(
-      column: $table.extDescription,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.extDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ItemCachesTableAnnotationComposer
@@ -1672,16 +2001,22 @@ class $$ItemCachesTableAnnotationComposer
       $composableBuilder(column: $table.itemnum, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get details =>
       $composableBuilder(column: $table.details, builder: (column) => column);
 
   GeneratedColumn<String> get changedDate => $composableBuilder(
-      column: $table.changedDate, builder: (column) => column);
+    column: $table.changedDate,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get searchText => $composableBuilder(
-      column: $table.searchText, builder: (column) => column);
+    column: $table.searchText,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get glClass =>
       $composableBuilder(column: $table.glClass, builder: (column) => column);
@@ -1690,29 +2025,42 @@ class $$ItemCachesTableAnnotationComposer
       $composableBuilder(column: $table.uom, builder: (column) => column);
 
   GeneratedColumn<String> get commodityGroup => $composableBuilder(
-      column: $table.commodityGroup, builder: (column) => column);
+    column: $table.commodityGroup,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get extSearchText => $composableBuilder(
-      column: $table.extSearchText, builder: (column) => column);
+    column: $table.extSearchText,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get extDescription => $composableBuilder(
-      column: $table.extDescription, builder: (column) => column);
+    column: $table.extDescription,
+    builder: (column) => column,
+  );
 }
 
-class $$ItemCachesTableTableManager extends RootTableManager<
-    _$ItemDatabase,
-    $ItemCachesTable,
-    ItemCache,
-    $$ItemCachesTableFilterComposer,
-    $$ItemCachesTableOrderingComposer,
-    $$ItemCachesTableAnnotationComposer,
-    $$ItemCachesTableCreateCompanionBuilder,
-    $$ItemCachesTableUpdateCompanionBuilder,
-    (ItemCache, BaseReferences<_$ItemDatabase, $ItemCachesTable, ItemCache>),
-    ItemCache,
-    PrefetchHooks Function()> {
+class $$ItemCachesTableTableManager
+    extends
+        RootTableManager<
+          _$ItemDatabase,
+          $ItemCachesTable,
+          ItemCache,
+          $$ItemCachesTableFilterComposer,
+          $$ItemCachesTableOrderingComposer,
+          $$ItemCachesTableAnnotationComposer,
+          $$ItemCachesTableCreateCompanionBuilder,
+          $$ItemCachesTableUpdateCompanionBuilder,
+          (
+            ItemCache,
+            BaseReferences<_$ItemDatabase, $ItemCachesTable, ItemCache>,
+          ),
+          ItemCache,
+          PrefetchHooks Function()
+        > {
   $$ItemCachesTableTableManager(_$ItemDatabase db, $ItemCachesTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1721,105 +2069,117 @@ class $$ItemCachesTableTableManager extends RootTableManager<
               $$ItemCachesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$ItemCachesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> itemnum = const Value.absent(),
-            Value<String> description = const Value.absent(),
-            Value<String?> details = const Value.absent(),
-            Value<String?> changedDate = const Value.absent(),
-            Value<String?> searchText = const Value.absent(),
-            Value<String?> glClass = const Value.absent(),
-            Value<String?> uom = const Value.absent(),
-            Value<String?> commodityGroup = const Value.absent(),
-            Value<String?> extSearchText = const Value.absent(),
-            Value<String?> extDescription = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ItemCachesCompanion(
-            itemnum: itemnum,
-            description: description,
-            details: details,
-            changedDate: changedDate,
-            searchText: searchText,
-            glClass: glClass,
-            uom: uom,
-            commodityGroup: commodityGroup,
-            extSearchText: extSearchText,
-            extDescription: extDescription,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String itemnum,
-            required String description,
-            Value<String?> details = const Value.absent(),
-            Value<String?> changedDate = const Value.absent(),
-            Value<String?> searchText = const Value.absent(),
-            Value<String?> glClass = const Value.absent(),
-            Value<String?> uom = const Value.absent(),
-            Value<String?> commodityGroup = const Value.absent(),
-            Value<String?> extSearchText = const Value.absent(),
-            Value<String?> extDescription = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ItemCachesCompanion.insert(
-            itemnum: itemnum,
-            description: description,
-            details: details,
-            changedDate: changedDate,
-            searchText: searchText,
-            glClass: glClass,
-            uom: uom,
-            commodityGroup: commodityGroup,
-            extSearchText: extSearchText,
-            extDescription: extDescription,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> itemnum = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String?> details = const Value.absent(),
+                Value<String?> changedDate = const Value.absent(),
+                Value<String?> searchText = const Value.absent(),
+                Value<String?> glClass = const Value.absent(),
+                Value<String?> uom = const Value.absent(),
+                Value<String?> commodityGroup = const Value.absent(),
+                Value<String?> extSearchText = const Value.absent(),
+                Value<String?> extDescription = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ItemCachesCompanion(
+                itemnum: itemnum,
+                description: description,
+                details: details,
+                changedDate: changedDate,
+                searchText: searchText,
+                glClass: glClass,
+                uom: uom,
+                commodityGroup: commodityGroup,
+                extSearchText: extSearchText,
+                extDescription: extDescription,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String itemnum,
+                required String description,
+                Value<String?> details = const Value.absent(),
+                Value<String?> changedDate = const Value.absent(),
+                Value<String?> searchText = const Value.absent(),
+                Value<String?> glClass = const Value.absent(),
+                Value<String?> uom = const Value.absent(),
+                Value<String?> commodityGroup = const Value.absent(),
+                Value<String?> extSearchText = const Value.absent(),
+                Value<String?> extDescription = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ItemCachesCompanion.insert(
+                itemnum: itemnum,
+                description: description,
+                details: details,
+                changedDate: changedDate,
+                searchText: searchText,
+                glClass: glClass,
+                uom: uom,
+                commodityGroup: commodityGroup,
+                extSearchText: extSearchText,
+                extDescription: extDescription,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ItemCachesTable, ItemCache>(table),
+                  BaseReferences<_$ItemDatabase, $ItemCachesTable, ItemCache>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$ItemCachesTableProcessedTableManager = ProcessedTableManager<
-    _$ItemDatabase,
-    $ItemCachesTable,
-    ItemCache,
-    $$ItemCachesTableFilterComposer,
-    $$ItemCachesTableOrderingComposer,
-    $$ItemCachesTableAnnotationComposer,
-    $$ItemCachesTableCreateCompanionBuilder,
-    $$ItemCachesTableUpdateCompanionBuilder,
-    (ItemCache, BaseReferences<_$ItemDatabase, $ItemCachesTable, ItemCache>),
-    ItemCache,
-    PrefetchHooks Function()>;
-typedef $$InventoryCachesTableCreateCompanionBuilder = InventoryCachesCompanion
-    Function({
-  required String itemnum,
-  required String siteid,
-  Value<String?> catalogcode,
-  Value<String?> modelnum,
-  Value<String?> vendor,
-  Value<String?> manufacturer,
-  Value<String?> companyname,
-  Value<String?> rowstamp,
-  required String location,
-  Value<String?> binnum,
-  Value<int> rowid,
-});
-typedef $$InventoryCachesTableUpdateCompanionBuilder = InventoryCachesCompanion
-    Function({
-  Value<String> itemnum,
-  Value<String> siteid,
-  Value<String?> catalogcode,
-  Value<String?> modelnum,
-  Value<String?> vendor,
-  Value<String?> manufacturer,
-  Value<String?> companyname,
-  Value<String?> rowstamp,
-  Value<String> location,
-  Value<String?> binnum,
-  Value<int> rowid,
-});
+typedef $$ItemCachesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$ItemDatabase,
+      $ItemCachesTable,
+      ItemCache,
+      $$ItemCachesTableFilterComposer,
+      $$ItemCachesTableOrderingComposer,
+      $$ItemCachesTableAnnotationComposer,
+      $$ItemCachesTableCreateCompanionBuilder,
+      $$ItemCachesTableUpdateCompanionBuilder,
+      (ItemCache, BaseReferences<_$ItemDatabase, $ItemCachesTable, ItemCache>),
+      ItemCache,
+      PrefetchHooks Function()
+    >;
+typedef $$InventoryCachesTableCreateCompanionBuilder =
+    InventoryCachesCompanion Function({
+      required String itemnum,
+      required String siteid,
+      Value<String?> catalogcode,
+      Value<String?> modelnum,
+      Value<String?> vendor,
+      Value<String?> manufacturer,
+      Value<String?> companyname,
+      Value<String?> rowstamp,
+      required String location,
+      Value<String?> binnum,
+      Value<int> rowid,
+    });
+typedef $$InventoryCachesTableUpdateCompanionBuilder =
+    InventoryCachesCompanion Function({
+      Value<String> itemnum,
+      Value<String> siteid,
+      Value<String?> catalogcode,
+      Value<String?> modelnum,
+      Value<String?> vendor,
+      Value<String?> manufacturer,
+      Value<String?> companyname,
+      Value<String?> rowstamp,
+      Value<String> location,
+      Value<String?> binnum,
+      Value<int> rowid,
+    });
 
 class $$InventoryCachesTableFilterComposer
     extends Composer<_$ItemDatabase, $InventoryCachesTable> {
@@ -1831,34 +2191,54 @@ class $$InventoryCachesTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnFilters(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnFilters(column));
+    column: $table.siteid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get catalogcode => $composableBuilder(
-      column: $table.catalogcode, builder: (column) => ColumnFilters(column));
+    column: $table.catalogcode,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get modelnum => $composableBuilder(
-      column: $table.modelnum, builder: (column) => ColumnFilters(column));
+    column: $table.modelnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get vendor => $composableBuilder(
-      column: $table.vendor, builder: (column) => ColumnFilters(column));
+    column: $table.vendor,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get manufacturer => $composableBuilder(
-      column: $table.manufacturer, builder: (column) => ColumnFilters(column));
+    column: $table.manufacturer,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get companyname => $composableBuilder(
-      column: $table.companyname, builder: (column) => ColumnFilters(column));
+    column: $table.companyname,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get rowstamp => $composableBuilder(
-      column: $table.rowstamp, builder: (column) => ColumnFilters(column));
+    column: $table.rowstamp,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get location => $composableBuilder(
-      column: $table.location, builder: (column) => ColumnFilters(column));
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get binnum => $composableBuilder(
-      column: $table.binnum, builder: (column) => ColumnFilters(column));
+    column: $table.binnum,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$InventoryCachesTableOrderingComposer
@@ -1871,35 +2251,54 @@ class $$InventoryCachesTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnOrderings(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+    column: $table.siteid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get catalogcode => $composableBuilder(
-      column: $table.catalogcode, builder: (column) => ColumnOrderings(column));
+    column: $table.catalogcode,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get modelnum => $composableBuilder(
-      column: $table.modelnum, builder: (column) => ColumnOrderings(column));
+    column: $table.modelnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get vendor => $composableBuilder(
-      column: $table.vendor, builder: (column) => ColumnOrderings(column));
+    column: $table.vendor,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get manufacturer => $composableBuilder(
-      column: $table.manufacturer,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.manufacturer,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get companyname => $composableBuilder(
-      column: $table.companyname, builder: (column) => ColumnOrderings(column));
+    column: $table.companyname,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get rowstamp => $composableBuilder(
-      column: $table.rowstamp, builder: (column) => ColumnOrderings(column));
+    column: $table.rowstamp,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get location => $composableBuilder(
-      column: $table.location, builder: (column) => ColumnOrderings(column));
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get binnum => $composableBuilder(
-      column: $table.binnum, builder: (column) => ColumnOrderings(column));
+    column: $table.binnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$InventoryCachesTableAnnotationComposer
@@ -1918,7 +2317,9 @@ class $$InventoryCachesTableAnnotationComposer
       $composableBuilder(column: $table.siteid, builder: (column) => column);
 
   GeneratedColumn<String> get catalogcode => $composableBuilder(
-      column: $table.catalogcode, builder: (column) => column);
+    column: $table.catalogcode,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get modelnum =>
       $composableBuilder(column: $table.modelnum, builder: (column) => column);
@@ -1927,10 +2328,14 @@ class $$InventoryCachesTableAnnotationComposer
       $composableBuilder(column: $table.vendor, builder: (column) => column);
 
   GeneratedColumn<String> get manufacturer => $composableBuilder(
-      column: $table.manufacturer, builder: (column) => column);
+    column: $table.manufacturer,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get companyname => $composableBuilder(
-      column: $table.companyname, builder: (column) => column);
+    column: $table.companyname,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get rowstamp =>
       $composableBuilder(column: $table.rowstamp, builder: (column) => column);
@@ -1942,24 +2347,33 @@ class $$InventoryCachesTableAnnotationComposer
       $composableBuilder(column: $table.binnum, builder: (column) => column);
 }
 
-class $$InventoryCachesTableTableManager extends RootTableManager<
-    _$ItemDatabase,
-    $InventoryCachesTable,
-    InventoryCache,
-    $$InventoryCachesTableFilterComposer,
-    $$InventoryCachesTableOrderingComposer,
-    $$InventoryCachesTableAnnotationComposer,
-    $$InventoryCachesTableCreateCompanionBuilder,
-    $$InventoryCachesTableUpdateCompanionBuilder,
-    (
-      InventoryCache,
-      BaseReferences<_$ItemDatabase, $InventoryCachesTable, InventoryCache>
-    ),
-    InventoryCache,
-    PrefetchHooks Function()> {
+class $$InventoryCachesTableTableManager
+    extends
+        RootTableManager<
+          _$ItemDatabase,
+          $InventoryCachesTable,
+          InventoryCache,
+          $$InventoryCachesTableFilterComposer,
+          $$InventoryCachesTableOrderingComposer,
+          $$InventoryCachesTableAnnotationComposer,
+          $$InventoryCachesTableCreateCompanionBuilder,
+          $$InventoryCachesTableUpdateCompanionBuilder,
+          (
+            InventoryCache,
+            BaseReferences<
+              _$ItemDatabase,
+              $InventoryCachesTable,
+              InventoryCache
+            >,
+          ),
+          InventoryCache,
+          PrefetchHooks Function()
+        > {
   $$InventoryCachesTableTableManager(
-      _$ItemDatabase db, $InventoryCachesTable table)
-      : super(TableManagerState(
+    _$ItemDatabase db,
+    $InventoryCachesTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1968,92 +2382,104 @@ class $$InventoryCachesTableTableManager extends RootTableManager<
               $$InventoryCachesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$InventoryCachesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> itemnum = const Value.absent(),
-            Value<String> siteid = const Value.absent(),
-            Value<String?> catalogcode = const Value.absent(),
-            Value<String?> modelnum = const Value.absent(),
-            Value<String?> vendor = const Value.absent(),
-            Value<String?> manufacturer = const Value.absent(),
-            Value<String?> companyname = const Value.absent(),
-            Value<String?> rowstamp = const Value.absent(),
-            Value<String> location = const Value.absent(),
-            Value<String?> binnum = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              InventoryCachesCompanion(
-            itemnum: itemnum,
-            siteid: siteid,
-            catalogcode: catalogcode,
-            modelnum: modelnum,
-            vendor: vendor,
-            manufacturer: manufacturer,
-            companyname: companyname,
-            rowstamp: rowstamp,
-            location: location,
-            binnum: binnum,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String itemnum,
-            required String siteid,
-            Value<String?> catalogcode = const Value.absent(),
-            Value<String?> modelnum = const Value.absent(),
-            Value<String?> vendor = const Value.absent(),
-            Value<String?> manufacturer = const Value.absent(),
-            Value<String?> companyname = const Value.absent(),
-            Value<String?> rowstamp = const Value.absent(),
-            required String location,
-            Value<String?> binnum = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              InventoryCachesCompanion.insert(
-            itemnum: itemnum,
-            siteid: siteid,
-            catalogcode: catalogcode,
-            modelnum: modelnum,
-            vendor: vendor,
-            manufacturer: manufacturer,
-            companyname: companyname,
-            rowstamp: rowstamp,
-            location: location,
-            binnum: binnum,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> itemnum = const Value.absent(),
+                Value<String> siteid = const Value.absent(),
+                Value<String?> catalogcode = const Value.absent(),
+                Value<String?> modelnum = const Value.absent(),
+                Value<String?> vendor = const Value.absent(),
+                Value<String?> manufacturer = const Value.absent(),
+                Value<String?> companyname = const Value.absent(),
+                Value<String?> rowstamp = const Value.absent(),
+                Value<String> location = const Value.absent(),
+                Value<String?> binnum = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryCachesCompanion(
+                itemnum: itemnum,
+                siteid: siteid,
+                catalogcode: catalogcode,
+                modelnum: modelnum,
+                vendor: vendor,
+                manufacturer: manufacturer,
+                companyname: companyname,
+                rowstamp: rowstamp,
+                location: location,
+                binnum: binnum,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String itemnum,
+                required String siteid,
+                Value<String?> catalogcode = const Value.absent(),
+                Value<String?> modelnum = const Value.absent(),
+                Value<String?> vendor = const Value.absent(),
+                Value<String?> manufacturer = const Value.absent(),
+                Value<String?> companyname = const Value.absent(),
+                Value<String?> rowstamp = const Value.absent(),
+                required String location,
+                Value<String?> binnum = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryCachesCompanion.insert(
+                itemnum: itemnum,
+                siteid: siteid,
+                catalogcode: catalogcode,
+                modelnum: modelnum,
+                vendor: vendor,
+                manufacturer: manufacturer,
+                companyname: companyname,
+                rowstamp: rowstamp,
+                location: location,
+                binnum: binnum,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$InventoryCachesTable, InventoryCache>(table),
+                  BaseReferences<
+                    _$ItemDatabase,
+                    $InventoryCachesTable,
+                    InventoryCache
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$InventoryCachesTableProcessedTableManager = ProcessedTableManager<
-    _$ItemDatabase,
-    $InventoryCachesTable,
-    InventoryCache,
-    $$InventoryCachesTableFilterComposer,
-    $$InventoryCachesTableOrderingComposer,
-    $$InventoryCachesTableAnnotationComposer,
-    $$InventoryCachesTableCreateCompanionBuilder,
-    $$InventoryCachesTableUpdateCompanionBuilder,
-    (
+typedef $$InventoryCachesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$ItemDatabase,
+      $InventoryCachesTable,
       InventoryCache,
-      BaseReferences<_$ItemDatabase, $InventoryCachesTable, InventoryCache>
-    ),
-    InventoryCache,
-    PrefetchHooks Function()>;
-typedef $$ManufacturersTableCreateCompanionBuilder = ManufacturersCompanion
-    Function({
-  Value<int> id,
-  required String fullName,
-  required String shortName,
-});
-typedef $$ManufacturersTableUpdateCompanionBuilder = ManufacturersCompanion
-    Function({
-  Value<int> id,
-  Value<String> fullName,
-  Value<String> shortName,
-});
+      $$InventoryCachesTableFilterComposer,
+      $$InventoryCachesTableOrderingComposer,
+      $$InventoryCachesTableAnnotationComposer,
+      $$InventoryCachesTableCreateCompanionBuilder,
+      $$InventoryCachesTableUpdateCompanionBuilder,
+      (
+        InventoryCache,
+        BaseReferences<_$ItemDatabase, $InventoryCachesTable, InventoryCache>,
+      ),
+      InventoryCache,
+      PrefetchHooks Function()
+    >;
+typedef $$ManufacturersTableCreateCompanionBuilder =
+    ManufacturersCompanion Function({
+      Value<int> id,
+      required String fullName,
+      required String shortName,
+    });
+typedef $$ManufacturersTableUpdateCompanionBuilder =
+    ManufacturersCompanion Function({
+      Value<int> id,
+      Value<String> fullName,
+      Value<String> shortName,
+    });
 
 class $$ManufacturersTableFilterComposer
     extends Composer<_$ItemDatabase, $ManufacturersTable> {
@@ -2065,13 +2491,19 @@ class $$ManufacturersTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get fullName => $composableBuilder(
-      column: $table.fullName, builder: (column) => ColumnFilters(column));
+    column: $table.fullName,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get shortName => $composableBuilder(
-      column: $table.shortName, builder: (column) => ColumnFilters(column));
+    column: $table.shortName,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ManufacturersTableOrderingComposer
@@ -2084,13 +2516,19 @@ class $$ManufacturersTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get fullName => $composableBuilder(
-      column: $table.fullName, builder: (column) => ColumnOrderings(column));
+    column: $table.fullName,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get shortName => $composableBuilder(
-      column: $table.shortName, builder: (column) => ColumnOrderings(column));
+    column: $table.shortName,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ManufacturersTableAnnotationComposer
@@ -2112,23 +2550,27 @@ class $$ManufacturersTableAnnotationComposer
       $composableBuilder(column: $table.shortName, builder: (column) => column);
 }
 
-class $$ManufacturersTableTableManager extends RootTableManager<
-    _$ItemDatabase,
-    $ManufacturersTable,
-    Manufacturer,
-    $$ManufacturersTableFilterComposer,
-    $$ManufacturersTableOrderingComposer,
-    $$ManufacturersTableAnnotationComposer,
-    $$ManufacturersTableCreateCompanionBuilder,
-    $$ManufacturersTableUpdateCompanionBuilder,
-    (
-      Manufacturer,
-      BaseReferences<_$ItemDatabase, $ManufacturersTable, Manufacturer>
-    ),
-    Manufacturer,
-    PrefetchHooks Function()> {
+class $$ManufacturersTableTableManager
+    extends
+        RootTableManager<
+          _$ItemDatabase,
+          $ManufacturersTable,
+          Manufacturer,
+          $$ManufacturersTableFilterComposer,
+          $$ManufacturersTableOrderingComposer,
+          $$ManufacturersTableAnnotationComposer,
+          $$ManufacturersTableCreateCompanionBuilder,
+          $$ManufacturersTableUpdateCompanionBuilder,
+          (
+            Manufacturer,
+            BaseReferences<_$ItemDatabase, $ManufacturersTable, Manufacturer>,
+          ),
+          Manufacturer,
+          PrefetchHooks Function()
+        > {
   $$ManufacturersTableTableManager(_$ItemDatabase db, $ManufacturersTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -2137,60 +2579,72 @@ class $$ManufacturersTableTableManager extends RootTableManager<
               $$ManufacturersTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$ManufacturersTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> fullName = const Value.absent(),
-            Value<String> shortName = const Value.absent(),
-          }) =>
-              ManufacturersCompanion(
-            id: id,
-            fullName: fullName,
-            shortName: shortName,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String fullName,
-            required String shortName,
-          }) =>
-              ManufacturersCompanion.insert(
-            id: id,
-            fullName: fullName,
-            shortName: shortName,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> fullName = const Value.absent(),
+                Value<String> shortName = const Value.absent(),
+              }) => ManufacturersCompanion(
+                id: id,
+                fullName: fullName,
+                shortName: shortName,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String fullName,
+                required String shortName,
+              }) => ManufacturersCompanion.insert(
+                id: id,
+                fullName: fullName,
+                shortName: shortName,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ManufacturersTable, Manufacturer>(table),
+                  BaseReferences<
+                    _$ItemDatabase,
+                    $ManufacturersTable,
+                    Manufacturer
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$ManufacturersTableProcessedTableManager = ProcessedTableManager<
-    _$ItemDatabase,
-    $ManufacturersTable,
-    Manufacturer,
-    $$ManufacturersTableFilterComposer,
-    $$ManufacturersTableOrderingComposer,
-    $$ManufacturersTableAnnotationComposer,
-    $$ManufacturersTableCreateCompanionBuilder,
-    $$ManufacturersTableUpdateCompanionBuilder,
-    (
+typedef $$ManufacturersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$ItemDatabase,
+      $ManufacturersTable,
       Manufacturer,
-      BaseReferences<_$ItemDatabase, $ManufacturersTable, Manufacturer>
-    ),
-    Manufacturer,
-    PrefetchHooks Function()>;
-typedef $$AbbreviationsTableCreateCompanionBuilder = AbbreviationsCompanion
-    Function({
-  Value<int> id,
-  required String origText,
-  required String replaceText,
-});
-typedef $$AbbreviationsTableUpdateCompanionBuilder = AbbreviationsCompanion
-    Function({
-  Value<int> id,
-  Value<String> origText,
-  Value<String> replaceText,
-});
+      $$ManufacturersTableFilterComposer,
+      $$ManufacturersTableOrderingComposer,
+      $$ManufacturersTableAnnotationComposer,
+      $$ManufacturersTableCreateCompanionBuilder,
+      $$ManufacturersTableUpdateCompanionBuilder,
+      (
+        Manufacturer,
+        BaseReferences<_$ItemDatabase, $ManufacturersTable, Manufacturer>,
+      ),
+      Manufacturer,
+      PrefetchHooks Function()
+    >;
+typedef $$AbbreviationsTableCreateCompanionBuilder =
+    AbbreviationsCompanion Function({
+      Value<int> id,
+      required String origText,
+      required String replaceText,
+    });
+typedef $$AbbreviationsTableUpdateCompanionBuilder =
+    AbbreviationsCompanion Function({
+      Value<int> id,
+      Value<String> origText,
+      Value<String> replaceText,
+    });
 
 class $$AbbreviationsTableFilterComposer
     extends Composer<_$ItemDatabase, $AbbreviationsTable> {
@@ -2202,13 +2656,19 @@ class $$AbbreviationsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get origText => $composableBuilder(
-      column: $table.origText, builder: (column) => ColumnFilters(column));
+    column: $table.origText,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get replaceText => $composableBuilder(
-      column: $table.replaceText, builder: (column) => ColumnFilters(column));
+    column: $table.replaceText,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$AbbreviationsTableOrderingComposer
@@ -2221,13 +2681,19 @@ class $$AbbreviationsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get origText => $composableBuilder(
-      column: $table.origText, builder: (column) => ColumnOrderings(column));
+    column: $table.origText,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get replaceText => $composableBuilder(
-      column: $table.replaceText, builder: (column) => ColumnOrderings(column));
+    column: $table.replaceText,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AbbreviationsTableAnnotationComposer
@@ -2246,26 +2712,32 @@ class $$AbbreviationsTableAnnotationComposer
       $composableBuilder(column: $table.origText, builder: (column) => column);
 
   GeneratedColumn<String> get replaceText => $composableBuilder(
-      column: $table.replaceText, builder: (column) => column);
+    column: $table.replaceText,
+    builder: (column) => column,
+  );
 }
 
-class $$AbbreviationsTableTableManager extends RootTableManager<
-    _$ItemDatabase,
-    $AbbreviationsTable,
-    Abbreviation,
-    $$AbbreviationsTableFilterComposer,
-    $$AbbreviationsTableOrderingComposer,
-    $$AbbreviationsTableAnnotationComposer,
-    $$AbbreviationsTableCreateCompanionBuilder,
-    $$AbbreviationsTableUpdateCompanionBuilder,
-    (
-      Abbreviation,
-      BaseReferences<_$ItemDatabase, $AbbreviationsTable, Abbreviation>
-    ),
-    Abbreviation,
-    PrefetchHooks Function()> {
+class $$AbbreviationsTableTableManager
+    extends
+        RootTableManager<
+          _$ItemDatabase,
+          $AbbreviationsTable,
+          Abbreviation,
+          $$AbbreviationsTableFilterComposer,
+          $$AbbreviationsTableOrderingComposer,
+          $$AbbreviationsTableAnnotationComposer,
+          $$AbbreviationsTableCreateCompanionBuilder,
+          $$AbbreviationsTableUpdateCompanionBuilder,
+          (
+            Abbreviation,
+            BaseReferences<_$ItemDatabase, $AbbreviationsTable, Abbreviation>,
+          ),
+          Abbreviation,
+          PrefetchHooks Function()
+        > {
   $$AbbreviationsTableTableManager(_$ItemDatabase db, $AbbreviationsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -2274,48 +2746,60 @@ class $$AbbreviationsTableTableManager extends RootTableManager<
               $$AbbreviationsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$AbbreviationsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> origText = const Value.absent(),
-            Value<String> replaceText = const Value.absent(),
-          }) =>
-              AbbreviationsCompanion(
-            id: id,
-            origText: origText,
-            replaceText: replaceText,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String origText,
-            required String replaceText,
-          }) =>
-              AbbreviationsCompanion.insert(
-            id: id,
-            origText: origText,
-            replaceText: replaceText,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> origText = const Value.absent(),
+                Value<String> replaceText = const Value.absent(),
+              }) => AbbreviationsCompanion(
+                id: id,
+                origText: origText,
+                replaceText: replaceText,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String origText,
+                required String replaceText,
+              }) => AbbreviationsCompanion.insert(
+                id: id,
+                origText: origText,
+                replaceText: replaceText,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$AbbreviationsTable, Abbreviation>(table),
+                  BaseReferences<
+                    _$ItemDatabase,
+                    $AbbreviationsTable,
+                    Abbreviation
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$AbbreviationsTableProcessedTableManager = ProcessedTableManager<
-    _$ItemDatabase,
-    $AbbreviationsTable,
-    Abbreviation,
-    $$AbbreviationsTableFilterComposer,
-    $$AbbreviationsTableOrderingComposer,
-    $$AbbreviationsTableAnnotationComposer,
-    $$AbbreviationsTableCreateCompanionBuilder,
-    $$AbbreviationsTableUpdateCompanionBuilder,
-    (
+typedef $$AbbreviationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$ItemDatabase,
+      $AbbreviationsTable,
       Abbreviation,
-      BaseReferences<_$ItemDatabase, $AbbreviationsTable, Abbreviation>
-    ),
-    Abbreviation,
-    PrefetchHooks Function()>;
+      $$AbbreviationsTableFilterComposer,
+      $$AbbreviationsTableOrderingComposer,
+      $$AbbreviationsTableAnnotationComposer,
+      $$AbbreviationsTableCreateCompanionBuilder,
+      $$AbbreviationsTableUpdateCompanionBuilder,
+      (
+        Abbreviation,
+        BaseReferences<_$ItemDatabase, $AbbreviationsTable, Abbreviation>,
+      ),
+      Abbreviation,
+      PrefetchHooks Function()
+    >;
 
 class $ItemDatabaseManager {
   final _$ItemDatabase _db;
@@ -2333,8 +2817,5 @@ class $ItemDatabaseManager {
 class GetReplacementsResult {
   final String origText;
   final String replaceText;
-  GetReplacementsResult({
-    required this.origText,
-    required this.replaceText,
-  });
+  GetReplacementsResult({required this.origText, required this.replaceText});
 }

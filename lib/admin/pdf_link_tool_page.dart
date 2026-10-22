@@ -329,7 +329,7 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<PdfLinkReplacementMode>(
-              value: _mode,
+              initialValue: _mode,
               decoration: const InputDecoration(labelText: 'Replacement mode'),
               items: const [
                 DropdownMenuItem(

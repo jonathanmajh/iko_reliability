@@ -11,13 +11,21 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
   late final GeneratedColumn<String> key = GeneratedColumn<String>(
-      'key', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _valueMeta = const VerificationMeta('value');
   @override
   late final GeneratedColumn<String> value = GeneratedColumn<String>(
-      'value', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [key, value];
   @override
@@ -26,19 +34,25 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   String get actualTableName => $name;
   static const String $name = 'settings';
   @override
-  VerificationContext validateIntegrity(Insertable<Setting> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Setting> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('key')) {
       context.handle(
-          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
     } else if (isInserting) {
       context.missing(_keyMeta);
     }
     if (data.containsKey('value')) {
       context.handle(
-          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
     } else if (isInserting) {
       context.missing(_valueMeta);
     }
@@ -51,10 +65,14 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
   Setting map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Setting(
-      key: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
-      value: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}value'])!,
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
     );
   }
 
@@ -77,14 +95,13 @@ class Setting extends DataClass implements Insertable<Setting> {
   }
 
   SettingsCompanion toCompanion(bool nullToAbsent) {
-    return SettingsCompanion(
-      key: Value(key),
-      value: Value(value),
-    );
+    return SettingsCompanion(key: Value(key), value: Value(value));
   }
 
-  factory Setting.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Setting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Setting(
       key: serializer.fromJson<String>(json['key']),
@@ -100,10 +117,8 @@ class Setting extends DataClass implements Insertable<Setting> {
     };
   }
 
-  Setting copyWith({String? key, String? value}) => Setting(
-        key: key ?? this.key,
-        value: value ?? this.value,
-      );
+  Setting copyWith({String? key, String? value}) =>
+      Setting(key: key ?? this.key, value: value ?? this.value);
   Setting copyWithCompanion(SettingsCompanion data) {
     return Setting(
       key: data.key.present ? data.key.value : this.key,
@@ -141,8 +156,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     required String key,
     required String value,
     this.rowid = const Value.absent(),
-  })  : key = Value(key),
-        value = Value(value);
+  }) : key = Value(key),
+       value = Value(value);
   static Insertable<Setting> custom({
     Expression<String>? key,
     Expression<String>? value,
@@ -155,8 +170,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     });
   }
 
-  SettingsCompanion copyWith(
-      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
+  SettingsCompanion copyWith({
+    Value<String>? key,
+    Value<String>? value,
+    Value<int>? rowid,
+  }) {
     return SettingsCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
@@ -199,13 +217,21 @@ class $LoginSettingsTable extends LoginSettings
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
   late final GeneratedColumn<String> key = GeneratedColumn<String>(
-      'key', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _valueMeta = const VerificationMeta('value');
   @override
   late final GeneratedColumn<String> value = GeneratedColumn<String>(
-      'value', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [key, value];
   @override
@@ -214,19 +240,25 @@ class $LoginSettingsTable extends LoginSettings
   String get actualTableName => $name;
   static const String $name = 'login_settings';
   @override
-  VerificationContext validateIntegrity(Insertable<LoginSetting> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<LoginSetting> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('key')) {
       context.handle(
-          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
     } else if (isInserting) {
       context.missing(_keyMeta);
     }
     if (data.containsKey('value')) {
       context.handle(
-          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
     } else if (isInserting) {
       context.missing(_valueMeta);
     }
@@ -239,10 +271,14 @@ class $LoginSettingsTable extends LoginSettings
   LoginSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return LoginSetting(
-      key: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
-      value: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}value'])!,
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
     );
   }
 
@@ -265,14 +301,13 @@ class LoginSetting extends DataClass implements Insertable<LoginSetting> {
   }
 
   LoginSettingsCompanion toCompanion(bool nullToAbsent) {
-    return LoginSettingsCompanion(
-      key: Value(key),
-      value: Value(value),
-    );
+    return LoginSettingsCompanion(key: Value(key), value: Value(value));
   }
 
-  factory LoginSetting.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory LoginSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LoginSetting(
       key: serializer.fromJson<String>(json['key']),
@@ -288,10 +323,8 @@ class LoginSetting extends DataClass implements Insertable<LoginSetting> {
     };
   }
 
-  LoginSetting copyWith({String? key, String? value}) => LoginSetting(
-        key: key ?? this.key,
-        value: value ?? this.value,
-      );
+  LoginSetting copyWith({String? key, String? value}) =>
+      LoginSetting(key: key ?? this.key, value: value ?? this.value);
   LoginSetting copyWithCompanion(LoginSettingsCompanion data) {
     return LoginSetting(
       key: data.key.present ? data.key.value : this.key,
@@ -331,8 +364,8 @@ class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
     required String key,
     required String value,
     this.rowid = const Value.absent(),
-  })  : key = Value(key),
-        value = Value(value);
+  }) : key = Value(key),
+       value = Value(value);
   static Insertable<LoginSetting> custom({
     Expression<String>? key,
     Expression<String>? value,
@@ -345,8 +378,11 @@ class LoginSettingsCompanion extends UpdateCompanion<LoginSetting> {
     });
   }
 
-  LoginSettingsCompanion copyWith(
-      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
+  LoginSettingsCompanion copyWith({
+    Value<String>? key,
+    Value<String>? value,
+    Value<int>? rowid,
+  }) {
     return LoginSettingsCompanion(
       key: key ?? this.key,
       value: value ?? this.value,
@@ -388,97 +424,154 @@ class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
   static const VerificationMeta _meterMeta = const VerificationMeta('meter');
   @override
   late final GeneratedColumn<String> meter = GeneratedColumn<String>(
-      'meter', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _inspectMeta =
-      const VerificationMeta('inspect');
+    'meter',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _inspectMeta = const VerificationMeta(
+    'inspect',
+  );
   @override
   late final GeneratedColumn<String> inspect = GeneratedColumn<String>(
-      'inspect', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'inspect',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _frequencyMeta =
-      const VerificationMeta('frequency');
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _frequencyMeta = const VerificationMeta(
+    'frequency',
+  );
   @override
   late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
-      'frequency', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _freqUnitMeta =
-      const VerificationMeta('freqUnit');
+    'frequency',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _freqUnitMeta = const VerificationMeta(
+    'freqUnit',
+  );
   @override
   late final GeneratedColumn<String> freqUnit = GeneratedColumn<String>(
-      'freq_unit', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _conditionMeta =
-      const VerificationMeta('condition');
+    'freq_unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _conditionMeta = const VerificationMeta(
+    'condition',
+  );
   @override
   late final GeneratedColumn<String> condition = GeneratedColumn<String>(
-      'condition', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'condition',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _craftMeta = const VerificationMeta('craft');
   @override
   late final GeneratedColumn<String> craft = GeneratedColumn<String>(
-      'craft', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'craft',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [meter, inspect, description, frequency, freqUnit, condition, craft];
+  List<GeneratedColumn> get $columns => [
+    meter,
+    inspect,
+    description,
+    frequency,
+    freqUnit,
+    condition,
+    craft,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'meter_d_bs';
   @override
-  VerificationContext validateIntegrity(Insertable<MeterDB> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<MeterDB> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('meter')) {
       context.handle(
-          _meterMeta, meter.isAcceptableOrUnknown(data['meter']!, _meterMeta));
+        _meterMeta,
+        meter.isAcceptableOrUnknown(data['meter']!, _meterMeta),
+      );
     } else if (isInserting) {
       context.missing(_meterMeta);
     }
     if (data.containsKey('inspect')) {
-      context.handle(_inspectMeta,
-          inspect.isAcceptableOrUnknown(data['inspect']!, _inspectMeta));
+      context.handle(
+        _inspectMeta,
+        inspect.isAcceptableOrUnknown(data['inspect']!, _inspectMeta),
+      );
     } else if (isInserting) {
       context.missing(_inspectMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
     if (data.containsKey('frequency')) {
-      context.handle(_frequencyMeta,
-          frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta));
+      context.handle(
+        _frequencyMeta,
+        frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta),
+      );
     } else if (isInserting) {
       context.missing(_frequencyMeta);
     }
     if (data.containsKey('freq_unit')) {
-      context.handle(_freqUnitMeta,
-          freqUnit.isAcceptableOrUnknown(data['freq_unit']!, _freqUnitMeta));
+      context.handle(
+        _freqUnitMeta,
+        freqUnit.isAcceptableOrUnknown(data['freq_unit']!, _freqUnitMeta),
+      );
     } else if (isInserting) {
       context.missing(_freqUnitMeta);
     }
     if (data.containsKey('condition')) {
-      context.handle(_conditionMeta,
-          condition.isAcceptableOrUnknown(data['condition']!, _conditionMeta));
+      context.handle(
+        _conditionMeta,
+        condition.isAcceptableOrUnknown(data['condition']!, _conditionMeta),
+      );
     } else if (isInserting) {
       context.missing(_conditionMeta);
     }
     if (data.containsKey('craft')) {
       context.handle(
-          _craftMeta, craft.isAcceptableOrUnknown(data['craft']!, _craftMeta));
+        _craftMeta,
+        craft.isAcceptableOrUnknown(data['craft']!, _craftMeta),
+      );
     } else if (isInserting) {
       context.missing(_craftMeta);
     }
@@ -491,20 +584,34 @@ class $MeterDBsTable extends MeterDBs with TableInfo<$MeterDBsTable, MeterDB> {
   MeterDB map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MeterDB(
-      meter: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}meter'])!,
-      inspect: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}inspect'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      frequency: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}frequency'])!,
-      freqUnit: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}freq_unit'])!,
-      condition: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}condition'])!,
-      craft: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}craft'])!,
+      meter: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meter'],
+      )!,
+      inspect: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}inspect'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      frequency: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}frequency'],
+      )!,
+      freqUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}freq_unit'],
+      )!,
+      condition: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}condition'],
+      )!,
+      craft: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}craft'],
+      )!,
     );
   }
 
@@ -522,14 +629,15 @@ class MeterDB extends DataClass implements Insertable<MeterDB> {
   final String freqUnit;
   final String condition;
   final String craft;
-  const MeterDB(
-      {required this.meter,
-      required this.inspect,
-      required this.description,
-      required this.frequency,
-      required this.freqUnit,
-      required this.condition,
-      required this.craft});
+  const MeterDB({
+    required this.meter,
+    required this.inspect,
+    required this.description,
+    required this.frequency,
+    required this.freqUnit,
+    required this.condition,
+    required this.craft,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -555,8 +663,10 @@ class MeterDB extends DataClass implements Insertable<MeterDB> {
     );
   }
 
-  factory MeterDB.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory MeterDB.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MeterDB(
       meter: serializer.fromJson<String>(json['meter']),
@@ -582,29 +692,30 @@ class MeterDB extends DataClass implements Insertable<MeterDB> {
     };
   }
 
-  MeterDB copyWith(
-          {String? meter,
-          String? inspect,
-          String? description,
-          int? frequency,
-          String? freqUnit,
-          String? condition,
-          String? craft}) =>
-      MeterDB(
-        meter: meter ?? this.meter,
-        inspect: inspect ?? this.inspect,
-        description: description ?? this.description,
-        frequency: frequency ?? this.frequency,
-        freqUnit: freqUnit ?? this.freqUnit,
-        condition: condition ?? this.condition,
-        craft: craft ?? this.craft,
-      );
+  MeterDB copyWith({
+    String? meter,
+    String? inspect,
+    String? description,
+    int? frequency,
+    String? freqUnit,
+    String? condition,
+    String? craft,
+  }) => MeterDB(
+    meter: meter ?? this.meter,
+    inspect: inspect ?? this.inspect,
+    description: description ?? this.description,
+    frequency: frequency ?? this.frequency,
+    freqUnit: freqUnit ?? this.freqUnit,
+    condition: condition ?? this.condition,
+    craft: craft ?? this.craft,
+  );
   MeterDB copyWithCompanion(MeterDBsCompanion data) {
     return MeterDB(
       meter: data.meter.present ? data.meter.value : this.meter,
       inspect: data.inspect.present ? data.inspect.value : this.inspect,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       frequency: data.frequency.present ? data.frequency.value : this.frequency,
       freqUnit: data.freqUnit.present ? data.freqUnit.value : this.freqUnit,
       condition: data.condition.present ? data.condition.value : this.condition,
@@ -628,7 +739,14 @@ class MeterDB extends DataClass implements Insertable<MeterDB> {
 
   @override
   int get hashCode => Object.hash(
-      meter, inspect, description, frequency, freqUnit, condition, craft);
+    meter,
+    inspect,
+    description,
+    frequency,
+    freqUnit,
+    condition,
+    craft,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -670,13 +788,13 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     required String condition,
     required String craft,
     this.rowid = const Value.absent(),
-  })  : meter = Value(meter),
-        inspect = Value(inspect),
-        description = Value(description),
-        frequency = Value(frequency),
-        freqUnit = Value(freqUnit),
-        condition = Value(condition),
-        craft = Value(craft);
+  }) : meter = Value(meter),
+       inspect = Value(inspect),
+       description = Value(description),
+       frequency = Value(frequency),
+       freqUnit = Value(freqUnit),
+       condition = Value(condition),
+       craft = Value(craft);
   static Insertable<MeterDB> custom({
     Expression<String>? meter,
     Expression<String>? inspect,
@@ -699,15 +817,16 @@ class MeterDBsCompanion extends UpdateCompanion<MeterDB> {
     });
   }
 
-  MeterDBsCompanion copyWith(
-      {Value<String>? meter,
-      Value<String>? inspect,
-      Value<String>? description,
-      Value<int>? frequency,
-      Value<String>? freqUnit,
-      Value<String>? condition,
-      Value<String>? craft,
-      Value<int>? rowid}) {
+  MeterDBsCompanion copyWith({
+    Value<String>? meter,
+    Value<String>? inspect,
+    Value<String>? description,
+    Value<int>? frequency,
+    Value<String>? freqUnit,
+    Value<String>? condition,
+    Value<String>? craft,
+    Value<int>? rowid,
+  }) {
     return MeterDBsCompanion(
       meter: meter ?? this.meter,
       inspect: inspect ?? this.inspect,
@@ -775,24 +894,41 @@ class $ObservationsTable extends Observations
   static const VerificationMeta _meterMeta = const VerificationMeta('meter');
   @override
   late final GeneratedColumn<String> meter = GeneratedColumn<String>(
-      'meter', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'meter',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _codeMeta = const VerificationMeta('code');
   @override
   late final GeneratedColumn<String> code = GeneratedColumn<String>(
-      'code', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _actionMeta = const VerificationMeta('action');
   @override
   late final GeneratedColumn<String> action = GeneratedColumn<String>(
-      'action', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'action',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [meter, code, description, action];
   @override
@@ -801,33 +937,44 @@ class $ObservationsTable extends Observations
   String get actualTableName => $name;
   static const String $name = 'observations';
   @override
-  VerificationContext validateIntegrity(Insertable<Observation> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Observation> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('meter')) {
       context.handle(
-          _meterMeta, meter.isAcceptableOrUnknown(data['meter']!, _meterMeta));
+        _meterMeta,
+        meter.isAcceptableOrUnknown(data['meter']!, _meterMeta),
+      );
     } else if (isInserting) {
       context.missing(_meterMeta);
     }
     if (data.containsKey('code')) {
       context.handle(
-          _codeMeta, code.isAcceptableOrUnknown(data['code']!, _codeMeta));
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
     } else if (isInserting) {
       context.missing(_codeMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
     if (data.containsKey('action')) {
-      context.handle(_actionMeta,
-          action.isAcceptableOrUnknown(data['action']!, _actionMeta));
+      context.handle(
+        _actionMeta,
+        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
+      );
     }
     return context;
   }
@@ -838,14 +985,22 @@ class $ObservationsTable extends Observations
   Observation map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Observation(
-      meter: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}meter'])!,
-      code: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}code'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      action: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}action']),
+      meter: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meter'],
+      )!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      action: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}action'],
+      ),
     );
   }
 
@@ -860,11 +1015,12 @@ class Observation extends DataClass implements Insertable<Observation> {
   final String code;
   final String description;
   final String? action;
-  const Observation(
-      {required this.meter,
-      required this.code,
-      required this.description,
-      this.action});
+  const Observation({
+    required this.meter,
+    required this.code,
+    required this.description,
+    this.action,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -882,13 +1038,16 @@ class Observation extends DataClass implements Insertable<Observation> {
       meter: Value(meter),
       code: Value(code),
       description: Value(description),
-      action:
-          action == null && nullToAbsent ? const Value.absent() : Value(action),
+      action: action == null && nullToAbsent
+          ? const Value.absent()
+          : Value(action),
     );
   }
 
-  factory Observation.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Observation.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Observation(
       meter: serializer.fromJson<String>(json['meter']),
@@ -908,23 +1067,24 @@ class Observation extends DataClass implements Insertable<Observation> {
     };
   }
 
-  Observation copyWith(
-          {String? meter,
-          String? code,
-          String? description,
-          Value<String?> action = const Value.absent()}) =>
-      Observation(
-        meter: meter ?? this.meter,
-        code: code ?? this.code,
-        description: description ?? this.description,
-        action: action.present ? action.value : this.action,
-      );
+  Observation copyWith({
+    String? meter,
+    String? code,
+    String? description,
+    Value<String?> action = const Value.absent(),
+  }) => Observation(
+    meter: meter ?? this.meter,
+    code: code ?? this.code,
+    description: description ?? this.description,
+    action: action.present ? action.value : this.action,
+  );
   Observation copyWithCompanion(ObservationsCompanion data) {
     return Observation(
       meter: data.meter.present ? data.meter.value : this.meter,
       code: data.code.present ? data.code.value : this.code,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       action: data.action.present ? data.action.value : this.action,
     );
   }
@@ -971,9 +1131,9 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
     required String description,
     this.action = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : meter = Value(meter),
-        code = Value(code),
-        description = Value(description);
+  }) : meter = Value(meter),
+       code = Value(code),
+       description = Value(description);
   static Insertable<Observation> custom({
     Expression<String>? meter,
     Expression<String>? code,
@@ -990,12 +1150,13 @@ class ObservationsCompanion extends UpdateCompanion<Observation> {
     });
   }
 
-  ObservationsCompanion copyWith(
-      {Value<String>? meter,
-      Value<String>? code,
-      Value<String>? description,
-      Value<String?>? action,
-      Value<int>? rowid}) {
+  ObservationsCompanion copyWith({
+    Value<String>? meter,
+    Value<String>? code,
+    Value<String>? description,
+    Value<String?>? action,
+    Value<int>? rowid,
+  }) {
     return ObservationsCompanion(
       meter: meter ?? this.meter,
       code: code ?? this.code,
@@ -1044,132 +1205,194 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $AssetsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _assetnumMeta =
-      const VerificationMeta('assetnum');
+  static const VerificationMeta _assetnumMeta = const VerificationMeta(
+    'assetnum',
+  );
   @override
   late final GeneratedColumn<String> assetnum = GeneratedColumn<String>(
-      'assetnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'assetnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
-      'status', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
   late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
-      'siteid', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _changedateMeta =
-      const VerificationMeta('changedate');
+    'siteid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _changedateMeta = const VerificationMeta(
+    'changedate',
+  );
   @override
   late final GeneratedColumn<String> changedate = GeneratedColumn<String>(
-      'changedate', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _hierarchyMeta =
-      const VerificationMeta('hierarchy');
+    'changedate',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hierarchyMeta = const VerificationMeta(
+    'hierarchy',
+  );
   @override
   late final GeneratedColumn<String> hierarchy = GeneratedColumn<String>(
-      'hierarchy', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'hierarchy',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _parentMeta = const VerificationMeta('parent');
   @override
   late final GeneratedColumn<String> parent = GeneratedColumn<String>(
-      'parent', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _priorityMeta =
-      const VerificationMeta('priority');
+    'parent',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
   @override
   late final GeneratedColumn<int> priority = GeneratedColumn<int>(
-      'priority', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _newAssetMeta =
-      const VerificationMeta('newAsset');
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _newAssetMeta = const VerificationMeta(
+    'newAsset',
+  );
   @override
   late final GeneratedColumn<int> newAsset = GeneratedColumn<int>(
-      'new_asset', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+    'new_asset',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        assetnum,
-        description,
-        status,
-        siteid,
-        changedate,
-        hierarchy,
-        parent,
-        priority,
-        id,
-        newAsset
-      ];
+    assetnum,
+    description,
+    status,
+    siteid,
+    changedate,
+    hierarchy,
+    parent,
+    priority,
+    id,
+    newAsset,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'assets';
   @override
-  VerificationContext validateIntegrity(Insertable<Asset> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Asset> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('assetnum')) {
-      context.handle(_assetnumMeta,
-          assetnum.isAcceptableOrUnknown(data['assetnum']!, _assetnumMeta));
+      context.handle(
+        _assetnumMeta,
+        assetnum.isAcceptableOrUnknown(data['assetnum']!, _assetnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_assetnumMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
     if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
     if (data.containsKey('siteid')) {
-      context.handle(_siteidMeta,
-          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+      context.handle(
+        _siteidMeta,
+        siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta),
+      );
     } else if (isInserting) {
       context.missing(_siteidMeta);
     }
     if (data.containsKey('changedate')) {
       context.handle(
-          _changedateMeta,
-          changedate.isAcceptableOrUnknown(
-              data['changedate']!, _changedateMeta));
+        _changedateMeta,
+        changedate.isAcceptableOrUnknown(data['changedate']!, _changedateMeta),
+      );
     } else if (isInserting) {
       context.missing(_changedateMeta);
     }
     if (data.containsKey('hierarchy')) {
-      context.handle(_hierarchyMeta,
-          hierarchy.isAcceptableOrUnknown(data['hierarchy']!, _hierarchyMeta));
+      context.handle(
+        _hierarchyMeta,
+        hierarchy.isAcceptableOrUnknown(data['hierarchy']!, _hierarchyMeta),
+      );
     }
     if (data.containsKey('parent')) {
-      context.handle(_parentMeta,
-          parent.isAcceptableOrUnknown(data['parent']!, _parentMeta));
+      context.handle(
+        _parentMeta,
+        parent.isAcceptableOrUnknown(data['parent']!, _parentMeta),
+      );
     }
     if (data.containsKey('priority')) {
-      context.handle(_priorityMeta,
-          priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta));
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
     } else if (isInserting) {
       context.missing(_priorityMeta);
     }
@@ -1179,8 +1402,10 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
       context.missing(_idMeta);
     }
     if (data.containsKey('new_asset')) {
-      context.handle(_newAssetMeta,
-          newAsset.isAcceptableOrUnknown(data['new_asset']!, _newAssetMeta));
+      context.handle(
+        _newAssetMeta,
+        newAsset.isAcceptableOrUnknown(data['new_asset']!, _newAssetMeta),
+      );
     }
     return context;
   }
@@ -1189,32 +1414,52 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   List<Set<GeneratedColumn>> get uniqueKeys => [
-        {siteid, assetnum},
-      ];
+    {siteid, assetnum},
+  ];
   @override
   Asset map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Asset(
-      assetnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}assetnum'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      status: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
-      siteid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
-      changedate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}changedate'])!,
-      hierarchy: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}hierarchy']),
-      parent: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}parent']),
-      priority: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}priority'])!,
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      newAsset: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}new_asset'])!,
+      assetnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assetnum'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      siteid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siteid'],
+      )!,
+      changedate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}changedate'],
+      )!,
+      hierarchy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hierarchy'],
+      ),
+      parent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent'],
+      ),
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}priority'],
+      )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      newAsset: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}new_asset'],
+      )!,
     );
   }
 
@@ -1235,17 +1480,18 @@ class Asset extends DataClass implements Insertable<Asset> {
   final int priority;
   final String id;
   final int newAsset;
-  const Asset(
-      {required this.assetnum,
-      required this.description,
-      required this.status,
-      required this.siteid,
-      required this.changedate,
-      this.hierarchy,
-      this.parent,
-      required this.priority,
-      required this.id,
-      required this.newAsset});
+  const Asset({
+    required this.assetnum,
+    required this.description,
+    required this.status,
+    required this.siteid,
+    required this.changedate,
+    this.hierarchy,
+    this.parent,
+    required this.priority,
+    required this.id,
+    required this.newAsset,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1276,16 +1522,19 @@ class Asset extends DataClass implements Insertable<Asset> {
       hierarchy: hierarchy == null && nullToAbsent
           ? const Value.absent()
           : Value(hierarchy),
-      parent:
-          parent == null && nullToAbsent ? const Value.absent() : Value(parent),
+      parent: parent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parent),
       priority: Value(priority),
       id: Value(id),
       newAsset: Value(newAsset),
     );
   }
 
-  factory Asset.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Asset.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Asset(
       assetnum: serializer.fromJson<String>(json['assetnum']),
@@ -1317,38 +1566,40 @@ class Asset extends DataClass implements Insertable<Asset> {
     };
   }
 
-  Asset copyWith(
-          {String? assetnum,
-          String? description,
-          String? status,
-          String? siteid,
-          String? changedate,
-          Value<String?> hierarchy = const Value.absent(),
-          Value<String?> parent = const Value.absent(),
-          int? priority,
-          String? id,
-          int? newAsset}) =>
-      Asset(
-        assetnum: assetnum ?? this.assetnum,
-        description: description ?? this.description,
-        status: status ?? this.status,
-        siteid: siteid ?? this.siteid,
-        changedate: changedate ?? this.changedate,
-        hierarchy: hierarchy.present ? hierarchy.value : this.hierarchy,
-        parent: parent.present ? parent.value : this.parent,
-        priority: priority ?? this.priority,
-        id: id ?? this.id,
-        newAsset: newAsset ?? this.newAsset,
-      );
+  Asset copyWith({
+    String? assetnum,
+    String? description,
+    String? status,
+    String? siteid,
+    String? changedate,
+    Value<String?> hierarchy = const Value.absent(),
+    Value<String?> parent = const Value.absent(),
+    int? priority,
+    String? id,
+    int? newAsset,
+  }) => Asset(
+    assetnum: assetnum ?? this.assetnum,
+    description: description ?? this.description,
+    status: status ?? this.status,
+    siteid: siteid ?? this.siteid,
+    changedate: changedate ?? this.changedate,
+    hierarchy: hierarchy.present ? hierarchy.value : this.hierarchy,
+    parent: parent.present ? parent.value : this.parent,
+    priority: priority ?? this.priority,
+    id: id ?? this.id,
+    newAsset: newAsset ?? this.newAsset,
+  );
   Asset copyWithCompanion(AssetsCompanion data) {
     return Asset(
       assetnum: data.assetnum.present ? data.assetnum.value : this.assetnum,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       status: data.status.present ? data.status.value : this.status,
       siteid: data.siteid.present ? data.siteid.value : this.siteid,
-      changedate:
-          data.changedate.present ? data.changedate.value : this.changedate,
+      changedate: data.changedate.present
+          ? data.changedate.value
+          : this.changedate,
       hierarchy: data.hierarchy.present ? data.hierarchy.value : this.hierarchy,
       parent: data.parent.present ? data.parent.value : this.parent,
       priority: data.priority.present ? data.priority.value : this.priority,
@@ -1375,8 +1626,18 @@ class Asset extends DataClass implements Insertable<Asset> {
   }
 
   @override
-  int get hashCode => Object.hash(assetnum, description, status, siteid,
-      changedate, hierarchy, parent, priority, id, newAsset);
+  int get hashCode => Object.hash(
+    assetnum,
+    description,
+    status,
+    siteid,
+    changedate,
+    hierarchy,
+    parent,
+    priority,
+    id,
+    newAsset,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1430,13 +1691,13 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     required String id,
     this.newAsset = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : assetnum = Value(assetnum),
-        description = Value(description),
-        status = Value(status),
-        siteid = Value(siteid),
-        changedate = Value(changedate),
-        priority = Value(priority),
-        id = Value(id);
+  }) : assetnum = Value(assetnum),
+       description = Value(description),
+       status = Value(status),
+       siteid = Value(siteid),
+       changedate = Value(changedate),
+       priority = Value(priority),
+       id = Value(id);
   static Insertable<Asset> custom({
     Expression<String>? assetnum,
     Expression<String>? description,
@@ -1465,18 +1726,19 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     });
   }
 
-  AssetsCompanion copyWith(
-      {Value<String>? assetnum,
-      Value<String>? description,
-      Value<String>? status,
-      Value<String>? siteid,
-      Value<String>? changedate,
-      Value<String?>? hierarchy,
-      Value<String?>? parent,
-      Value<int>? priority,
-      Value<String>? id,
-      Value<int>? newAsset,
-      Value<int>? rowid}) {
+  AssetsCompanion copyWith({
+    Value<String>? assetnum,
+    Value<String>? description,
+    Value<String>? status,
+    Value<String>? siteid,
+    Value<String>? changedate,
+    Value<String?>? hierarchy,
+    Value<String?>? parent,
+    Value<int>? priority,
+    Value<String>? id,
+    Value<int>? newAsset,
+    Value<int>? rowid,
+  }) {
     return AssetsCompanion(
       assetnum: assetnum ?? this.assetnum,
       description: description ?? this.description,
@@ -1559,143 +1821,208 @@ class $WorkordersTable extends Workorders
   static const VerificationMeta _wonumMeta = const VerificationMeta('wonum');
   @override
   late final GeneratedColumn<String> wonum = GeneratedColumn<String>(
-      'wonum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'wonum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
-      'status', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
   late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
-      'siteid', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _reportdateMeta =
-      const VerificationMeta('reportdate');
+    'siteid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reportdateMeta = const VerificationMeta(
+    'reportdate',
+  );
   @override
   late final GeneratedColumn<String> reportdate = GeneratedColumn<String>(
-      'reportdate', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _downtimeMeta =
-      const VerificationMeta('downtime');
+    'reportdate',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _downtimeMeta = const VerificationMeta(
+    'downtime',
+  );
   @override
   late final GeneratedColumn<double> downtime = GeneratedColumn<double>(
-      'downtime', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+    'downtime',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
-      'type', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _assetnumMeta =
-      const VerificationMeta('assetnum');
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _assetnumMeta = const VerificationMeta(
+    'assetnum',
+  );
   @override
   late final GeneratedColumn<String> assetnum = GeneratedColumn<String>(
-      'assetnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _detailsMeta =
-      const VerificationMeta('details');
+    'assetnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _detailsMeta = const VerificationMeta(
+    'details',
+  );
   @override
   late final GeneratedColumn<String> details = GeneratedColumn<String>(
-      'details', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _recordTypeMeta =
-      const VerificationMeta('recordType');
+    'details',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordTypeMeta = const VerificationMeta(
+    'recordType',
+  );
   @override
   late final GeneratedColumn<String> recordType = GeneratedColumn<String>(
-      'record_type', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'record_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        wonum,
-        description,
-        status,
-        siteid,
-        reportdate,
-        downtime,
-        type,
-        assetnum,
-        details,
-        recordType
-      ];
+    wonum,
+    description,
+    status,
+    siteid,
+    reportdate,
+    downtime,
+    type,
+    assetnum,
+    details,
+    recordType,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'workorders';
   @override
-  VerificationContext validateIntegrity(Insertable<Workorder> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Workorder> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('wonum')) {
       context.handle(
-          _wonumMeta, wonum.isAcceptableOrUnknown(data['wonum']!, _wonumMeta));
+        _wonumMeta,
+        wonum.isAcceptableOrUnknown(data['wonum']!, _wonumMeta),
+      );
     } else if (isInserting) {
       context.missing(_wonumMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
     if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
     if (data.containsKey('siteid')) {
-      context.handle(_siteidMeta,
-          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+      context.handle(
+        _siteidMeta,
+        siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta),
+      );
     } else if (isInserting) {
       context.missing(_siteidMeta);
     }
     if (data.containsKey('reportdate')) {
       context.handle(
-          _reportdateMeta,
-          reportdate.isAcceptableOrUnknown(
-              data['reportdate']!, _reportdateMeta));
+        _reportdateMeta,
+        reportdate.isAcceptableOrUnknown(data['reportdate']!, _reportdateMeta),
+      );
     } else if (isInserting) {
       context.missing(_reportdateMeta);
     }
     if (data.containsKey('downtime')) {
-      context.handle(_downtimeMeta,
-          downtime.isAcceptableOrUnknown(data['downtime']!, _downtimeMeta));
+      context.handle(
+        _downtimeMeta,
+        downtime.isAcceptableOrUnknown(data['downtime']!, _downtimeMeta),
+      );
     } else if (isInserting) {
       context.missing(_downtimeMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
     if (data.containsKey('assetnum')) {
-      context.handle(_assetnumMeta,
-          assetnum.isAcceptableOrUnknown(data['assetnum']!, _assetnumMeta));
+      context.handle(
+        _assetnumMeta,
+        assetnum.isAcceptableOrUnknown(data['assetnum']!, _assetnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_assetnumMeta);
     }
     if (data.containsKey('details')) {
-      context.handle(_detailsMeta,
-          details.isAcceptableOrUnknown(data['details']!, _detailsMeta));
+      context.handle(
+        _detailsMeta,
+        details.isAcceptableOrUnknown(data['details']!, _detailsMeta),
+      );
     }
     if (data.containsKey('record_type')) {
       context.handle(
-          _recordTypeMeta,
-          recordType.isAcceptableOrUnknown(
-              data['record_type']!, _recordTypeMeta));
+        _recordTypeMeta,
+        recordType.isAcceptableOrUnknown(data['record_type']!, _recordTypeMeta),
+      );
     }
     return context;
   }
@@ -1706,26 +2033,46 @@ class $WorkordersTable extends Workorders
   Workorder map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Workorder(
-      wonum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}wonum'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      status: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
-      siteid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
-      reportdate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}reportdate'])!,
-      downtime: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}downtime'])!,
-      type: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
-      assetnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}assetnum'])!,
-      details: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}details']),
-      recordType: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}record_type']),
+      wonum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}wonum'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      siteid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siteid'],
+      )!,
+      reportdate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reportdate'],
+      )!,
+      downtime: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}downtime'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      assetnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assetnum'],
+      )!,
+      details: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}details'],
+      ),
+      recordType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}record_type'],
+      ),
     );
   }
 
@@ -1746,17 +2093,18 @@ class Workorder extends DataClass implements Insertable<Workorder> {
   final String assetnum;
   final String? details;
   final String? recordType;
-  const Workorder(
-      {required this.wonum,
-      required this.description,
-      required this.status,
-      required this.siteid,
-      required this.reportdate,
-      required this.downtime,
-      required this.type,
-      required this.assetnum,
-      this.details,
-      this.recordType});
+  const Workorder({
+    required this.wonum,
+    required this.description,
+    required this.status,
+    required this.siteid,
+    required this.reportdate,
+    required this.downtime,
+    required this.type,
+    required this.assetnum,
+    this.details,
+    this.recordType,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1796,8 +2144,10 @@ class Workorder extends DataClass implements Insertable<Workorder> {
     );
   }
 
-  factory Workorder.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Workorder.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Workorder(
       wonum: serializer.fromJson<String>(json['wonum']),
@@ -1829,44 +2179,47 @@ class Workorder extends DataClass implements Insertable<Workorder> {
     };
   }
 
-  Workorder copyWith(
-          {String? wonum,
-          String? description,
-          String? status,
-          String? siteid,
-          String? reportdate,
-          double? downtime,
-          String? type,
-          String? assetnum,
-          Value<String?> details = const Value.absent(),
-          Value<String?> recordType = const Value.absent()}) =>
-      Workorder(
-        wonum: wonum ?? this.wonum,
-        description: description ?? this.description,
-        status: status ?? this.status,
-        siteid: siteid ?? this.siteid,
-        reportdate: reportdate ?? this.reportdate,
-        downtime: downtime ?? this.downtime,
-        type: type ?? this.type,
-        assetnum: assetnum ?? this.assetnum,
-        details: details.present ? details.value : this.details,
-        recordType: recordType.present ? recordType.value : this.recordType,
-      );
+  Workorder copyWith({
+    String? wonum,
+    String? description,
+    String? status,
+    String? siteid,
+    String? reportdate,
+    double? downtime,
+    String? type,
+    String? assetnum,
+    Value<String?> details = const Value.absent(),
+    Value<String?> recordType = const Value.absent(),
+  }) => Workorder(
+    wonum: wonum ?? this.wonum,
+    description: description ?? this.description,
+    status: status ?? this.status,
+    siteid: siteid ?? this.siteid,
+    reportdate: reportdate ?? this.reportdate,
+    downtime: downtime ?? this.downtime,
+    type: type ?? this.type,
+    assetnum: assetnum ?? this.assetnum,
+    details: details.present ? details.value : this.details,
+    recordType: recordType.present ? recordType.value : this.recordType,
+  );
   Workorder copyWithCompanion(WorkordersCompanion data) {
     return Workorder(
       wonum: data.wonum.present ? data.wonum.value : this.wonum,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       status: data.status.present ? data.status.value : this.status,
       siteid: data.siteid.present ? data.siteid.value : this.siteid,
-      reportdate:
-          data.reportdate.present ? data.reportdate.value : this.reportdate,
+      reportdate: data.reportdate.present
+          ? data.reportdate.value
+          : this.reportdate,
       downtime: data.downtime.present ? data.downtime.value : this.downtime,
       type: data.type.present ? data.type.value : this.type,
       assetnum: data.assetnum.present ? data.assetnum.value : this.assetnum,
       details: data.details.present ? data.details.value : this.details,
-      recordType:
-          data.recordType.present ? data.recordType.value : this.recordType,
+      recordType: data.recordType.present
+          ? data.recordType.value
+          : this.recordType,
     );
   }
 
@@ -1888,8 +2241,18 @@ class Workorder extends DataClass implements Insertable<Workorder> {
   }
 
   @override
-  int get hashCode => Object.hash(wonum, description, status, siteid,
-      reportdate, downtime, type, assetnum, details, recordType);
+  int get hashCode => Object.hash(
+    wonum,
+    description,
+    status,
+    siteid,
+    reportdate,
+    downtime,
+    type,
+    assetnum,
+    details,
+    recordType,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1943,14 +2306,14 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     this.details = const Value.absent(),
     this.recordType = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : wonum = Value(wonum),
-        description = Value(description),
-        status = Value(status),
-        siteid = Value(siteid),
-        reportdate = Value(reportdate),
-        downtime = Value(downtime),
-        type = Value(type),
-        assetnum = Value(assetnum);
+  }) : wonum = Value(wonum),
+       description = Value(description),
+       status = Value(status),
+       siteid = Value(siteid),
+       reportdate = Value(reportdate),
+       downtime = Value(downtime),
+       type = Value(type),
+       assetnum = Value(assetnum);
   static Insertable<Workorder> custom({
     Expression<String>? wonum,
     Expression<String>? description,
@@ -1979,18 +2342,19 @@ class WorkordersCompanion extends UpdateCompanion<Workorder> {
     });
   }
 
-  WorkordersCompanion copyWith(
-      {Value<String>? wonum,
-      Value<String>? description,
-      Value<String>? status,
-      Value<String>? siteid,
-      Value<String>? reportdate,
-      Value<double>? downtime,
-      Value<String>? type,
-      Value<String>? assetnum,
-      Value<String?>? details,
-      Value<String?>? recordType,
-      Value<int>? rowid}) {
+  WorkordersCompanion copyWith({
+    Value<String>? wonum,
+    Value<String>? description,
+    Value<String>? status,
+    Value<String>? siteid,
+    Value<String>? reportdate,
+    Value<double>? downtime,
+    Value<String>? type,
+    Value<String>? assetnum,
+    Value<String?>? details,
+    Value<String?>? recordType,
+    Value<int>? rowid,
+  }) {
     return WorkordersCompanion(
       wonum: wonum ?? this.wonum,
       description: description ?? this.description,
@@ -2073,95 +2437,136 @@ class $SystemCriticalitysTable extends SystemCriticalitys
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
   late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
-      'siteid', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'siteid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _safetyMeta = const VerificationMeta('safety');
   @override
   late final GeneratedColumn<int> safety = GeneratedColumn<int>(
-      'safety', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _regulatoryMeta =
-      const VerificationMeta('regulatory');
+    'safety',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _regulatoryMeta = const VerificationMeta(
+    'regulatory',
+  );
   @override
   late final GeneratedColumn<int> regulatory = GeneratedColumn<int>(
-      'regulatory', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _economicMeta =
-      const VerificationMeta('economic');
+    'regulatory',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _economicMeta = const VerificationMeta(
+    'economic',
+  );
   @override
   late final GeneratedColumn<int> economic = GeneratedColumn<int>(
-      'economic', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _throughputMeta =
-      const VerificationMeta('throughput');
+    'economic',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _throughputMeta = const VerificationMeta(
+    'throughput',
+  );
   @override
   late final GeneratedColumn<int> throughput = GeneratedColumn<int>(
-      'throughput', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _qualityMeta =
-      const VerificationMeta('quality');
+    'throughput',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _qualityMeta = const VerificationMeta(
+    'quality',
+  );
   @override
   late final GeneratedColumn<int> quality = GeneratedColumn<int>(
-      'quality', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+    'quality',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _lineMeta = const VerificationMeta('line');
   @override
   late final GeneratedColumn<String> line = GeneratedColumn<String>(
-      'line', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'line',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _scoreMeta = const VerificationMeta('score');
   @override
   late final GeneratedColumn<double> score = GeneratedColumn<double>(
-      'score', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+    'score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        description,
-        siteid,
-        safety,
-        regulatory,
-        economic,
-        throughput,
-        quality,
-        line,
-        score
-      ];
+    id,
+    description,
+    siteid,
+    safety,
+    regulatory,
+    economic,
+    throughput,
+    quality,
+    line,
+    score,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'system_criticalitys';
   @override
-  VerificationContext validateIntegrity(Insertable<SystemCriticality> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<SystemCriticality> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -2169,49 +2574,64 @@ class $SystemCriticalitysTable extends SystemCriticalitys
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
     if (data.containsKey('siteid')) {
-      context.handle(_siteidMeta,
-          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+      context.handle(
+        _siteidMeta,
+        siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta),
+      );
     }
     if (data.containsKey('safety')) {
-      context.handle(_safetyMeta,
-          safety.isAcceptableOrUnknown(data['safety']!, _safetyMeta));
+      context.handle(
+        _safetyMeta,
+        safety.isAcceptableOrUnknown(data['safety']!, _safetyMeta),
+      );
     }
     if (data.containsKey('regulatory')) {
       context.handle(
-          _regulatoryMeta,
-          regulatory.isAcceptableOrUnknown(
-              data['regulatory']!, _regulatoryMeta));
+        _regulatoryMeta,
+        regulatory.isAcceptableOrUnknown(data['regulatory']!, _regulatoryMeta),
+      );
     }
     if (data.containsKey('economic')) {
-      context.handle(_economicMeta,
-          economic.isAcceptableOrUnknown(data['economic']!, _economicMeta));
+      context.handle(
+        _economicMeta,
+        economic.isAcceptableOrUnknown(data['economic']!, _economicMeta),
+      );
     }
     if (data.containsKey('throughput')) {
       context.handle(
-          _throughputMeta,
-          throughput.isAcceptableOrUnknown(
-              data['throughput']!, _throughputMeta));
+        _throughputMeta,
+        throughput.isAcceptableOrUnknown(data['throughput']!, _throughputMeta),
+      );
     }
     if (data.containsKey('quality')) {
-      context.handle(_qualityMeta,
-          quality.isAcceptableOrUnknown(data['quality']!, _qualityMeta));
+      context.handle(
+        _qualityMeta,
+        quality.isAcceptableOrUnknown(data['quality']!, _qualityMeta),
+      );
     }
     if (data.containsKey('line')) {
       context.handle(
-          _lineMeta, line.isAcceptableOrUnknown(data['line']!, _lineMeta));
+        _lineMeta,
+        line.isAcceptableOrUnknown(data['line']!, _lineMeta),
+      );
     } else if (isInserting) {
       context.missing(_lineMeta);
     }
     if (data.containsKey('score')) {
       context.handle(
-          _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
+        _scoreMeta,
+        score.isAcceptableOrUnknown(data['score']!, _scoreMeta),
+      );
     }
     return context;
   }
@@ -2222,26 +2642,46 @@ class $SystemCriticalitysTable extends SystemCriticalitys
   SystemCriticality map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SystemCriticality(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      siteid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}siteid']),
-      safety: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}safety'])!,
-      regulatory: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}regulatory'])!,
-      economic: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}economic'])!,
-      throughput: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}throughput'])!,
-      quality: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}quality'])!,
-      line: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}line'])!,
-      score: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}score'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      siteid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siteid'],
+      ),
+      safety: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}safety'],
+      )!,
+      regulatory: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}regulatory'],
+      )!,
+      economic: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}economic'],
+      )!,
+      throughput: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}throughput'],
+      )!,
+      quality: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quality'],
+      )!,
+      line: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}line'],
+      )!,
+      score: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}score'],
+      )!,
     );
   }
 
@@ -2263,17 +2703,18 @@ class SystemCriticality extends DataClass
   final int quality;
   final String line;
   final double score;
-  const SystemCriticality(
-      {required this.id,
-      required this.description,
-      this.siteid,
-      required this.safety,
-      required this.regulatory,
-      required this.economic,
-      required this.throughput,
-      required this.quality,
-      required this.line,
-      required this.score});
+  const SystemCriticality({
+    required this.id,
+    required this.description,
+    this.siteid,
+    required this.safety,
+    required this.regulatory,
+    required this.economic,
+    required this.throughput,
+    required this.quality,
+    required this.line,
+    required this.score,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2296,8 +2737,9 @@ class SystemCriticality extends DataClass
     return SystemCriticalitysCompanion(
       id: Value(id),
       description: Value(description),
-      siteid:
-          siteid == null && nullToAbsent ? const Value.absent() : Value(siteid),
+      siteid: siteid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(siteid),
       safety: Value(safety),
       regulatory: Value(regulatory),
       economic: Value(economic),
@@ -2308,8 +2750,10 @@ class SystemCriticality extends DataClass
     );
   }
 
-  factory SystemCriticality.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory SystemCriticality.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SystemCriticality(
       id: serializer.fromJson<int>(json['id']),
@@ -2341,41 +2785,44 @@ class SystemCriticality extends DataClass
     };
   }
 
-  SystemCriticality copyWith(
-          {int? id,
-          String? description,
-          Value<String?> siteid = const Value.absent(),
-          int? safety,
-          int? regulatory,
-          int? economic,
-          int? throughput,
-          int? quality,
-          String? line,
-          double? score}) =>
-      SystemCriticality(
-        id: id ?? this.id,
-        description: description ?? this.description,
-        siteid: siteid.present ? siteid.value : this.siteid,
-        safety: safety ?? this.safety,
-        regulatory: regulatory ?? this.regulatory,
-        economic: economic ?? this.economic,
-        throughput: throughput ?? this.throughput,
-        quality: quality ?? this.quality,
-        line: line ?? this.line,
-        score: score ?? this.score,
-      );
+  SystemCriticality copyWith({
+    int? id,
+    String? description,
+    Value<String?> siteid = const Value.absent(),
+    int? safety,
+    int? regulatory,
+    int? economic,
+    int? throughput,
+    int? quality,
+    String? line,
+    double? score,
+  }) => SystemCriticality(
+    id: id ?? this.id,
+    description: description ?? this.description,
+    siteid: siteid.present ? siteid.value : this.siteid,
+    safety: safety ?? this.safety,
+    regulatory: regulatory ?? this.regulatory,
+    economic: economic ?? this.economic,
+    throughput: throughput ?? this.throughput,
+    quality: quality ?? this.quality,
+    line: line ?? this.line,
+    score: score ?? this.score,
+  );
   SystemCriticality copyWithCompanion(SystemCriticalitysCompanion data) {
     return SystemCriticality(
       id: data.id.present ? data.id.value : this.id,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       siteid: data.siteid.present ? data.siteid.value : this.siteid,
       safety: data.safety.present ? data.safety.value : this.safety,
-      regulatory:
-          data.regulatory.present ? data.regulatory.value : this.regulatory,
+      regulatory: data.regulatory.present
+          ? data.regulatory.value
+          : this.regulatory,
       economic: data.economic.present ? data.economic.value : this.economic,
-      throughput:
-          data.throughput.present ? data.throughput.value : this.throughput,
+      throughput: data.throughput.present
+          ? data.throughput.value
+          : this.throughput,
       quality: data.quality.present ? data.quality.value : this.quality,
       line: data.line.present ? data.line.value : this.line,
       score: data.score.present ? data.score.value : this.score,
@@ -2400,8 +2847,18 @@ class SystemCriticality extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, description, siteid, safety, regulatory,
-      economic, throughput, quality, line, score);
+  int get hashCode => Object.hash(
+    id,
+    description,
+    siteid,
+    safety,
+    regulatory,
+    economic,
+    throughput,
+    quality,
+    line,
+    score,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2452,8 +2909,8 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     this.quality = const Value.absent(),
     required String line,
     this.score = const Value.absent(),
-  })  : description = Value(description),
-        line = Value(line);
+  }) : description = Value(description),
+       line = Value(line);
   static Insertable<SystemCriticality> custom({
     Expression<int>? id,
     Expression<String>? description,
@@ -2480,17 +2937,18 @@ class SystemCriticalitysCompanion extends UpdateCompanion<SystemCriticality> {
     });
   }
 
-  SystemCriticalitysCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? description,
-      Value<String?>? siteid,
-      Value<int>? safety,
-      Value<int>? regulatory,
-      Value<int>? economic,
-      Value<int>? throughput,
-      Value<int>? quality,
-      Value<String>? line,
-      Value<double>? score}) {
+  SystemCriticalitysCompanion copyWith({
+    Value<int>? id,
+    Value<String>? description,
+    Value<String?>? siteid,
+    Value<int>? safety,
+    Value<int>? regulatory,
+    Value<int>? economic,
+    Value<int>? throughput,
+    Value<int>? quality,
+    Value<String>? line,
+    Value<double>? score,
+  }) {
     return SystemCriticalitysCompanion(
       id: id ?? this.id,
       description: description ?? this.description,
@@ -2568,171 +3026,247 @@ class $AssetCriticalitysTable extends AssetCriticalitys
   static const VerificationMeta _assetMeta = const VerificationMeta('asset');
   @override
   late final GeneratedColumn<String> asset = GeneratedColumn<String>(
-      'asset', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES assets (id)'));
+    'asset',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES assets (id)',
+    ),
+  );
   static const VerificationMeta _systemMeta = const VerificationMeta('system');
   @override
   late final GeneratedColumn<int> system = GeneratedColumn<int>(
-      'system', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES system_criticalitys (id)'));
+    'system',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES system_criticalitys (id)',
+    ),
+  );
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
-      'type', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _frequencyMeta =
-      const VerificationMeta('frequency');
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _frequencyMeta = const VerificationMeta(
+    'frequency',
+  );
   @override
   late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
-      'frequency', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _downtimeMeta =
-      const VerificationMeta('downtime');
+    'frequency',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _downtimeMeta = const VerificationMeta(
+    'downtime',
+  );
   @override
   late final GeneratedColumn<int> downtime = GeneratedColumn<int>(
-      'downtime', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _earlyDetectionMeta =
-      const VerificationMeta('earlyDetection');
+    'downtime',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _earlyDetectionMeta = const VerificationMeta(
+    'earlyDetection',
+  );
   @override
   late final GeneratedColumn<double> earlyDetection = GeneratedColumn<double>(
-      'early_detection', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0.0));
+    'early_detection',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _manualMeta = const VerificationMeta('manual');
   @override
   late final GeneratedColumn<bool> manual = GeneratedColumn<bool>(
-      'manual', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("manual" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _manualPriorityMeta =
-      const VerificationMeta('manualPriority');
+    'manual',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("manual" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _manualPriorityMeta = const VerificationMeta(
+    'manualPriority',
+  );
   @override
   late final GeneratedColumn<bool> manualPriority = GeneratedColumn<bool>(
-      'manual_priority', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("manual_priority" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _newPriorityMeta =
-      const VerificationMeta('newPriority');
+    'manual_priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("manual_priority" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _newPriorityMeta = const VerificationMeta(
+    'newPriority',
+  );
   @override
   late final GeneratedColumn<int> newPriority = GeneratedColumn<int>(
-      'new_priority', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'new_priority',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _newRPNMeta = const VerificationMeta('newRPN');
   @override
   late final GeneratedColumn<double> newRPN = GeneratedColumn<double>(
-      'new_r_p_n', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _lockedSystemMeta =
-      const VerificationMeta('lockedSystem');
+    'new_r_p_n',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lockedSystemMeta = const VerificationMeta(
+    'lockedSystem',
+  );
   @override
   late final GeneratedColumn<bool> lockedSystem = GeneratedColumn<bool>(
-      'locked_system', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("locked_system" IN (0, 1))'),
-      defaultValue: const Constant(false));
+    'locked_system',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("locked_system" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        asset,
-        system,
-        type,
-        frequency,
-        downtime,
-        earlyDetection,
-        manual,
-        manualPriority,
-        newPriority,
-        newRPN,
-        lockedSystem
-      ];
+    asset,
+    system,
+    type,
+    frequency,
+    downtime,
+    earlyDetection,
+    manual,
+    manualPriority,
+    newPriority,
+    newRPN,
+    lockedSystem,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'asset_criticalitys';
   @override
-  VerificationContext validateIntegrity(Insertable<AssetCriticality> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<AssetCriticality> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('asset')) {
       context.handle(
-          _assetMeta, asset.isAcceptableOrUnknown(data['asset']!, _assetMeta));
+        _assetMeta,
+        asset.isAcceptableOrUnknown(data['asset']!, _assetMeta),
+      );
     } else if (isInserting) {
       context.missing(_assetMeta);
     }
     if (data.containsKey('system')) {
-      context.handle(_systemMeta,
-          system.isAcceptableOrUnknown(data['system']!, _systemMeta));
+      context.handle(
+        _systemMeta,
+        system.isAcceptableOrUnknown(data['system']!, _systemMeta),
+      );
     } else if (isInserting) {
       context.missing(_systemMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
     if (data.containsKey('frequency')) {
-      context.handle(_frequencyMeta,
-          frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta));
+      context.handle(
+        _frequencyMeta,
+        frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta),
+      );
     } else if (isInserting) {
       context.missing(_frequencyMeta);
     }
     if (data.containsKey('downtime')) {
-      context.handle(_downtimeMeta,
-          downtime.isAcceptableOrUnknown(data['downtime']!, _downtimeMeta));
+      context.handle(
+        _downtimeMeta,
+        downtime.isAcceptableOrUnknown(data['downtime']!, _downtimeMeta),
+      );
     } else if (isInserting) {
       context.missing(_downtimeMeta);
     }
     if (data.containsKey('early_detection')) {
       context.handle(
+        _earlyDetectionMeta,
+        earlyDetection.isAcceptableOrUnknown(
+          data['early_detection']!,
           _earlyDetectionMeta,
-          earlyDetection.isAcceptableOrUnknown(
-              data['early_detection']!, _earlyDetectionMeta));
+        ),
+      );
     }
     if (data.containsKey('manual')) {
-      context.handle(_manualMeta,
-          manual.isAcceptableOrUnknown(data['manual']!, _manualMeta));
+      context.handle(
+        _manualMeta,
+        manual.isAcceptableOrUnknown(data['manual']!, _manualMeta),
+      );
     }
     if (data.containsKey('manual_priority')) {
       context.handle(
+        _manualPriorityMeta,
+        manualPriority.isAcceptableOrUnknown(
+          data['manual_priority']!,
           _manualPriorityMeta,
-          manualPriority.isAcceptableOrUnknown(
-              data['manual_priority']!, _manualPriorityMeta));
+        ),
+      );
     }
     if (data.containsKey('new_priority')) {
       context.handle(
+        _newPriorityMeta,
+        newPriority.isAcceptableOrUnknown(
+          data['new_priority']!,
           _newPriorityMeta,
-          newPriority.isAcceptableOrUnknown(
-              data['new_priority']!, _newPriorityMeta));
+        ),
+      );
     }
     if (data.containsKey('new_r_p_n')) {
-      context.handle(_newRPNMeta,
-          newRPN.isAcceptableOrUnknown(data['new_r_p_n']!, _newRPNMeta));
+      context.handle(
+        _newRPNMeta,
+        newRPN.isAcceptableOrUnknown(data['new_r_p_n']!, _newRPNMeta),
+      );
     }
     if (data.containsKey('locked_system')) {
       context.handle(
+        _lockedSystemMeta,
+        lockedSystem.isAcceptableOrUnknown(
+          data['locked_system']!,
           _lockedSystemMeta,
-          lockedSystem.isAcceptableOrUnknown(
-              data['locked_system']!, _lockedSystemMeta));
+        ),
+      );
     }
     return context;
   }
@@ -2743,28 +3277,50 @@ class $AssetCriticalitysTable extends AssetCriticalitys
   AssetCriticality map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return AssetCriticality(
-      asset: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}asset'])!,
-      system: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}system'])!,
-      type: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
-      frequency: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}frequency'])!,
-      downtime: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}downtime'])!,
+      asset: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset'],
+      )!,
+      system: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}system'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      frequency: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}frequency'],
+      )!,
+      downtime: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}downtime'],
+      )!,
       earlyDetection: attachedDatabase.typeMapping.read(
-          DriftSqlType.double, data['${effectivePrefix}early_detection'])!,
-      manual: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}manual'])!,
-      manualPriority: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}manual_priority'])!,
-      newPriority: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}new_priority']),
-      newRPN: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}new_r_p_n'])!,
-      lockedSystem: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}locked_system'])!,
+        DriftSqlType.double,
+        data['${effectivePrefix}early_detection'],
+      )!,
+      manual: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}manual'],
+      )!,
+      manualPriority: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}manual_priority'],
+      )!,
+      newPriority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}new_priority'],
+      ),
+      newRPN: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}new_r_p_n'],
+      )!,
+      lockedSystem: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}locked_system'],
+      )!,
     );
   }
 
@@ -2787,18 +3343,19 @@ class AssetCriticality extends DataClass
   final int? newPriority;
   final double newRPN;
   final bool lockedSystem;
-  const AssetCriticality(
-      {required this.asset,
-      required this.system,
-      required this.type,
-      required this.frequency,
-      required this.downtime,
-      required this.earlyDetection,
-      required this.manual,
-      required this.manualPriority,
-      this.newPriority,
-      required this.newRPN,
-      required this.lockedSystem});
+  const AssetCriticality({
+    required this.asset,
+    required this.system,
+    required this.type,
+    required this.frequency,
+    required this.downtime,
+    required this.earlyDetection,
+    required this.manual,
+    required this.manualPriority,
+    this.newPriority,
+    required this.newRPN,
+    required this.lockedSystem,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2836,8 +3393,10 @@ class AssetCriticality extends DataClass
     );
   }
 
-  factory AssetCriticality.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory AssetCriticality.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AssetCriticality(
       asset: serializer.fromJson<String>(json['asset']),
@@ -2871,31 +3430,31 @@ class AssetCriticality extends DataClass
     };
   }
 
-  AssetCriticality copyWith(
-          {String? asset,
-          int? system,
-          String? type,
-          int? frequency,
-          int? downtime,
-          double? earlyDetection,
-          bool? manual,
-          bool? manualPriority,
-          Value<int?> newPriority = const Value.absent(),
-          double? newRPN,
-          bool? lockedSystem}) =>
-      AssetCriticality(
-        asset: asset ?? this.asset,
-        system: system ?? this.system,
-        type: type ?? this.type,
-        frequency: frequency ?? this.frequency,
-        downtime: downtime ?? this.downtime,
-        earlyDetection: earlyDetection ?? this.earlyDetection,
-        manual: manual ?? this.manual,
-        manualPriority: manualPriority ?? this.manualPriority,
-        newPriority: newPriority.present ? newPriority.value : this.newPriority,
-        newRPN: newRPN ?? this.newRPN,
-        lockedSystem: lockedSystem ?? this.lockedSystem,
-      );
+  AssetCriticality copyWith({
+    String? asset,
+    int? system,
+    String? type,
+    int? frequency,
+    int? downtime,
+    double? earlyDetection,
+    bool? manual,
+    bool? manualPriority,
+    Value<int?> newPriority = const Value.absent(),
+    double? newRPN,
+    bool? lockedSystem,
+  }) => AssetCriticality(
+    asset: asset ?? this.asset,
+    system: system ?? this.system,
+    type: type ?? this.type,
+    frequency: frequency ?? this.frequency,
+    downtime: downtime ?? this.downtime,
+    earlyDetection: earlyDetection ?? this.earlyDetection,
+    manual: manual ?? this.manual,
+    manualPriority: manualPriority ?? this.manualPriority,
+    newPriority: newPriority.present ? newPriority.value : this.newPriority,
+    newRPN: newRPN ?? this.newRPN,
+    lockedSystem: lockedSystem ?? this.lockedSystem,
+  );
   AssetCriticality copyWithCompanion(AssetCriticalitysCompanion data) {
     return AssetCriticality(
       asset: data.asset.present ? data.asset.value : this.asset,
@@ -2910,8 +3469,9 @@ class AssetCriticality extends DataClass
       manualPriority: data.manualPriority.present
           ? data.manualPriority.value
           : this.manualPriority,
-      newPriority:
-          data.newPriority.present ? data.newPriority.value : this.newPriority,
+      newPriority: data.newPriority.present
+          ? data.newPriority.value
+          : this.newPriority,
       newRPN: data.newRPN.present ? data.newRPN.value : this.newRPN,
       lockedSystem: data.lockedSystem.present
           ? data.lockedSystem.value
@@ -2939,17 +3499,18 @@ class AssetCriticality extends DataClass
 
   @override
   int get hashCode => Object.hash(
-      asset,
-      system,
-      type,
-      frequency,
-      downtime,
-      earlyDetection,
-      manual,
-      manualPriority,
-      newPriority,
-      newRPN,
-      lockedSystem);
+    asset,
+    system,
+    type,
+    frequency,
+    downtime,
+    earlyDetection,
+    manual,
+    manualPriority,
+    newPriority,
+    newRPN,
+    lockedSystem,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3007,11 +3568,11 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     this.newRPN = const Value.absent(),
     this.lockedSystem = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : asset = Value(asset),
-        system = Value(system),
-        type = Value(type),
-        frequency = Value(frequency),
-        downtime = Value(downtime);
+  }) : asset = Value(asset),
+       system = Value(system),
+       type = Value(type),
+       frequency = Value(frequency),
+       downtime = Value(downtime);
   static Insertable<AssetCriticality> custom({
     Expression<String>? asset,
     Expression<int>? system,
@@ -3042,19 +3603,20 @@ class AssetCriticalitysCompanion extends UpdateCompanion<AssetCriticality> {
     });
   }
 
-  AssetCriticalitysCompanion copyWith(
-      {Value<String>? asset,
-      Value<int>? system,
-      Value<String>? type,
-      Value<int>? frequency,
-      Value<int>? downtime,
-      Value<double>? earlyDetection,
-      Value<bool>? manual,
-      Value<bool>? manualPriority,
-      Value<int?>? newPriority,
-      Value<double>? newRPN,
-      Value<bool>? lockedSystem,
-      Value<int>? rowid}) {
+  AssetCriticalitysCompanion copyWith({
+    Value<String>? asset,
+    Value<int>? system,
+    Value<String>? type,
+    Value<int>? frequency,
+    Value<int>? downtime,
+    Value<double>? earlyDetection,
+    Value<bool>? manual,
+    Value<bool>? manualPriority,
+    Value<int?>? newPriority,
+    Value<double>? newRPN,
+    Value<bool>? lockedSystem,
+    Value<int>? rowid,
+  }) {
     return AssetCriticalitysCompanion(
       asset: asset ?? this.asset,
       system: system ?? this.system,
@@ -3142,103 +3704,156 @@ class $AssetUploadsTable extends AssetUploads
   static const VerificationMeta _assetMeta = const VerificationMeta('asset');
   @override
   late final GeneratedColumn<String> asset = GeneratedColumn<String>(
-      'asset', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES assets (id)'));
-  static const VerificationMeta _sjpDescriptionMeta =
-      const VerificationMeta('sjpDescription');
+    'asset',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES assets (id)',
+    ),
+  );
+  static const VerificationMeta _sjpDescriptionMeta = const VerificationMeta(
+    'sjpDescription',
+  );
   @override
   late final GeneratedColumn<String> sjpDescription = GeneratedColumn<String>(
-      'sjp_description', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _installationDateMeta =
-      const VerificationMeta('installationDate');
+    'sjp_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _installationDateMeta = const VerificationMeta(
+    'installationDate',
+  );
   @override
   late final GeneratedColumn<String> installationDate = GeneratedColumn<String>(
-      'installation_date', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'installation_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
   @override
   late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
-      'vendor', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _manufacturerMeta =
-      const VerificationMeta('manufacturer');
+    'vendor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _manufacturerMeta = const VerificationMeta(
+    'manufacturer',
+  );
   @override
   late final GeneratedColumn<String> manufacturer = GeneratedColumn<String>(
-      'manufacturer', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _modelNumMeta =
-      const VerificationMeta('modelNum');
+    'manufacturer',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modelNumMeta = const VerificationMeta(
+    'modelNum',
+  );
   @override
   late final GeneratedColumn<String> modelNum = GeneratedColumn<String>(
-      'model_num', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _assetCriticalityMeta =
-      const VerificationMeta('assetCriticality');
+    'model_num',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _assetCriticalityMeta = const VerificationMeta(
+    'assetCriticality',
+  );
   @override
   late final GeneratedColumn<int> assetCriticality = GeneratedColumn<int>(
-      'asset_criticality', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'asset_criticality',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        asset,
-        sjpDescription,
-        installationDate,
-        vendor,
-        manufacturer,
-        modelNum,
-        assetCriticality
-      ];
+    asset,
+    sjpDescription,
+    installationDate,
+    vendor,
+    manufacturer,
+    modelNum,
+    assetCriticality,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'asset_uploads';
   @override
-  VerificationContext validateIntegrity(Insertable<AssetUpload> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<AssetUpload> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('asset')) {
       context.handle(
-          _assetMeta, asset.isAcceptableOrUnknown(data['asset']!, _assetMeta));
+        _assetMeta,
+        asset.isAcceptableOrUnknown(data['asset']!, _assetMeta),
+      );
     } else if (isInserting) {
       context.missing(_assetMeta);
     }
     if (data.containsKey('sjp_description')) {
       context.handle(
+        _sjpDescriptionMeta,
+        sjpDescription.isAcceptableOrUnknown(
+          data['sjp_description']!,
           _sjpDescriptionMeta,
-          sjpDescription.isAcceptableOrUnknown(
-              data['sjp_description']!, _sjpDescriptionMeta));
+        ),
+      );
     }
     if (data.containsKey('installation_date')) {
       context.handle(
+        _installationDateMeta,
+        installationDate.isAcceptableOrUnknown(
+          data['installation_date']!,
           _installationDateMeta,
-          installationDate.isAcceptableOrUnknown(
-              data['installation_date']!, _installationDateMeta));
+        ),
+      );
     }
     if (data.containsKey('vendor')) {
-      context.handle(_vendorMeta,
-          vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta));
+      context.handle(
+        _vendorMeta,
+        vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta),
+      );
     }
     if (data.containsKey('manufacturer')) {
       context.handle(
+        _manufacturerMeta,
+        manufacturer.isAcceptableOrUnknown(
+          data['manufacturer']!,
           _manufacturerMeta,
-          manufacturer.isAcceptableOrUnknown(
-              data['manufacturer']!, _manufacturerMeta));
+        ),
+      );
     }
     if (data.containsKey('model_num')) {
-      context.handle(_modelNumMeta,
-          modelNum.isAcceptableOrUnknown(data['model_num']!, _modelNumMeta));
+      context.handle(
+        _modelNumMeta,
+        modelNum.isAcceptableOrUnknown(data['model_num']!, _modelNumMeta),
+      );
     }
     if (data.containsKey('asset_criticality')) {
       context.handle(
+        _assetCriticalityMeta,
+        assetCriticality.isAcceptableOrUnknown(
+          data['asset_criticality']!,
           _assetCriticalityMeta,
-          assetCriticality.isAcceptableOrUnknown(
-              data['asset_criticality']!, _assetCriticalityMeta));
+        ),
+      );
     }
     return context;
   }
@@ -3249,20 +3864,34 @@ class $AssetUploadsTable extends AssetUploads
   AssetUpload map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return AssetUpload(
-      asset: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}asset'])!,
-      sjpDescription: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sjp_description']),
+      asset: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset'],
+      )!,
+      sjpDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sjp_description'],
+      ),
       installationDate: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}installation_date']),
-      vendor: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}vendor']),
-      manufacturer: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}manufacturer']),
-      modelNum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}model_num']),
-      assetCriticality: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}asset_criticality']),
+        DriftSqlType.string,
+        data['${effectivePrefix}installation_date'],
+      ),
+      vendor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vendor'],
+      ),
+      manufacturer: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}manufacturer'],
+      ),
+      modelNum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}model_num'],
+      ),
+      assetCriticality: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}asset_criticality'],
+      ),
     );
   }
 
@@ -3280,14 +3909,15 @@ class AssetUpload extends DataClass implements Insertable<AssetUpload> {
   final String? manufacturer;
   final String? modelNum;
   final int? assetCriticality;
-  const AssetUpload(
-      {required this.asset,
-      this.sjpDescription,
-      this.installationDate,
-      this.vendor,
-      this.manufacturer,
-      this.modelNum,
-      this.assetCriticality});
+  const AssetUpload({
+    required this.asset,
+    this.sjpDescription,
+    this.installationDate,
+    this.vendor,
+    this.manufacturer,
+    this.modelNum,
+    this.assetCriticality,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3322,8 +3952,9 @@ class AssetUpload extends DataClass implements Insertable<AssetUpload> {
       installationDate: installationDate == null && nullToAbsent
           ? const Value.absent()
           : Value(installationDate),
-      vendor:
-          vendor == null && nullToAbsent ? const Value.absent() : Value(vendor),
+      vendor: vendor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vendor),
       manufacturer: manufacturer == null && nullToAbsent
           ? const Value.absent()
           : Value(manufacturer),
@@ -3336,8 +3967,10 @@ class AssetUpload extends DataClass implements Insertable<AssetUpload> {
     );
   }
 
-  factory AssetUpload.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory AssetUpload.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AssetUpload(
       asset: serializer.fromJson<String>(json['asset']),
@@ -3363,29 +3996,29 @@ class AssetUpload extends DataClass implements Insertable<AssetUpload> {
     };
   }
 
-  AssetUpload copyWith(
-          {String? asset,
-          Value<String?> sjpDescription = const Value.absent(),
-          Value<String?> installationDate = const Value.absent(),
-          Value<String?> vendor = const Value.absent(),
-          Value<String?> manufacturer = const Value.absent(),
-          Value<String?> modelNum = const Value.absent(),
-          Value<int?> assetCriticality = const Value.absent()}) =>
-      AssetUpload(
-        asset: asset ?? this.asset,
-        sjpDescription:
-            sjpDescription.present ? sjpDescription.value : this.sjpDescription,
-        installationDate: installationDate.present
-            ? installationDate.value
-            : this.installationDate,
-        vendor: vendor.present ? vendor.value : this.vendor,
-        manufacturer:
-            manufacturer.present ? manufacturer.value : this.manufacturer,
-        modelNum: modelNum.present ? modelNum.value : this.modelNum,
-        assetCriticality: assetCriticality.present
-            ? assetCriticality.value
-            : this.assetCriticality,
-      );
+  AssetUpload copyWith({
+    String? asset,
+    Value<String?> sjpDescription = const Value.absent(),
+    Value<String?> installationDate = const Value.absent(),
+    Value<String?> vendor = const Value.absent(),
+    Value<String?> manufacturer = const Value.absent(),
+    Value<String?> modelNum = const Value.absent(),
+    Value<int?> assetCriticality = const Value.absent(),
+  }) => AssetUpload(
+    asset: asset ?? this.asset,
+    sjpDescription: sjpDescription.present
+        ? sjpDescription.value
+        : this.sjpDescription,
+    installationDate: installationDate.present
+        ? installationDate.value
+        : this.installationDate,
+    vendor: vendor.present ? vendor.value : this.vendor,
+    manufacturer: manufacturer.present ? manufacturer.value : this.manufacturer,
+    modelNum: modelNum.present ? modelNum.value : this.modelNum,
+    assetCriticality: assetCriticality.present
+        ? assetCriticality.value
+        : this.assetCriticality,
+  );
   AssetUpload copyWithCompanion(AssetUploadsCompanion data) {
     return AssetUpload(
       asset: data.asset.present ? data.asset.value : this.asset,
@@ -3421,8 +4054,15 @@ class AssetUpload extends DataClass implements Insertable<AssetUpload> {
   }
 
   @override
-  int get hashCode => Object.hash(asset, sjpDescription, installationDate,
-      vendor, manufacturer, modelNum, assetCriticality);
+  int get hashCode => Object.hash(
+    asset,
+    sjpDescription,
+    installationDate,
+    vendor,
+    manufacturer,
+    modelNum,
+    assetCriticality,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3487,15 +4127,16 @@ class AssetUploadsCompanion extends UpdateCompanion<AssetUpload> {
     });
   }
 
-  AssetUploadsCompanion copyWith(
-      {Value<String>? asset,
-      Value<String?>? sjpDescription,
-      Value<String?>? installationDate,
-      Value<String?>? vendor,
-      Value<String?>? manufacturer,
-      Value<String?>? modelNum,
-      Value<int?>? assetCriticality,
-      Value<int>? rowid}) {
+  AssetUploadsCompanion copyWith({
+    Value<String>? asset,
+    Value<String?>? sjpDescription,
+    Value<String?>? installationDate,
+    Value<String?>? vendor,
+    Value<String?>? manufacturer,
+    Value<String?>? modelNum,
+    Value<int?>? assetCriticality,
+    Value<int>? rowid,
+  }) {
     return AssetUploadsCompanion(
       asset: asset ?? this.asset,
       sjpDescription: sjpDescription ?? this.sjpDescription,
@@ -3560,77 +4201,119 @@ class $SparePartsTable extends SpareParts
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $SparePartsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _itemnumMeta =
-      const VerificationMeta('itemnum');
+  static const VerificationMeta _itemnumMeta = const VerificationMeta(
+    'itemnum',
+  );
   @override
   late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
-      'itemnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _assetnumMeta =
-      const VerificationMeta('assetnum');
+    'itemnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _assetnumMeta = const VerificationMeta(
+    'assetnum',
+  );
   @override
   late final GeneratedColumn<String> assetnum = GeneratedColumn<String>(
-      'assetnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'assetnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
   late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
-      'siteid', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _quantityMeta =
-      const VerificationMeta('quantity');
+    'siteid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
   @override
   late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
-      'quantity', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _sparepartidMeta =
-      const VerificationMeta('sparepartid');
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sparepartidMeta = const VerificationMeta(
+    'sparepartid',
+  );
   @override
   late final GeneratedColumn<int> sparepartid = GeneratedColumn<int>(
-      'sparepartid', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'sparepartid',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [itemnum, assetnum, siteid, quantity, sparepartid];
+  List<GeneratedColumn> get $columns => [
+    itemnum,
+    assetnum,
+    siteid,
+    quantity,
+    sparepartid,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'spare_parts';
   @override
-  VerificationContext validateIntegrity(Insertable<SparePart> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<SparePart> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('itemnum')) {
-      context.handle(_itemnumMeta,
-          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+      context.handle(
+        _itemnumMeta,
+        itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_itemnumMeta);
     }
     if (data.containsKey('assetnum')) {
-      context.handle(_assetnumMeta,
-          assetnum.isAcceptableOrUnknown(data['assetnum']!, _assetnumMeta));
+      context.handle(
+        _assetnumMeta,
+        assetnum.isAcceptableOrUnknown(data['assetnum']!, _assetnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_assetnumMeta);
     }
     if (data.containsKey('siteid')) {
-      context.handle(_siteidMeta,
-          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+      context.handle(
+        _siteidMeta,
+        siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta),
+      );
     } else if (isInserting) {
       context.missing(_siteidMeta);
     }
     if (data.containsKey('quantity')) {
-      context.handle(_quantityMeta,
-          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
     } else if (isInserting) {
       context.missing(_quantityMeta);
     }
     if (data.containsKey('sparepartid')) {
       context.handle(
+        _sparepartidMeta,
+        sparepartid.isAcceptableOrUnknown(
+          data['sparepartid']!,
           _sparepartidMeta,
-          sparepartid.isAcceptableOrUnknown(
-              data['sparepartid']!, _sparepartidMeta));
+        ),
+      );
     }
     return context;
   }
@@ -3641,16 +4324,26 @@ class $SparePartsTable extends SpareParts
   SparePart map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SparePart(
-      itemnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
-      assetnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}assetnum'])!,
-      siteid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
-      quantity: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
-      sparepartid: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}sparepartid'])!,
+      itemnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}itemnum'],
+      )!,
+      assetnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assetnum'],
+      )!,
+      siteid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siteid'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      sparepartid: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sparepartid'],
+      )!,
     );
   }
 
@@ -3666,12 +4359,13 @@ class SparePart extends DataClass implements Insertable<SparePart> {
   final String siteid;
   final double quantity;
   final int sparepartid;
-  const SparePart(
-      {required this.itemnum,
-      required this.assetnum,
-      required this.siteid,
-      required this.quantity,
-      required this.sparepartid});
+  const SparePart({
+    required this.itemnum,
+    required this.assetnum,
+    required this.siteid,
+    required this.quantity,
+    required this.sparepartid,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3693,8 +4387,10 @@ class SparePart extends DataClass implements Insertable<SparePart> {
     );
   }
 
-  factory SparePart.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory SparePart.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SparePart(
       itemnum: serializer.fromJson<String>(json['itemnum']),
@@ -3716,27 +4412,28 @@ class SparePart extends DataClass implements Insertable<SparePart> {
     };
   }
 
-  SparePart copyWith(
-          {String? itemnum,
-          String? assetnum,
-          String? siteid,
-          double? quantity,
-          int? sparepartid}) =>
-      SparePart(
-        itemnum: itemnum ?? this.itemnum,
-        assetnum: assetnum ?? this.assetnum,
-        siteid: siteid ?? this.siteid,
-        quantity: quantity ?? this.quantity,
-        sparepartid: sparepartid ?? this.sparepartid,
-      );
+  SparePart copyWith({
+    String? itemnum,
+    String? assetnum,
+    String? siteid,
+    double? quantity,
+    int? sparepartid,
+  }) => SparePart(
+    itemnum: itemnum ?? this.itemnum,
+    assetnum: assetnum ?? this.assetnum,
+    siteid: siteid ?? this.siteid,
+    quantity: quantity ?? this.quantity,
+    sparepartid: sparepartid ?? this.sparepartid,
+  );
   SparePart copyWithCompanion(SparePartsCompanion data) {
     return SparePart(
       itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
       assetnum: data.assetnum.present ? data.assetnum.value : this.assetnum,
       siteid: data.siteid.present ? data.siteid.value : this.siteid,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
-      sparepartid:
-          data.sparepartid.present ? data.sparepartid.value : this.sparepartid,
+      sparepartid: data.sparepartid.present
+          ? data.sparepartid.value
+          : this.sparepartid,
     );
   }
 
@@ -3785,10 +4482,10 @@ class SparePartsCompanion extends UpdateCompanion<SparePart> {
     required String siteid,
     required double quantity,
     this.sparepartid = const Value.absent(),
-  })  : itemnum = Value(itemnum),
-        assetnum = Value(assetnum),
-        siteid = Value(siteid),
-        quantity = Value(quantity);
+  }) : itemnum = Value(itemnum),
+       assetnum = Value(assetnum),
+       siteid = Value(siteid),
+       quantity = Value(quantity);
   static Insertable<SparePart> custom({
     Expression<String>? itemnum,
     Expression<String>? assetnum,
@@ -3805,12 +4502,13 @@ class SparePartsCompanion extends UpdateCompanion<SparePart> {
     });
   }
 
-  SparePartsCompanion copyWith(
-      {Value<String>? itemnum,
-      Value<String>? assetnum,
-      Value<String>? siteid,
-      Value<double>? quantity,
-      Value<int>? sparepartid}) {
+  SparePartsCompanion copyWith({
+    Value<String>? itemnum,
+    Value<String>? assetnum,
+    Value<String>? siteid,
+    Value<double>? quantity,
+    Value<int>? sparepartid,
+  }) {
     return SparePartsCompanion(
       itemnum: itemnum ?? this.itemnum,
       assetnum: assetnum ?? this.assetnum,
@@ -3863,169 +4561,254 @@ class $PurchasesTable extends Purchases
   static const VerificationMeta _prnumMeta = const VerificationMeta('prnum');
   @override
   late final GeneratedColumn<String> prnum = GeneratedColumn<String>(
-      'prnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _prDescriptionMeta =
-      const VerificationMeta('prDescription');
+    'prnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _prDescriptionMeta = const VerificationMeta(
+    'prDescription',
+  );
   @override
   late final GeneratedColumn<String> prDescription = GeneratedColumn<String>(
-      'pr_description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _poDescriptionMeta =
-      const VerificationMeta('poDescription');
+    'pr_description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _poDescriptionMeta = const VerificationMeta(
+    'poDescription',
+  );
   @override
   late final GeneratedColumn<String> poDescription = GeneratedColumn<String>(
-      'po_description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'po_description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _ponumMeta = const VerificationMeta('ponum');
   @override
   late final GeneratedColumn<String> ponum = GeneratedColumn<String>(
-      'ponum', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _startDateMeta =
-      const VerificationMeta('startDate');
+    'ponum',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
   @override
   late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
-      'start_date', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
   late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
-      'siteid', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _endDateMeta =
-      const VerificationMeta('endDate');
+    'siteid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
   @override
   late final GeneratedColumn<String> endDate = GeneratedColumn<String>(
-      'end_date', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _leadTimeMeta =
-      const VerificationMeta('leadTime');
+    'end_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _leadTimeMeta = const VerificationMeta(
+    'leadTime',
+  );
   @override
   late final GeneratedColumn<double> leadTime = GeneratedColumn<double>(
-      'lead_time', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _itemnumMeta =
-      const VerificationMeta('itemnum');
+    'lead_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemnumMeta = const VerificationMeta(
+    'itemnum',
+  );
   @override
   late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
-      'itemnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _unitCostMeta =
-      const VerificationMeta('unitCost');
+    'itemnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitCostMeta = const VerificationMeta(
+    'unitCost',
+  );
   @override
   late final GeneratedColumn<double> unitCost = GeneratedColumn<double>(
-      'unit_cost', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _poStatusMeta =
-      const VerificationMeta('poStatus');
+    'unit_cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _poStatusMeta = const VerificationMeta(
+    'poStatus',
+  );
   @override
   late final GeneratedColumn<bool> poStatus = GeneratedColumn<bool>(
-      'po_status', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("po_status" IN (0, 1))'));
-  static const VerificationMeta _prlineidMeta =
-      const VerificationMeta('prlineid');
+    'po_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("po_status" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _prlineidMeta = const VerificationMeta(
+    'prlineid',
+  );
   @override
   late final GeneratedColumn<int> prlineid = GeneratedColumn<int>(
-      'prlineid', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'prlineid',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        prnum,
-        prDescription,
-        poDescription,
-        ponum,
-        startDate,
-        siteid,
-        endDate,
-        leadTime,
-        itemnum,
-        unitCost,
-        poStatus,
-        prlineid
-      ];
+    prnum,
+    prDescription,
+    poDescription,
+    ponum,
+    startDate,
+    siteid,
+    endDate,
+    leadTime,
+    itemnum,
+    unitCost,
+    poStatus,
+    prlineid,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'purchases';
   @override
-  VerificationContext validateIntegrity(Insertable<Purchase> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Purchase> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('prnum')) {
       context.handle(
-          _prnumMeta, prnum.isAcceptableOrUnknown(data['prnum']!, _prnumMeta));
+        _prnumMeta,
+        prnum.isAcceptableOrUnknown(data['prnum']!, _prnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_prnumMeta);
     }
     if (data.containsKey('pr_description')) {
       context.handle(
+        _prDescriptionMeta,
+        prDescription.isAcceptableOrUnknown(
+          data['pr_description']!,
           _prDescriptionMeta,
-          prDescription.isAcceptableOrUnknown(
-              data['pr_description']!, _prDescriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_prDescriptionMeta);
     }
     if (data.containsKey('po_description')) {
       context.handle(
+        _poDescriptionMeta,
+        poDescription.isAcceptableOrUnknown(
+          data['po_description']!,
           _poDescriptionMeta,
-          poDescription.isAcceptableOrUnknown(
-              data['po_description']!, _poDescriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_poDescriptionMeta);
     }
     if (data.containsKey('ponum')) {
       context.handle(
-          _ponumMeta, ponum.isAcceptableOrUnknown(data['ponum']!, _ponumMeta));
+        _ponumMeta,
+        ponum.isAcceptableOrUnknown(data['ponum']!, _ponumMeta),
+      );
     }
     if (data.containsKey('start_date')) {
-      context.handle(_startDateMeta,
-          startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta));
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
     } else if (isInserting) {
       context.missing(_startDateMeta);
     }
     if (data.containsKey('siteid')) {
-      context.handle(_siteidMeta,
-          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+      context.handle(
+        _siteidMeta,
+        siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta),
+      );
     } else if (isInserting) {
       context.missing(_siteidMeta);
     }
     if (data.containsKey('end_date')) {
-      context.handle(_endDateMeta,
-          endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta));
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
     }
     if (data.containsKey('lead_time')) {
-      context.handle(_leadTimeMeta,
-          leadTime.isAcceptableOrUnknown(data['lead_time']!, _leadTimeMeta));
+      context.handle(
+        _leadTimeMeta,
+        leadTime.isAcceptableOrUnknown(data['lead_time']!, _leadTimeMeta),
+      );
     } else if (isInserting) {
       context.missing(_leadTimeMeta);
     }
     if (data.containsKey('itemnum')) {
-      context.handle(_itemnumMeta,
-          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+      context.handle(
+        _itemnumMeta,
+        itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_itemnumMeta);
     }
     if (data.containsKey('unit_cost')) {
-      context.handle(_unitCostMeta,
-          unitCost.isAcceptableOrUnknown(data['unit_cost']!, _unitCostMeta));
+      context.handle(
+        _unitCostMeta,
+        unitCost.isAcceptableOrUnknown(data['unit_cost']!, _unitCostMeta),
+      );
     } else if (isInserting) {
       context.missing(_unitCostMeta);
     }
     if (data.containsKey('po_status')) {
-      context.handle(_poStatusMeta,
-          poStatus.isAcceptableOrUnknown(data['po_status']!, _poStatusMeta));
+      context.handle(
+        _poStatusMeta,
+        poStatus.isAcceptableOrUnknown(data['po_status']!, _poStatusMeta),
+      );
     } else if (isInserting) {
       context.missing(_poStatusMeta);
     }
     if (data.containsKey('prlineid')) {
-      context.handle(_prlineidMeta,
-          prlineid.isAcceptableOrUnknown(data['prlineid']!, _prlineidMeta));
+      context.handle(
+        _prlineidMeta,
+        prlineid.isAcceptableOrUnknown(data['prlineid']!, _prlineidMeta),
+      );
     }
     return context;
   }
@@ -4036,30 +4819,54 @@ class $PurchasesTable extends Purchases
   Purchase map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Purchase(
-      prnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}prnum'])!,
-      prDescription: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}pr_description'])!,
-      poDescription: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}po_description'])!,
-      ponum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}ponum']),
-      startDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}start_date'])!,
-      siteid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
-      endDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}end_date']),
-      leadTime: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}lead_time'])!,
-      itemnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
-      unitCost: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}unit_cost'])!,
-      poStatus: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}po_status'])!,
-      prlineid: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}prlineid'])!,
+      prnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prnum'],
+      )!,
+      prDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pr_description'],
+      )!,
+      poDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}po_description'],
+      )!,
+      ponum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ponum'],
+      ),
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_date'],
+      )!,
+      siteid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siteid'],
+      )!,
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_date'],
+      ),
+      leadTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lead_time'],
+      )!,
+      itemnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}itemnum'],
+      )!,
+      unitCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}unit_cost'],
+      )!,
+      poStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}po_status'],
+      )!,
+      prlineid: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}prlineid'],
+      )!,
     );
   }
 
@@ -4082,19 +4889,20 @@ class Purchase extends DataClass implements Insertable<Purchase> {
   final double unitCost;
   final bool poStatus;
   final int prlineid;
-  const Purchase(
-      {required this.prnum,
-      required this.prDescription,
-      required this.poDescription,
-      this.ponum,
-      required this.startDate,
-      required this.siteid,
-      this.endDate,
-      required this.leadTime,
-      required this.itemnum,
-      required this.unitCost,
-      required this.poStatus,
-      required this.prlineid});
+  const Purchase({
+    required this.prnum,
+    required this.prDescription,
+    required this.poDescription,
+    this.ponum,
+    required this.startDate,
+    required this.siteid,
+    this.endDate,
+    required this.leadTime,
+    required this.itemnum,
+    required this.unitCost,
+    required this.poStatus,
+    required this.prlineid,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4122,8 +4930,9 @@ class Purchase extends DataClass implements Insertable<Purchase> {
       prnum: Value(prnum),
       prDescription: Value(prDescription),
       poDescription: Value(poDescription),
-      ponum:
-          ponum == null && nullToAbsent ? const Value.absent() : Value(ponum),
+      ponum: ponum == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ponum),
       startDate: Value(startDate),
       siteid: Value(siteid),
       endDate: endDate == null && nullToAbsent
@@ -4137,8 +4946,10 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     );
   }
 
-  factory Purchase.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Purchase.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Purchase(
       prnum: serializer.fromJson<String>(json['prnum']),
@@ -4174,33 +4985,33 @@ class Purchase extends DataClass implements Insertable<Purchase> {
     };
   }
 
-  Purchase copyWith(
-          {String? prnum,
-          String? prDescription,
-          String? poDescription,
-          Value<String?> ponum = const Value.absent(),
-          String? startDate,
-          String? siteid,
-          Value<String?> endDate = const Value.absent(),
-          double? leadTime,
-          String? itemnum,
-          double? unitCost,
-          bool? poStatus,
-          int? prlineid}) =>
-      Purchase(
-        prnum: prnum ?? this.prnum,
-        prDescription: prDescription ?? this.prDescription,
-        poDescription: poDescription ?? this.poDescription,
-        ponum: ponum.present ? ponum.value : this.ponum,
-        startDate: startDate ?? this.startDate,
-        siteid: siteid ?? this.siteid,
-        endDate: endDate.present ? endDate.value : this.endDate,
-        leadTime: leadTime ?? this.leadTime,
-        itemnum: itemnum ?? this.itemnum,
-        unitCost: unitCost ?? this.unitCost,
-        poStatus: poStatus ?? this.poStatus,
-        prlineid: prlineid ?? this.prlineid,
-      );
+  Purchase copyWith({
+    String? prnum,
+    String? prDescription,
+    String? poDescription,
+    Value<String?> ponum = const Value.absent(),
+    String? startDate,
+    String? siteid,
+    Value<String?> endDate = const Value.absent(),
+    double? leadTime,
+    String? itemnum,
+    double? unitCost,
+    bool? poStatus,
+    int? prlineid,
+  }) => Purchase(
+    prnum: prnum ?? this.prnum,
+    prDescription: prDescription ?? this.prDescription,
+    poDescription: poDescription ?? this.poDescription,
+    ponum: ponum.present ? ponum.value : this.ponum,
+    startDate: startDate ?? this.startDate,
+    siteid: siteid ?? this.siteid,
+    endDate: endDate.present ? endDate.value : this.endDate,
+    leadTime: leadTime ?? this.leadTime,
+    itemnum: itemnum ?? this.itemnum,
+    unitCost: unitCost ?? this.unitCost,
+    poStatus: poStatus ?? this.poStatus,
+    prlineid: prlineid ?? this.prlineid,
+  );
   Purchase copyWithCompanion(PurchasesCompanion data) {
     return Purchase(
       prnum: data.prnum.present ? data.prnum.value : this.prnum,
@@ -4243,18 +5054,19 @@ class Purchase extends DataClass implements Insertable<Purchase> {
 
   @override
   int get hashCode => Object.hash(
-      prnum,
-      prDescription,
-      poDescription,
-      ponum,
-      startDate,
-      siteid,
-      endDate,
-      leadTime,
-      itemnum,
-      unitCost,
-      poStatus,
-      prlineid);
+    prnum,
+    prDescription,
+    poDescription,
+    ponum,
+    startDate,
+    siteid,
+    endDate,
+    leadTime,
+    itemnum,
+    unitCost,
+    poStatus,
+    prlineid,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4313,15 +5125,15 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     required double unitCost,
     required bool poStatus,
     this.prlineid = const Value.absent(),
-  })  : prnum = Value(prnum),
-        prDescription = Value(prDescription),
-        poDescription = Value(poDescription),
-        startDate = Value(startDate),
-        siteid = Value(siteid),
-        leadTime = Value(leadTime),
-        itemnum = Value(itemnum),
-        unitCost = Value(unitCost),
-        poStatus = Value(poStatus);
+  }) : prnum = Value(prnum),
+       prDescription = Value(prDescription),
+       poDescription = Value(poDescription),
+       startDate = Value(startDate),
+       siteid = Value(siteid),
+       leadTime = Value(leadTime),
+       itemnum = Value(itemnum),
+       unitCost = Value(unitCost),
+       poStatus = Value(poStatus);
   static Insertable<Purchase> custom({
     Expression<String>? prnum,
     Expression<String>? prDescription,
@@ -4352,19 +5164,20 @@ class PurchasesCompanion extends UpdateCompanion<Purchase> {
     });
   }
 
-  PurchasesCompanion copyWith(
-      {Value<String>? prnum,
-      Value<String>? prDescription,
-      Value<String>? poDescription,
-      Value<String?>? ponum,
-      Value<String>? startDate,
-      Value<String>? siteid,
-      Value<String?>? endDate,
-      Value<double>? leadTime,
-      Value<String>? itemnum,
-      Value<double>? unitCost,
-      Value<bool>? poStatus,
-      Value<int>? prlineid}) {
+  PurchasesCompanion copyWith({
+    Value<String>? prnum,
+    Value<String>? prDescription,
+    Value<String>? poDescription,
+    Value<String?>? ponum,
+    Value<String>? startDate,
+    Value<String>? siteid,
+    Value<String?>? endDate,
+    Value<double>? leadTime,
+    Value<String>? itemnum,
+    Value<double>? unitCost,
+    Value<bool>? poStatus,
+    Value<int>? prlineid,
+  }) {
     return PurchasesCompanion(
       prnum: prnum ?? this.prnum,
       prDescription: prDescription ?? this.prDescription,
@@ -4448,79 +5261,122 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $ItemsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _itemnumMeta =
-      const VerificationMeta('itemnum');
+  static const VerificationMeta _itemnumMeta = const VerificationMeta(
+    'itemnum',
+  );
   @override
   late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
-      'itemnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+    'itemnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
-      'status', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _commodityGroupMeta =
-      const VerificationMeta('commodityGroup');
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _commodityGroupMeta = const VerificationMeta(
+    'commodityGroup',
+  );
   @override
   late final GeneratedColumn<String> commodityGroup = GeneratedColumn<String>(
-      'commodity_group', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _glClassMeta =
-      const VerificationMeta('glClass');
+    'commodity_group',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _glClassMeta = const VerificationMeta(
+    'glClass',
+  );
   @override
   late final GeneratedColumn<String> glClass = GeneratedColumn<String>(
-      'gl_class', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'gl_class',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [itemnum, description, status, commodityGroup, glClass];
+  List<GeneratedColumn> get $columns => [
+    itemnum,
+    description,
+    status,
+    commodityGroup,
+    glClass,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'items';
   @override
-  VerificationContext validateIntegrity(Insertable<Item> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Item> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('itemnum')) {
-      context.handle(_itemnumMeta,
-          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+      context.handle(
+        _itemnumMeta,
+        itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_itemnumMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
           _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
     if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
     if (data.containsKey('commodity_group')) {
       context.handle(
+        _commodityGroupMeta,
+        commodityGroup.isAcceptableOrUnknown(
+          data['commodity_group']!,
           _commodityGroupMeta,
-          commodityGroup.isAcceptableOrUnknown(
-              data['commodity_group']!, _commodityGroupMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_commodityGroupMeta);
     }
     if (data.containsKey('gl_class')) {
-      context.handle(_glClassMeta,
-          glClass.isAcceptableOrUnknown(data['gl_class']!, _glClassMeta));
+      context.handle(
+        _glClassMeta,
+        glClass.isAcceptableOrUnknown(data['gl_class']!, _glClassMeta),
+      );
     } else if (isInserting) {
       context.missing(_glClassMeta);
     }
@@ -4533,16 +5389,26 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
   Item map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Item(
-      itemnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      status: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      itemnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}itemnum'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
       commodityGroup: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}commodity_group'])!,
-      glClass: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}gl_class'])!,
+        DriftSqlType.string,
+        data['${effectivePrefix}commodity_group'],
+      )!,
+      glClass: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gl_class'],
+      )!,
     );
   }
 
@@ -4558,12 +5424,13 @@ class Item extends DataClass implements Insertable<Item> {
   final String status;
   final String commodityGroup;
   final String glClass;
-  const Item(
-      {required this.itemnum,
-      required this.description,
-      required this.status,
-      required this.commodityGroup,
-      required this.glClass});
+  const Item({
+    required this.itemnum,
+    required this.description,
+    required this.status,
+    required this.commodityGroup,
+    required this.glClass,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4585,8 +5452,10 @@ class Item extends DataClass implements Insertable<Item> {
     );
   }
 
-  factory Item.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Item.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Item(
       itemnum: serializer.fromJson<String>(json['itemnum']),
@@ -4608,24 +5477,25 @@ class Item extends DataClass implements Insertable<Item> {
     };
   }
 
-  Item copyWith(
-          {String? itemnum,
-          String? description,
-          String? status,
-          String? commodityGroup,
-          String? glClass}) =>
-      Item(
-        itemnum: itemnum ?? this.itemnum,
-        description: description ?? this.description,
-        status: status ?? this.status,
-        commodityGroup: commodityGroup ?? this.commodityGroup,
-        glClass: glClass ?? this.glClass,
-      );
+  Item copyWith({
+    String? itemnum,
+    String? description,
+    String? status,
+    String? commodityGroup,
+    String? glClass,
+  }) => Item(
+    itemnum: itemnum ?? this.itemnum,
+    description: description ?? this.description,
+    status: status ?? this.status,
+    commodityGroup: commodityGroup ?? this.commodityGroup,
+    glClass: glClass ?? this.glClass,
+  );
   Item copyWithCompanion(ItemsCompanion data) {
     return Item(
       itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       status: data.status.present ? data.status.value : this.status,
       commodityGroup: data.commodityGroup.present
           ? data.commodityGroup.value
@@ -4682,11 +5552,11 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     required String commodityGroup,
     required String glClass,
     this.rowid = const Value.absent(),
-  })  : itemnum = Value(itemnum),
-        description = Value(description),
-        status = Value(status),
-        commodityGroup = Value(commodityGroup),
-        glClass = Value(glClass);
+  }) : itemnum = Value(itemnum),
+       description = Value(description),
+       status = Value(status),
+       commodityGroup = Value(commodityGroup),
+       glClass = Value(glClass);
   static Insertable<Item> custom({
     Expression<String>? itemnum,
     Expression<String>? description,
@@ -4705,13 +5575,14 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     });
   }
 
-  ItemsCompanion copyWith(
-      {Value<String>? itemnum,
-      Value<String>? description,
-      Value<String>? status,
-      Value<String>? commodityGroup,
-      Value<String>? glClass,
-      Value<int>? rowid}) {
+  ItemsCompanion copyWith({
+    Value<String>? itemnum,
+    Value<String>? description,
+    Value<String>? status,
+    Value<String>? commodityGroup,
+    Value<String>? glClass,
+    Value<int>? rowid,
+  }) {
     return ItemsCompanion(
       itemnum: itemnum ?? this.itemnum,
       description: description ?? this.description,
@@ -4769,120 +5640,191 @@ class $SpareCriticalitysTable extends SpareCriticalitys
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _usageMeta = const VerificationMeta('usage');
   @override
   late final GeneratedColumn<int> usage = GeneratedColumn<int>(
-      'usage', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _leadTimeMeta =
-      const VerificationMeta('leadTime');
+    'usage',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _leadTimeMeta = const VerificationMeta(
+    'leadTime',
+  );
   @override
   late final GeneratedColumn<int> leadTime = GeneratedColumn<int>(
-      'lead_time', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _realLeadTimeMeta =
-      const VerificationMeta('realLeadTime');
+    'lead_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _realLeadTimeMeta = const VerificationMeta(
+    'realLeadTime',
+  );
   @override
   late final GeneratedColumn<double> realLeadTime = GeneratedColumn<double>(
-      'real_lead_time', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
+    'real_lead_time',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _costMeta = const VerificationMeta('cost');
   @override
   late final GeneratedColumn<int> cost = GeneratedColumn<int>(
-      'cost', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _realCostMeta =
-      const VerificationMeta('realCost');
+    'cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _realCostMeta = const VerificationMeta(
+    'realCost',
+  );
   @override
   late final GeneratedColumn<double> realCost = GeneratedColumn<double>(
-      'real_cost', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
-  static const VerificationMeta _assetRPNMeta =
-      const VerificationMeta('assetRPN');
+    'real_cost',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _assetRPNMeta = const VerificationMeta(
+    'assetRPN',
+  );
   @override
   late final GeneratedColumn<double> assetRPN = GeneratedColumn<double>(
-      'asset_r_p_n', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+    'asset_r_p_n',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _manualMeta = const VerificationMeta('manual');
   @override
   late final GeneratedColumn<bool> manual = GeneratedColumn<bool>(
-      'manual', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("manual" IN (0, 1))'));
-  static const VerificationMeta _manualPriorityMeta =
-      const VerificationMeta('manualPriority');
+    'manual',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("manual" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _manualPriorityMeta = const VerificationMeta(
+    'manualPriority',
+  );
   @override
   late final GeneratedColumn<bool> manualPriority = GeneratedColumn<bool>(
-      'manual_priority', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("manual_priority" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _newPriorityMeta =
-      const VerificationMeta('newPriority');
+    'manual_priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("manual_priority" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _newPriorityMeta = const VerificationMeta(
+    'newPriority',
+  );
   @override
   late final GeneratedColumn<int> newPriority = GeneratedColumn<int>(
-      'new_priority', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'new_priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _newRPNMeta = const VerificationMeta('newRPN');
   @override
   late final GeneratedColumn<double> newRPN = GeneratedColumn<double>(
-      'new_r_p_n', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+    'new_r_p_n',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
   late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
-      'siteid', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _itemnumMeta =
-      const VerificationMeta('itemnum');
+    'siteid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemnumMeta = const VerificationMeta(
+    'itemnum',
+  );
   @override
   late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
-      'itemnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _reorderPointMeta =
-      const VerificationMeta('reorderPoint');
+    'itemnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reorderPointMeta = const VerificationMeta(
+    'reorderPoint',
+  );
   @override
   late final GeneratedColumn<double> reorderPoint = GeneratedColumn<double>(
-      'reorder_point', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
-  static const VerificationMeta _orderQuantityMeta =
-      const VerificationMeta('orderQuantity');
+    'reorder_point',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _orderQuantityMeta = const VerificationMeta(
+    'orderQuantity',
+  );
   @override
   late final GeneratedColumn<double> orderQuantity = GeneratedColumn<double>(
-      'order_quantity', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
+    'order_quantity',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        usage,
-        leadTime,
-        realLeadTime,
-        cost,
-        realCost,
-        assetRPN,
-        manual,
-        manualPriority,
-        newPriority,
-        newRPN,
-        siteid,
-        itemnum,
-        reorderPoint,
-        orderQuantity
-      ];
+    id,
+    usage,
+    leadTime,
+    realLeadTime,
+    cost,
+    realCost,
+    assetRPN,
+    manual,
+    manualPriority,
+    newPriority,
+    newRPN,
+    siteid,
+    itemnum,
+    reorderPoint,
+    orderQuantity,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'spare_criticalitys';
   @override
-  VerificationContext validateIntegrity(Insertable<SpareCriticality> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<SpareCriticality> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -4892,87 +5834,120 @@ class $SpareCriticalitysTable extends SpareCriticalitys
     }
     if (data.containsKey('usage')) {
       context.handle(
-          _usageMeta, usage.isAcceptableOrUnknown(data['usage']!, _usageMeta));
+        _usageMeta,
+        usage.isAcceptableOrUnknown(data['usage']!, _usageMeta),
+      );
     } else if (isInserting) {
       context.missing(_usageMeta);
     }
     if (data.containsKey('lead_time')) {
-      context.handle(_leadTimeMeta,
-          leadTime.isAcceptableOrUnknown(data['lead_time']!, _leadTimeMeta));
+      context.handle(
+        _leadTimeMeta,
+        leadTime.isAcceptableOrUnknown(data['lead_time']!, _leadTimeMeta),
+      );
     } else if (isInserting) {
       context.missing(_leadTimeMeta);
     }
     if (data.containsKey('real_lead_time')) {
       context.handle(
+        _realLeadTimeMeta,
+        realLeadTime.isAcceptableOrUnknown(
+          data['real_lead_time']!,
           _realLeadTimeMeta,
-          realLeadTime.isAcceptableOrUnknown(
-              data['real_lead_time']!, _realLeadTimeMeta));
+        ),
+      );
     }
     if (data.containsKey('cost')) {
       context.handle(
-          _costMeta, cost.isAcceptableOrUnknown(data['cost']!, _costMeta));
+        _costMeta,
+        cost.isAcceptableOrUnknown(data['cost']!, _costMeta),
+      );
     } else if (isInserting) {
       context.missing(_costMeta);
     }
     if (data.containsKey('real_cost')) {
-      context.handle(_realCostMeta,
-          realCost.isAcceptableOrUnknown(data['real_cost']!, _realCostMeta));
+      context.handle(
+        _realCostMeta,
+        realCost.isAcceptableOrUnknown(data['real_cost']!, _realCostMeta),
+      );
     }
     if (data.containsKey('asset_r_p_n')) {
-      context.handle(_assetRPNMeta,
-          assetRPN.isAcceptableOrUnknown(data['asset_r_p_n']!, _assetRPNMeta));
+      context.handle(
+        _assetRPNMeta,
+        assetRPN.isAcceptableOrUnknown(data['asset_r_p_n']!, _assetRPNMeta),
+      );
     } else if (isInserting) {
       context.missing(_assetRPNMeta);
     }
     if (data.containsKey('manual')) {
-      context.handle(_manualMeta,
-          manual.isAcceptableOrUnknown(data['manual']!, _manualMeta));
+      context.handle(
+        _manualMeta,
+        manual.isAcceptableOrUnknown(data['manual']!, _manualMeta),
+      );
     } else if (isInserting) {
       context.missing(_manualMeta);
     }
     if (data.containsKey('manual_priority')) {
       context.handle(
+        _manualPriorityMeta,
+        manualPriority.isAcceptableOrUnknown(
+          data['manual_priority']!,
           _manualPriorityMeta,
-          manualPriority.isAcceptableOrUnknown(
-              data['manual_priority']!, _manualPriorityMeta));
+        ),
+      );
     }
     if (data.containsKey('new_priority')) {
       context.handle(
+        _newPriorityMeta,
+        newPriority.isAcceptableOrUnknown(
+          data['new_priority']!,
           _newPriorityMeta,
-          newPriority.isAcceptableOrUnknown(
-              data['new_priority']!, _newPriorityMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_newPriorityMeta);
     }
     if (data.containsKey('new_r_p_n')) {
-      context.handle(_newRPNMeta,
-          newRPN.isAcceptableOrUnknown(data['new_r_p_n']!, _newRPNMeta));
+      context.handle(
+        _newRPNMeta,
+        newRPN.isAcceptableOrUnknown(data['new_r_p_n']!, _newRPNMeta),
+      );
     } else if (isInserting) {
       context.missing(_newRPNMeta);
     }
     if (data.containsKey('siteid')) {
-      context.handle(_siteidMeta,
-          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+      context.handle(
+        _siteidMeta,
+        siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta),
+      );
     } else if (isInserting) {
       context.missing(_siteidMeta);
     }
     if (data.containsKey('itemnum')) {
-      context.handle(_itemnumMeta,
-          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+      context.handle(
+        _itemnumMeta,
+        itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_itemnumMeta);
     }
     if (data.containsKey('reorder_point')) {
       context.handle(
+        _reorderPointMeta,
+        reorderPoint.isAcceptableOrUnknown(
+          data['reorder_point']!,
           _reorderPointMeta,
-          reorderPoint.isAcceptableOrUnknown(
-              data['reorder_point']!, _reorderPointMeta));
+        ),
+      );
     }
     if (data.containsKey('order_quantity')) {
       context.handle(
+        _orderQuantityMeta,
+        orderQuantity.isAcceptableOrUnknown(
+          data['order_quantity']!,
           _orderQuantityMeta,
-          orderQuantity.isAcceptableOrUnknown(
-              data['order_quantity']!, _orderQuantityMeta));
+        ),
+      );
     }
     return context;
   }
@@ -4983,36 +5958,66 @@ class $SpareCriticalitysTable extends SpareCriticalitys
   SpareCriticality map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SpareCriticality(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      usage: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}usage'])!,
-      leadTime: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}lead_time'])!,
-      realLeadTime: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}real_lead_time']),
-      cost: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}cost'])!,
-      realCost: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}real_cost']),
-      assetRPN: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}asset_r_p_n'])!,
-      manual: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}manual'])!,
-      manualPriority: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}manual_priority'])!,
-      newPriority: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}new_priority'])!,
-      newRPN: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}new_r_p_n'])!,
-      siteid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
-      itemnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
-      reorderPoint: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}reorder_point']),
-      orderQuantity: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}order_quantity']),
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      usage: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}usage'],
+      )!,
+      leadTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}lead_time'],
+      )!,
+      realLeadTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}real_lead_time'],
+      ),
+      cost: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cost'],
+      )!,
+      realCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}real_cost'],
+      ),
+      assetRPN: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}asset_r_p_n'],
+      )!,
+      manual: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}manual'],
+      )!,
+      manualPriority: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}manual_priority'],
+      )!,
+      newPriority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}new_priority'],
+      )!,
+      newRPN: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}new_r_p_n'],
+      )!,
+      siteid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siteid'],
+      )!,
+      itemnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}itemnum'],
+      )!,
+      reorderPoint: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}reorder_point'],
+      ),
+      orderQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}order_quantity'],
+      ),
     );
   }
 
@@ -5039,22 +6044,23 @@ class SpareCriticality extends DataClass
   final String itemnum;
   final double? reorderPoint;
   final double? orderQuantity;
-  const SpareCriticality(
-      {required this.id,
-      required this.usage,
-      required this.leadTime,
-      this.realLeadTime,
-      required this.cost,
-      this.realCost,
-      required this.assetRPN,
-      required this.manual,
-      required this.manualPriority,
-      required this.newPriority,
-      required this.newRPN,
-      required this.siteid,
-      required this.itemnum,
-      this.reorderPoint,
-      this.orderQuantity});
+  const SpareCriticality({
+    required this.id,
+    required this.usage,
+    required this.leadTime,
+    this.realLeadTime,
+    required this.cost,
+    this.realCost,
+    required this.assetRPN,
+    required this.manual,
+    required this.manualPriority,
+    required this.newPriority,
+    required this.newRPN,
+    required this.siteid,
+    required this.itemnum,
+    this.reorderPoint,
+    this.orderQuantity,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -5112,8 +6118,10 @@ class SpareCriticality extends DataClass
     );
   }
 
-  factory SpareCriticality.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory SpareCriticality.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SpareCriticality(
       id: serializer.fromJson<String>(json['id']),
@@ -5155,42 +6163,41 @@ class SpareCriticality extends DataClass
     };
   }
 
-  SpareCriticality copyWith(
-          {String? id,
-          int? usage,
-          int? leadTime,
-          Value<double?> realLeadTime = const Value.absent(),
-          int? cost,
-          Value<double?> realCost = const Value.absent(),
-          double? assetRPN,
-          bool? manual,
-          bool? manualPriority,
-          int? newPriority,
-          double? newRPN,
-          String? siteid,
-          String? itemnum,
-          Value<double?> reorderPoint = const Value.absent(),
-          Value<double?> orderQuantity = const Value.absent()}) =>
-      SpareCriticality(
-        id: id ?? this.id,
-        usage: usage ?? this.usage,
-        leadTime: leadTime ?? this.leadTime,
-        realLeadTime:
-            realLeadTime.present ? realLeadTime.value : this.realLeadTime,
-        cost: cost ?? this.cost,
-        realCost: realCost.present ? realCost.value : this.realCost,
-        assetRPN: assetRPN ?? this.assetRPN,
-        manual: manual ?? this.manual,
-        manualPriority: manualPriority ?? this.manualPriority,
-        newPriority: newPriority ?? this.newPriority,
-        newRPN: newRPN ?? this.newRPN,
-        siteid: siteid ?? this.siteid,
-        itemnum: itemnum ?? this.itemnum,
-        reorderPoint:
-            reorderPoint.present ? reorderPoint.value : this.reorderPoint,
-        orderQuantity:
-            orderQuantity.present ? orderQuantity.value : this.orderQuantity,
-      );
+  SpareCriticality copyWith({
+    String? id,
+    int? usage,
+    int? leadTime,
+    Value<double?> realLeadTime = const Value.absent(),
+    int? cost,
+    Value<double?> realCost = const Value.absent(),
+    double? assetRPN,
+    bool? manual,
+    bool? manualPriority,
+    int? newPriority,
+    double? newRPN,
+    String? siteid,
+    String? itemnum,
+    Value<double?> reorderPoint = const Value.absent(),
+    Value<double?> orderQuantity = const Value.absent(),
+  }) => SpareCriticality(
+    id: id ?? this.id,
+    usage: usage ?? this.usage,
+    leadTime: leadTime ?? this.leadTime,
+    realLeadTime: realLeadTime.present ? realLeadTime.value : this.realLeadTime,
+    cost: cost ?? this.cost,
+    realCost: realCost.present ? realCost.value : this.realCost,
+    assetRPN: assetRPN ?? this.assetRPN,
+    manual: manual ?? this.manual,
+    manualPriority: manualPriority ?? this.manualPriority,
+    newPriority: newPriority ?? this.newPriority,
+    newRPN: newRPN ?? this.newRPN,
+    siteid: siteid ?? this.siteid,
+    itemnum: itemnum ?? this.itemnum,
+    reorderPoint: reorderPoint.present ? reorderPoint.value : this.reorderPoint,
+    orderQuantity: orderQuantity.present
+        ? orderQuantity.value
+        : this.orderQuantity,
+  );
   SpareCriticality copyWithCompanion(SpareCriticalitysCompanion data) {
     return SpareCriticality(
       id: data.id.present ? data.id.value : this.id,
@@ -5206,8 +6213,9 @@ class SpareCriticality extends DataClass
       manualPriority: data.manualPriority.present
           ? data.manualPriority.value
           : this.manualPriority,
-      newPriority:
-          data.newPriority.present ? data.newPriority.value : this.newPriority,
+      newPriority: data.newPriority.present
+          ? data.newPriority.value
+          : this.newPriority,
       newRPN: data.newRPN.present ? data.newRPN.value : this.newRPN,
       siteid: data.siteid.present ? data.siteid.value : this.siteid,
       itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
@@ -5244,21 +6252,22 @@ class SpareCriticality extends DataClass
 
   @override
   int get hashCode => Object.hash(
-      id,
-      usage,
-      leadTime,
-      realLeadTime,
-      cost,
-      realCost,
-      assetRPN,
-      manual,
-      manualPriority,
-      newPriority,
-      newRPN,
-      siteid,
-      itemnum,
-      reorderPoint,
-      orderQuantity);
+    id,
+    usage,
+    leadTime,
+    realLeadTime,
+    cost,
+    realCost,
+    assetRPN,
+    manual,
+    manualPriority,
+    newPriority,
+    newRPN,
+    siteid,
+    itemnum,
+    reorderPoint,
+    orderQuantity,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5332,16 +6341,16 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     this.reorderPoint = const Value.absent(),
     this.orderQuantity = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        usage = Value(usage),
-        leadTime = Value(leadTime),
-        cost = Value(cost),
-        assetRPN = Value(assetRPN),
-        manual = Value(manual),
-        newPriority = Value(newPriority),
-        newRPN = Value(newRPN),
-        siteid = Value(siteid),
-        itemnum = Value(itemnum);
+  }) : id = Value(id),
+       usage = Value(usage),
+       leadTime = Value(leadTime),
+       cost = Value(cost),
+       assetRPN = Value(assetRPN),
+       manual = Value(manual),
+       newPriority = Value(newPriority),
+       newRPN = Value(newRPN),
+       siteid = Value(siteid),
+       itemnum = Value(itemnum);
   static Insertable<SpareCriticality> custom({
     Expression<String>? id,
     Expression<int>? usage,
@@ -5380,23 +6389,24 @@ class SpareCriticalitysCompanion extends UpdateCompanion<SpareCriticality> {
     });
   }
 
-  SpareCriticalitysCompanion copyWith(
-      {Value<String>? id,
-      Value<int>? usage,
-      Value<int>? leadTime,
-      Value<double?>? realLeadTime,
-      Value<int>? cost,
-      Value<double?>? realCost,
-      Value<double>? assetRPN,
-      Value<bool>? manual,
-      Value<bool>? manualPriority,
-      Value<int>? newPriority,
-      Value<double>? newRPN,
-      Value<String>? siteid,
-      Value<String>? itemnum,
-      Value<double?>? reorderPoint,
-      Value<double?>? orderQuantity,
-      Value<int>? rowid}) {
+  SpareCriticalitysCompanion copyWith({
+    Value<String>? id,
+    Value<int>? usage,
+    Value<int>? leadTime,
+    Value<double?>? realLeadTime,
+    Value<int>? cost,
+    Value<double?>? realCost,
+    Value<double>? assetRPN,
+    Value<bool>? manual,
+    Value<bool>? manualPriority,
+    Value<int>? newPriority,
+    Value<double>? newRPN,
+    Value<String>? siteid,
+    Value<String>? itemnum,
+    Value<double?>? reorderPoint,
+    Value<double?>? orderQuantity,
+    Value<int>? rowid,
+  }) {
     return SpareCriticalitysCompanion(
       id: id ?? this.id,
       usage: usage ?? this.usage,
@@ -5501,110 +6511,173 @@ class $ItemUsageTable extends ItemUsage
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $ItemUsageTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _itemnumMeta =
-      const VerificationMeta('itemnum');
+  static const VerificationMeta _itemnumMeta = const VerificationMeta(
+    'itemnum',
+  );
   @override
   late final GeneratedColumn<String> itemnum = GeneratedColumn<String>(
-      'itemnum', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _transdateMeta =
-      const VerificationMeta('transdate');
+    'itemnum',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _transdateMeta = const VerificationMeta(
+    'transdate',
+  );
   @override
   late final GeneratedColumn<String> transdate = GeneratedColumn<String>(
-      'transdate', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _quantityMeta =
-      const VerificationMeta('quantity');
+    'transdate',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
   @override
   late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
-      'quantity', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _siteidMeta = const VerificationMeta('siteid');
   @override
   late final GeneratedColumn<String> siteid = GeneratedColumn<String>(
-      'siteid', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'siteid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _refwoMeta = const VerificationMeta('refwo');
   @override
   late final GeneratedColumn<String> refwo = GeneratedColumn<String>(
-      'refwo', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'refwo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _yearMeta = const VerificationMeta('year');
   @override
   late final GeneratedColumn<int> year = GeneratedColumn<int>(
-      'year', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'year',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _monthMeta = const VerificationMeta('month');
   @override
   late final GeneratedColumn<int> month = GeneratedColumn<int>(
-      'month', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _matusetransidMeta =
-      const VerificationMeta('matusetransid');
+    'month',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _matusetransidMeta = const VerificationMeta(
+    'matusetransid',
+  );
   @override
   late final GeneratedColumn<int> matusetransid = GeneratedColumn<int>(
-      'matusetransid', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'matusetransid',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [itemnum, transdate, quantity, siteid, refwo, year, month, matusetransid];
+  List<GeneratedColumn> get $columns => [
+    itemnum,
+    transdate,
+    quantity,
+    siteid,
+    refwo,
+    year,
+    month,
+    matusetransid,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'item_usage';
   @override
-  VerificationContext validateIntegrity(Insertable<ItemUsageData> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<ItemUsageData> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('itemnum')) {
-      context.handle(_itemnumMeta,
-          itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta));
+      context.handle(
+        _itemnumMeta,
+        itemnum.isAcceptableOrUnknown(data['itemnum']!, _itemnumMeta),
+      );
     } else if (isInserting) {
       context.missing(_itemnumMeta);
     }
     if (data.containsKey('transdate')) {
-      context.handle(_transdateMeta,
-          transdate.isAcceptableOrUnknown(data['transdate']!, _transdateMeta));
+      context.handle(
+        _transdateMeta,
+        transdate.isAcceptableOrUnknown(data['transdate']!, _transdateMeta),
+      );
     } else if (isInserting) {
       context.missing(_transdateMeta);
     }
     if (data.containsKey('quantity')) {
-      context.handle(_quantityMeta,
-          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
     } else if (isInserting) {
       context.missing(_quantityMeta);
     }
     if (data.containsKey('siteid')) {
-      context.handle(_siteidMeta,
-          siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta));
+      context.handle(
+        _siteidMeta,
+        siteid.isAcceptableOrUnknown(data['siteid']!, _siteidMeta),
+      );
     } else if (isInserting) {
       context.missing(_siteidMeta);
     }
     if (data.containsKey('refwo')) {
       context.handle(
-          _refwoMeta, refwo.isAcceptableOrUnknown(data['refwo']!, _refwoMeta));
+        _refwoMeta,
+        refwo.isAcceptableOrUnknown(data['refwo']!, _refwoMeta),
+      );
     } else if (isInserting) {
       context.missing(_refwoMeta);
     }
     if (data.containsKey('year')) {
       context.handle(
-          _yearMeta, year.isAcceptableOrUnknown(data['year']!, _yearMeta));
+        _yearMeta,
+        year.isAcceptableOrUnknown(data['year']!, _yearMeta),
+      );
     } else if (isInserting) {
       context.missing(_yearMeta);
     }
     if (data.containsKey('month')) {
       context.handle(
-          _monthMeta, month.isAcceptableOrUnknown(data['month']!, _monthMeta));
+        _monthMeta,
+        month.isAcceptableOrUnknown(data['month']!, _monthMeta),
+      );
     } else if (isInserting) {
       context.missing(_monthMeta);
     }
     if (data.containsKey('matusetransid')) {
       context.handle(
+        _matusetransidMeta,
+        matusetransid.isAcceptableOrUnknown(
+          data['matusetransid']!,
           _matusetransidMeta,
-          matusetransid.isAcceptableOrUnknown(
-              data['matusetransid']!, _matusetransidMeta));
+        ),
+      );
     }
     return context;
   }
@@ -5615,22 +6688,38 @@ class $ItemUsageTable extends ItemUsage
   ItemUsageData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ItemUsageData(
-      itemnum: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}itemnum'])!,
-      transdate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}transdate'])!,
-      quantity: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
-      siteid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}siteid'])!,
-      refwo: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}refwo'])!,
-      year: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}year'])!,
-      month: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}month'])!,
-      matusetransid: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}matusetransid'])!,
+      itemnum: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}itemnum'],
+      )!,
+      transdate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transdate'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      siteid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siteid'],
+      )!,
+      refwo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}refwo'],
+      )!,
+      year: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}year'],
+      )!,
+      month: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}month'],
+      )!,
+      matusetransid: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}matusetransid'],
+      )!,
     );
   }
 
@@ -5649,15 +6738,16 @@ class ItemUsageData extends DataClass implements Insertable<ItemUsageData> {
   final int year;
   final int month;
   final int matusetransid;
-  const ItemUsageData(
-      {required this.itemnum,
-      required this.transdate,
-      required this.quantity,
-      required this.siteid,
-      required this.refwo,
-      required this.year,
-      required this.month,
-      required this.matusetransid});
+  const ItemUsageData({
+    required this.itemnum,
+    required this.transdate,
+    required this.quantity,
+    required this.siteid,
+    required this.refwo,
+    required this.year,
+    required this.month,
+    required this.matusetransid,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -5685,8 +6775,10 @@ class ItemUsageData extends DataClass implements Insertable<ItemUsageData> {
     );
   }
 
-  factory ItemUsageData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory ItemUsageData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ItemUsageData(
       itemnum: serializer.fromJson<String>(json['itemnum']),
@@ -5714,25 +6806,25 @@ class ItemUsageData extends DataClass implements Insertable<ItemUsageData> {
     };
   }
 
-  ItemUsageData copyWith(
-          {String? itemnum,
-          String? transdate,
-          double? quantity,
-          String? siteid,
-          String? refwo,
-          int? year,
-          int? month,
-          int? matusetransid}) =>
-      ItemUsageData(
-        itemnum: itemnum ?? this.itemnum,
-        transdate: transdate ?? this.transdate,
-        quantity: quantity ?? this.quantity,
-        siteid: siteid ?? this.siteid,
-        refwo: refwo ?? this.refwo,
-        year: year ?? this.year,
-        month: month ?? this.month,
-        matusetransid: matusetransid ?? this.matusetransid,
-      );
+  ItemUsageData copyWith({
+    String? itemnum,
+    String? transdate,
+    double? quantity,
+    String? siteid,
+    String? refwo,
+    int? year,
+    int? month,
+    int? matusetransid,
+  }) => ItemUsageData(
+    itemnum: itemnum ?? this.itemnum,
+    transdate: transdate ?? this.transdate,
+    quantity: quantity ?? this.quantity,
+    siteid: siteid ?? this.siteid,
+    refwo: refwo ?? this.refwo,
+    year: year ?? this.year,
+    month: month ?? this.month,
+    matusetransid: matusetransid ?? this.matusetransid,
+  );
   ItemUsageData copyWithCompanion(ItemUsageCompanion data) {
     return ItemUsageData(
       itemnum: data.itemnum.present ? data.itemnum.value : this.itemnum,
@@ -5765,7 +6857,15 @@ class ItemUsageData extends DataClass implements Insertable<ItemUsageData> {
 
   @override
   int get hashCode => Object.hash(
-      itemnum, transdate, quantity, siteid, refwo, year, month, matusetransid);
+    itemnum,
+    transdate,
+    quantity,
+    siteid,
+    refwo,
+    year,
+    month,
+    matusetransid,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5808,13 +6908,13 @@ class ItemUsageCompanion extends UpdateCompanion<ItemUsageData> {
     required int year,
     required int month,
     this.matusetransid = const Value.absent(),
-  })  : itemnum = Value(itemnum),
-        transdate = Value(transdate),
-        quantity = Value(quantity),
-        siteid = Value(siteid),
-        refwo = Value(refwo),
-        year = Value(year),
-        month = Value(month);
+  }) : itemnum = Value(itemnum),
+       transdate = Value(transdate),
+       quantity = Value(quantity),
+       siteid = Value(siteid),
+       refwo = Value(refwo),
+       year = Value(year),
+       month = Value(month);
   static Insertable<ItemUsageData> custom({
     Expression<String>? itemnum,
     Expression<String>? transdate,
@@ -5837,15 +6937,16 @@ class ItemUsageCompanion extends UpdateCompanion<ItemUsageData> {
     });
   }
 
-  ItemUsageCompanion copyWith(
-      {Value<String>? itemnum,
-      Value<String>? transdate,
-      Value<double>? quantity,
-      Value<String>? siteid,
-      Value<String>? refwo,
-      Value<int>? year,
-      Value<int>? month,
-      Value<int>? matusetransid}) {
+  ItemUsageCompanion copyWith({
+    Value<String>? itemnum,
+    Value<String>? transdate,
+    Value<double>? quantity,
+    Value<String>? siteid,
+    Value<String>? refwo,
+    Value<int>? year,
+    Value<int>? month,
+    Value<int>? matusetransid,
+  }) {
     return ItemUsageCompanion(
       itemnum: itemnum ?? this.itemnum,
       transdate: transdate ?? this.transdate,
@@ -5926,141 +7027,120 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   late final $ItemUsageTable itemUsage = $ItemUsageTable(this);
   Selectable<SystemCriticality> systemsFilteredBySite(String? siteid) {
     return customSelect(
-        'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1) AND siteid IS NULL UNION SELECT * FROM system_criticalitys WHERE siteid = ?1',
-        variables: [
-          Variable<String>(siteid)
-        ],
-        readsFrom: {
-          systemCriticalitys,
-          assets,
-        }).asyncMap(systemCriticalitys.mapFromRow);
+      'SELECT * FROM system_criticalitys WHERE line IN (SELECT substr(assetnum, 1, 1) FROM assets WHERE siteid = ?1) AND siteid IS NULL UNION SELECT * FROM system_criticalitys WHERE siteid = ?1',
+      variables: [Variable<String>(siteid)],
+      readsFrom: {this.systemCriticalitys, this.assets},
+    ).asyncMap(this.systemCriticalitys.mapFromRow);
   }
 
   Selectable<int?> maxSystemID() {
-    return customSelect('SELECT max(id) AS _c0 FROM system_criticalitys',
-        variables: [],
-        readsFrom: {
-          systemCriticalitys,
-        }).map((QueryRow row) => row.readNullable<int>('_c0'));
+    return customSelect(
+      'SELECT max(id) AS _c0 FROM system_criticalitys',
+      variables: [],
+      readsFrom: {this.systemCriticalitys},
+    ).map((QueryRow row) => row.readNullable<int>('_c0'));
   }
 
   Selectable<AssetCriticality> assetCriticalityOrdered(String siteid) {
     return customSelect(
-        'SELECT * FROM asset_criticalitys WHERE substr(asset, 1, 2) = ?1 AND asset NOT IN (SELECT siteid || parent FROM assets WHERE parent IS NOT NULL) ORDER BY new_r_p_n DESC',
-        variables: [
-          Variable<String>(siteid)
-        ],
-        readsFrom: {
-          assetCriticalitys,
-          assets,
-        }).asyncMap(assetCriticalitys.mapFromRow);
+      'SELECT * FROM asset_criticalitys WHERE substr(asset, 1, 2) = ?1 AND asset NOT IN (SELECT siteid || parent FROM assets WHERE parent IS NOT NULL) ORDER BY new_r_p_n DESC',
+      variables: [Variable<String>(siteid)],
+      readsFrom: {this.assetCriticalitys, this.assets},
+    ).asyncMap(this.assetCriticalitys.mapFromRow);
   }
 
   Selectable<UniqueRpnNumbersResult> uniqueRpnNumbers(String siteid) {
     return customSelect(
-        'SELECT new_r_p_n, count(asset) AS _c0 FROM asset_criticalitys WHERE new_r_p_n > 0 AND asset LIKE ?1 AND asset NOT IN (SELECT siteid || parent FROM assets WHERE parent IS NOT NULL) GROUP BY new_r_p_n',
-        variables: [
-          Variable<String>(siteid)
-        ],
-        readsFrom: {
-          assetCriticalitys,
-          assets,
-        }).map((QueryRow row) => UniqueRpnNumbersResult(
-          newRPN: row.read<double>('new_r_p_n'),
-          countasset: row.read<int>('_c0'),
-        ));
+      'SELECT new_r_p_n, count(asset) AS _c0 FROM asset_criticalitys WHERE new_r_p_n > 0 AND asset LIKE ?1 AND asset NOT IN (SELECT siteid || parent FROM assets WHERE parent IS NOT NULL) GROUP BY new_r_p_n',
+      variables: [Variable<String>(siteid)],
+      readsFrom: {this.assetCriticalitys, this.assets},
+    ).map(
+      (QueryRow row) => UniqueRpnNumbersResult(
+        newRPN: row.read<double>('new_r_p_n'),
+        countasset: row.read<int>('_c0'),
+      ),
+    );
   }
 
   Selectable<UniqueRpnNumbersSpareResult> uniqueRpnNumbersSpare(String siteid) {
     return customSelect(
-        'SELECT new_r_p_n, count(itemnum) AS _c0 FROM spare_criticalitys WHERE new_r_p_n > 0 AND siteid = ?1 GROUP BY new_r_p_n',
-        variables: [
-          Variable<String>(siteid)
-        ],
-        readsFrom: {
-          spareCriticalitys,
-        }).map((QueryRow row) => UniqueRpnNumbersSpareResult(
-          newRPN: row.read<double>('new_r_p_n'),
-          countitemnum: row.read<int>('_c0'),
-        ));
+      'SELECT new_r_p_n, count(itemnum) AS _c0 FROM spare_criticalitys WHERE new_r_p_n > 0 AND siteid = ?1 GROUP BY new_r_p_n',
+      variables: [Variable<String>(siteid)],
+      readsFrom: {this.spareCriticalitys},
+    ).map(
+      (QueryRow row) => UniqueRpnNumbersSpareResult(
+        newRPN: row.read<double>('new_r_p_n'),
+        countitemnum: row.read<int>('_c0'),
+      ),
+    );
   }
 
   Selectable<SpareCriticalityAssetInfoResult> spareCriticalityAssetInfo(
-      String siteid, String itemnum) {
+    String siteid,
+    String itemnum,
+  ) {
     return customSelect(
-        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN, (SELECT max(priority) FROM assets WHERE id IN (SELECT sp.siteid || s3.assetnum FROM spare_parts AS s3 WHERE s3.itemnum = sp.itemnum AND s3.siteid = sp.siteid)) AS assetCriticality FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum LIKE ?2',
-        variables: [
-          Variable<String>(siteid),
-          Variable<String>(itemnum)
-        ],
-        readsFrom: {
-          spareParts,
-          assetCriticalitys,
-          assets,
-        }).map((QueryRow row) => SpareCriticalityAssetInfoResult(
-          itemnum: row.read<String>('itemnum'),
-          quantity: row.readNullable<double>('quantity'),
-          assetRPN: row.readNullable<double>('assetRPN'),
-          assetCriticality: row.readNullable<int>('assetCriticality'),
-        ));
+      'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN, (SELECT max(priority) FROM assets WHERE id IN (SELECT sp.siteid || s3.assetnum FROM spare_parts AS s3 WHERE s3.itemnum = sp.itemnum AND s3.siteid = sp.siteid)) AS assetCriticality FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum LIKE ?2',
+      variables: [Variable<String>(siteid), Variable<String>(itemnum)],
+      readsFrom: {this.spareParts, this.assetCriticalitys, this.assets},
+    ).map(
+      (QueryRow row) => SpareCriticalityAssetInfoResult(
+        itemnum: row.read<String>('itemnum'),
+        quantity: row.readNullable<double>('quantity'),
+        assetRPN: row.readNullable<double>('assetRPN'),
+        assetCriticality: row.readNullable<int>('assetCriticality'),
+      ),
+    );
   }
 
   Selectable<SpareCriticalityAutoCalculationResult>
-      spareCriticalityAutoCalculation(String siteid, String itemnum) {
+  spareCriticalityAutoCalculation(String siteid, String itemnum) {
     return customSelect(
-        'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum LIKE ?2',
-        variables: [
-          Variable<String>(siteid),
-          Variable<String>(itemnum)
-        ],
-        readsFrom: {
-          spareParts,
-          purchases,
-          assetCriticalitys,
-        }).map((QueryRow row) => SpareCriticalityAutoCalculationResult(
-          itemnum: row.read<String>('itemnum'),
-          quantity: row.readNullable<double>('quantity'),
-          unitCost: row.read<double>('unitCost'),
-          leadTime: row.read<double>('leadTime'),
-          assetRPN: row.readNullable<double>('assetRPN'),
-        ));
+      'SELECT DISTINCT(sp.itemnum)AS itemnum, (SELECT sum(quantity) FROM spare_parts AS s1 WHERE s1.itemnum = sp.itemnum AND s1.siteid = sp.siteid) AS quantity, (SELECT ifnull(avg(pr.unit_cost), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS unitCost, (SELECT ifnull(avg(pr.lead_time), -1) FROM purchases AS pr WHERE pr.itemnum = sp.itemnum AND pr.siteid = sp.siteid AND pr.po_status = 1) AS leadTime, (SELECT max(new_r_p_n) FROM asset_criticalitys WHERE asset IN (SELECT sp.siteid || s2.assetnum FROM spare_parts AS s2 WHERE s2.itemnum = sp.itemnum AND s2.siteid = sp.siteid)) AS assetRPN FROM spare_parts AS sp WHERE sp.siteid = ?1 AND sp.itemnum LIKE ?2',
+      variables: [Variable<String>(siteid), Variable<String>(itemnum)],
+      readsFrom: {this.spareParts, this.purchases, this.assetCriticalitys},
+    ).map(
+      (QueryRow row) => SpareCriticalityAutoCalculationResult(
+        itemnum: row.read<String>('itemnum'),
+        quantity: row.readNullable<double>('quantity'),
+        unitCost: row.read<double>('unitCost'),
+        leadTime: row.read<double>('leadTime'),
+        assetRPN: row.readNullable<double>('assetRPN'),
+      ),
+    );
   }
 
   Selectable<AssetsAssociatedWithItemResult> assetsAssociatedWithItem(
-      String siteid, String itemnum) {
+    String siteid,
+    String itemnum,
+  ) {
     return customSelect(
-        'SELECT sp.assetnum, a.description, ac.new_r_p_n, sp.quantity, a.priority FROM spare_parts AS sp LEFT JOIN assets AS a ON sp.assetnum = a.assetnum AND sp.siteid = a.siteid LEFT JOIN asset_criticalitys AS ac ON sp.siteid || sp.assetnum = ac.asset WHERE sp.siteid = ?1 AND sp.itemnum = ?2',
-        variables: [
-          Variable<String>(siteid),
-          Variable<String>(itemnum)
-        ],
-        readsFrom: {
-          spareParts,
-          assets,
-          assetCriticalitys,
-        }).map((QueryRow row) => AssetsAssociatedWithItemResult(
-          assetnum: row.read<String>('assetnum'),
-          description: row.readNullable<String>('description'),
-          newRPN: row.readNullable<double>('new_r_p_n'),
-          quantity: row.read<double>('quantity'),
-          priority: row.readNullable<int>('priority'),
-        ));
+      'SELECT sp.assetnum, a.description, ac.new_r_p_n, sp.quantity, a.priority FROM spare_parts AS sp LEFT JOIN assets AS a ON sp.assetnum = a.assetnum AND sp.siteid = a.siteid LEFT JOIN asset_criticalitys AS ac ON sp.siteid || sp.assetnum = ac.asset WHERE sp.siteid = ?1 AND sp.itemnum = ?2',
+      variables: [Variable<String>(siteid), Variable<String>(itemnum)],
+      readsFrom: {this.spareParts, this.assets, this.assetCriticalitys},
+    ).map(
+      (QueryRow row) => AssetsAssociatedWithItemResult(
+        assetnum: row.read<String>('assetnum'),
+        description: row.readNullable<String>('description'),
+        newRPN: row.readNullable<double>('new_r_p_n'),
+        quantity: row.read<double>('quantity'),
+        priority: row.readNullable<int>('priority'),
+      ),
+    );
   }
 
   Selectable<CompletedAssetRpnResult> completedAssetRpn(String siteid) {
     return customSelect(
-        'SELECT count(assetnum) AS totalAssets, count(DISTINCT parent) AS parentAssets, (SELECT count(asset) FROM asset_criticalitys WHERE new_r_p_n > 0 AND asset LIKE ?1 || \'%\' AND asset NOT IN (SELECT DISTINCT ?1 || parent FROM assets WHERE siteid = ?1 AND parent IS NOT NULL)) AS completeChilds FROM assets WHERE siteid = ?1',
-        variables: [
-          Variable<String>(siteid)
-        ],
-        readsFrom: {
-          assets,
-          assetCriticalitys,
-        }).map((QueryRow row) => CompletedAssetRpnResult(
-          totalAssets: row.read<int>('totalAssets'),
-          parentAssets: row.read<int>('parentAssets'),
-          completeChilds: row.read<int>('completeChilds'),
-        ));
+      'SELECT count(assetnum) AS totalAssets, count(DISTINCT parent) AS parentAssets, (SELECT count(asset) FROM asset_criticalitys WHERE new_r_p_n > 0 AND asset LIKE ?1 || \'%\' AND asset NOT IN (SELECT DISTINCT ?1 || parent FROM assets WHERE siteid = ?1 AND parent IS NOT NULL)) AS completeChilds FROM assets WHERE siteid = ?1',
+      variables: [Variable<String>(siteid)],
+      readsFrom: {this.assets, this.assetCriticalitys},
+    ).map(
+      (QueryRow row) => CompletedAssetRpnResult(
+        totalAssets: row.read<int>('totalAssets'),
+        parentAssets: row.read<int>('parentAssets'),
+        completeChilds: row.read<int>('completeChilds'),
+      ),
+    );
   }
 
   @override
@@ -6068,33 +7148,35 @@ abstract class _$MyDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        settings,
-        loginSettings,
-        meterDBs,
-        observations,
-        assets,
-        workorders,
-        systemCriticalitys,
-        assetCriticalitys,
-        assetUploads,
-        spareParts,
-        purchases,
-        items,
-        spareCriticalitys,
-        itemUsage
-      ];
+    settings,
+    loginSettings,
+    meterDBs,
+    observations,
+    assets,
+    workorders,
+    systemCriticalitys,
+    assetCriticalitys,
+    assetUploads,
+    spareParts,
+    purchases,
+    items,
+    spareCriticalitys,
+    itemUsage,
+  ];
 }
 
-typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
-  required String key,
-  required String value,
-  Value<int> rowid,
-});
-typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
-  Value<String> key,
-  Value<String> value,
-  Value<int> rowid,
-});
+typedef $$SettingsTableCreateCompanionBuilder =
+    SettingsCompanion Function({
+      required String key,
+      required String value,
+      Value<int> rowid,
+    });
+typedef $$SettingsTableUpdateCompanionBuilder =
+    SettingsCompanion Function({
+      Value<String> key,
+      Value<String> value,
+      Value<int> rowid,
+    });
 
 class $$SettingsTableFilterComposer
     extends Composer<_$MyDatabase, $SettingsTable> {
@@ -6106,10 +7188,14 @@ class $$SettingsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get key => $composableBuilder(
-      column: $table.key, builder: (column) => ColumnFilters(column));
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get value => $composableBuilder(
-      column: $table.value, builder: (column) => ColumnFilters(column));
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$SettingsTableOrderingComposer
@@ -6122,10 +7208,14 @@ class $$SettingsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get key => $composableBuilder(
-      column: $table.key, builder: (column) => ColumnOrderings(column));
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get value => $composableBuilder(
-      column: $table.value, builder: (column) => ColumnOrderings(column));
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -6144,20 +7234,24 @@ class $$SettingsTableAnnotationComposer
       $composableBuilder(column: $table.value, builder: (column) => column);
 }
 
-class $$SettingsTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $SettingsTable,
-    Setting,
-    $$SettingsTableFilterComposer,
-    $$SettingsTableOrderingComposer,
-    $$SettingsTableAnnotationComposer,
-    $$SettingsTableCreateCompanionBuilder,
-    $$SettingsTableUpdateCompanionBuilder,
-    (Setting, BaseReferences<_$MyDatabase, $SettingsTable, Setting>),
-    Setting,
-    PrefetchHooks Function()> {
+class $$SettingsTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $SettingsTable,
+          Setting,
+          $$SettingsTableFilterComposer,
+          $$SettingsTableOrderingComposer,
+          $$SettingsTableAnnotationComposer,
+          $$SettingsTableCreateCompanionBuilder,
+          $$SettingsTableUpdateCompanionBuilder,
+          (Setting, BaseReferences<_$MyDatabase, $SettingsTable, Setting>),
+          Setting,
+          PrefetchHooks Function()
+        > {
   $$SettingsTableTableManager(_$MyDatabase db, $SettingsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -6166,57 +7260,65 @@ class $$SettingsTableTableManager extends RootTableManager<
               $$SettingsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$SettingsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> key = const Value.absent(),
-            Value<String> value = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              SettingsCompanion(
-            key: key,
-            value: value,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String key,
-            required String value,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              SettingsCompanion.insert(
-            key: key,
-            value: value,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SettingsCompanion(key: key, value: value, rowid: rowid),
+          createCompanionCallback:
+              ({
+                required String key,
+                required String value,
+                Value<int> rowid = const Value.absent(),
+              }) => SettingsCompanion.insert(
+                key: key,
+                value: value,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SettingsTable, Setting>(table),
+                  BaseReferences<_$MyDatabase, $SettingsTable, Setting>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$SettingsTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $SettingsTable,
-    Setting,
-    $$SettingsTableFilterComposer,
-    $$SettingsTableOrderingComposer,
-    $$SettingsTableAnnotationComposer,
-    $$SettingsTableCreateCompanionBuilder,
-    $$SettingsTableUpdateCompanionBuilder,
-    (Setting, BaseReferences<_$MyDatabase, $SettingsTable, Setting>),
-    Setting,
-    PrefetchHooks Function()>;
-typedef $$LoginSettingsTableCreateCompanionBuilder = LoginSettingsCompanion
-    Function({
-  required String key,
-  required String value,
-  Value<int> rowid,
-});
-typedef $$LoginSettingsTableUpdateCompanionBuilder = LoginSettingsCompanion
-    Function({
-  Value<String> key,
-  Value<String> value,
-  Value<int> rowid,
-});
+typedef $$SettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $SettingsTable,
+      Setting,
+      $$SettingsTableFilterComposer,
+      $$SettingsTableOrderingComposer,
+      $$SettingsTableAnnotationComposer,
+      $$SettingsTableCreateCompanionBuilder,
+      $$SettingsTableUpdateCompanionBuilder,
+      (Setting, BaseReferences<_$MyDatabase, $SettingsTable, Setting>),
+      Setting,
+      PrefetchHooks Function()
+    >;
+typedef $$LoginSettingsTableCreateCompanionBuilder =
+    LoginSettingsCompanion Function({
+      required String key,
+      required String value,
+      Value<int> rowid,
+    });
+typedef $$LoginSettingsTableUpdateCompanionBuilder =
+    LoginSettingsCompanion Function({
+      Value<String> key,
+      Value<String> value,
+      Value<int> rowid,
+    });
 
 class $$LoginSettingsTableFilterComposer
     extends Composer<_$MyDatabase, $LoginSettingsTable> {
@@ -6228,10 +7330,14 @@ class $$LoginSettingsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get key => $composableBuilder(
-      column: $table.key, builder: (column) => ColumnFilters(column));
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get value => $composableBuilder(
-      column: $table.value, builder: (column) => ColumnFilters(column));
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$LoginSettingsTableOrderingComposer
@@ -6244,10 +7350,14 @@ class $$LoginSettingsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get key => $composableBuilder(
-      column: $table.key, builder: (column) => ColumnOrderings(column));
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get value => $composableBuilder(
-      column: $table.value, builder: (column) => ColumnOrderings(column));
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LoginSettingsTableAnnotationComposer
@@ -6266,23 +7376,27 @@ class $$LoginSettingsTableAnnotationComposer
       $composableBuilder(column: $table.value, builder: (column) => column);
 }
 
-class $$LoginSettingsTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $LoginSettingsTable,
-    LoginSetting,
-    $$LoginSettingsTableFilterComposer,
-    $$LoginSettingsTableOrderingComposer,
-    $$LoginSettingsTableAnnotationComposer,
-    $$LoginSettingsTableCreateCompanionBuilder,
-    $$LoginSettingsTableUpdateCompanionBuilder,
-    (
-      LoginSetting,
-      BaseReferences<_$MyDatabase, $LoginSettingsTable, LoginSetting>
-    ),
-    LoginSetting,
-    PrefetchHooks Function()> {
+class $$LoginSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $LoginSettingsTable,
+          LoginSetting,
+          $$LoginSettingsTableFilterComposer,
+          $$LoginSettingsTableOrderingComposer,
+          $$LoginSettingsTableAnnotationComposer,
+          $$LoginSettingsTableCreateCompanionBuilder,
+          $$LoginSettingsTableUpdateCompanionBuilder,
+          (
+            LoginSetting,
+            BaseReferences<_$MyDatabase, $LoginSettingsTable, LoginSetting>,
+          ),
+          LoginSetting,
+          PrefetchHooks Function()
+        > {
   $$LoginSettingsTableTableManager(_$MyDatabase db, $LoginSettingsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -6291,68 +7405,79 @@ class $$LoginSettingsTableTableManager extends RootTableManager<
               $$LoginSettingsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$LoginSettingsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> key = const Value.absent(),
-            Value<String> value = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              LoginSettingsCompanion(
-            key: key,
-            value: value,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String key,
-            required String value,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              LoginSettingsCompanion.insert(
-            key: key,
-            value: value,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) =>
+                  LoginSettingsCompanion(key: key, value: value, rowid: rowid),
+          createCompanionCallback:
+              ({
+                required String key,
+                required String value,
+                Value<int> rowid = const Value.absent(),
+              }) => LoginSettingsCompanion.insert(
+                key: key,
+                value: value,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$LoginSettingsTable, LoginSetting>(table),
+                  BaseReferences<
+                    _$MyDatabase,
+                    $LoginSettingsTable,
+                    LoginSetting
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$LoginSettingsTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $LoginSettingsTable,
-    LoginSetting,
-    $$LoginSettingsTableFilterComposer,
-    $$LoginSettingsTableOrderingComposer,
-    $$LoginSettingsTableAnnotationComposer,
-    $$LoginSettingsTableCreateCompanionBuilder,
-    $$LoginSettingsTableUpdateCompanionBuilder,
-    (
+typedef $$LoginSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $LoginSettingsTable,
       LoginSetting,
-      BaseReferences<_$MyDatabase, $LoginSettingsTable, LoginSetting>
-    ),
-    LoginSetting,
-    PrefetchHooks Function()>;
-typedef $$MeterDBsTableCreateCompanionBuilder = MeterDBsCompanion Function({
-  required String meter,
-  required String inspect,
-  required String description,
-  required int frequency,
-  required String freqUnit,
-  required String condition,
-  required String craft,
-  Value<int> rowid,
-});
-typedef $$MeterDBsTableUpdateCompanionBuilder = MeterDBsCompanion Function({
-  Value<String> meter,
-  Value<String> inspect,
-  Value<String> description,
-  Value<int> frequency,
-  Value<String> freqUnit,
-  Value<String> condition,
-  Value<String> craft,
-  Value<int> rowid,
-});
+      $$LoginSettingsTableFilterComposer,
+      $$LoginSettingsTableOrderingComposer,
+      $$LoginSettingsTableAnnotationComposer,
+      $$LoginSettingsTableCreateCompanionBuilder,
+      $$LoginSettingsTableUpdateCompanionBuilder,
+      (
+        LoginSetting,
+        BaseReferences<_$MyDatabase, $LoginSettingsTable, LoginSetting>,
+      ),
+      LoginSetting,
+      PrefetchHooks Function()
+    >;
+typedef $$MeterDBsTableCreateCompanionBuilder =
+    MeterDBsCompanion Function({
+      required String meter,
+      required String inspect,
+      required String description,
+      required int frequency,
+      required String freqUnit,
+      required String condition,
+      required String craft,
+      Value<int> rowid,
+    });
+typedef $$MeterDBsTableUpdateCompanionBuilder =
+    MeterDBsCompanion Function({
+      Value<String> meter,
+      Value<String> inspect,
+      Value<String> description,
+      Value<int> frequency,
+      Value<String> freqUnit,
+      Value<String> condition,
+      Value<String> craft,
+      Value<int> rowid,
+    });
 
 class $$MeterDBsTableFilterComposer
     extends Composer<_$MyDatabase, $MeterDBsTable> {
@@ -6364,25 +7489,39 @@ class $$MeterDBsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get meter => $composableBuilder(
-      column: $table.meter, builder: (column) => ColumnFilters(column));
+    column: $table.meter,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get inspect => $composableBuilder(
-      column: $table.inspect, builder: (column) => ColumnFilters(column));
+    column: $table.inspect,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get frequency => $composableBuilder(
-      column: $table.frequency, builder: (column) => ColumnFilters(column));
+    column: $table.frequency,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get freqUnit => $composableBuilder(
-      column: $table.freqUnit, builder: (column) => ColumnFilters(column));
+    column: $table.freqUnit,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get condition => $composableBuilder(
-      column: $table.condition, builder: (column) => ColumnFilters(column));
+    column: $table.condition,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get craft => $composableBuilder(
-      column: $table.craft, builder: (column) => ColumnFilters(column));
+    column: $table.craft,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$MeterDBsTableOrderingComposer
@@ -6395,25 +7534,39 @@ class $$MeterDBsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get meter => $composableBuilder(
-      column: $table.meter, builder: (column) => ColumnOrderings(column));
+    column: $table.meter,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get inspect => $composableBuilder(
-      column: $table.inspect, builder: (column) => ColumnOrderings(column));
+    column: $table.inspect,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get frequency => $composableBuilder(
-      column: $table.frequency, builder: (column) => ColumnOrderings(column));
+    column: $table.frequency,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get freqUnit => $composableBuilder(
-      column: $table.freqUnit, builder: (column) => ColumnOrderings(column));
+    column: $table.freqUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get condition => $composableBuilder(
-      column: $table.condition, builder: (column) => ColumnOrderings(column));
+    column: $table.condition,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get craft => $composableBuilder(
-      column: $table.craft, builder: (column) => ColumnOrderings(column));
+    column: $table.craft,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MeterDBsTableAnnotationComposer
@@ -6432,7 +7585,9 @@ class $$MeterDBsTableAnnotationComposer
       $composableBuilder(column: $table.inspect, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get frequency =>
       $composableBuilder(column: $table.frequency, builder: (column) => column);
@@ -6447,20 +7602,24 @@ class $$MeterDBsTableAnnotationComposer
       $composableBuilder(column: $table.craft, builder: (column) => column);
 }
 
-class $$MeterDBsTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $MeterDBsTable,
-    MeterDB,
-    $$MeterDBsTableFilterComposer,
-    $$MeterDBsTableOrderingComposer,
-    $$MeterDBsTableAnnotationComposer,
-    $$MeterDBsTableCreateCompanionBuilder,
-    $$MeterDBsTableUpdateCompanionBuilder,
-    (MeterDB, BaseReferences<_$MyDatabase, $MeterDBsTable, MeterDB>),
-    MeterDB,
-    PrefetchHooks Function()> {
+class $$MeterDBsTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $MeterDBsTable,
+          MeterDB,
+          $$MeterDBsTableFilterComposer,
+          $$MeterDBsTableOrderingComposer,
+          $$MeterDBsTableAnnotationComposer,
+          $$MeterDBsTableCreateCompanionBuilder,
+          $$MeterDBsTableUpdateCompanionBuilder,
+          (MeterDB, BaseReferences<_$MyDatabase, $MeterDBsTable, MeterDB>),
+          MeterDB,
+          PrefetchHooks Function()
+        > {
   $$MeterDBsTableTableManager(_$MyDatabase db, $MeterDBsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -6469,81 +7628,93 @@ class $$MeterDBsTableTableManager extends RootTableManager<
               $$MeterDBsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$MeterDBsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> meter = const Value.absent(),
-            Value<String> inspect = const Value.absent(),
-            Value<String> description = const Value.absent(),
-            Value<int> frequency = const Value.absent(),
-            Value<String> freqUnit = const Value.absent(),
-            Value<String> condition = const Value.absent(),
-            Value<String> craft = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              MeterDBsCompanion(
-            meter: meter,
-            inspect: inspect,
-            description: description,
-            frequency: frequency,
-            freqUnit: freqUnit,
-            condition: condition,
-            craft: craft,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String meter,
-            required String inspect,
-            required String description,
-            required int frequency,
-            required String freqUnit,
-            required String condition,
-            required String craft,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              MeterDBsCompanion.insert(
-            meter: meter,
-            inspect: inspect,
-            description: description,
-            frequency: frequency,
-            freqUnit: freqUnit,
-            condition: condition,
-            craft: craft,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> meter = const Value.absent(),
+                Value<String> inspect = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<int> frequency = const Value.absent(),
+                Value<String> freqUnit = const Value.absent(),
+                Value<String> condition = const Value.absent(),
+                Value<String> craft = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MeterDBsCompanion(
+                meter: meter,
+                inspect: inspect,
+                description: description,
+                frequency: frequency,
+                freqUnit: freqUnit,
+                condition: condition,
+                craft: craft,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String meter,
+                required String inspect,
+                required String description,
+                required int frequency,
+                required String freqUnit,
+                required String condition,
+                required String craft,
+                Value<int> rowid = const Value.absent(),
+              }) => MeterDBsCompanion.insert(
+                meter: meter,
+                inspect: inspect,
+                description: description,
+                frequency: frequency,
+                freqUnit: freqUnit,
+                condition: condition,
+                craft: craft,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$MeterDBsTable, MeterDB>(table),
+                  BaseReferences<_$MyDatabase, $MeterDBsTable, MeterDB>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$MeterDBsTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $MeterDBsTable,
-    MeterDB,
-    $$MeterDBsTableFilterComposer,
-    $$MeterDBsTableOrderingComposer,
-    $$MeterDBsTableAnnotationComposer,
-    $$MeterDBsTableCreateCompanionBuilder,
-    $$MeterDBsTableUpdateCompanionBuilder,
-    (MeterDB, BaseReferences<_$MyDatabase, $MeterDBsTable, MeterDB>),
-    MeterDB,
-    PrefetchHooks Function()>;
-typedef $$ObservationsTableCreateCompanionBuilder = ObservationsCompanion
-    Function({
-  required String meter,
-  required String code,
-  required String description,
-  Value<String?> action,
-  Value<int> rowid,
-});
-typedef $$ObservationsTableUpdateCompanionBuilder = ObservationsCompanion
-    Function({
-  Value<String> meter,
-  Value<String> code,
-  Value<String> description,
-  Value<String?> action,
-  Value<int> rowid,
-});
+typedef $$MeterDBsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $MeterDBsTable,
+      MeterDB,
+      $$MeterDBsTableFilterComposer,
+      $$MeterDBsTableOrderingComposer,
+      $$MeterDBsTableAnnotationComposer,
+      $$MeterDBsTableCreateCompanionBuilder,
+      $$MeterDBsTableUpdateCompanionBuilder,
+      (MeterDB, BaseReferences<_$MyDatabase, $MeterDBsTable, MeterDB>),
+      MeterDB,
+      PrefetchHooks Function()
+    >;
+typedef $$ObservationsTableCreateCompanionBuilder =
+    ObservationsCompanion Function({
+      required String meter,
+      required String code,
+      required String description,
+      Value<String?> action,
+      Value<int> rowid,
+    });
+typedef $$ObservationsTableUpdateCompanionBuilder =
+    ObservationsCompanion Function({
+      Value<String> meter,
+      Value<String> code,
+      Value<String> description,
+      Value<String?> action,
+      Value<int> rowid,
+    });
 
 class $$ObservationsTableFilterComposer
     extends Composer<_$MyDatabase, $ObservationsTable> {
@@ -6555,16 +7726,24 @@ class $$ObservationsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get meter => $composableBuilder(
-      column: $table.meter, builder: (column) => ColumnFilters(column));
+    column: $table.meter,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get code => $composableBuilder(
-      column: $table.code, builder: (column) => ColumnFilters(column));
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get action => $composableBuilder(
-      column: $table.action, builder: (column) => ColumnFilters(column));
+    column: $table.action,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ObservationsTableOrderingComposer
@@ -6577,16 +7756,24 @@ class $$ObservationsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get meter => $composableBuilder(
-      column: $table.meter, builder: (column) => ColumnOrderings(column));
+    column: $table.meter,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get code => $composableBuilder(
-      column: $table.code, builder: (column) => ColumnOrderings(column));
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get action => $composableBuilder(
-      column: $table.action, builder: (column) => ColumnOrderings(column));
+    column: $table.action,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ObservationsTableAnnotationComposer
@@ -6605,29 +7792,35 @@ class $$ObservationsTableAnnotationComposer
       $composableBuilder(column: $table.code, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get action =>
       $composableBuilder(column: $table.action, builder: (column) => column);
 }
 
-class $$ObservationsTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $ObservationsTable,
-    Observation,
-    $$ObservationsTableFilterComposer,
-    $$ObservationsTableOrderingComposer,
-    $$ObservationsTableAnnotationComposer,
-    $$ObservationsTableCreateCompanionBuilder,
-    $$ObservationsTableUpdateCompanionBuilder,
-    (
-      Observation,
-      BaseReferences<_$MyDatabase, $ObservationsTable, Observation>
-    ),
-    Observation,
-    PrefetchHooks Function()> {
+class $$ObservationsTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $ObservationsTable,
+          Observation,
+          $$ObservationsTableFilterComposer,
+          $$ObservationsTableOrderingComposer,
+          $$ObservationsTableAnnotationComposer,
+          $$ObservationsTableCreateCompanionBuilder,
+          $$ObservationsTableUpdateCompanionBuilder,
+          (
+            Observation,
+            BaseReferences<_$MyDatabase, $ObservationsTable, Observation>,
+          ),
+          Observation,
+          PrefetchHooks Function()
+        > {
   $$ObservationsTableTableManager(_$MyDatabase db, $ObservationsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -6636,115 +7829,137 @@ class $$ObservationsTableTableManager extends RootTableManager<
               $$ObservationsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$ObservationsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> meter = const Value.absent(),
-            Value<String> code = const Value.absent(),
-            Value<String> description = const Value.absent(),
-            Value<String?> action = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ObservationsCompanion(
-            meter: meter,
-            code: code,
-            description: description,
-            action: action,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String meter,
-            required String code,
-            required String description,
-            Value<String?> action = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ObservationsCompanion.insert(
-            meter: meter,
-            code: code,
-            description: description,
-            action: action,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> meter = const Value.absent(),
+                Value<String> code = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String?> action = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ObservationsCompanion(
+                meter: meter,
+                code: code,
+                description: description,
+                action: action,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String meter,
+                required String code,
+                required String description,
+                Value<String?> action = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ObservationsCompanion.insert(
+                meter: meter,
+                code: code,
+                description: description,
+                action: action,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ObservationsTable, Observation>(table),
+                  BaseReferences<_$MyDatabase, $ObservationsTable, Observation>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$ObservationsTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $ObservationsTable,
-    Observation,
-    $$ObservationsTableFilterComposer,
-    $$ObservationsTableOrderingComposer,
-    $$ObservationsTableAnnotationComposer,
-    $$ObservationsTableCreateCompanionBuilder,
-    $$ObservationsTableUpdateCompanionBuilder,
-    (
+typedef $$ObservationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $ObservationsTable,
       Observation,
-      BaseReferences<_$MyDatabase, $ObservationsTable, Observation>
-    ),
-    Observation,
-    PrefetchHooks Function()>;
-typedef $$AssetsTableCreateCompanionBuilder = AssetsCompanion Function({
-  required String assetnum,
-  required String description,
-  required String status,
-  required String siteid,
-  required String changedate,
-  Value<String?> hierarchy,
-  Value<String?> parent,
-  required int priority,
-  required String id,
-  Value<int> newAsset,
-  Value<int> rowid,
-});
-typedef $$AssetsTableUpdateCompanionBuilder = AssetsCompanion Function({
-  Value<String> assetnum,
-  Value<String> description,
-  Value<String> status,
-  Value<String> siteid,
-  Value<String> changedate,
-  Value<String?> hierarchy,
-  Value<String?> parent,
-  Value<int> priority,
-  Value<String> id,
-  Value<int> newAsset,
-  Value<int> rowid,
-});
+      $$ObservationsTableFilterComposer,
+      $$ObservationsTableOrderingComposer,
+      $$ObservationsTableAnnotationComposer,
+      $$ObservationsTableCreateCompanionBuilder,
+      $$ObservationsTableUpdateCompanionBuilder,
+      (
+        Observation,
+        BaseReferences<_$MyDatabase, $ObservationsTable, Observation>,
+      ),
+      Observation,
+      PrefetchHooks Function()
+    >;
+typedef $$AssetsTableCreateCompanionBuilder =
+    AssetsCompanion Function({
+      required String assetnum,
+      required String description,
+      required String status,
+      required String siteid,
+      required String changedate,
+      Value<String?> hierarchy,
+      Value<String?> parent,
+      required int priority,
+      required String id,
+      Value<int> newAsset,
+      Value<int> rowid,
+    });
+typedef $$AssetsTableUpdateCompanionBuilder =
+    AssetsCompanion Function({
+      Value<String> assetnum,
+      Value<String> description,
+      Value<String> status,
+      Value<String> siteid,
+      Value<String> changedate,
+      Value<String?> hierarchy,
+      Value<String?> parent,
+      Value<int> priority,
+      Value<String> id,
+      Value<int> newAsset,
+      Value<int> rowid,
+    });
 
 final class $$AssetsTableReferences
     extends BaseReferences<_$MyDatabase, $AssetsTable, Asset> {
   $$AssetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static MultiTypedResultKey<$AssetCriticalitysTable, List<AssetCriticality>>
-      _assetCriticalitysRefsTable(_$MyDatabase db) =>
-          MultiTypedResultKey.fromTable(db.assetCriticalitys,
-              aliasName: 'assets__id__asset_criticalitys__asset');
+  _assetCriticalitysRefsTable(_$MyDatabase db) => MultiTypedResultKey.fromTable(
+    db.assetCriticalitys,
+    aliasName: 'assets__id__asset_criticalitys__asset',
+  );
 
   $$AssetCriticalitysTableProcessedTableManager get assetCriticalitysRefs {
-    final manager =
-        $$AssetCriticalitysTableTableManager($_db, $_db.assetCriticalitys)
-            .filter((f) => f.asset.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$AssetCriticalitysTableTableManager(
+      $_db,
+      $_db.assetCriticalitys,
+    ).filter((f) => f.asset.id.sqlEquals($_itemColumn<String>('id')!));
 
-    final cache =
-        $_typedResult.readTableOrNull(_assetCriticalitysRefsTable($_db));
+    final cache = $_typedResult.readTableOrNull(
+      _assetCriticalitysRefsTable($_db),
+    );
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 
   static MultiTypedResultKey<$AssetUploadsTable, List<AssetUpload>>
-      _assetUploadsRefsTable(_$MyDatabase db) =>
-          MultiTypedResultKey.fromTable(db.assetUploads,
-              aliasName: 'assets__id__asset_uploads__asset');
+  _assetUploadsRefsTable(_$MyDatabase db) => MultiTypedResultKey.fromTable(
+    db.assetUploads,
+    aliasName: 'assets__id__asset_uploads__asset',
+  );
 
   $$AssetUploadsTableProcessedTableManager get assetUploadsRefs {
-    final manager = $$AssetUploadsTableTableManager($_db, $_db.assetUploads)
-        .filter((f) => f.asset.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$AssetUploadsTableTableManager(
+      $_db,
+      $_db.assetUploads,
+    ).filter((f) => f.asset.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_assetUploadsRefsTable($_db));
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 }
 
@@ -6757,74 +7972,102 @@ class $$AssetsTableFilterComposer extends Composer<_$MyDatabase, $AssetsTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get assetnum => $composableBuilder(
-      column: $table.assetnum, builder: (column) => ColumnFilters(column));
+    column: $table.assetnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get status => $composableBuilder(
-      column: $table.status, builder: (column) => ColumnFilters(column));
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnFilters(column));
+    column: $table.siteid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get changedate => $composableBuilder(
-      column: $table.changedate, builder: (column) => ColumnFilters(column));
+    column: $table.changedate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get hierarchy => $composableBuilder(
-      column: $table.hierarchy, builder: (column) => ColumnFilters(column));
+    column: $table.hierarchy,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get parent => $composableBuilder(
-      column: $table.parent, builder: (column) => ColumnFilters(column));
+    column: $table.parent,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get priority => $composableBuilder(
-      column: $table.priority, builder: (column) => ColumnFilters(column));
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get newAsset => $composableBuilder(
-      column: $table.newAsset, builder: (column) => ColumnFilters(column));
+    column: $table.newAsset,
+    builder: (column) => ColumnFilters(column),
+  );
 
   Expression<bool> assetCriticalitysRefs(
-      Expression<bool> Function($$AssetCriticalitysTableFilterComposer f) f) {
+    Expression<bool> Function($$AssetCriticalitysTableFilterComposer f) f,
+  ) {
     final $$AssetCriticalitysTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.assetCriticalitys,
-        getReferencedColumn: (t) => t.asset,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetCriticalitysTableFilterComposer(
-              $db: $db,
-              $table: $db.assetCriticalitys,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assetCriticalitys,
+      getReferencedColumn: (t) => t.asset,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetCriticalitysTableFilterComposer(
+            $db: $db,
+            $table: $db.assetCriticalitys,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 
   Expression<bool> assetUploadsRefs(
-      Expression<bool> Function($$AssetUploadsTableFilterComposer f) f) {
+    Expression<bool> Function($$AssetUploadsTableFilterComposer f) f,
+  ) {
     final $$AssetUploadsTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.assetUploads,
-        getReferencedColumn: (t) => t.asset,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetUploadsTableFilterComposer(
-              $db: $db,
-              $table: $db.assetUploads,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assetUploads,
+      getReferencedColumn: (t) => t.asset,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetUploadsTableFilterComposer(
+            $db: $db,
+            $table: $db.assetUploads,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -6839,34 +8082,54 @@ class $$AssetsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get assetnum => $composableBuilder(
-      column: $table.assetnum, builder: (column) => ColumnOrderings(column));
+    column: $table.assetnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get status => $composableBuilder(
-      column: $table.status, builder: (column) => ColumnOrderings(column));
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+    column: $table.siteid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get changedate => $composableBuilder(
-      column: $table.changedate, builder: (column) => ColumnOrderings(column));
+    column: $table.changedate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get hierarchy => $composableBuilder(
-      column: $table.hierarchy, builder: (column) => ColumnOrderings(column));
+    column: $table.hierarchy,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get parent => $composableBuilder(
-      column: $table.parent, builder: (column) => ColumnOrderings(column));
+    column: $table.parent,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get priority => $composableBuilder(
-      column: $table.priority, builder: (column) => ColumnOrderings(column));
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get newAsset => $composableBuilder(
-      column: $table.newAsset, builder: (column) => ColumnOrderings(column));
+    column: $table.newAsset,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AssetsTableAnnotationComposer
@@ -6882,7 +8145,9 @@ class $$AssetsTableAnnotationComposer
       $composableBuilder(column: $table.assetnum, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -6891,7 +8156,9 @@ class $$AssetsTableAnnotationComposer
       $composableBuilder(column: $table.siteid, builder: (column) => column);
 
   GeneratedColumn<String> get changedate => $composableBuilder(
-      column: $table.changedate, builder: (column) => column);
+    column: $table.changedate,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get hierarchy =>
       $composableBuilder(column: $table.hierarchy, builder: (column) => column);
@@ -6909,64 +8176,78 @@ class $$AssetsTableAnnotationComposer
       $composableBuilder(column: $table.newAsset, builder: (column) => column);
 
   Expression<T> assetCriticalitysRefs<T extends Object>(
-      Expression<T> Function($$AssetCriticalitysTableAnnotationComposer a) f) {
+    Expression<T> Function($$AssetCriticalitysTableAnnotationComposer a) f,
+  ) {
     final $$AssetCriticalitysTableAnnotationComposer composer =
         $composerBuilder(
-            composer: this,
-            getCurrentColumn: (t) => t.id,
-            referencedTable: $db.assetCriticalitys,
-            getReferencedColumn: (t) => t.asset,
-            builder: (joinBuilder,
-                    {$addJoinBuilderToRootComposer,
-                    $removeJoinBuilderFromRootComposer}) =>
-                $$AssetCriticalitysTableAnnotationComposer(
-                  $db: $db,
-                  $table: $db.assetCriticalitys,
-                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                  joinBuilder: joinBuilder,
-                  $removeJoinBuilderFromRootComposer:
-                      $removeJoinBuilderFromRootComposer,
-                ));
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.assetCriticalitys,
+          getReferencedColumn: (t) => t.asset,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AssetCriticalitysTableAnnotationComposer(
+                $db: $db,
+                $table: $db.assetCriticalitys,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 
   Expression<T> assetUploadsRefs<T extends Object>(
-      Expression<T> Function($$AssetUploadsTableAnnotationComposer a) f) {
+    Expression<T> Function($$AssetUploadsTableAnnotationComposer a) f,
+  ) {
     final $$AssetUploadsTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.assetUploads,
-        getReferencedColumn: (t) => t.asset,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetUploadsTableAnnotationComposer(
-              $db: $db,
-              $table: $db.assetUploads,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assetUploads,
+      getReferencedColumn: (t) => t.asset,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetUploadsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.assetUploads,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
 
-class $$AssetsTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $AssetsTable,
-    Asset,
-    $$AssetsTableFilterComposer,
-    $$AssetsTableOrderingComposer,
-    $$AssetsTableAnnotationComposer,
-    $$AssetsTableCreateCompanionBuilder,
-    $$AssetsTableUpdateCompanionBuilder,
-    (Asset, $$AssetsTableReferences),
-    Asset,
-    PrefetchHooks Function(
-        {bool assetCriticalitysRefs, bool assetUploadsRefs})> {
+class $$AssetsTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $AssetsTable,
+          Asset,
+          $$AssetsTableFilterComposer,
+          $$AssetsTableOrderingComposer,
+          $$AssetsTableAnnotationComposer,
+          $$AssetsTableCreateCompanionBuilder,
+          $$AssetsTableUpdateCompanionBuilder,
+          (Asset, $$AssetsTableReferences),
+          Asset,
+          PrefetchHooks Function({
+            bool assetCriticalitysRefs,
+            bool assetUploadsRefs,
+          })
+        > {
   $$AssetsTableTableManager(_$MyDatabase db, $AssetsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -6975,144 +8256,172 @@ class $$AssetsTableTableManager extends RootTableManager<
               $$AssetsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$AssetsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> assetnum = const Value.absent(),
-            Value<String> description = const Value.absent(),
-            Value<String> status = const Value.absent(),
-            Value<String> siteid = const Value.absent(),
-            Value<String> changedate = const Value.absent(),
-            Value<String?> hierarchy = const Value.absent(),
-            Value<String?> parent = const Value.absent(),
-            Value<int> priority = const Value.absent(),
-            Value<String> id = const Value.absent(),
-            Value<int> newAsset = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              AssetsCompanion(
-            assetnum: assetnum,
-            description: description,
-            status: status,
-            siteid: siteid,
-            changedate: changedate,
-            hierarchy: hierarchy,
-            parent: parent,
-            priority: priority,
-            id: id,
-            newAsset: newAsset,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String assetnum,
-            required String description,
-            required String status,
-            required String siteid,
-            required String changedate,
-            Value<String?> hierarchy = const Value.absent(),
-            Value<String?> parent = const Value.absent(),
-            required int priority,
-            required String id,
-            Value<int> newAsset = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              AssetsCompanion.insert(
-            assetnum: assetnum,
-            description: description,
-            status: status,
-            siteid: siteid,
-            changedate: changedate,
-            hierarchy: hierarchy,
-            parent: parent,
-            priority: priority,
-            id: id,
-            newAsset: newAsset,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> assetnum = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> siteid = const Value.absent(),
+                Value<String> changedate = const Value.absent(),
+                Value<String?> hierarchy = const Value.absent(),
+                Value<String?> parent = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<String> id = const Value.absent(),
+                Value<int> newAsset = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetsCompanion(
+                assetnum: assetnum,
+                description: description,
+                status: status,
+                siteid: siteid,
+                changedate: changedate,
+                hierarchy: hierarchy,
+                parent: parent,
+                priority: priority,
+                id: id,
+                newAsset: newAsset,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String assetnum,
+                required String description,
+                required String status,
+                required String siteid,
+                required String changedate,
+                Value<String?> hierarchy = const Value.absent(),
+                Value<String?> parent = const Value.absent(),
+                required int priority,
+                required String id,
+                Value<int> newAsset = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetsCompanion.insert(
+                assetnum: assetnum,
+                description: description,
+                status: status,
+                siteid: siteid,
+                changedate: changedate,
+                hierarchy: hierarchy,
+                parent: parent,
+                priority: priority,
+                id: id,
+                newAsset: newAsset,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $$AssetsTableReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$AssetsTable, Asset>(table),
+                  $$AssetsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: (
-              {assetCriticalitysRefs = false, assetUploadsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (assetCriticalitysRefs) db.assetCriticalitys,
-                if (assetUploadsRefs) db.assetUploads
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (assetCriticalitysRefs)
-                    await $_getPrefetchedData<Asset, $AssetsTable,
-                            AssetCriticality>(
-                        currentTable: table,
-                        referencedTable: $$AssetsTableReferences
-                            ._assetCriticalitysRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $$AssetsTableReferences(db, table, p0)
-                                .assetCriticalitysRefs,
-                        referencedItemsForCurrentItem: (item,
-                                referencedItems) =>
-                            referencedItems.where((e) => e.asset == item.id),
-                        typedResults: items),
-                  if (assetUploadsRefs)
-                    await $_getPrefetchedData<Asset, $AssetsTable, AssetUpload>(
-                        currentTable: table,
-                        referencedTable:
-                            $$AssetsTableReferences._assetUploadsRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $$AssetsTableReferences(db, table, p0)
-                                .assetUploadsRefs,
-                        referencedItemsForCurrentItem: (item,
-                                referencedItems) =>
-                            referencedItems.where((e) => e.asset == item.id),
-                        typedResults: items)
-                ];
+          prefetchHooksCallback:
+              ({assetCriticalitysRefs = false, assetUploadsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (assetCriticalitysRefs) db.assetCriticalitys,
+                    if (assetUploadsRefs) db.assetUploads,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (assetCriticalitysRefs)
+                        await $_getPrefetchedData<
+                          Asset,
+                          $AssetsTable,
+                          AssetCriticality
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AssetsTableReferences
+                              ._assetCriticalitysRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AssetsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).assetCriticalitysRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.asset == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (assetUploadsRefs)
+                        await $_getPrefetchedData<
+                          Asset,
+                          $AssetsTable,
+                          AssetUpload
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AssetsTableReferences
+                              ._assetUploadsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AssetsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).assetUploadsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.asset == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
-        ));
+        ),
+      );
 }
 
-typedef $$AssetsTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $AssetsTable,
-    Asset,
-    $$AssetsTableFilterComposer,
-    $$AssetsTableOrderingComposer,
-    $$AssetsTableAnnotationComposer,
-    $$AssetsTableCreateCompanionBuilder,
-    $$AssetsTableUpdateCompanionBuilder,
-    (Asset, $$AssetsTableReferences),
-    Asset,
-    PrefetchHooks Function(
-        {bool assetCriticalitysRefs, bool assetUploadsRefs})>;
-typedef $$WorkordersTableCreateCompanionBuilder = WorkordersCompanion Function({
-  required String wonum,
-  required String description,
-  required String status,
-  required String siteid,
-  required String reportdate,
-  required double downtime,
-  required String type,
-  required String assetnum,
-  Value<String?> details,
-  Value<String?> recordType,
-  Value<int> rowid,
-});
-typedef $$WorkordersTableUpdateCompanionBuilder = WorkordersCompanion Function({
-  Value<String> wonum,
-  Value<String> description,
-  Value<String> status,
-  Value<String> siteid,
-  Value<String> reportdate,
-  Value<double> downtime,
-  Value<String> type,
-  Value<String> assetnum,
-  Value<String?> details,
-  Value<String?> recordType,
-  Value<int> rowid,
-});
+typedef $$AssetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $AssetsTable,
+      Asset,
+      $$AssetsTableFilterComposer,
+      $$AssetsTableOrderingComposer,
+      $$AssetsTableAnnotationComposer,
+      $$AssetsTableCreateCompanionBuilder,
+      $$AssetsTableUpdateCompanionBuilder,
+      (Asset, $$AssetsTableReferences),
+      Asset,
+      PrefetchHooks Function({
+        bool assetCriticalitysRefs,
+        bool assetUploadsRefs,
+      })
+    >;
+typedef $$WorkordersTableCreateCompanionBuilder =
+    WorkordersCompanion Function({
+      required String wonum,
+      required String description,
+      required String status,
+      required String siteid,
+      required String reportdate,
+      required double downtime,
+      required String type,
+      required String assetnum,
+      Value<String?> details,
+      Value<String?> recordType,
+      Value<int> rowid,
+    });
+typedef $$WorkordersTableUpdateCompanionBuilder =
+    WorkordersCompanion Function({
+      Value<String> wonum,
+      Value<String> description,
+      Value<String> status,
+      Value<String> siteid,
+      Value<String> reportdate,
+      Value<double> downtime,
+      Value<String> type,
+      Value<String> assetnum,
+      Value<String?> details,
+      Value<String?> recordType,
+      Value<int> rowid,
+    });
 
 class $$WorkordersTableFilterComposer
     extends Composer<_$MyDatabase, $WorkordersTable> {
@@ -7124,34 +8433,54 @@ class $$WorkordersTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get wonum => $composableBuilder(
-      column: $table.wonum, builder: (column) => ColumnFilters(column));
+    column: $table.wonum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get status => $composableBuilder(
-      column: $table.status, builder: (column) => ColumnFilters(column));
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnFilters(column));
+    column: $table.siteid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get reportdate => $composableBuilder(
-      column: $table.reportdate, builder: (column) => ColumnFilters(column));
+    column: $table.reportdate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get downtime => $composableBuilder(
-      column: $table.downtime, builder: (column) => ColumnFilters(column));
+    column: $table.downtime,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get type => $composableBuilder(
-      column: $table.type, builder: (column) => ColumnFilters(column));
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get assetnum => $composableBuilder(
-      column: $table.assetnum, builder: (column) => ColumnFilters(column));
+    column: $table.assetnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get details => $composableBuilder(
-      column: $table.details, builder: (column) => ColumnFilters(column));
+    column: $table.details,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get recordType => $composableBuilder(
-      column: $table.recordType, builder: (column) => ColumnFilters(column));
+    column: $table.recordType,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$WorkordersTableOrderingComposer
@@ -7164,34 +8493,54 @@ class $$WorkordersTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get wonum => $composableBuilder(
-      column: $table.wonum, builder: (column) => ColumnOrderings(column));
+    column: $table.wonum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get status => $composableBuilder(
-      column: $table.status, builder: (column) => ColumnOrderings(column));
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+    column: $table.siteid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get reportdate => $composableBuilder(
-      column: $table.reportdate, builder: (column) => ColumnOrderings(column));
+    column: $table.reportdate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get downtime => $composableBuilder(
-      column: $table.downtime, builder: (column) => ColumnOrderings(column));
+    column: $table.downtime,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get type => $composableBuilder(
-      column: $table.type, builder: (column) => ColumnOrderings(column));
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get assetnum => $composableBuilder(
-      column: $table.assetnum, builder: (column) => ColumnOrderings(column));
+    column: $table.assetnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get details => $composableBuilder(
-      column: $table.details, builder: (column) => ColumnOrderings(column));
+    column: $table.details,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get recordType => $composableBuilder(
-      column: $table.recordType, builder: (column) => ColumnOrderings(column));
+    column: $table.recordType,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WorkordersTableAnnotationComposer
@@ -7207,7 +8556,9 @@ class $$WorkordersTableAnnotationComposer
       $composableBuilder(column: $table.wonum, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -7216,7 +8567,9 @@ class $$WorkordersTableAnnotationComposer
       $composableBuilder(column: $table.siteid, builder: (column) => column);
 
   GeneratedColumn<String> get reportdate => $composableBuilder(
-      column: $table.reportdate, builder: (column) => column);
+    column: $table.reportdate,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get downtime =>
       $composableBuilder(column: $table.downtime, builder: (column) => column);
@@ -7231,23 +8584,32 @@ class $$WorkordersTableAnnotationComposer
       $composableBuilder(column: $table.details, builder: (column) => column);
 
   GeneratedColumn<String> get recordType => $composableBuilder(
-      column: $table.recordType, builder: (column) => column);
+    column: $table.recordType,
+    builder: (column) => column,
+  );
 }
 
-class $$WorkordersTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $WorkordersTable,
-    Workorder,
-    $$WorkordersTableFilterComposer,
-    $$WorkordersTableOrderingComposer,
-    $$WorkordersTableAnnotationComposer,
-    $$WorkordersTableCreateCompanionBuilder,
-    $$WorkordersTableUpdateCompanionBuilder,
-    (Workorder, BaseReferences<_$MyDatabase, $WorkordersTable, Workorder>),
-    Workorder,
-    PrefetchHooks Function()> {
+class $$WorkordersTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $WorkordersTable,
+          Workorder,
+          $$WorkordersTableFilterComposer,
+          $$WorkordersTableOrderingComposer,
+          $$WorkordersTableAnnotationComposer,
+          $$WorkordersTableCreateCompanionBuilder,
+          $$WorkordersTableUpdateCompanionBuilder,
+          (
+            Workorder,
+            BaseReferences<_$MyDatabase, $WorkordersTable, Workorder>,
+          ),
+          Workorder,
+          PrefetchHooks Function()
+        > {
   $$WorkordersTableTableManager(_$MyDatabase db, $WorkordersTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -7256,123 +8618,147 @@ class $$WorkordersTableTableManager extends RootTableManager<
               $$WorkordersTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$WorkordersTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> wonum = const Value.absent(),
-            Value<String> description = const Value.absent(),
-            Value<String> status = const Value.absent(),
-            Value<String> siteid = const Value.absent(),
-            Value<String> reportdate = const Value.absent(),
-            Value<double> downtime = const Value.absent(),
-            Value<String> type = const Value.absent(),
-            Value<String> assetnum = const Value.absent(),
-            Value<String?> details = const Value.absent(),
-            Value<String?> recordType = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              WorkordersCompanion(
-            wonum: wonum,
-            description: description,
-            status: status,
-            siteid: siteid,
-            reportdate: reportdate,
-            downtime: downtime,
-            type: type,
-            assetnum: assetnum,
-            details: details,
-            recordType: recordType,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String wonum,
-            required String description,
-            required String status,
-            required String siteid,
-            required String reportdate,
-            required double downtime,
-            required String type,
-            required String assetnum,
-            Value<String?> details = const Value.absent(),
-            Value<String?> recordType = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              WorkordersCompanion.insert(
-            wonum: wonum,
-            description: description,
-            status: status,
-            siteid: siteid,
-            reportdate: reportdate,
-            downtime: downtime,
-            type: type,
-            assetnum: assetnum,
-            details: details,
-            recordType: recordType,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> wonum = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> siteid = const Value.absent(),
+                Value<String> reportdate = const Value.absent(),
+                Value<double> downtime = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String> assetnum = const Value.absent(),
+                Value<String?> details = const Value.absent(),
+                Value<String?> recordType = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WorkordersCompanion(
+                wonum: wonum,
+                description: description,
+                status: status,
+                siteid: siteid,
+                reportdate: reportdate,
+                downtime: downtime,
+                type: type,
+                assetnum: assetnum,
+                details: details,
+                recordType: recordType,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String wonum,
+                required String description,
+                required String status,
+                required String siteid,
+                required String reportdate,
+                required double downtime,
+                required String type,
+                required String assetnum,
+                Value<String?> details = const Value.absent(),
+                Value<String?> recordType = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WorkordersCompanion.insert(
+                wonum: wonum,
+                description: description,
+                status: status,
+                siteid: siteid,
+                reportdate: reportdate,
+                downtime: downtime,
+                type: type,
+                assetnum: assetnum,
+                details: details,
+                recordType: recordType,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$WorkordersTable, Workorder>(table),
+                  BaseReferences<_$MyDatabase, $WorkordersTable, Workorder>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$WorkordersTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $WorkordersTable,
-    Workorder,
-    $$WorkordersTableFilterComposer,
-    $$WorkordersTableOrderingComposer,
-    $$WorkordersTableAnnotationComposer,
-    $$WorkordersTableCreateCompanionBuilder,
-    $$WorkordersTableUpdateCompanionBuilder,
-    (Workorder, BaseReferences<_$MyDatabase, $WorkordersTable, Workorder>),
-    Workorder,
-    PrefetchHooks Function()>;
-typedef $$SystemCriticalitysTableCreateCompanionBuilder
-    = SystemCriticalitysCompanion Function({
-  Value<int> id,
-  required String description,
-  Value<String?> siteid,
-  Value<int> safety,
-  Value<int> regulatory,
-  Value<int> economic,
-  Value<int> throughput,
-  Value<int> quality,
-  required String line,
-  Value<double> score,
-});
-typedef $$SystemCriticalitysTableUpdateCompanionBuilder
-    = SystemCriticalitysCompanion Function({
-  Value<int> id,
-  Value<String> description,
-  Value<String?> siteid,
-  Value<int> safety,
-  Value<int> regulatory,
-  Value<int> economic,
-  Value<int> throughput,
-  Value<int> quality,
-  Value<String> line,
-  Value<double> score,
-});
+typedef $$WorkordersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $WorkordersTable,
+      Workorder,
+      $$WorkordersTableFilterComposer,
+      $$WorkordersTableOrderingComposer,
+      $$WorkordersTableAnnotationComposer,
+      $$WorkordersTableCreateCompanionBuilder,
+      $$WorkordersTableUpdateCompanionBuilder,
+      (Workorder, BaseReferences<_$MyDatabase, $WorkordersTable, Workorder>),
+      Workorder,
+      PrefetchHooks Function()
+    >;
+typedef $$SystemCriticalitysTableCreateCompanionBuilder =
+    SystemCriticalitysCompanion Function({
+      Value<int> id,
+      required String description,
+      Value<String?> siteid,
+      Value<int> safety,
+      Value<int> regulatory,
+      Value<int> economic,
+      Value<int> throughput,
+      Value<int> quality,
+      required String line,
+      Value<double> score,
+    });
+typedef $$SystemCriticalitysTableUpdateCompanionBuilder =
+    SystemCriticalitysCompanion Function({
+      Value<int> id,
+      Value<String> description,
+      Value<String?> siteid,
+      Value<int> safety,
+      Value<int> regulatory,
+      Value<int> economic,
+      Value<int> throughput,
+      Value<int> quality,
+      Value<String> line,
+      Value<double> score,
+    });
 
-final class $$SystemCriticalitysTableReferences extends BaseReferences<
-    _$MyDatabase, $SystemCriticalitysTable, SystemCriticality> {
+final class $$SystemCriticalitysTableReferences
+    extends
+        BaseReferences<
+          _$MyDatabase,
+          $SystemCriticalitysTable,
+          SystemCriticality
+        > {
   $$SystemCriticalitysTableReferences(
-      super.$_db, super.$_table, super.$_typedResult);
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
 
   static MultiTypedResultKey<$AssetCriticalitysTable, List<AssetCriticality>>
-      _assetCriticalitysRefsTable(_$MyDatabase db) =>
-          MultiTypedResultKey.fromTable(db.assetCriticalitys,
-              aliasName: 'system_criticalitys__id__asset_criticalitys__system');
+  _assetCriticalitysRefsTable(_$MyDatabase db) => MultiTypedResultKey.fromTable(
+    db.assetCriticalitys,
+    aliasName: 'system_criticalitys__id__asset_criticalitys__system',
+  );
 
   $$AssetCriticalitysTableProcessedTableManager get assetCriticalitysRefs {
-    final manager =
-        $$AssetCriticalitysTableTableManager($_db, $_db.assetCriticalitys)
-            .filter((f) => f.system.id.sqlEquals($_itemColumn<int>('id')!));
+    final manager = $$AssetCriticalitysTableTableManager(
+      $_db,
+      $_db.assetCriticalitys,
+    ).filter((f) => f.system.id.sqlEquals($_itemColumn<int>('id')!));
 
-    final cache =
-        $_typedResult.readTableOrNull(_assetCriticalitysRefsTable($_db));
+    final cache = $_typedResult.readTableOrNull(
+      _assetCriticalitysRefsTable($_db),
+    );
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 }
 
@@ -7386,53 +8772,77 @@ class $$SystemCriticalitysTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnFilters(column));
+    column: $table.siteid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get safety => $composableBuilder(
-      column: $table.safety, builder: (column) => ColumnFilters(column));
+    column: $table.safety,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get regulatory => $composableBuilder(
-      column: $table.regulatory, builder: (column) => ColumnFilters(column));
+    column: $table.regulatory,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get economic => $composableBuilder(
-      column: $table.economic, builder: (column) => ColumnFilters(column));
+    column: $table.economic,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get throughput => $composableBuilder(
-      column: $table.throughput, builder: (column) => ColumnFilters(column));
+    column: $table.throughput,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get quality => $composableBuilder(
-      column: $table.quality, builder: (column) => ColumnFilters(column));
+    column: $table.quality,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get line => $composableBuilder(
-      column: $table.line, builder: (column) => ColumnFilters(column));
+    column: $table.line,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get score => $composableBuilder(
-      column: $table.score, builder: (column) => ColumnFilters(column));
+    column: $table.score,
+    builder: (column) => ColumnFilters(column),
+  );
 
   Expression<bool> assetCriticalitysRefs(
-      Expression<bool> Function($$AssetCriticalitysTableFilterComposer f) f) {
+    Expression<bool> Function($$AssetCriticalitysTableFilterComposer f) f,
+  ) {
     final $$AssetCriticalitysTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.assetCriticalitys,
-        getReferencedColumn: (t) => t.system,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetCriticalitysTableFilterComposer(
-              $db: $db,
-              $table: $db.assetCriticalitys,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assetCriticalitys,
+      getReferencedColumn: (t) => t.system,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetCriticalitysTableFilterComposer(
+            $db: $db,
+            $table: $db.assetCriticalitys,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -7447,34 +8857,54 @@ class $$SystemCriticalitysTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+    column: $table.siteid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get safety => $composableBuilder(
-      column: $table.safety, builder: (column) => ColumnOrderings(column));
+    column: $table.safety,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get regulatory => $composableBuilder(
-      column: $table.regulatory, builder: (column) => ColumnOrderings(column));
+    column: $table.regulatory,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get economic => $composableBuilder(
-      column: $table.economic, builder: (column) => ColumnOrderings(column));
+    column: $table.economic,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get throughput => $composableBuilder(
-      column: $table.throughput, builder: (column) => ColumnOrderings(column));
+    column: $table.throughput,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get quality => $composableBuilder(
-      column: $table.quality, builder: (column) => ColumnOrderings(column));
+    column: $table.quality,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get line => $composableBuilder(
-      column: $table.line, builder: (column) => ColumnOrderings(column));
+    column: $table.line,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get score => $composableBuilder(
-      column: $table.score, builder: (column) => ColumnOrderings(column));
+    column: $table.score,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SystemCriticalitysTableAnnotationComposer
@@ -7490,7 +8920,9 @@ class $$SystemCriticalitysTableAnnotationComposer
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get siteid =>
       $composableBuilder(column: $table.siteid, builder: (column) => column);
@@ -7499,13 +8931,17 @@ class $$SystemCriticalitysTableAnnotationComposer
       $composableBuilder(column: $table.safety, builder: (column) => column);
 
   GeneratedColumn<int> get regulatory => $composableBuilder(
-      column: $table.regulatory, builder: (column) => column);
+    column: $table.regulatory,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get economic =>
       $composableBuilder(column: $table.economic, builder: (column) => column);
 
   GeneratedColumn<int> get throughput => $composableBuilder(
-      column: $table.throughput, builder: (column) => column);
+    column: $table.throughput,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get quality =>
       $composableBuilder(column: $table.quality, builder: (column) => column);
@@ -7517,43 +8953,52 @@ class $$SystemCriticalitysTableAnnotationComposer
       $composableBuilder(column: $table.score, builder: (column) => column);
 
   Expression<T> assetCriticalitysRefs<T extends Object>(
-      Expression<T> Function($$AssetCriticalitysTableAnnotationComposer a) f) {
+    Expression<T> Function($$AssetCriticalitysTableAnnotationComposer a) f,
+  ) {
     final $$AssetCriticalitysTableAnnotationComposer composer =
         $composerBuilder(
-            composer: this,
-            getCurrentColumn: (t) => t.id,
-            referencedTable: $db.assetCriticalitys,
-            getReferencedColumn: (t) => t.system,
-            builder: (joinBuilder,
-                    {$addJoinBuilderToRootComposer,
-                    $removeJoinBuilderFromRootComposer}) =>
-                $$AssetCriticalitysTableAnnotationComposer(
-                  $db: $db,
-                  $table: $db.assetCriticalitys,
-                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                  joinBuilder: joinBuilder,
-                  $removeJoinBuilderFromRootComposer:
-                      $removeJoinBuilderFromRootComposer,
-                ));
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.assetCriticalitys,
+          getReferencedColumn: (t) => t.system,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AssetCriticalitysTableAnnotationComposer(
+                $db: $db,
+                $table: $db.assetCriticalitys,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
 
-class $$SystemCriticalitysTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $SystemCriticalitysTable,
-    SystemCriticality,
-    $$SystemCriticalitysTableFilterComposer,
-    $$SystemCriticalitysTableOrderingComposer,
-    $$SystemCriticalitysTableAnnotationComposer,
-    $$SystemCriticalitysTableCreateCompanionBuilder,
-    $$SystemCriticalitysTableUpdateCompanionBuilder,
-    (SystemCriticality, $$SystemCriticalitysTableReferences),
-    SystemCriticality,
-    PrefetchHooks Function({bool assetCriticalitysRefs})> {
+class $$SystemCriticalitysTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $SystemCriticalitysTable,
+          SystemCriticality,
+          $$SystemCriticalitysTableFilterComposer,
+          $$SystemCriticalitysTableOrderingComposer,
+          $$SystemCriticalitysTableAnnotationComposer,
+          $$SystemCriticalitysTableCreateCompanionBuilder,
+          $$SystemCriticalitysTableUpdateCompanionBuilder,
+          (SystemCriticality, $$SystemCriticalitysTableReferences),
+          SystemCriticality,
+          PrefetchHooks Function({bool assetCriticalitysRefs})
+        > {
   $$SystemCriticalitysTableTableManager(
-      _$MyDatabase db, $SystemCriticalitysTable table)
-      : super(TableManagerState(
+    _$MyDatabase db,
+    $SystemCriticalitysTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -7562,137 +9007,160 @@ class $$SystemCriticalitysTableTableManager extends RootTableManager<
               $$SystemCriticalitysTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$SystemCriticalitysTableAnnotationComposer(
-                  $db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> description = const Value.absent(),
-            Value<String?> siteid = const Value.absent(),
-            Value<int> safety = const Value.absent(),
-            Value<int> regulatory = const Value.absent(),
-            Value<int> economic = const Value.absent(),
-            Value<int> throughput = const Value.absent(),
-            Value<int> quality = const Value.absent(),
-            Value<String> line = const Value.absent(),
-            Value<double> score = const Value.absent(),
-          }) =>
-              SystemCriticalitysCompanion(
-            id: id,
-            description: description,
-            siteid: siteid,
-            safety: safety,
-            regulatory: regulatory,
-            economic: economic,
-            throughput: throughput,
-            quality: quality,
-            line: line,
-            score: score,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String description,
-            Value<String?> siteid = const Value.absent(),
-            Value<int> safety = const Value.absent(),
-            Value<int> regulatory = const Value.absent(),
-            Value<int> economic = const Value.absent(),
-            Value<int> throughput = const Value.absent(),
-            Value<int> quality = const Value.absent(),
-            required String line,
-            Value<double> score = const Value.absent(),
-          }) =>
-              SystemCriticalitysCompanion.insert(
-            id: id,
-            description: description,
-            siteid: siteid,
-            safety: safety,
-            regulatory: regulatory,
-            economic: economic,
-            throughput: throughput,
-            quality: quality,
-            line: line,
-            score: score,
-          ),
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String?> siteid = const Value.absent(),
+                Value<int> safety = const Value.absent(),
+                Value<int> regulatory = const Value.absent(),
+                Value<int> economic = const Value.absent(),
+                Value<int> throughput = const Value.absent(),
+                Value<int> quality = const Value.absent(),
+                Value<String> line = const Value.absent(),
+                Value<double> score = const Value.absent(),
+              }) => SystemCriticalitysCompanion(
+                id: id,
+                description: description,
+                siteid: siteid,
+                safety: safety,
+                regulatory: regulatory,
+                economic: economic,
+                throughput: throughput,
+                quality: quality,
+                line: line,
+                score: score,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String description,
+                Value<String?> siteid = const Value.absent(),
+                Value<int> safety = const Value.absent(),
+                Value<int> regulatory = const Value.absent(),
+                Value<int> economic = const Value.absent(),
+                Value<int> throughput = const Value.absent(),
+                Value<int> quality = const Value.absent(),
+                required String line,
+                Value<double> score = const Value.absent(),
+              }) => SystemCriticalitysCompanion.insert(
+                id: id,
+                description: description,
+                siteid: siteid,
+                safety: safety,
+                regulatory: regulatory,
+                economic: economic,
+                throughput: throughput,
+                quality: quality,
+                line: line,
+                score: score,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (
-                    e.readTable(table),
-                    $$SystemCriticalitysTableReferences(db, table, e)
-                  ))
+              .map(
+                (e) => (
+                  e.readTable<$SystemCriticalitysTable, SystemCriticality>(
+                    table,
+                  ),
+                  $$SystemCriticalitysTableReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: ({assetCriticalitysRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
-                if (assetCriticalitysRefs) db.assetCriticalitys
+                if (assetCriticalitysRefs) db.assetCriticalitys,
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (assetCriticalitysRefs)
-                    await $_getPrefetchedData<SystemCriticality,
-                            $SystemCriticalitysTable, AssetCriticality>(
-                        currentTable: table,
-                        referencedTable: $$SystemCriticalitysTableReferences
-                            ._assetCriticalitysRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $$SystemCriticalitysTableReferences(db, table, p0)
-                                .assetCriticalitysRefs,
-                        referencedItemsForCurrentItem: (item,
-                                referencedItems) =>
-                            referencedItems.where((e) => e.system == item.id),
-                        typedResults: items)
+                    await $_getPrefetchedData<
+                      SystemCriticality,
+                      $SystemCriticalitysTable,
+                      AssetCriticality
+                    >(
+                      currentTable: table,
+                      referencedTable: $$SystemCriticalitysTableReferences
+                          ._assetCriticalitysRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$SystemCriticalitysTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).assetCriticalitysRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.system == item.id),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $$SystemCriticalitysTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $SystemCriticalitysTable,
-    SystemCriticality,
-    $$SystemCriticalitysTableFilterComposer,
-    $$SystemCriticalitysTableOrderingComposer,
-    $$SystemCriticalitysTableAnnotationComposer,
-    $$SystemCriticalitysTableCreateCompanionBuilder,
-    $$SystemCriticalitysTableUpdateCompanionBuilder,
-    (SystemCriticality, $$SystemCriticalitysTableReferences),
-    SystemCriticality,
-    PrefetchHooks Function({bool assetCriticalitysRefs})>;
-typedef $$AssetCriticalitysTableCreateCompanionBuilder
-    = AssetCriticalitysCompanion Function({
-  required String asset,
-  required int system,
-  required String type,
-  required int frequency,
-  required int downtime,
-  Value<double> earlyDetection,
-  Value<bool> manual,
-  Value<bool> manualPriority,
-  Value<int?> newPriority,
-  Value<double> newRPN,
-  Value<bool> lockedSystem,
-  Value<int> rowid,
-});
-typedef $$AssetCriticalitysTableUpdateCompanionBuilder
-    = AssetCriticalitysCompanion Function({
-  Value<String> asset,
-  Value<int> system,
-  Value<String> type,
-  Value<int> frequency,
-  Value<int> downtime,
-  Value<double> earlyDetection,
-  Value<bool> manual,
-  Value<bool> manualPriority,
-  Value<int?> newPriority,
-  Value<double> newRPN,
-  Value<bool> lockedSystem,
-  Value<int> rowid,
-});
+typedef $$SystemCriticalitysTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $SystemCriticalitysTable,
+      SystemCriticality,
+      $$SystemCriticalitysTableFilterComposer,
+      $$SystemCriticalitysTableOrderingComposer,
+      $$SystemCriticalitysTableAnnotationComposer,
+      $$SystemCriticalitysTableCreateCompanionBuilder,
+      $$SystemCriticalitysTableUpdateCompanionBuilder,
+      (SystemCriticality, $$SystemCriticalitysTableReferences),
+      SystemCriticality,
+      PrefetchHooks Function({bool assetCriticalitysRefs})
+    >;
+typedef $$AssetCriticalitysTableCreateCompanionBuilder =
+    AssetCriticalitysCompanion Function({
+      required String asset,
+      required int system,
+      required String type,
+      required int frequency,
+      required int downtime,
+      Value<double> earlyDetection,
+      Value<bool> manual,
+      Value<bool> manualPriority,
+      Value<int?> newPriority,
+      Value<double> newRPN,
+      Value<bool> lockedSystem,
+      Value<int> rowid,
+    });
+typedef $$AssetCriticalitysTableUpdateCompanionBuilder =
+    AssetCriticalitysCompanion Function({
+      Value<String> asset,
+      Value<int> system,
+      Value<String> type,
+      Value<int> frequency,
+      Value<int> downtime,
+      Value<double> earlyDetection,
+      Value<bool> manual,
+      Value<bool> manualPriority,
+      Value<int?> newPriority,
+      Value<double> newRPN,
+      Value<bool> lockedSystem,
+      Value<int> rowid,
+    });
 
-final class $$AssetCriticalitysTableReferences extends BaseReferences<
-    _$MyDatabase, $AssetCriticalitysTable, AssetCriticality> {
+final class $$AssetCriticalitysTableReferences
+    extends
+        BaseReferences<
+          _$MyDatabase,
+          $AssetCriticalitysTable,
+          AssetCriticality
+        > {
   $$AssetCriticalitysTableReferences(
-      super.$_db, super.$_table, super.$_typedResult);
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
 
   static $AssetsTable _assetTable(_$MyDatabase db) =>
       db.assets.createAlias('asset_criticalitys__asset__assets__id');
@@ -7700,28 +9168,33 @@ final class $$AssetCriticalitysTableReferences extends BaseReferences<
   $$AssetsTableProcessedTableManager get asset {
     final $_column = $_itemColumn<String>('asset')!;
 
-    final manager = $$AssetsTableTableManager($_db, $_db.assets)
-        .filter((f) => f.id.sqlEquals($_column));
+    final manager = $$AssetsTableTableManager(
+      $_db,
+      $_db.assets,
+    ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_assetTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 
-  static $SystemCriticalitysTable _systemTable(_$MyDatabase db) =>
-      db.systemCriticalitys
-          .createAlias('asset_criticalitys__system__system_criticalitys__id');
+  static $SystemCriticalitysTable _systemTable(_$MyDatabase db) => db
+      .systemCriticalitys
+      .createAlias('asset_criticalitys__system__system_criticalitys__id');
 
   $$SystemCriticalitysTableProcessedTableManager get system {
     final $_column = $_itemColumn<int>('system')!;
 
-    final manager =
-        $$SystemCriticalitysTableTableManager($_db, $_db.systemCriticalitys)
-            .filter((f) => f.id.sqlEquals($_column));
+    final manager = $$SystemCriticalitysTableTableManager(
+      $_db,
+      $_db.systemCriticalitys,
+    ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_systemTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
@@ -7735,71 +9208,93 @@ class $$AssetCriticalitysTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get type => $composableBuilder(
-      column: $table.type, builder: (column) => ColumnFilters(column));
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get frequency => $composableBuilder(
-      column: $table.frequency, builder: (column) => ColumnFilters(column));
+    column: $table.frequency,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get downtime => $composableBuilder(
-      column: $table.downtime, builder: (column) => ColumnFilters(column));
+    column: $table.downtime,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get earlyDetection => $composableBuilder(
-      column: $table.earlyDetection,
-      builder: (column) => ColumnFilters(column));
+    column: $table.earlyDetection,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get manual => $composableBuilder(
-      column: $table.manual, builder: (column) => ColumnFilters(column));
+    column: $table.manual,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get manualPriority => $composableBuilder(
-      column: $table.manualPriority,
-      builder: (column) => ColumnFilters(column));
+    column: $table.manualPriority,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get newPriority => $composableBuilder(
-      column: $table.newPriority, builder: (column) => ColumnFilters(column));
+    column: $table.newPriority,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get newRPN => $composableBuilder(
-      column: $table.newRPN, builder: (column) => ColumnFilters(column));
+    column: $table.newRPN,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get lockedSystem => $composableBuilder(
-      column: $table.lockedSystem, builder: (column) => ColumnFilters(column));
+    column: $table.lockedSystem,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $$AssetsTableFilterComposer get asset {
     final $$AssetsTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.asset,
-        referencedTable: $db.assets,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetsTableFilterComposer(
-              $db: $db,
-              $table: $db.assets,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.asset,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableFilterComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 
   $$SystemCriticalitysTableFilterComposer get system {
     final $$SystemCriticalitysTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.system,
-        referencedTable: $db.systemCriticalitys,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$SystemCriticalitysTableFilterComposer(
-              $db: $db,
-              $table: $db.systemCriticalitys,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.system,
+      referencedTable: $db.systemCriticalitys,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SystemCriticalitysTableFilterComposer(
+            $db: $db,
+            $table: $db.systemCriticalitys,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -7814,72 +9309,93 @@ class $$AssetCriticalitysTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get type => $composableBuilder(
-      column: $table.type, builder: (column) => ColumnOrderings(column));
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get frequency => $composableBuilder(
-      column: $table.frequency, builder: (column) => ColumnOrderings(column));
+    column: $table.frequency,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get downtime => $composableBuilder(
-      column: $table.downtime, builder: (column) => ColumnOrderings(column));
+    column: $table.downtime,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get earlyDetection => $composableBuilder(
-      column: $table.earlyDetection,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.earlyDetection,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get manual => $composableBuilder(
-      column: $table.manual, builder: (column) => ColumnOrderings(column));
+    column: $table.manual,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get manualPriority => $composableBuilder(
-      column: $table.manualPriority,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.manualPriority,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get newPriority => $composableBuilder(
-      column: $table.newPriority, builder: (column) => ColumnOrderings(column));
+    column: $table.newPriority,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get newRPN => $composableBuilder(
-      column: $table.newRPN, builder: (column) => ColumnOrderings(column));
+    column: $table.newRPN,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get lockedSystem => $composableBuilder(
-      column: $table.lockedSystem,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.lockedSystem,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $$AssetsTableOrderingComposer get asset {
     final $$AssetsTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.asset,
-        referencedTable: $db.assets,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetsTableOrderingComposer(
-              $db: $db,
-              $table: $db.assets,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.asset,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableOrderingComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 
   $$SystemCriticalitysTableOrderingComposer get system {
     final $$SystemCriticalitysTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.system,
-        referencedTable: $db.systemCriticalitys,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$SystemCriticalitysTableOrderingComposer(
-              $db: $db,
-              $table: $db.systemCriticalitys,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.system,
+      referencedTable: $db.systemCriticalitys,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SystemCriticalitysTableOrderingComposer(
+            $db: $db,
+            $table: $db.systemCriticalitys,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -7903,80 +9419,99 @@ class $$AssetCriticalitysTableAnnotationComposer
       $composableBuilder(column: $table.downtime, builder: (column) => column);
 
   GeneratedColumn<double> get earlyDetection => $composableBuilder(
-      column: $table.earlyDetection, builder: (column) => column);
+    column: $table.earlyDetection,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get manual =>
       $composableBuilder(column: $table.manual, builder: (column) => column);
 
   GeneratedColumn<bool> get manualPriority => $composableBuilder(
-      column: $table.manualPriority, builder: (column) => column);
+    column: $table.manualPriority,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get newPriority => $composableBuilder(
-      column: $table.newPriority, builder: (column) => column);
+    column: $table.newPriority,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get newRPN =>
       $composableBuilder(column: $table.newRPN, builder: (column) => column);
 
   GeneratedColumn<bool> get lockedSystem => $composableBuilder(
-      column: $table.lockedSystem, builder: (column) => column);
+    column: $table.lockedSystem,
+    builder: (column) => column,
+  );
 
   $$AssetsTableAnnotationComposer get asset {
     final $$AssetsTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.asset,
-        referencedTable: $db.assets,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetsTableAnnotationComposer(
-              $db: $db,
-              $table: $db.assets,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.asset,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 
   $$SystemCriticalitysTableAnnotationComposer get system {
     final $$SystemCriticalitysTableAnnotationComposer composer =
         $composerBuilder(
-            composer: this,
-            getCurrentColumn: (t) => t.system,
-            referencedTable: $db.systemCriticalitys,
-            getReferencedColumn: (t) => t.id,
-            builder: (joinBuilder,
-                    {$addJoinBuilderToRootComposer,
-                    $removeJoinBuilderFromRootComposer}) =>
-                $$SystemCriticalitysTableAnnotationComposer(
-                  $db: $db,
-                  $table: $db.systemCriticalitys,
-                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                  joinBuilder: joinBuilder,
-                  $removeJoinBuilderFromRootComposer:
-                      $removeJoinBuilderFromRootComposer,
-                ));
+          composer: this,
+          getCurrentColumn: (t) => t.system,
+          referencedTable: $db.systemCriticalitys,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SystemCriticalitysTableAnnotationComposer(
+                $db: $db,
+                $table: $db.systemCriticalitys,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
 
-class $$AssetCriticalitysTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $AssetCriticalitysTable,
-    AssetCriticality,
-    $$AssetCriticalitysTableFilterComposer,
-    $$AssetCriticalitysTableOrderingComposer,
-    $$AssetCriticalitysTableAnnotationComposer,
-    $$AssetCriticalitysTableCreateCompanionBuilder,
-    $$AssetCriticalitysTableUpdateCompanionBuilder,
-    (AssetCriticality, $$AssetCriticalitysTableReferences),
-    AssetCriticality,
-    PrefetchHooks Function({bool asset, bool system})> {
+class $$AssetCriticalitysTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $AssetCriticalitysTable,
+          AssetCriticality,
+          $$AssetCriticalitysTableFilterComposer,
+          $$AssetCriticalitysTableOrderingComposer,
+          $$AssetCriticalitysTableAnnotationComposer,
+          $$AssetCriticalitysTableCreateCompanionBuilder,
+          $$AssetCriticalitysTableUpdateCompanionBuilder,
+          (AssetCriticality, $$AssetCriticalitysTableReferences),
+          AssetCriticality,
+          PrefetchHooks Function({bool asset, bool system})
+        > {
   $$AssetCriticalitysTableTableManager(
-      _$MyDatabase db, $AssetCriticalitysTable table)
-      : super(TableManagerState(
+    _$MyDatabase db,
+    $AssetCriticalitysTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -7985,75 +9520,80 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
               $$AssetCriticalitysTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$AssetCriticalitysTableAnnotationComposer(
-                  $db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> asset = const Value.absent(),
-            Value<int> system = const Value.absent(),
-            Value<String> type = const Value.absent(),
-            Value<int> frequency = const Value.absent(),
-            Value<int> downtime = const Value.absent(),
-            Value<double> earlyDetection = const Value.absent(),
-            Value<bool> manual = const Value.absent(),
-            Value<bool> manualPriority = const Value.absent(),
-            Value<int?> newPriority = const Value.absent(),
-            Value<double> newRPN = const Value.absent(),
-            Value<bool> lockedSystem = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              AssetCriticalitysCompanion(
-            asset: asset,
-            system: system,
-            type: type,
-            frequency: frequency,
-            downtime: downtime,
-            earlyDetection: earlyDetection,
-            manual: manual,
-            manualPriority: manualPriority,
-            newPriority: newPriority,
-            newRPN: newRPN,
-            lockedSystem: lockedSystem,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String asset,
-            required int system,
-            required String type,
-            required int frequency,
-            required int downtime,
-            Value<double> earlyDetection = const Value.absent(),
-            Value<bool> manual = const Value.absent(),
-            Value<bool> manualPriority = const Value.absent(),
-            Value<int?> newPriority = const Value.absent(),
-            Value<double> newRPN = const Value.absent(),
-            Value<bool> lockedSystem = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              AssetCriticalitysCompanion.insert(
-            asset: asset,
-            system: system,
-            type: type,
-            frequency: frequency,
-            downtime: downtime,
-            earlyDetection: earlyDetection,
-            manual: manual,
-            manualPriority: manualPriority,
-            newPriority: newPriority,
-            newRPN: newRPN,
-            lockedSystem: lockedSystem,
-            rowid: rowid,
-          ),
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> asset = const Value.absent(),
+                Value<int> system = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<int> frequency = const Value.absent(),
+                Value<int> downtime = const Value.absent(),
+                Value<double> earlyDetection = const Value.absent(),
+                Value<bool> manual = const Value.absent(),
+                Value<bool> manualPriority = const Value.absent(),
+                Value<int?> newPriority = const Value.absent(),
+                Value<double> newRPN = const Value.absent(),
+                Value<bool> lockedSystem = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetCriticalitysCompanion(
+                asset: asset,
+                system: system,
+                type: type,
+                frequency: frequency,
+                downtime: downtime,
+                earlyDetection: earlyDetection,
+                manual: manual,
+                manualPriority: manualPriority,
+                newPriority: newPriority,
+                newRPN: newRPN,
+                lockedSystem: lockedSystem,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String asset,
+                required int system,
+                required String type,
+                required int frequency,
+                required int downtime,
+                Value<double> earlyDetection = const Value.absent(),
+                Value<bool> manual = const Value.absent(),
+                Value<bool> manualPriority = const Value.absent(),
+                Value<int?> newPriority = const Value.absent(),
+                Value<double> newRPN = const Value.absent(),
+                Value<bool> lockedSystem = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetCriticalitysCompanion.insert(
+                asset: asset,
+                system: system,
+                type: type,
+                frequency: frequency,
+                downtime: downtime,
+                earlyDetection: earlyDetection,
+                manual: manual,
+                manualPriority: manualPriority,
+                newPriority: newPriority,
+                newRPN: newRPN,
+                lockedSystem: lockedSystem,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (
-                    e.readTable(table),
-                    $$AssetCriticalitysTableReferences(db, table, e)
-                  ))
+              .map(
+                (e) => (
+                  e.readTable<$AssetCriticalitysTable, AssetCriticality>(table),
+                  $$AssetCriticalitysTableReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: ({asset = false, system = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins: <
-                  T extends TableManagerState<
+              addJoins:
+                  <
+                    T extends TableManagerState<
                       dynamic,
                       dynamic,
                       dynamic,
@@ -8064,72 +9604,87 @@ class $$AssetCriticalitysTableTableManager extends RootTableManager<
                       dynamic,
                       dynamic,
                       dynamic,
-                      dynamic>>(state) {
-                if (asset) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.asset,
-                    referencedTable:
-                        $$AssetCriticalitysTableReferences._assetTable(db),
-                    referencedColumn:
-                        $$AssetCriticalitysTableReferences._assetTable(db).id,
-                  ) as T;
-                }
-                if (system) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.system,
-                    referencedTable:
-                        $$AssetCriticalitysTableReferences._systemTable(db),
-                    referencedColumn:
-                        $$AssetCriticalitysTableReferences._systemTable(db).id,
-                  ) as T;
-                }
+                      dynamic
+                    >
+                  >(state) {
+                    if (asset) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.asset,
+                                referencedTable:
+                                    $$AssetCriticalitysTableReferences
+                                        ._assetTable(db),
+                                referencedColumn:
+                                    $$AssetCriticalitysTableReferences
+                                        ._assetTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (system) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.system,
+                                referencedTable:
+                                    $$AssetCriticalitysTableReferences
+                                        ._systemTable(db),
+                                referencedColumn:
+                                    $$AssetCriticalitysTableReferences
+                                        ._systemTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
 
-                return state;
-              },
+                    return state;
+                  },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $$AssetCriticalitysTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $AssetCriticalitysTable,
-    AssetCriticality,
-    $$AssetCriticalitysTableFilterComposer,
-    $$AssetCriticalitysTableOrderingComposer,
-    $$AssetCriticalitysTableAnnotationComposer,
-    $$AssetCriticalitysTableCreateCompanionBuilder,
-    $$AssetCriticalitysTableUpdateCompanionBuilder,
-    (AssetCriticality, $$AssetCriticalitysTableReferences),
-    AssetCriticality,
-    PrefetchHooks Function({bool asset, bool system})>;
-typedef $$AssetUploadsTableCreateCompanionBuilder = AssetUploadsCompanion
-    Function({
-  required String asset,
-  Value<String?> sjpDescription,
-  Value<String?> installationDate,
-  Value<String?> vendor,
-  Value<String?> manufacturer,
-  Value<String?> modelNum,
-  Value<int?> assetCriticality,
-  Value<int> rowid,
-});
-typedef $$AssetUploadsTableUpdateCompanionBuilder = AssetUploadsCompanion
-    Function({
-  Value<String> asset,
-  Value<String?> sjpDescription,
-  Value<String?> installationDate,
-  Value<String?> vendor,
-  Value<String?> manufacturer,
-  Value<String?> modelNum,
-  Value<int?> assetCriticality,
-  Value<int> rowid,
-});
+typedef $$AssetCriticalitysTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $AssetCriticalitysTable,
+      AssetCriticality,
+      $$AssetCriticalitysTableFilterComposer,
+      $$AssetCriticalitysTableOrderingComposer,
+      $$AssetCriticalitysTableAnnotationComposer,
+      $$AssetCriticalitysTableCreateCompanionBuilder,
+      $$AssetCriticalitysTableUpdateCompanionBuilder,
+      (AssetCriticality, $$AssetCriticalitysTableReferences),
+      AssetCriticality,
+      PrefetchHooks Function({bool asset, bool system})
+    >;
+typedef $$AssetUploadsTableCreateCompanionBuilder =
+    AssetUploadsCompanion Function({
+      required String asset,
+      Value<String?> sjpDescription,
+      Value<String?> installationDate,
+      Value<String?> vendor,
+      Value<String?> manufacturer,
+      Value<String?> modelNum,
+      Value<int?> assetCriticality,
+      Value<int> rowid,
+    });
+typedef $$AssetUploadsTableUpdateCompanionBuilder =
+    AssetUploadsCompanion Function({
+      Value<String> asset,
+      Value<String?> sjpDescription,
+      Value<String?> installationDate,
+      Value<String?> vendor,
+      Value<String?> manufacturer,
+      Value<String?> modelNum,
+      Value<int?> assetCriticality,
+      Value<int> rowid,
+    });
 
 final class $$AssetUploadsTableReferences
     extends BaseReferences<_$MyDatabase, $AssetUploadsTable, AssetUpload> {
@@ -8141,12 +9696,15 @@ final class $$AssetUploadsTableReferences
   $$AssetsTableProcessedTableManager get asset {
     final $_column = $_itemColumn<String>('asset')!;
 
-    final manager = $$AssetsTableTableManager($_db, $_db.assets)
-        .filter((f) => f.id.sqlEquals($_column));
+    final manager = $$AssetsTableTableManager(
+      $_db,
+      $_db.assets,
+    ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_assetTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
@@ -8160,43 +9718,55 @@ class $$AssetUploadsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get sjpDescription => $composableBuilder(
-      column: $table.sjpDescription,
-      builder: (column) => ColumnFilters(column));
+    column: $table.sjpDescription,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get installationDate => $composableBuilder(
-      column: $table.installationDate,
-      builder: (column) => ColumnFilters(column));
+    column: $table.installationDate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get vendor => $composableBuilder(
-      column: $table.vendor, builder: (column) => ColumnFilters(column));
+    column: $table.vendor,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get manufacturer => $composableBuilder(
-      column: $table.manufacturer, builder: (column) => ColumnFilters(column));
+    column: $table.manufacturer,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get modelNum => $composableBuilder(
-      column: $table.modelNum, builder: (column) => ColumnFilters(column));
+    column: $table.modelNum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get assetCriticality => $composableBuilder(
-      column: $table.assetCriticality,
-      builder: (column) => ColumnFilters(column));
+    column: $table.assetCriticality,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $$AssetsTableFilterComposer get asset {
     final $$AssetsTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.asset,
-        referencedTable: $db.assets,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetsTableFilterComposer(
-              $db: $db,
-              $table: $db.assets,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.asset,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableFilterComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -8211,44 +9781,55 @@ class $$AssetUploadsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get sjpDescription => $composableBuilder(
-      column: $table.sjpDescription,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.sjpDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get installationDate => $composableBuilder(
-      column: $table.installationDate,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.installationDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get vendor => $composableBuilder(
-      column: $table.vendor, builder: (column) => ColumnOrderings(column));
+    column: $table.vendor,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get manufacturer => $composableBuilder(
-      column: $table.manufacturer,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.manufacturer,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get modelNum => $composableBuilder(
-      column: $table.modelNum, builder: (column) => ColumnOrderings(column));
+    column: $table.modelNum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get assetCriticality => $composableBuilder(
-      column: $table.assetCriticality,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.assetCriticality,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $$AssetsTableOrderingComposer get asset {
     final $$AssetsTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.asset,
-        referencedTable: $db.assets,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetsTableOrderingComposer(
-              $db: $db,
-              $table: $db.assets,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.asset,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableOrderingComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -8263,58 +9844,73 @@ class $$AssetUploadsTableAnnotationComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   GeneratedColumn<String> get sjpDescription => $composableBuilder(
-      column: $table.sjpDescription, builder: (column) => column);
+    column: $table.sjpDescription,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get installationDate => $composableBuilder(
-      column: $table.installationDate, builder: (column) => column);
+    column: $table.installationDate,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get vendor =>
       $composableBuilder(column: $table.vendor, builder: (column) => column);
 
   GeneratedColumn<String> get manufacturer => $composableBuilder(
-      column: $table.manufacturer, builder: (column) => column);
+    column: $table.manufacturer,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get modelNum =>
       $composableBuilder(column: $table.modelNum, builder: (column) => column);
 
   GeneratedColumn<int> get assetCriticality => $composableBuilder(
-      column: $table.assetCriticality, builder: (column) => column);
+    column: $table.assetCriticality,
+    builder: (column) => column,
+  );
 
   $$AssetsTableAnnotationComposer get asset {
     final $$AssetsTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.asset,
-        referencedTable: $db.assets,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$AssetsTableAnnotationComposer(
-              $db: $db,
-              $table: $db.assets,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.asset,
+      referencedTable: $db.assets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.assets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
 
-class $$AssetUploadsTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $AssetUploadsTable,
-    AssetUpload,
-    $$AssetUploadsTableFilterComposer,
-    $$AssetUploadsTableOrderingComposer,
-    $$AssetUploadsTableAnnotationComposer,
-    $$AssetUploadsTableCreateCompanionBuilder,
-    $$AssetUploadsTableUpdateCompanionBuilder,
-    (AssetUpload, $$AssetUploadsTableReferences),
-    AssetUpload,
-    PrefetchHooks Function({bool asset})> {
+class $$AssetUploadsTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $AssetUploadsTable,
+          AssetUpload,
+          $$AssetUploadsTableFilterComposer,
+          $$AssetUploadsTableOrderingComposer,
+          $$AssetUploadsTableAnnotationComposer,
+          $$AssetUploadsTableCreateCompanionBuilder,
+          $$AssetUploadsTableUpdateCompanionBuilder,
+          (AssetUpload, $$AssetUploadsTableReferences),
+          AssetUpload,
+          PrefetchHooks Function({bool asset})
+        > {
   $$AssetUploadsTableTableManager(_$MyDatabase db, $AssetUploadsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -8323,58 +9919,61 @@ class $$AssetUploadsTableTableManager extends RootTableManager<
               $$AssetUploadsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$AssetUploadsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> asset = const Value.absent(),
-            Value<String?> sjpDescription = const Value.absent(),
-            Value<String?> installationDate = const Value.absent(),
-            Value<String?> vendor = const Value.absent(),
-            Value<String?> manufacturer = const Value.absent(),
-            Value<String?> modelNum = const Value.absent(),
-            Value<int?> assetCriticality = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              AssetUploadsCompanion(
-            asset: asset,
-            sjpDescription: sjpDescription,
-            installationDate: installationDate,
-            vendor: vendor,
-            manufacturer: manufacturer,
-            modelNum: modelNum,
-            assetCriticality: assetCriticality,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String asset,
-            Value<String?> sjpDescription = const Value.absent(),
-            Value<String?> installationDate = const Value.absent(),
-            Value<String?> vendor = const Value.absent(),
-            Value<String?> manufacturer = const Value.absent(),
-            Value<String?> modelNum = const Value.absent(),
-            Value<int?> assetCriticality = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              AssetUploadsCompanion.insert(
-            asset: asset,
-            sjpDescription: sjpDescription,
-            installationDate: installationDate,
-            vendor: vendor,
-            manufacturer: manufacturer,
-            modelNum: modelNum,
-            assetCriticality: assetCriticality,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> asset = const Value.absent(),
+                Value<String?> sjpDescription = const Value.absent(),
+                Value<String?> installationDate = const Value.absent(),
+                Value<String?> vendor = const Value.absent(),
+                Value<String?> manufacturer = const Value.absent(),
+                Value<String?> modelNum = const Value.absent(),
+                Value<int?> assetCriticality = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetUploadsCompanion(
+                asset: asset,
+                sjpDescription: sjpDescription,
+                installationDate: installationDate,
+                vendor: vendor,
+                manufacturer: manufacturer,
+                modelNum: modelNum,
+                assetCriticality: assetCriticality,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String asset,
+                Value<String?> sjpDescription = const Value.absent(),
+                Value<String?> installationDate = const Value.absent(),
+                Value<String?> vendor = const Value.absent(),
+                Value<String?> manufacturer = const Value.absent(),
+                Value<String?> modelNum = const Value.absent(),
+                Value<int?> assetCriticality = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssetUploadsCompanion.insert(
+                asset: asset,
+                sjpDescription: sjpDescription,
+                installationDate: installationDate,
+                vendor: vendor,
+                manufacturer: manufacturer,
+                modelNum: modelNum,
+                assetCriticality: assetCriticality,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (
-                    e.readTable(table),
-                    $$AssetUploadsTableReferences(db, table, e)
-                  ))
+              .map(
+                (e) => (
+                  e.readTable<$AssetUploadsTable, AssetUpload>(table),
+                  $$AssetUploadsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: ({asset = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins: <
-                  T extends TableManagerState<
+              addJoins:
+                  <
+                    T extends TableManagerState<
                       dynamic,
                       dynamic,
                       dynamic,
@@ -8385,54 +9984,64 @@ class $$AssetUploadsTableTableManager extends RootTableManager<
                       dynamic,
                       dynamic,
                       dynamic,
-                      dynamic>>(state) {
-                if (asset) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.asset,
-                    referencedTable:
-                        $$AssetUploadsTableReferences._assetTable(db),
-                    referencedColumn:
-                        $$AssetUploadsTableReferences._assetTable(db).id,
-                  ) as T;
-                }
+                      dynamic
+                    >
+                  >(state) {
+                    if (asset) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.asset,
+                                referencedTable: $$AssetUploadsTableReferences
+                                    ._assetTable(db),
+                                referencedColumn: $$AssetUploadsTableReferences
+                                    ._assetTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
 
-                return state;
-              },
+                    return state;
+                  },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $$AssetUploadsTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $AssetUploadsTable,
-    AssetUpload,
-    $$AssetUploadsTableFilterComposer,
-    $$AssetUploadsTableOrderingComposer,
-    $$AssetUploadsTableAnnotationComposer,
-    $$AssetUploadsTableCreateCompanionBuilder,
-    $$AssetUploadsTableUpdateCompanionBuilder,
-    (AssetUpload, $$AssetUploadsTableReferences),
-    AssetUpload,
-    PrefetchHooks Function({bool asset})>;
-typedef $$SparePartsTableCreateCompanionBuilder = SparePartsCompanion Function({
-  required String itemnum,
-  required String assetnum,
-  required String siteid,
-  required double quantity,
-  Value<int> sparepartid,
-});
-typedef $$SparePartsTableUpdateCompanionBuilder = SparePartsCompanion Function({
-  Value<String> itemnum,
-  Value<String> assetnum,
-  Value<String> siteid,
-  Value<double> quantity,
-  Value<int> sparepartid,
-});
+typedef $$AssetUploadsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $AssetUploadsTable,
+      AssetUpload,
+      $$AssetUploadsTableFilterComposer,
+      $$AssetUploadsTableOrderingComposer,
+      $$AssetUploadsTableAnnotationComposer,
+      $$AssetUploadsTableCreateCompanionBuilder,
+      $$AssetUploadsTableUpdateCompanionBuilder,
+      (AssetUpload, $$AssetUploadsTableReferences),
+      AssetUpload,
+      PrefetchHooks Function({bool asset})
+    >;
+typedef $$SparePartsTableCreateCompanionBuilder =
+    SparePartsCompanion Function({
+      required String itemnum,
+      required String assetnum,
+      required String siteid,
+      required double quantity,
+      Value<int> sparepartid,
+    });
+typedef $$SparePartsTableUpdateCompanionBuilder =
+    SparePartsCompanion Function({
+      Value<String> itemnum,
+      Value<String> assetnum,
+      Value<String> siteid,
+      Value<double> quantity,
+      Value<int> sparepartid,
+    });
 
 class $$SparePartsTableFilterComposer
     extends Composer<_$MyDatabase, $SparePartsTable> {
@@ -8444,19 +10053,29 @@ class $$SparePartsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnFilters(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get assetnum => $composableBuilder(
-      column: $table.assetnum, builder: (column) => ColumnFilters(column));
+    column: $table.assetnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnFilters(column));
+    column: $table.siteid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get quantity => $composableBuilder(
-      column: $table.quantity, builder: (column) => ColumnFilters(column));
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get sparepartid => $composableBuilder(
-      column: $table.sparepartid, builder: (column) => ColumnFilters(column));
+    column: $table.sparepartid,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$SparePartsTableOrderingComposer
@@ -8469,19 +10088,29 @@ class $$SparePartsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnOrderings(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get assetnum => $composableBuilder(
-      column: $table.assetnum, builder: (column) => ColumnOrderings(column));
+    column: $table.assetnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+    column: $table.siteid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get quantity => $composableBuilder(
-      column: $table.quantity, builder: (column) => ColumnOrderings(column));
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get sparepartid => $composableBuilder(
-      column: $table.sparepartid, builder: (column) => ColumnOrderings(column));
+    column: $table.sparepartid,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SparePartsTableAnnotationComposer
@@ -8506,23 +10135,32 @@ class $$SparePartsTableAnnotationComposer
       $composableBuilder(column: $table.quantity, builder: (column) => column);
 
   GeneratedColumn<int> get sparepartid => $composableBuilder(
-      column: $table.sparepartid, builder: (column) => column);
+    column: $table.sparepartid,
+    builder: (column) => column,
+  );
 }
 
-class $$SparePartsTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $SparePartsTable,
-    SparePart,
-    $$SparePartsTableFilterComposer,
-    $$SparePartsTableOrderingComposer,
-    $$SparePartsTableAnnotationComposer,
-    $$SparePartsTableCreateCompanionBuilder,
-    $$SparePartsTableUpdateCompanionBuilder,
-    (SparePart, BaseReferences<_$MyDatabase, $SparePartsTable, SparePart>),
-    SparePart,
-    PrefetchHooks Function()> {
+class $$SparePartsTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $SparePartsTable,
+          SparePart,
+          $$SparePartsTableFilterComposer,
+          $$SparePartsTableOrderingComposer,
+          $$SparePartsTableAnnotationComposer,
+          $$SparePartsTableCreateCompanionBuilder,
+          $$SparePartsTableUpdateCompanionBuilder,
+          (
+            SparePart,
+            BaseReferences<_$MyDatabase, $SparePartsTable, SparePart>,
+          ),
+          SparePart,
+          PrefetchHooks Function()
+        > {
   $$SparePartsTableTableManager(_$MyDatabase db, $SparePartsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -8531,81 +10169,95 @@ class $$SparePartsTableTableManager extends RootTableManager<
               $$SparePartsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$SparePartsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> itemnum = const Value.absent(),
-            Value<String> assetnum = const Value.absent(),
-            Value<String> siteid = const Value.absent(),
-            Value<double> quantity = const Value.absent(),
-            Value<int> sparepartid = const Value.absent(),
-          }) =>
-              SparePartsCompanion(
-            itemnum: itemnum,
-            assetnum: assetnum,
-            siteid: siteid,
-            quantity: quantity,
-            sparepartid: sparepartid,
-          ),
-          createCompanionCallback: ({
-            required String itemnum,
-            required String assetnum,
-            required String siteid,
-            required double quantity,
-            Value<int> sparepartid = const Value.absent(),
-          }) =>
-              SparePartsCompanion.insert(
-            itemnum: itemnum,
-            assetnum: assetnum,
-            siteid: siteid,
-            quantity: quantity,
-            sparepartid: sparepartid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> itemnum = const Value.absent(),
+                Value<String> assetnum = const Value.absent(),
+                Value<String> siteid = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<int> sparepartid = const Value.absent(),
+              }) => SparePartsCompanion(
+                itemnum: itemnum,
+                assetnum: assetnum,
+                siteid: siteid,
+                quantity: quantity,
+                sparepartid: sparepartid,
+              ),
+          createCompanionCallback:
+              ({
+                required String itemnum,
+                required String assetnum,
+                required String siteid,
+                required double quantity,
+                Value<int> sparepartid = const Value.absent(),
+              }) => SparePartsCompanion.insert(
+                itemnum: itemnum,
+                assetnum: assetnum,
+                siteid: siteid,
+                quantity: quantity,
+                sparepartid: sparepartid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SparePartsTable, SparePart>(table),
+                  BaseReferences<_$MyDatabase, $SparePartsTable, SparePart>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$SparePartsTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $SparePartsTable,
-    SparePart,
-    $$SparePartsTableFilterComposer,
-    $$SparePartsTableOrderingComposer,
-    $$SparePartsTableAnnotationComposer,
-    $$SparePartsTableCreateCompanionBuilder,
-    $$SparePartsTableUpdateCompanionBuilder,
-    (SparePart, BaseReferences<_$MyDatabase, $SparePartsTable, SparePart>),
-    SparePart,
-    PrefetchHooks Function()>;
-typedef $$PurchasesTableCreateCompanionBuilder = PurchasesCompanion Function({
-  required String prnum,
-  required String prDescription,
-  required String poDescription,
-  Value<String?> ponum,
-  required String startDate,
-  required String siteid,
-  Value<String?> endDate,
-  required double leadTime,
-  required String itemnum,
-  required double unitCost,
-  required bool poStatus,
-  Value<int> prlineid,
-});
-typedef $$PurchasesTableUpdateCompanionBuilder = PurchasesCompanion Function({
-  Value<String> prnum,
-  Value<String> prDescription,
-  Value<String> poDescription,
-  Value<String?> ponum,
-  Value<String> startDate,
-  Value<String> siteid,
-  Value<String?> endDate,
-  Value<double> leadTime,
-  Value<String> itemnum,
-  Value<double> unitCost,
-  Value<bool> poStatus,
-  Value<int> prlineid,
-});
+typedef $$SparePartsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $SparePartsTable,
+      SparePart,
+      $$SparePartsTableFilterComposer,
+      $$SparePartsTableOrderingComposer,
+      $$SparePartsTableAnnotationComposer,
+      $$SparePartsTableCreateCompanionBuilder,
+      $$SparePartsTableUpdateCompanionBuilder,
+      (SparePart, BaseReferences<_$MyDatabase, $SparePartsTable, SparePart>),
+      SparePart,
+      PrefetchHooks Function()
+    >;
+typedef $$PurchasesTableCreateCompanionBuilder =
+    PurchasesCompanion Function({
+      required String prnum,
+      required String prDescription,
+      required String poDescription,
+      Value<String?> ponum,
+      required String startDate,
+      required String siteid,
+      Value<String?> endDate,
+      required double leadTime,
+      required String itemnum,
+      required double unitCost,
+      required bool poStatus,
+      Value<int> prlineid,
+    });
+typedef $$PurchasesTableUpdateCompanionBuilder =
+    PurchasesCompanion Function({
+      Value<String> prnum,
+      Value<String> prDescription,
+      Value<String> poDescription,
+      Value<String?> ponum,
+      Value<String> startDate,
+      Value<String> siteid,
+      Value<String?> endDate,
+      Value<double> leadTime,
+      Value<String> itemnum,
+      Value<double> unitCost,
+      Value<bool> poStatus,
+      Value<int> prlineid,
+    });
 
 class $$PurchasesTableFilterComposer
     extends Composer<_$MyDatabase, $PurchasesTable> {
@@ -8617,40 +10269,64 @@ class $$PurchasesTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get prnum => $composableBuilder(
-      column: $table.prnum, builder: (column) => ColumnFilters(column));
+    column: $table.prnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get prDescription => $composableBuilder(
-      column: $table.prDescription, builder: (column) => ColumnFilters(column));
+    column: $table.prDescription,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get poDescription => $composableBuilder(
-      column: $table.poDescription, builder: (column) => ColumnFilters(column));
+    column: $table.poDescription,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get ponum => $composableBuilder(
-      column: $table.ponum, builder: (column) => ColumnFilters(column));
+    column: $table.ponum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get startDate => $composableBuilder(
-      column: $table.startDate, builder: (column) => ColumnFilters(column));
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnFilters(column));
+    column: $table.siteid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get endDate => $composableBuilder(
-      column: $table.endDate, builder: (column) => ColumnFilters(column));
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get leadTime => $composableBuilder(
-      column: $table.leadTime, builder: (column) => ColumnFilters(column));
+    column: $table.leadTime,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnFilters(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get unitCost => $composableBuilder(
-      column: $table.unitCost, builder: (column) => ColumnFilters(column));
+    column: $table.unitCost,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get poStatus => $composableBuilder(
-      column: $table.poStatus, builder: (column) => ColumnFilters(column));
+    column: $table.poStatus,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get prlineid => $composableBuilder(
-      column: $table.prlineid, builder: (column) => ColumnFilters(column));
+    column: $table.prlineid,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$PurchasesTableOrderingComposer
@@ -8663,42 +10339,64 @@ class $$PurchasesTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get prnum => $composableBuilder(
-      column: $table.prnum, builder: (column) => ColumnOrderings(column));
+    column: $table.prnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get prDescription => $composableBuilder(
-      column: $table.prDescription,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.prDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get poDescription => $composableBuilder(
-      column: $table.poDescription,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.poDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get ponum => $composableBuilder(
-      column: $table.ponum, builder: (column) => ColumnOrderings(column));
+    column: $table.ponum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get startDate => $composableBuilder(
-      column: $table.startDate, builder: (column) => ColumnOrderings(column));
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+    column: $table.siteid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get endDate => $composableBuilder(
-      column: $table.endDate, builder: (column) => ColumnOrderings(column));
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get leadTime => $composableBuilder(
-      column: $table.leadTime, builder: (column) => ColumnOrderings(column));
+    column: $table.leadTime,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnOrderings(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get unitCost => $composableBuilder(
-      column: $table.unitCost, builder: (column) => ColumnOrderings(column));
+    column: $table.unitCost,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get poStatus => $composableBuilder(
-      column: $table.poStatus, builder: (column) => ColumnOrderings(column));
+    column: $table.poStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get prlineid => $composableBuilder(
-      column: $table.prlineid, builder: (column) => ColumnOrderings(column));
+    column: $table.prlineid,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PurchasesTableAnnotationComposer
@@ -8714,10 +10412,14 @@ class $$PurchasesTableAnnotationComposer
       $composableBuilder(column: $table.prnum, builder: (column) => column);
 
   GeneratedColumn<String> get prDescription => $composableBuilder(
-      column: $table.prDescription, builder: (column) => column);
+    column: $table.prDescription,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get poDescription => $composableBuilder(
-      column: $table.poDescription, builder: (column) => column);
+    column: $table.poDescription,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get ponum =>
       $composableBuilder(column: $table.ponum, builder: (column) => column);
@@ -8747,20 +10449,24 @@ class $$PurchasesTableAnnotationComposer
       $composableBuilder(column: $table.prlineid, builder: (column) => column);
 }
 
-class $$PurchasesTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $PurchasesTable,
-    Purchase,
-    $$PurchasesTableFilterComposer,
-    $$PurchasesTableOrderingComposer,
-    $$PurchasesTableAnnotationComposer,
-    $$PurchasesTableCreateCompanionBuilder,
-    $$PurchasesTableUpdateCompanionBuilder,
-    (Purchase, BaseReferences<_$MyDatabase, $PurchasesTable, Purchase>),
-    Purchase,
-    PrefetchHooks Function()> {
+class $$PurchasesTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $PurchasesTable,
+          Purchase,
+          $$PurchasesTableFilterComposer,
+          $$PurchasesTableOrderingComposer,
+          $$PurchasesTableAnnotationComposer,
+          $$PurchasesTableCreateCompanionBuilder,
+          $$PurchasesTableUpdateCompanionBuilder,
+          (Purchase, BaseReferences<_$MyDatabase, $PurchasesTable, Purchase>),
+          Purchase,
+          PrefetchHooks Function()
+        > {
   $$PurchasesTableTableManager(_$MyDatabase db, $PurchasesTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -8769,97 +10475,111 @@ class $$PurchasesTableTableManager extends RootTableManager<
               $$PurchasesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$PurchasesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> prnum = const Value.absent(),
-            Value<String> prDescription = const Value.absent(),
-            Value<String> poDescription = const Value.absent(),
-            Value<String?> ponum = const Value.absent(),
-            Value<String> startDate = const Value.absent(),
-            Value<String> siteid = const Value.absent(),
-            Value<String?> endDate = const Value.absent(),
-            Value<double> leadTime = const Value.absent(),
-            Value<String> itemnum = const Value.absent(),
-            Value<double> unitCost = const Value.absent(),
-            Value<bool> poStatus = const Value.absent(),
-            Value<int> prlineid = const Value.absent(),
-          }) =>
-              PurchasesCompanion(
-            prnum: prnum,
-            prDescription: prDescription,
-            poDescription: poDescription,
-            ponum: ponum,
-            startDate: startDate,
-            siteid: siteid,
-            endDate: endDate,
-            leadTime: leadTime,
-            itemnum: itemnum,
-            unitCost: unitCost,
-            poStatus: poStatus,
-            prlineid: prlineid,
-          ),
-          createCompanionCallback: ({
-            required String prnum,
-            required String prDescription,
-            required String poDescription,
-            Value<String?> ponum = const Value.absent(),
-            required String startDate,
-            required String siteid,
-            Value<String?> endDate = const Value.absent(),
-            required double leadTime,
-            required String itemnum,
-            required double unitCost,
-            required bool poStatus,
-            Value<int> prlineid = const Value.absent(),
-          }) =>
-              PurchasesCompanion.insert(
-            prnum: prnum,
-            prDescription: prDescription,
-            poDescription: poDescription,
-            ponum: ponum,
-            startDate: startDate,
-            siteid: siteid,
-            endDate: endDate,
-            leadTime: leadTime,
-            itemnum: itemnum,
-            unitCost: unitCost,
-            poStatus: poStatus,
-            prlineid: prlineid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> prnum = const Value.absent(),
+                Value<String> prDescription = const Value.absent(),
+                Value<String> poDescription = const Value.absent(),
+                Value<String?> ponum = const Value.absent(),
+                Value<String> startDate = const Value.absent(),
+                Value<String> siteid = const Value.absent(),
+                Value<String?> endDate = const Value.absent(),
+                Value<double> leadTime = const Value.absent(),
+                Value<String> itemnum = const Value.absent(),
+                Value<double> unitCost = const Value.absent(),
+                Value<bool> poStatus = const Value.absent(),
+                Value<int> prlineid = const Value.absent(),
+              }) => PurchasesCompanion(
+                prnum: prnum,
+                prDescription: prDescription,
+                poDescription: poDescription,
+                ponum: ponum,
+                startDate: startDate,
+                siteid: siteid,
+                endDate: endDate,
+                leadTime: leadTime,
+                itemnum: itemnum,
+                unitCost: unitCost,
+                poStatus: poStatus,
+                prlineid: prlineid,
+              ),
+          createCompanionCallback:
+              ({
+                required String prnum,
+                required String prDescription,
+                required String poDescription,
+                Value<String?> ponum = const Value.absent(),
+                required String startDate,
+                required String siteid,
+                Value<String?> endDate = const Value.absent(),
+                required double leadTime,
+                required String itemnum,
+                required double unitCost,
+                required bool poStatus,
+                Value<int> prlineid = const Value.absent(),
+              }) => PurchasesCompanion.insert(
+                prnum: prnum,
+                prDescription: prDescription,
+                poDescription: poDescription,
+                ponum: ponum,
+                startDate: startDate,
+                siteid: siteid,
+                endDate: endDate,
+                leadTime: leadTime,
+                itemnum: itemnum,
+                unitCost: unitCost,
+                poStatus: poStatus,
+                prlineid: prlineid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$PurchasesTable, Purchase>(table),
+                  BaseReferences<_$MyDatabase, $PurchasesTable, Purchase>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$PurchasesTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $PurchasesTable,
-    Purchase,
-    $$PurchasesTableFilterComposer,
-    $$PurchasesTableOrderingComposer,
-    $$PurchasesTableAnnotationComposer,
-    $$PurchasesTableCreateCompanionBuilder,
-    $$PurchasesTableUpdateCompanionBuilder,
-    (Purchase, BaseReferences<_$MyDatabase, $PurchasesTable, Purchase>),
-    Purchase,
-    PrefetchHooks Function()>;
-typedef $$ItemsTableCreateCompanionBuilder = ItemsCompanion Function({
-  required String itemnum,
-  required String description,
-  required String status,
-  required String commodityGroup,
-  required String glClass,
-  Value<int> rowid,
-});
-typedef $$ItemsTableUpdateCompanionBuilder = ItemsCompanion Function({
-  Value<String> itemnum,
-  Value<String> description,
-  Value<String> status,
-  Value<String> commodityGroup,
-  Value<String> glClass,
-  Value<int> rowid,
-});
+typedef $$PurchasesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $PurchasesTable,
+      Purchase,
+      $$PurchasesTableFilterComposer,
+      $$PurchasesTableOrderingComposer,
+      $$PurchasesTableAnnotationComposer,
+      $$PurchasesTableCreateCompanionBuilder,
+      $$PurchasesTableUpdateCompanionBuilder,
+      (Purchase, BaseReferences<_$MyDatabase, $PurchasesTable, Purchase>),
+      Purchase,
+      PrefetchHooks Function()
+    >;
+typedef $$ItemsTableCreateCompanionBuilder =
+    ItemsCompanion Function({
+      required String itemnum,
+      required String description,
+      required String status,
+      required String commodityGroup,
+      required String glClass,
+      Value<int> rowid,
+    });
+typedef $$ItemsTableUpdateCompanionBuilder =
+    ItemsCompanion Function({
+      Value<String> itemnum,
+      Value<String> description,
+      Value<String> status,
+      Value<String> commodityGroup,
+      Value<String> glClass,
+      Value<int> rowid,
+    });
 
 class $$ItemsTableFilterComposer extends Composer<_$MyDatabase, $ItemsTable> {
   $$ItemsTableFilterComposer({
@@ -8870,20 +10590,29 @@ class $$ItemsTableFilterComposer extends Composer<_$MyDatabase, $ItemsTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnFilters(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnFilters(column));
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get status => $composableBuilder(
-      column: $table.status, builder: (column) => ColumnFilters(column));
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get commodityGroup => $composableBuilder(
-      column: $table.commodityGroup,
-      builder: (column) => ColumnFilters(column));
+    column: $table.commodityGroup,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get glClass => $composableBuilder(
-      column: $table.glClass, builder: (column) => ColumnFilters(column));
+    column: $table.glClass,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ItemsTableOrderingComposer extends Composer<_$MyDatabase, $ItemsTable> {
@@ -8895,20 +10624,29 @@ class $$ItemsTableOrderingComposer extends Composer<_$MyDatabase, $ItemsTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnOrderings(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => ColumnOrderings(column));
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get status => $composableBuilder(
-      column: $table.status, builder: (column) => ColumnOrderings(column));
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get commodityGroup => $composableBuilder(
-      column: $table.commodityGroup,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.commodityGroup,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get glClass => $composableBuilder(
-      column: $table.glClass, builder: (column) => ColumnOrderings(column));
+    column: $table.glClass,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ItemsTableAnnotationComposer
@@ -8924,32 +10662,40 @@ class $$ItemsTableAnnotationComposer
       $composableBuilder(column: $table.itemnum, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
-      column: $table.description, builder: (column) => column);
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
   GeneratedColumn<String> get commodityGroup => $composableBuilder(
-      column: $table.commodityGroup, builder: (column) => column);
+    column: $table.commodityGroup,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get glClass =>
       $composableBuilder(column: $table.glClass, builder: (column) => column);
 }
 
-class $$ItemsTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $ItemsTable,
-    Item,
-    $$ItemsTableFilterComposer,
-    $$ItemsTableOrderingComposer,
-    $$ItemsTableAnnotationComposer,
-    $$ItemsTableCreateCompanionBuilder,
-    $$ItemsTableUpdateCompanionBuilder,
-    (Item, BaseReferences<_$MyDatabase, $ItemsTable, Item>),
-    Item,
-    PrefetchHooks Function()> {
+class $$ItemsTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $ItemsTable,
+          Item,
+          $$ItemsTableFilterComposer,
+          $$ItemsTableOrderingComposer,
+          $$ItemsTableAnnotationComposer,
+          $$ItemsTableCreateCompanionBuilder,
+          $$ItemsTableUpdateCompanionBuilder,
+          (Item, BaseReferences<_$MyDatabase, $ItemsTable, Item>),
+          Item,
+          PrefetchHooks Function()
+        > {
   $$ItemsTableTableManager(_$MyDatabase db, $ItemsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -8958,95 +10704,103 @@ class $$ItemsTableTableManager extends RootTableManager<
               $$ItemsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$ItemsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> itemnum = const Value.absent(),
-            Value<String> description = const Value.absent(),
-            Value<String> status = const Value.absent(),
-            Value<String> commodityGroup = const Value.absent(),
-            Value<String> glClass = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ItemsCompanion(
-            itemnum: itemnum,
-            description: description,
-            status: status,
-            commodityGroup: commodityGroup,
-            glClass: glClass,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String itemnum,
-            required String description,
-            required String status,
-            required String commodityGroup,
-            required String glClass,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ItemsCompanion.insert(
-            itemnum: itemnum,
-            description: description,
-            status: status,
-            commodityGroup: commodityGroup,
-            glClass: glClass,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> itemnum = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> commodityGroup = const Value.absent(),
+                Value<String> glClass = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ItemsCompanion(
+                itemnum: itemnum,
+                description: description,
+                status: status,
+                commodityGroup: commodityGroup,
+                glClass: glClass,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String itemnum,
+                required String description,
+                required String status,
+                required String commodityGroup,
+                required String glClass,
+                Value<int> rowid = const Value.absent(),
+              }) => ItemsCompanion.insert(
+                itemnum: itemnum,
+                description: description,
+                status: status,
+                commodityGroup: commodityGroup,
+                glClass: glClass,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ItemsTable, Item>(table),
+                  BaseReferences<_$MyDatabase, $ItemsTable, Item>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$ItemsTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $ItemsTable,
-    Item,
-    $$ItemsTableFilterComposer,
-    $$ItemsTableOrderingComposer,
-    $$ItemsTableAnnotationComposer,
-    $$ItemsTableCreateCompanionBuilder,
-    $$ItemsTableUpdateCompanionBuilder,
-    (Item, BaseReferences<_$MyDatabase, $ItemsTable, Item>),
-    Item,
-    PrefetchHooks Function()>;
-typedef $$SpareCriticalitysTableCreateCompanionBuilder
-    = SpareCriticalitysCompanion Function({
-  required String id,
-  required int usage,
-  required int leadTime,
-  Value<double?> realLeadTime,
-  required int cost,
-  Value<double?> realCost,
-  required double assetRPN,
-  required bool manual,
-  Value<bool> manualPriority,
-  required int newPriority,
-  required double newRPN,
-  required String siteid,
-  required String itemnum,
-  Value<double?> reorderPoint,
-  Value<double?> orderQuantity,
-  Value<int> rowid,
-});
-typedef $$SpareCriticalitysTableUpdateCompanionBuilder
-    = SpareCriticalitysCompanion Function({
-  Value<String> id,
-  Value<int> usage,
-  Value<int> leadTime,
-  Value<double?> realLeadTime,
-  Value<int> cost,
-  Value<double?> realCost,
-  Value<double> assetRPN,
-  Value<bool> manual,
-  Value<bool> manualPriority,
-  Value<int> newPriority,
-  Value<double> newRPN,
-  Value<String> siteid,
-  Value<String> itemnum,
-  Value<double?> reorderPoint,
-  Value<double?> orderQuantity,
-  Value<int> rowid,
-});
+typedef $$ItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $ItemsTable,
+      Item,
+      $$ItemsTableFilterComposer,
+      $$ItemsTableOrderingComposer,
+      $$ItemsTableAnnotationComposer,
+      $$ItemsTableCreateCompanionBuilder,
+      $$ItemsTableUpdateCompanionBuilder,
+      (Item, BaseReferences<_$MyDatabase, $ItemsTable, Item>),
+      Item,
+      PrefetchHooks Function()
+    >;
+typedef $$SpareCriticalitysTableCreateCompanionBuilder =
+    SpareCriticalitysCompanion Function({
+      required String id,
+      required int usage,
+      required int leadTime,
+      Value<double?> realLeadTime,
+      required int cost,
+      Value<double?> realCost,
+      required double assetRPN,
+      required bool manual,
+      Value<bool> manualPriority,
+      required int newPriority,
+      required double newRPN,
+      required String siteid,
+      required String itemnum,
+      Value<double?> reorderPoint,
+      Value<double?> orderQuantity,
+      Value<int> rowid,
+    });
+typedef $$SpareCriticalitysTableUpdateCompanionBuilder =
+    SpareCriticalitysCompanion Function({
+      Value<String> id,
+      Value<int> usage,
+      Value<int> leadTime,
+      Value<double?> realLeadTime,
+      Value<int> cost,
+      Value<double?> realCost,
+      Value<double> assetRPN,
+      Value<bool> manual,
+      Value<bool> manualPriority,
+      Value<int> newPriority,
+      Value<double> newRPN,
+      Value<String> siteid,
+      Value<String> itemnum,
+      Value<double?> reorderPoint,
+      Value<double?> orderQuantity,
+      Value<int> rowid,
+    });
 
 class $$SpareCriticalitysTableFilterComposer
     extends Composer<_$MyDatabase, $SpareCriticalitysTable> {
@@ -9058,50 +10812,79 @@ class $$SpareCriticalitysTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get usage => $composableBuilder(
-      column: $table.usage, builder: (column) => ColumnFilters(column));
+    column: $table.usage,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get leadTime => $composableBuilder(
-      column: $table.leadTime, builder: (column) => ColumnFilters(column));
+    column: $table.leadTime,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get realLeadTime => $composableBuilder(
-      column: $table.realLeadTime, builder: (column) => ColumnFilters(column));
+    column: $table.realLeadTime,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get cost => $composableBuilder(
-      column: $table.cost, builder: (column) => ColumnFilters(column));
+    column: $table.cost,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get realCost => $composableBuilder(
-      column: $table.realCost, builder: (column) => ColumnFilters(column));
+    column: $table.realCost,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get assetRPN => $composableBuilder(
-      column: $table.assetRPN, builder: (column) => ColumnFilters(column));
+    column: $table.assetRPN,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get manual => $composableBuilder(
-      column: $table.manual, builder: (column) => ColumnFilters(column));
+    column: $table.manual,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get manualPriority => $composableBuilder(
-      column: $table.manualPriority,
-      builder: (column) => ColumnFilters(column));
+    column: $table.manualPriority,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get newPriority => $composableBuilder(
-      column: $table.newPriority, builder: (column) => ColumnFilters(column));
+    column: $table.newPriority,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get newRPN => $composableBuilder(
-      column: $table.newRPN, builder: (column) => ColumnFilters(column));
+    column: $table.newRPN,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnFilters(column));
+    column: $table.siteid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnFilters(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get reorderPoint => $composableBuilder(
-      column: $table.reorderPoint, builder: (column) => ColumnFilters(column));
+    column: $table.reorderPoint,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get orderQuantity => $composableBuilder(
-      column: $table.orderQuantity, builder: (column) => ColumnFilters(column));
+    column: $table.orderQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$SpareCriticalitysTableOrderingComposer
@@ -9114,53 +10897,79 @@ class $$SpareCriticalitysTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get usage => $composableBuilder(
-      column: $table.usage, builder: (column) => ColumnOrderings(column));
+    column: $table.usage,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get leadTime => $composableBuilder(
-      column: $table.leadTime, builder: (column) => ColumnOrderings(column));
+    column: $table.leadTime,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get realLeadTime => $composableBuilder(
-      column: $table.realLeadTime,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.realLeadTime,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get cost => $composableBuilder(
-      column: $table.cost, builder: (column) => ColumnOrderings(column));
+    column: $table.cost,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get realCost => $composableBuilder(
-      column: $table.realCost, builder: (column) => ColumnOrderings(column));
+    column: $table.realCost,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get assetRPN => $composableBuilder(
-      column: $table.assetRPN, builder: (column) => ColumnOrderings(column));
+    column: $table.assetRPN,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get manual => $composableBuilder(
-      column: $table.manual, builder: (column) => ColumnOrderings(column));
+    column: $table.manual,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get manualPriority => $composableBuilder(
-      column: $table.manualPriority,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.manualPriority,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get newPriority => $composableBuilder(
-      column: $table.newPriority, builder: (column) => ColumnOrderings(column));
+    column: $table.newPriority,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get newRPN => $composableBuilder(
-      column: $table.newRPN, builder: (column) => ColumnOrderings(column));
+    column: $table.newRPN,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+    column: $table.siteid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnOrderings(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get reorderPoint => $composableBuilder(
-      column: $table.reorderPoint,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.reorderPoint,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get orderQuantity => $composableBuilder(
-      column: $table.orderQuantity,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.orderQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SpareCriticalitysTableAnnotationComposer
@@ -9182,7 +10991,9 @@ class $$SpareCriticalitysTableAnnotationComposer
       $composableBuilder(column: $table.leadTime, builder: (column) => column);
 
   GeneratedColumn<double> get realLeadTime => $composableBuilder(
-      column: $table.realLeadTime, builder: (column) => column);
+    column: $table.realLeadTime,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get cost =>
       $composableBuilder(column: $table.cost, builder: (column) => column);
@@ -9197,10 +11008,14 @@ class $$SpareCriticalitysTableAnnotationComposer
       $composableBuilder(column: $table.manual, builder: (column) => column);
 
   GeneratedColumn<bool> get manualPriority => $composableBuilder(
-      column: $table.manualPriority, builder: (column) => column);
+    column: $table.manualPriority,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get newPriority => $composableBuilder(
-      column: $table.newPriority, builder: (column) => column);
+    column: $table.newPriority,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get newRPN =>
       $composableBuilder(column: $table.newRPN, builder: (column) => column);
@@ -9212,30 +11027,43 @@ class $$SpareCriticalitysTableAnnotationComposer
       $composableBuilder(column: $table.itemnum, builder: (column) => column);
 
   GeneratedColumn<double> get reorderPoint => $composableBuilder(
-      column: $table.reorderPoint, builder: (column) => column);
+    column: $table.reorderPoint,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get orderQuantity => $composableBuilder(
-      column: $table.orderQuantity, builder: (column) => column);
+    column: $table.orderQuantity,
+    builder: (column) => column,
+  );
 }
 
-class $$SpareCriticalitysTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $SpareCriticalitysTable,
-    SpareCriticality,
-    $$SpareCriticalitysTableFilterComposer,
-    $$SpareCriticalitysTableOrderingComposer,
-    $$SpareCriticalitysTableAnnotationComposer,
-    $$SpareCriticalitysTableCreateCompanionBuilder,
-    $$SpareCriticalitysTableUpdateCompanionBuilder,
-    (
-      SpareCriticality,
-      BaseReferences<_$MyDatabase, $SpareCriticalitysTable, SpareCriticality>
-    ),
-    SpareCriticality,
-    PrefetchHooks Function()> {
+class $$SpareCriticalitysTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $SpareCriticalitysTable,
+          SpareCriticality,
+          $$SpareCriticalitysTableFilterComposer,
+          $$SpareCriticalitysTableOrderingComposer,
+          $$SpareCriticalitysTableAnnotationComposer,
+          $$SpareCriticalitysTableCreateCompanionBuilder,
+          $$SpareCriticalitysTableUpdateCompanionBuilder,
+          (
+            SpareCriticality,
+            BaseReferences<
+              _$MyDatabase,
+              $SpareCriticalitysTable,
+              SpareCriticality
+            >,
+          ),
+          SpareCriticality,
+          PrefetchHooks Function()
+        > {
   $$SpareCriticalitysTableTableManager(
-      _$MyDatabase db, $SpareCriticalitysTable table)
-      : super(TableManagerState(
+    _$MyDatabase db,
+    $SpareCriticalitysTable table,
+  ) : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -9244,121 +11072,137 @@ class $$SpareCriticalitysTableTableManager extends RootTableManager<
               $$SpareCriticalitysTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$SpareCriticalitysTableAnnotationComposer(
-                  $db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
-            Value<int> usage = const Value.absent(),
-            Value<int> leadTime = const Value.absent(),
-            Value<double?> realLeadTime = const Value.absent(),
-            Value<int> cost = const Value.absent(),
-            Value<double?> realCost = const Value.absent(),
-            Value<double> assetRPN = const Value.absent(),
-            Value<bool> manual = const Value.absent(),
-            Value<bool> manualPriority = const Value.absent(),
-            Value<int> newPriority = const Value.absent(),
-            Value<double> newRPN = const Value.absent(),
-            Value<String> siteid = const Value.absent(),
-            Value<String> itemnum = const Value.absent(),
-            Value<double?> reorderPoint = const Value.absent(),
-            Value<double?> orderQuantity = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              SpareCriticalitysCompanion(
-            id: id,
-            usage: usage,
-            leadTime: leadTime,
-            realLeadTime: realLeadTime,
-            cost: cost,
-            realCost: realCost,
-            assetRPN: assetRPN,
-            manual: manual,
-            manualPriority: manualPriority,
-            newPriority: newPriority,
-            newRPN: newRPN,
-            siteid: siteid,
-            itemnum: itemnum,
-            reorderPoint: reorderPoint,
-            orderQuantity: orderQuantity,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String id,
-            required int usage,
-            required int leadTime,
-            Value<double?> realLeadTime = const Value.absent(),
-            required int cost,
-            Value<double?> realCost = const Value.absent(),
-            required double assetRPN,
-            required bool manual,
-            Value<bool> manualPriority = const Value.absent(),
-            required int newPriority,
-            required double newRPN,
-            required String siteid,
-            required String itemnum,
-            Value<double?> reorderPoint = const Value.absent(),
-            Value<double?> orderQuantity = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              SpareCriticalitysCompanion.insert(
-            id: id,
-            usage: usage,
-            leadTime: leadTime,
-            realLeadTime: realLeadTime,
-            cost: cost,
-            realCost: realCost,
-            assetRPN: assetRPN,
-            manual: manual,
-            manualPriority: manualPriority,
-            newPriority: newPriority,
-            newRPN: newRPN,
-            siteid: siteid,
-            itemnum: itemnum,
-            reorderPoint: reorderPoint,
-            orderQuantity: orderQuantity,
-            rowid: rowid,
-          ),
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> usage = const Value.absent(),
+                Value<int> leadTime = const Value.absent(),
+                Value<double?> realLeadTime = const Value.absent(),
+                Value<int> cost = const Value.absent(),
+                Value<double?> realCost = const Value.absent(),
+                Value<double> assetRPN = const Value.absent(),
+                Value<bool> manual = const Value.absent(),
+                Value<bool> manualPriority = const Value.absent(),
+                Value<int> newPriority = const Value.absent(),
+                Value<double> newRPN = const Value.absent(),
+                Value<String> siteid = const Value.absent(),
+                Value<String> itemnum = const Value.absent(),
+                Value<double?> reorderPoint = const Value.absent(),
+                Value<double?> orderQuantity = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SpareCriticalitysCompanion(
+                id: id,
+                usage: usage,
+                leadTime: leadTime,
+                realLeadTime: realLeadTime,
+                cost: cost,
+                realCost: realCost,
+                assetRPN: assetRPN,
+                manual: manual,
+                manualPriority: manualPriority,
+                newPriority: newPriority,
+                newRPN: newRPN,
+                siteid: siteid,
+                itemnum: itemnum,
+                reorderPoint: reorderPoint,
+                orderQuantity: orderQuantity,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int usage,
+                required int leadTime,
+                Value<double?> realLeadTime = const Value.absent(),
+                required int cost,
+                Value<double?> realCost = const Value.absent(),
+                required double assetRPN,
+                required bool manual,
+                Value<bool> manualPriority = const Value.absent(),
+                required int newPriority,
+                required double newRPN,
+                required String siteid,
+                required String itemnum,
+                Value<double?> reorderPoint = const Value.absent(),
+                Value<double?> orderQuantity = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SpareCriticalitysCompanion.insert(
+                id: id,
+                usage: usage,
+                leadTime: leadTime,
+                realLeadTime: realLeadTime,
+                cost: cost,
+                realCost: realCost,
+                assetRPN: assetRPN,
+                manual: manual,
+                manualPriority: manualPriority,
+                newPriority: newPriority,
+                newRPN: newRPN,
+                siteid: siteid,
+                itemnum: itemnum,
+                reorderPoint: reorderPoint,
+                orderQuantity: orderQuantity,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SpareCriticalitysTable, SpareCriticality>(table),
+                  BaseReferences<
+                    _$MyDatabase,
+                    $SpareCriticalitysTable,
+                    SpareCriticality
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$SpareCriticalitysTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $SpareCriticalitysTable,
-    SpareCriticality,
-    $$SpareCriticalitysTableFilterComposer,
-    $$SpareCriticalitysTableOrderingComposer,
-    $$SpareCriticalitysTableAnnotationComposer,
-    $$SpareCriticalitysTableCreateCompanionBuilder,
-    $$SpareCriticalitysTableUpdateCompanionBuilder,
-    (
+typedef $$SpareCriticalitysTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $SpareCriticalitysTable,
       SpareCriticality,
-      BaseReferences<_$MyDatabase, $SpareCriticalitysTable, SpareCriticality>
-    ),
-    SpareCriticality,
-    PrefetchHooks Function()>;
-typedef $$ItemUsageTableCreateCompanionBuilder = ItemUsageCompanion Function({
-  required String itemnum,
-  required String transdate,
-  required double quantity,
-  required String siteid,
-  required String refwo,
-  required int year,
-  required int month,
-  Value<int> matusetransid,
-});
-typedef $$ItemUsageTableUpdateCompanionBuilder = ItemUsageCompanion Function({
-  Value<String> itemnum,
-  Value<String> transdate,
-  Value<double> quantity,
-  Value<String> siteid,
-  Value<String> refwo,
-  Value<int> year,
-  Value<int> month,
-  Value<int> matusetransid,
-});
+      $$SpareCriticalitysTableFilterComposer,
+      $$SpareCriticalitysTableOrderingComposer,
+      $$SpareCriticalitysTableAnnotationComposer,
+      $$SpareCriticalitysTableCreateCompanionBuilder,
+      $$SpareCriticalitysTableUpdateCompanionBuilder,
+      (
+        SpareCriticality,
+        BaseReferences<_$MyDatabase, $SpareCriticalitysTable, SpareCriticality>,
+      ),
+      SpareCriticality,
+      PrefetchHooks Function()
+    >;
+typedef $$ItemUsageTableCreateCompanionBuilder =
+    ItemUsageCompanion Function({
+      required String itemnum,
+      required String transdate,
+      required double quantity,
+      required String siteid,
+      required String refwo,
+      required int year,
+      required int month,
+      Value<int> matusetransid,
+    });
+typedef $$ItemUsageTableUpdateCompanionBuilder =
+    ItemUsageCompanion Function({
+      Value<String> itemnum,
+      Value<String> transdate,
+      Value<double> quantity,
+      Value<String> siteid,
+      Value<String> refwo,
+      Value<int> year,
+      Value<int> month,
+      Value<int> matusetransid,
+    });
 
 class $$ItemUsageTableFilterComposer
     extends Composer<_$MyDatabase, $ItemUsageTable> {
@@ -9370,28 +11214,44 @@ class $$ItemUsageTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnFilters(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get transdate => $composableBuilder(
-      column: $table.transdate, builder: (column) => ColumnFilters(column));
+    column: $table.transdate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get quantity => $composableBuilder(
-      column: $table.quantity, builder: (column) => ColumnFilters(column));
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnFilters(column));
+    column: $table.siteid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get refwo => $composableBuilder(
-      column: $table.refwo, builder: (column) => ColumnFilters(column));
+    column: $table.refwo,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get year => $composableBuilder(
-      column: $table.year, builder: (column) => ColumnFilters(column));
+    column: $table.year,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get month => $composableBuilder(
-      column: $table.month, builder: (column) => ColumnFilters(column));
+    column: $table.month,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get matusetransid => $composableBuilder(
-      column: $table.matusetransid, builder: (column) => ColumnFilters(column));
+    column: $table.matusetransid,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ItemUsageTableOrderingComposer
@@ -9404,29 +11264,44 @@ class $$ItemUsageTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get itemnum => $composableBuilder(
-      column: $table.itemnum, builder: (column) => ColumnOrderings(column));
+    column: $table.itemnum,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get transdate => $composableBuilder(
-      column: $table.transdate, builder: (column) => ColumnOrderings(column));
+    column: $table.transdate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get quantity => $composableBuilder(
-      column: $table.quantity, builder: (column) => ColumnOrderings(column));
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get siteid => $composableBuilder(
-      column: $table.siteid, builder: (column) => ColumnOrderings(column));
+    column: $table.siteid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get refwo => $composableBuilder(
-      column: $table.refwo, builder: (column) => ColumnOrderings(column));
+    column: $table.refwo,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get year => $composableBuilder(
-      column: $table.year, builder: (column) => ColumnOrderings(column));
+    column: $table.year,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get month => $composableBuilder(
-      column: $table.month, builder: (column) => ColumnOrderings(column));
+    column: $table.month,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get matusetransid => $composableBuilder(
-      column: $table.matusetransid,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.matusetransid,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ItemUsageTableAnnotationComposer
@@ -9460,26 +11335,32 @@ class $$ItemUsageTableAnnotationComposer
       $composableBuilder(column: $table.month, builder: (column) => column);
 
   GeneratedColumn<int> get matusetransid => $composableBuilder(
-      column: $table.matusetransid, builder: (column) => column);
+    column: $table.matusetransid,
+    builder: (column) => column,
+  );
 }
 
-class $$ItemUsageTableTableManager extends RootTableManager<
-    _$MyDatabase,
-    $ItemUsageTable,
-    ItemUsageData,
-    $$ItemUsageTableFilterComposer,
-    $$ItemUsageTableOrderingComposer,
-    $$ItemUsageTableAnnotationComposer,
-    $$ItemUsageTableCreateCompanionBuilder,
-    $$ItemUsageTableUpdateCompanionBuilder,
-    (
-      ItemUsageData,
-      BaseReferences<_$MyDatabase, $ItemUsageTable, ItemUsageData>
-    ),
-    ItemUsageData,
-    PrefetchHooks Function()> {
+class $$ItemUsageTableTableManager
+    extends
+        RootTableManager<
+          _$MyDatabase,
+          $ItemUsageTable,
+          ItemUsageData,
+          $$ItemUsageTableFilterComposer,
+          $$ItemUsageTableOrderingComposer,
+          $$ItemUsageTableAnnotationComposer,
+          $$ItemUsageTableCreateCompanionBuilder,
+          $$ItemUsageTableUpdateCompanionBuilder,
+          (
+            ItemUsageData,
+            BaseReferences<_$MyDatabase, $ItemUsageTable, ItemUsageData>,
+          ),
+          ItemUsageData,
+          PrefetchHooks Function()
+        > {
   $$ItemUsageTableTableManager(_$MyDatabase db, $ItemUsageTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -9488,68 +11369,80 @@ class $$ItemUsageTableTableManager extends RootTableManager<
               $$ItemUsageTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$ItemUsageTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> itemnum = const Value.absent(),
-            Value<String> transdate = const Value.absent(),
-            Value<double> quantity = const Value.absent(),
-            Value<String> siteid = const Value.absent(),
-            Value<String> refwo = const Value.absent(),
-            Value<int> year = const Value.absent(),
-            Value<int> month = const Value.absent(),
-            Value<int> matusetransid = const Value.absent(),
-          }) =>
-              ItemUsageCompanion(
-            itemnum: itemnum,
-            transdate: transdate,
-            quantity: quantity,
-            siteid: siteid,
-            refwo: refwo,
-            year: year,
-            month: month,
-            matusetransid: matusetransid,
-          ),
-          createCompanionCallback: ({
-            required String itemnum,
-            required String transdate,
-            required double quantity,
-            required String siteid,
-            required String refwo,
-            required int year,
-            required int month,
-            Value<int> matusetransid = const Value.absent(),
-          }) =>
-              ItemUsageCompanion.insert(
-            itemnum: itemnum,
-            transdate: transdate,
-            quantity: quantity,
-            siteid: siteid,
-            refwo: refwo,
-            year: year,
-            month: month,
-            matusetransid: matusetransid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> itemnum = const Value.absent(),
+                Value<String> transdate = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<String> siteid = const Value.absent(),
+                Value<String> refwo = const Value.absent(),
+                Value<int> year = const Value.absent(),
+                Value<int> month = const Value.absent(),
+                Value<int> matusetransid = const Value.absent(),
+              }) => ItemUsageCompanion(
+                itemnum: itemnum,
+                transdate: transdate,
+                quantity: quantity,
+                siteid: siteid,
+                refwo: refwo,
+                year: year,
+                month: month,
+                matusetransid: matusetransid,
+              ),
+          createCompanionCallback:
+              ({
+                required String itemnum,
+                required String transdate,
+                required double quantity,
+                required String siteid,
+                required String refwo,
+                required int year,
+                required int month,
+                Value<int> matusetransid = const Value.absent(),
+              }) => ItemUsageCompanion.insert(
+                itemnum: itemnum,
+                transdate: transdate,
+                quantity: quantity,
+                siteid: siteid,
+                refwo: refwo,
+                year: year,
+                month: month,
+                matusetransid: matusetransid,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ItemUsageTable, ItemUsageData>(table),
+                  BaseReferences<_$MyDatabase, $ItemUsageTable, ItemUsageData>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$ItemUsageTableProcessedTableManager = ProcessedTableManager<
-    _$MyDatabase,
-    $ItemUsageTable,
-    ItemUsageData,
-    $$ItemUsageTableFilterComposer,
-    $$ItemUsageTableOrderingComposer,
-    $$ItemUsageTableAnnotationComposer,
-    $$ItemUsageTableCreateCompanionBuilder,
-    $$ItemUsageTableUpdateCompanionBuilder,
-    (
+typedef $$ItemUsageTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MyDatabase,
+      $ItemUsageTable,
       ItemUsageData,
-      BaseReferences<_$MyDatabase, $ItemUsageTable, ItemUsageData>
-    ),
-    ItemUsageData,
-    PrefetchHooks Function()>;
+      $$ItemUsageTableFilterComposer,
+      $$ItemUsageTableOrderingComposer,
+      $$ItemUsageTableAnnotationComposer,
+      $$ItemUsageTableCreateCompanionBuilder,
+      $$ItemUsageTableUpdateCompanionBuilder,
+      (
+        ItemUsageData,
+        BaseReferences<_$MyDatabase, $ItemUsageTable, ItemUsageData>,
+      ),
+      ItemUsageData,
+      PrefetchHooks Function()
+    >;
 
 class $MyDatabaseManager {
   final _$MyDatabase _db;
@@ -9587,10 +11480,7 @@ class $MyDatabaseManager {
 class UniqueRpnNumbersResult {
   final double newRPN;
   final int countasset;
-  UniqueRpnNumbersResult({
-    required this.newRPN,
-    required this.countasset,
-  });
+  UniqueRpnNumbersResult({required this.newRPN, required this.countasset});
 }
 
 class UniqueRpnNumbersSpareResult {

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show PlatformDispatcher, kIsWeb;
+import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:window_size/window_size.dart';
 
 import 'bin/db_drift.dart';
@@ -26,7 +26,6 @@ import 'criticality/spare_criticality_notifier.dart';
 import 'criticality/system_criticality_notifier.dart';
 import 'routes/route.dart';
 import 'notifiers/maximo_server_notifier.dart';
-import 'bin/common.dart';
 
 MyDatabase? database;
 ItemDatabase? itemDatabase;
@@ -38,8 +37,17 @@ NumberNotifier numberNotifier = NumberNotifier();
 /// The main entry point for the IKO Reliability Maximo Tool application.
 ///
 /// Initializes logging, database, settings, and launches the app.
-void main() async {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // The Velopack updater invokes this executable with a --veloapp-* switch
+  // to perform install / update / uninstall hooks. initializeVelopack runs
+  // the hook inside its runtime and terminates the process; the UI must not
+  // be launched for these invocations.
+  if (!kIsWeb && args.any(velopackHookArgs.contains)) {
+    await processVelopackHook();
+    return;
+  }
   if (kIsWeb) {
     logger = Logger(
       filter: ProductionFilter(),
@@ -93,6 +101,9 @@ void main() async {
   ThemeManager themeManager = ThemeManager();
   await settingsNotifier.initialize();
   await loadAppSettings(selectedSiteNotifier, themeManager, settingsNotifier);
+  // Resolve the update feed and bind it to Velopack while the app loads;
+  // checkForUpdate waits for this to complete.
+  unawaited(initializeAppUpdates());
   runApp(
     MyApp(
       settingsNotifier,
@@ -198,30 +209,3 @@ Future<void> loadAppSettings(SelectedSiteNotifier selectedSiteNotifier,
   settingsNotifier.setAdmin(isAdmin);
 }
 
-/// Checks for application updates and shows an alert if an update is available.
-Future<void> checkForUpdate(BuildContext context) async {
-  final update = await checkUpdate();
-  if (update) {
-    showDataAlert(
-        navigatorKey.currentContext!,
-        ['Update available'],
-        'Update Checker',
-        [
-          StatefulBuilder(builder: (context, setState) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    launchUrl(Uri.parse(
-                        'https://github.com/jonathanmajh/iko_reliability/releases/latest'));
-                  },
-                  child: const Text('Download Update'),
-                ),
-              ],
-            );
-          }),
-        ]);
-  }
-}

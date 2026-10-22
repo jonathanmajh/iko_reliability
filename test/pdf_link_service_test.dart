@@ -13,6 +13,23 @@ void main() {
       service = PdfLinkToolService();
     });
 
+    // `expect(list, contains(otherList))` checks membership of the List
+    // OBJECT, not a subsequence — use this helper instead.
+    bool containsSublist(List<int> haystack, List<int> needle) {
+      if (needle.isEmpty || needle.length > haystack.length) return false;
+      for (var i = 0; i <= haystack.length - needle.length; i++) {
+        var ok = true;
+        for (var j = 0; j < needle.length; j++) {
+          if (haystack[i + j] != needle[j]) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) return true;
+      }
+      return false;
+    }
+
     test('replaces matching links using find-and-replace mode', () {
       const input = 'https://old.example.com/path/page';
 
@@ -77,8 +94,14 @@ void main() {
       expect(result, p.join(outputDir.path, 'sample_updated.pdf'));
       final outputBytes = await File(result).readAsBytes();
       expect(
-          outputBytes, contains(utf8.encode('https://new.example.com/path')));
-      expect(outputBytes, contains([0x00, 0xFF, 0x01]));
+        containsSublist(
+            outputBytes, utf8.encode('https://new.example.com/path')),
+        isTrue,
+        reason: 'output should contain the replaced URL '
+            '(${String.fromCharCodes(outputBytes)})',
+      );
+      expect(containsSublist(outputBytes, [0x00, 0xFF, 0x01]), isTrue,
+          reason: 'output should preserve the binary bytes');
     });
 
     test('leaves the source file untouched when no matching links are found',

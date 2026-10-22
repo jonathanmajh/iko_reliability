@@ -46,6 +46,9 @@ app.*.map.json
 
 /releases/
 
+# Velopack release outputs
+/Releases*/
+
 # Local diagnostics / saved installer artifacts
 /build.logs
 /Setup.exe
