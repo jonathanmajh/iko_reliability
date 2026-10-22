@@ -95,6 +95,48 @@ class WoPrintFetcher {
     'status',
   ];
 
+  /// Assignment labor codes per work order number, read from the nested
+  /// `assignment` rows of the `ikomxwodetail` records. Any assignment
+  /// status counts; codes are trimmed and uppercased. Work orders without
+  /// a detail record or without assignment rows are absent from the
+  /// result (i.e. not assigned). [onStatus] receives progress text for
+  /// the UI between chunks/pages.
+  Future<Map<String, Set<String>>> fetchAssignmentLaborcodes(
+    List<String> wonums, {
+    void Function(String status)? onStatus,
+  }) async {
+    final cleaned = wonums
+        .map((w) => w.trim().toUpperCase())
+        .where((w) => w.isNotEmpty)
+        .toSet()
+        .toList();
+    if (cleaned.isEmpty) return const {};
+    final rows = await _queryIn(
+      'ikomxwodetail',
+      'wonum',
+      cleaned,
+      select: const ['wonum', 'assignment'],
+      step: 'assigned labor codes',
+      onStatus: onStatus,
+    );
+    final result = <String, Set<String>>{};
+    for (final r in rows) {
+      final codes = result.putIfAbsent(
+          '${r['wonum']}'.toUpperCase(), () => <String>{});
+      for (final a
+          in (r['assignment'] as List<dynamic>? ?? const [])
+              .cast<Map<String, dynamic>>()) {
+        final code = '${a['laborcode'] ?? ''}'.trim().toUpperCase();
+        if (code.isNotEmpty) codes.add(code);
+      }
+    }
+    logger?.i(
+      'Assigned labor codes found for ${result.length} of '
+      '${cleaned.length} work order(s).',
+    );
+    return result;
+  }
+
   /// Queries `structure` for rows where [field] is in [values], adding
   /// `and siteid="$site"[extraWhere]`. Chunks [values] (to keep OSLC URLs
   /// reasonable), requests [pageSize] rows at a time and follows Maximo's
