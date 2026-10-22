@@ -9,6 +9,7 @@ Windows-only Flutter desktop app (package `iko_reliability_flutter`, "IKO Reliab
 - `flutter pub get` first.
 - Codegen: `dart run build_runner build --delete-conflicting-outputs`. Regenerates `lib/routes/route.gr.dart` (auto_route), `lib/bin/db_drift.g.dart` and `lib/items/item_db.g.dart` (drift). Run it after adding a route in `lib/routes/route.dart` or changing a table; the `.g.dart` files ARE committed, so include regenerated output in changes.
 - `flutter analyze` (excludes `web/**`, `windows/**`); `flutter test` (all three files in `test/`).
+- Formatting: the repo IS `dart format`-clean since the formatting-only commit `1c9d824` (tall style, Dart 3.13). ALWAYS finish an edit by running `dart format` on the files you touched — the user's IDE applies the same formatter on save, so unformatted hand whitespace gets churned there otherwise. Never hand-place continuation indents; let the formatter own whitespace. `flutter analyze` reports 5 pre-existing infos (avoid_print x2, unrelated_type_equality_checks x2, unnecessary_brace_in_string_interps); your change must not add new analyzer issues rather than needing a fully green run.
 - Tests quirks:
   - `test/widget_test.dart` pumps the app at 1920x1080 because desktop layouts overflow at the default 800x600, and tolerates a known home drawer Row overflow (see comments there).
   - `test/extract_import_template_test.dart` is a bare-main assert harness (`ok:` prints, throws `StateError`); it runs under `flutter test` but also standalone via `dart run test/extract_import_template_test.dart`.
