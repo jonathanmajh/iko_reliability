@@ -928,7 +928,7 @@ class _WoPrintPageState extends State<WoPrintPage> {
           Tooltip(
             waitDuration: const Duration(milliseconds: 500),
             preferBelow: false,
-            message: 'Use Save as PDF, if a PDF file is desired.'
+            message: 'Use Save as PDF if a PDF file is desired. '
                 'Print to PDF is slow and freezes the window',
             child: FilledButton.icon(
               onPressed: busy ? null : _printSelected,
