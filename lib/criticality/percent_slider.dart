@@ -5,18 +5,19 @@ import 'package:flutter/material.dart';
 /// Multi percent bar slider widget for visualizing and adjusting multiple percentage values.
 /// Multi percent bar slider from left to right. A variation of https://gist.github.com/yeasin50/fc597892b500b12e2b2fb0a9d5ba53bb
 class PercentSlider extends StatefulWidget {
-  const PercentSlider(
-      {super.key,
-      required this.size,
-      this.min = 0,
-      this.max = 100,
-      required this.onSliderUpdate,
-      required this.onSliderUpdateEnd,
-      required this.barColors,
-      this.tooltip,
-      this.sliderColor = Colors.grey,
-      this.sliderPressedColor = Colors.blueGrey,
-      required this.initialValues});
+  const PercentSlider({
+    super.key,
+    required this.size,
+    this.min = 0,
+    this.max = 100,
+    required this.onSliderUpdate,
+    required this.onSliderUpdateEnd,
+    required this.barColors,
+    this.tooltip,
+    this.sliderColor = Colors.grey,
+    this.sliderPressedColor = Colors.blueGrey,
+    required this.initialValues,
+  });
 
   ///Size of the sliders
   final Size size;
@@ -72,12 +73,14 @@ class _PercentSliderState extends State<PercentSlider> {
     initialValuesDuplicateList = widget.initialValues;
     if (widget.initialValues.length != widget.barColors.length - 1) {
       throw Exception(
-          "Unexpected lengths for [widget.initialValues] and [widget.barColors]. {[initialValues.length] == [barColors.length] - 1} must be true");
+        "Unexpected lengths for [widget.initialValues] and [widget.barColors]. {[initialValues.length] == [barColors.length] - 1} must be true",
+      );
     }
     if (widget.tooltip != null &&
         widget.tooltip!.length != widget.barColors.length) {
       throw Exception(
-          "Mismatch between [widget.tooltip.length] and number of percent bars.");
+        "Mismatch between [widget.tooltip.length] and number of percent bars.",
+      );
     }
   }
 
@@ -98,8 +101,10 @@ class _PercentSliderState extends State<PercentSlider> {
     if (activeSliderNumber >= 0 && activeSliderNumber < percentList.length) {
       setState(() {
         isDragging = true;
-        percentList[activeSliderNumber] =
-            tapValue.clamp(lowerLimit, upperLimit);
+        percentList[activeSliderNumber] = tapValue.clamp(
+          lowerLimit,
+          upperLimit,
+        );
       });
     }
 
@@ -135,21 +140,19 @@ class _PercentSliderState extends State<PercentSlider> {
   }
 
   /// select ActiveSlider, fixed overLap issue
-  void _selectSlider({
-    required double maxWidth,
-    required double tapPosition,
-  }) {
+  void _selectSlider({required double maxWidth, required double tapPosition}) {
     double distanceFromSlider = 0.0;
     int closestSlider = 0;
     double closestdistanceFromSlider = maxWidth;
 
     for (int i = 0; i < percentList.length; i++) {
-      distanceFromSlider = (tapPosition -
-              _calculateSliderPosition(
-                maxWidth: maxWidth,
-                percent: percentList[i]!,
-              ))
-          .abs();
+      distanceFromSlider =
+          (tapPosition -
+                  _calculateSliderPosition(
+                    maxWidth: maxWidth,
+                    percent: percentList[i]!,
+                  ))
+              .abs();
       if (distanceFromSlider < closestdistanceFromSlider) {
         closestdistanceFromSlider = distanceFromSlider;
         closestSlider = i;
@@ -168,121 +171,128 @@ class _PercentSliderState extends State<PercentSlider> {
       children: [
         SizedBox(
           height: widget.size.height * 2,
-          child: LayoutBuilder(builder: (context, constraints) {
-            final maxWidth = constraints.maxWidth;
-            if (percentList.length != widget.initialValues.length) {
-              percentList =
-                  List<int?>.filled(widget.initialValues.length, null);
-            }
-            for (int i = 0; i < percentList.length; i++) {
-              percentList[i] = percentList[i] ?? widget.initialValues[i];
-            }
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                //bars
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: widget.size.height * 0.8,
-                    bottom: widget.size.height * 0.8,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: () {
-                      List<int> distributions = _calculateDistributions();
-                      List<Widget> widgetList = [];
-                      for (int i = 0; i < distributions.length; i++) {
-                        widgetList.add(Flexible(
-                          flex: distributions[i],
-                          child: Tooltip(
-                              preferBelow: false,
-                              message: (widget.tooltip != null && !isDragging)
-                                  ? '${widget.tooltip![i]}: ${distributions[i]}'
-                                  : '',
-                              child: Container(
-                                color: widget.barColors[i],
-                              )),
-                        ));
-                      }
-                      return widgetList;
-                    }(),
-                  ),
-                ),
-                //sliders
-                ...() {
-                  List<Widget> widgetList = [];
-                  for (int i = 0; i < percentList.length; i++) {
-                    widgetList.add(Positioned(
-                      left: _calculateSliderPosition(
-                          maxWidth: maxWidth, percent: percentList[i]!),
-                      child: Container(
-                        height: activeSliderNumber == i
-                            ? widget.size.height * 1.5
-                            : widget.size.height * 1,
-                        width: activeSliderNumber == i
-                            ? widget.size.height * 1.5
-                            : widget.size.height * 1,
-                        decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                widget.barColors[i],
-                                widget.barColors[i],
-                                widget.barColors[i + 1],
-                                widget.barColors[i + 1],
-                              ],
-                              stops: const [
-                                0.499,
-                                0.5,
-                                0.501,
-                                1,
-                              ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth;
+              if (percentList.length != widget.initialValues.length) {
+                percentList = List<int?>.filled(
+                  widget.initialValues.length,
+                  null,
+                );
+              }
+              for (int i = 0; i < percentList.length; i++) {
+                percentList[i] = percentList[i] ?? widget.initialValues[i];
+              }
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  //bars
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: widget.size.height * 0.8,
+                      bottom: widget.size.height * 0.8,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: () {
+                        List<int> distributions = _calculateDistributions();
+                        List<Widget> widgetList = [];
+                        for (int i = 0; i < distributions.length; i++) {
+                          widgetList.add(
+                            Flexible(
+                              flex: distributions[i],
+                              child: Tooltip(
+                                preferBelow: false,
+                                message: (widget.tooltip != null && !isDragging)
+                                    ? '${widget.tooltip![i]}: ${distributions[i]}'
+                                    : '',
+                                child: Container(color: widget.barColors[i]),
+                              ),
                             ),
-                            shape: BoxShape.circle),
-                      ),
-                    ));
-                  }
-                  return widgetList;
-                }(),
-                GestureDetector(
-                  onTapDown: (details) {
-                    _selectSlider(
+                          );
+                        }
+                        return widgetList;
+                      }(),
+                    ),
+                  ),
+                  //sliders
+                  ...() {
+                    List<Widget> widgetList = [];
+                    for (int i = 0; i < percentList.length; i++) {
+                      widgetList.add(
+                        Positioned(
+                          left: _calculateSliderPosition(
+                            maxWidth: maxWidth,
+                            percent: percentList[i]!,
+                          ),
+                          child: Container(
+                            height: activeSliderNumber == i
+                                ? widget.size.height * 1.5
+                                : widget.size.height * 1,
+                            width: activeSliderNumber == i
+                                ? widget.size.height * 1.5
+                                : widget.size.height * 1,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  widget.barColors[i],
+                                  widget.barColors[i],
+                                  widget.barColors[i + 1],
+                                  widget.barColors[i + 1],
+                                ],
+                                stops: const [0.499, 0.5, 0.501, 1],
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return widgetList;
+                  }(),
+                  GestureDetector(
+                    onTapDown: (details) {
+                      _selectSlider(
                         maxWidth: maxWidth,
-                        tapPosition: details.localPosition.dx);
-                  },
-                  onTapCancel: () {
-                    setState(() {
-                      isDragging = false;
-                    });
-                  },
-                  onTapUp: (details) {
-                    setState(() {
-                      isDragging = false;
-                    });
-                    widget.onSliderUpdateEnd(_calculateDistributions());
-                  },
-                  onPanDown: (details) {
-                    _selectSlider(
+                        tapPosition: details.localPosition.dx,
+                      );
+                    },
+                    onTapCancel: () {
+                      setState(() {
+                        isDragging = false;
+                      });
+                    },
+                    onTapUp: (details) {
+                      setState(() {
+                        isDragging = false;
+                      });
+                      widget.onSliderUpdateEnd(_calculateDistributions());
+                    },
+                    onPanDown: (details) {
+                      _selectSlider(
                         maxWidth: maxWidth,
-                        tapPosition: details.localPosition.dx);
-                  },
-                  onPanUpdate: (details) {
-                    _updateSlider(details.localPosition.dx, maxWidth);
-                  },
-                  onPanCancel: () {
-                    setState(() {
-                      isDragging = false;
-                    });
-                  },
-                  onPanEnd: (details) {
-                    setState(() {
-                      isDragging = false;
-                    });
-                    widget.onSliderUpdateEnd(_calculateDistributions());
-                  },
-                ),
-              ],
-            );
-          }),
+                        tapPosition: details.localPosition.dx,
+                      );
+                    },
+                    onPanUpdate: (details) {
+                      _updateSlider(details.localPosition.dx, maxWidth);
+                    },
+                    onPanCancel: () {
+                      setState(() {
+                        isDragging = false;
+                      });
+                    },
+                    onPanEnd: (details) {
+                      setState(() {
+                        isDragging = false;
+                      });
+                      widget.onSliderUpdateEnd(_calculateDistributions());
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ],
     );

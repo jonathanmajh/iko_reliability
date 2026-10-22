@@ -6,8 +6,9 @@ import 'package:iko_reliability_flutter/settings/settings_notifier.dart';
 import 'package:iko_reliability_flutter/settings/theme_manager.dart';
 
 void main() {
-  testWidgets('MyApp builds and renders the app root',
-      (WidgetTester tester) async {
+  testWidgets('MyApp builds and renders the app root', (
+    WidgetTester tester,
+  ) async {
     // The app is designed for a desktop window; the default test
     // surface (800x600 logical px) makes its layouts overflow.
     tester.view.devicePixelRatio = 1.0;
@@ -15,7 +16,8 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-        MyApp(SettingsNotifier(), SelectedSiteNotifier(), ThemeManager()));
+      MyApp(SettingsNotifier(), SelectedSiteNotifier(), ThemeManager()),
+    );
 
     // The real app is router-based, so pump one frame past first build.
     await tester.pump();
@@ -29,7 +31,10 @@ void main() {
       anyOf(
         isNull,
         isA<FlutterError>().having(
-            (e) => e.message, 'message', contains('RenderFlex overflowed')),
+          (e) => e.message,
+          'message',
+          contains('RenderFlex overflowed'),
+        ),
       ),
     );
     expect(find.byType(MaterialApp), findsOneWidget);

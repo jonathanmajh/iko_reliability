@@ -85,8 +85,9 @@ class _PmExtractPageState extends State<PmExtractPage> {
   /// 100 px spinner row at the top while fetching.
   double? _selectedRowTop() {
     final notifier = context.read<ExtractNotifier>();
-    final index = notifier.extracts
-        .indexWhere((element) => element.key == notifier.selectedKey);
+    final index = notifier.extracts.indexWhere(
+      (element) => element.key == notifier.selectedKey,
+    );
     if (index < 0) {
       return null;
     }
@@ -107,7 +108,8 @@ class _PmExtractPageState extends State<PmExtractPage> {
       const rowHeight = 105.0;
       final position = _listController.position;
       final offset = _listController.offset;
-      if (top >= offset && top + rowHeight <= offset + position.viewportDimension) {
+      if (top >= offset &&
+          top + rowHeight <= offset + position.viewportDimension) {
         return; // row is already fully visible
       }
       final target = (top + rowHeight / 2 - position.viewportDimension / 2)
@@ -206,7 +208,7 @@ class _PmExtractPageState extends State<PmExtractPage> {
             _updateFab();
           },
           child: const Icon(Icons.add),
-        )
+        ),
       ];
     }
 
@@ -242,8 +244,11 @@ class _PmExtractPageState extends State<PmExtractPage> {
     final processNotifier = context.read<ProcessStateNotifier>();
     try {
       processNotifier.addTask('extractPMState');
-      await fetchExtracts(parsed.valid, maximo.maximoServerSelected,
-          extractNotifier);
+      await fetchExtracts(
+        parsed.valid,
+        maximo.maximoServerSelected,
+        extractNotifier,
+      );
       final summary = _summarize(extractNotifier);
       _show(summary);
     } catch (e) {
@@ -294,9 +299,11 @@ class _PmExtractPageState extends State<PmExtractPage> {
     }
     final templateNotifier = context.read<TemplateNotifier>();
     final maximo = context.read<MaximoServerNotifier>();
-    final includeFrequency = context
-        .read<SettingsNotifier>()
-        .getSetting(ApplicationSetting.includeFrequencyInDescriptions) as bool?;
+    final includeFrequency =
+        context.read<SettingsNotifier>().getSetting(
+              ApplicationSetting.includeFrequencyInDescriptions,
+            )
+            as bool?;
     await populateTemplateFromExtract(
       store,
       templateNotifier,
@@ -309,8 +316,11 @@ class _PmExtractPageState extends State<PmExtractPage> {
   // Opens a file picker to load a text / csv file with PM + site lines.
   Future<void> _pickInputFile() async {
     FilePickerResult? result = await FilePicker.pickFiles(
-        allowMultiple: false, withData: true, type: FileType.custom,
-        allowedExtensions: ['txt', 'csv']);
+      allowMultiple: false,
+      withData: true,
+      type: FileType.custom,
+      allowedExtensions: ['txt', 'csv'],
+    );
     if (result != null && result.files.isNotEmpty) {
       final file = result.files.first;
       final content = String.fromCharCodes(file.bytes ?? []);
@@ -322,9 +332,9 @@ class _PmExtractPageState extends State<PmExtractPage> {
   }
 
   void _show(String toastMsg) {
-    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(
-      content: Text(toastMsg),
-    ));
+    ScaffoldMessenger.of(
+      navigatorKey.currentContext!,
+    ).showSnackBar(SnackBar(content: Text(toastMsg)));
   }
 
   @override
@@ -346,9 +356,7 @@ class _PmExtractPageState extends State<PmExtractPage> {
         child: Focus(
           autofocus: true,
           child: Scaffold(
-            drawer: const Drawer(
-              child: NavDrawer(),
-            ),
+            drawer: const Drawer(child: NavDrawer()),
             appBar: AppBar(
               title: const Text("PM Extract"),
               actions: [
@@ -356,8 +364,9 @@ class _PmExtractPageState extends State<PmExtractPage> {
                   builder: (context) => IconButton(
                     icon: const Icon(Icons.settings),
                     onPressed: () => Scaffold.of(context).openEndDrawer(),
-                    tooltip:
-                        MaterialLocalizations.of(context).openAppDrawerTooltip,
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).openAppDrawerTooltip,
                   ),
                 ),
               ],
@@ -396,8 +405,9 @@ class _PmExtractPageState extends State<PmExtractPage> {
                             setState(() {
                               dropHover = true;
                             });
-                            return event.session.allowedOperations
-                                    .contains(DropOperation.copy)
+                            return event.session.allowedOperations.contains(
+                                  DropOperation.copy,
+                                )
                                 ? DropOperation.copy
                                 : DropOperation.none;
                           },
@@ -414,13 +424,15 @@ class _PmExtractPageState extends State<PmExtractPage> {
                               final reader = item.dataReader;
                               if (reader != null) {
                                 reader.getFile(null, (file) async {
-                                  final content =
-                                      String.fromCharCodes(await file.readAll());
+                                  final content = String.fromCharCodes(
+                                    await file.readAll(),
+                                  );
                                   setState(() {
                                     _inputController.text = content;
                                   });
                                   _show(
-                                      'Loaded ${file.fileName} into the input');
+                                    'Loaded ${file.fileName} into the input',
+                                  );
                                 });
                               }
                             }
@@ -439,8 +451,10 @@ class _PmExtractPageState extends State<PmExtractPage> {
                               if (dropHover)
                                 Positioned.fill(
                                   child: BackdropFilter(
-                                    filter:
-                                        ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                    filter: ImageFilter.blur(
+                                      sigmaX: 5,
+                                      sigmaY: 5,
+                                    ),
                                     child: Container(
                                       alignment: Alignment.center,
                                       color: Theme.of(context)
@@ -450,9 +464,10 @@ class _PmExtractPageState extends State<PmExtractPage> {
                                       child: Text(
                                         'Drop PM list file here',
                                         style: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface),
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -472,17 +487,16 @@ class _PmExtractPageState extends State<PmExtractPage> {
                         children: [
                           const Text('Site for lines without a site'),
                           DropdownButton<String>(
-                            value:
-                                fallbackSite.isEmpty ? null : fallbackSite,
+                            value: fallbackSite.isEmpty ? null : fallbackSite,
                             hint: const Text('Select site'),
                             items: [
-                              for (final entry
-                                  in siteIDAndDescription.entries)
+                              for (final entry in siteIDAndDescription.entries)
                                 if (entry.key != 'All')
                                   DropdownMenuItem(
                                     value: entry.key,
                                     child: Text(
-                                        '${entry.key} - ${entry.value}'),
+                                      '${entry.key} - ${entry.value}',
+                                    ),
                                   ),
                             ],
                             onChanged: (value) {
@@ -545,11 +559,11 @@ class _PmExtractPageState extends State<PmExtractPage> {
 }
 
 /// Builds the left pane list of extracted PM pairs.
-List<Widget> buildExtractList(
-    ExtractNotifier notifier, BuildContext context) {
+List<Widget> buildExtractList(ExtractNotifier notifier, BuildContext context) {
   List<Widget> list = [];
   if (notifier.fetching) {
-    list.add(const Row(
+    list.add(
+      const Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -557,48 +571,68 @@ List<Widget> buildExtractList(
             height: 100,
             width: 100,
             child: CircularProgressIndicator.adaptive(),
-          )
-        ]));
+          ),
+        ],
+      ),
+    );
   }
   for (final store in notifier.extracts) {
     list.add(extractListItem(store, notifier, context));
-    list.add(Divider(
-      height: 5,
-      thickness: 1,
-      indent: 20,
-      endIndent: 20,
-      color: Theme.of(context).dividerColor,
-    ));
+    list.add(
+      Divider(
+        height: 5,
+        thickness: 1,
+        indent: 20,
+        endIndent: 20,
+        color: Theme.of(context).dividerColor,
+      ),
+    );
   }
   if (notifier.extracts.isEmpty && !notifier.fetching) {
-    list.addAll(instructionListItem(
+    list.addAll(
+      instructionListItem(
         'Enter PM numbers + site IDs above, then click Fetch',
         context,
-        Icons.cloud_download));
-    list.addAll(instructionListItem(
+        Icons.cloud_download,
+      ),
+    );
+    list.addAll(
+      instructionListItem(
         'Lines can be "AA A0001D1INRE" or "A0001D1INRE" with the site selected on the right',
         context,
-        Icons.format_list_bulleted));
-    list.addAll(instructionListItem(
-        'Export extracted PMs to Excel', context, Icons.table_view));
+        Icons.format_list_bulleted,
+      ),
+    );
+    list.addAll(
+      instructionListItem(
+        'Export extracted PMs to Excel',
+        context,
+        Icons.table_view,
+      ),
+    );
   }
   return list;
 }
 
 /// One PM pair row in the extract list.
 Widget extractListItem(
-    ExtractStore store, ExtractNotifier notifier, BuildContext context) {
+  ExtractStore store,
+  ExtractNotifier notifier,
+  BuildContext context,
+) {
   Color vertCol = Colors.grey;
   var boxDecoration = BoxDecoration(
-      border: Border.all(),
-      borderRadius: const BorderRadius.all(Radius.circular(20)));
+    border: Border.all(),
+    borderRadius: const BorderRadius.all(Radius.circular(20)),
+  );
   if (notifier.selectedKey == store.key) {
     Color containerCol = Theme.of(context).colorScheme.secondaryContainer;
     vertCol = Colors.redAccent;
     boxDecoration = BoxDecoration(
-        color: containerCol,
-        border: Border.all(color: containerCol),
-        borderRadius: const BorderRadius.all(Radius.circular(20)));
+      color: containerCol,
+      border: Border.all(color: containerCol),
+      borderRadius: const BorderRadius.all(Radius.circular(20)),
+    );
   }
   return SizedBox(
     height: 100,
@@ -641,8 +675,9 @@ Widget extractListItem(
                   Text(
                     'Site: ${store.siteid}',
                     style: TextStyle(
-                        fontSize: 12.0,
-                        color: Theme.of(context).colorScheme.onSurface),
+                      fontSize: 12.0,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ],
               ),
@@ -694,17 +729,17 @@ Widget extractStatusIndicator(ExtractStore store, BuildContext context) {
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       icon,
-      Text(
-        text,
-        style: TextStyle(fontSize: 20.0, color: textColor),
-      )
+      Text(text, style: TextStyle(fontSize: 20.0, color: textColor)),
     ],
   );
 }
 
 /// Simple instruction row shown when the list is empty.
 List<Widget> instructionListItem(
-    String instruction, BuildContext context, IconData? icon) {
+  String instruction,
+  BuildContext context,
+  IconData? icon,
+) {
   return [
     SizedBox(
       height: 70,
@@ -713,38 +748,39 @@ List<Widget> instructionListItem(
         children: <Widget>[
           Expanded(
             child: Padding(
-                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(
-                      width: 70,
-                      child: Icon(
-                        icon,
+              padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    width: 70,
+                    child: Icon(
+                      icon,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 35,
+                    ),
+                  ),
+                  VerticalDivider(
+                    width: 20,
+                    thickness: 1,
+                    indent: 10,
+                    endIndent: 10,
+                    color: Colors.redAccent,
+                  ),
+                  Expanded(
+                    child: Text(
+                      instruction,
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.0,
                         color: Theme.of(context).colorScheme.onSurface,
-                        size: 35,
                       ),
                     ),
-                    VerticalDivider(
-                      width: 20,
-                      thickness: 1,
-                      indent: 10,
-                      endIndent: 10,
-                      color: Colors.redAccent,
-                    ),
-                    Expanded(
-                      child: Text(
-                        instruction,
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                  ],
-                )),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -755,7 +791,7 @@ List<Widget> instructionListItem(
       indent: 20,
       endIndent: 20,
       color: Theme.of(context).dividerColor,
-    )
+    ),
   ];
 }
 
@@ -786,42 +822,46 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ExtractNotifier>(builder: (context, notifier, child) {
-      final store = notifier.getSelected();
-      if (store == null) {
-        return const Text('Select a PM to see extracted details');
-      }
-      if (store.status == 'not found') {
-        return Text(
-            '${store.pmnum} at site ${store.siteid} was not found in Maximo');
-      }
-      if (store.status == 'error') {
-        return Text(
-            'Failed to extract ${store.pmnum} at site ${store.siteid}: ${store.errorMessage}');
-      }
-      return Column(
-        children: [
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(icon: Icon(Icons.tune)),
-              Tab(icon: Icon(Icons.fact_check)),
-              Tab(icon: Icon(Icons.route_rounded)),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
+    return Consumer<ExtractNotifier>(
+      builder: (context, notifier, child) {
+        final store = notifier.getSelected();
+        if (store == null) {
+          return const Text('Select a PM to see extracted details');
+        }
+        if (store.status == 'not found') {
+          return Text(
+            '${store.pmnum} at site ${store.siteid} was not found in Maximo',
+          );
+        }
+        if (store.status == 'error') {
+          return Text(
+            'Failed to extract ${store.pmnum} at site ${store.siteid}: ${store.errorMessage}',
+          );
+        }
+        return Column(
+          children: [
+            TabBar(
               controller: _tabController,
-              children: [
-                _pmHeaderTab(store),
-                _jobPlanTab(store),
-                _routeTab(store),
+              tabs: const [
+                Tab(icon: Icon(Icons.tune)),
+                Tab(icon: Icon(Icons.fact_check)),
+                Tab(icon: Icon(Icons.route_rounded)),
               ],
             ),
-          ),
-        ],
-      );
-    });
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _pmHeaderTab(store),
+                  _jobPlanTab(store),
+                  _routeTab(store),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _fieldRow(String label, String value, BuildContext context) {
@@ -832,8 +872,10 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
         children: [
           SizedBox(
             width: 160,
-            child: Text(label,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           Expanded(child: SelectableText(value)),
         ],
@@ -847,7 +889,10 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
       children: [
         for (final header in tableHeaders['PM']!)
           _fieldRow(
-              header, stripHtml(fieldOf(store.pm, header.toLowerCase())), context),
+            header,
+            stripHtml(fieldOf(store.pm, header.toLowerCase())),
+            context,
+          ),
       ],
     );
   }
@@ -858,13 +903,15 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
     }
     final jp = store.jobplan!;
     List<Widget> rows = [];
-    rows.add(Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        fieldOf(jp, 'jpnum') ?? '',
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+    rows.add(
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          fieldOf(jp, 'jpnum') ?? '',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
       ),
-    ));
+    );
     for (final header in [
       'DESCRIPTION',
       'STATUS',
@@ -878,28 +925,42 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
       'ORGID',
       'SITEID',
     ]) {
-      rows.add(_fieldRow(header, fieldOf(jp, header.toLowerCase()) ?? '', context));
+      rows.add(
+        _fieldRow(header, fieldOf(jp, header.toLowerCase()) ?? '', context),
+      );
     }
-    rows.add(_childTableCard(
-        'Tasks (${store.jobtasks.length})',
-        ['JPTASK', 'METERNAME', 'ASSETNUM', 'DESCRIPTION'],
-        store.jobtasks));
-    rows.add(_childTableCard(
-        'Labor (${store.joblabors.length})',
-        ['CRAFT', 'QUANTITY', 'LABORHRS', 'LABORCODE'],
-        store.joblabors));
-    rows.add(_childTableCard(
-        'Materials (${store.jobmaterials.length})',
-        ['ITEMNUM', 'ITEMQTY', 'COST'],
-        store.jobmaterials));
-    rows.add(_childTableCard(
-        'Services (${store.jobservices.length})',
-        ['ITEMNUM', 'ITEMQTY', 'COMPANY', 'COST'],
-        store.jobservices));
-    return ListView(
-      padding: const EdgeInsets.all(10),
-      children: rows,
+    rows.add(
+      _childTableCard('Tasks (${store.jobtasks.length})', [
+        'JPTASK',
+        'METERNAME',
+        'ASSETNUM',
+        'DESCRIPTION',
+      ], store.jobtasks),
     );
+    rows.add(
+      _childTableCard('Labor (${store.joblabors.length})', [
+        'CRAFT',
+        'QUANTITY',
+        'LABORHRS',
+        'LABORCODE',
+      ], store.joblabors),
+    );
+    rows.add(
+      _childTableCard('Materials (${store.jobmaterials.length})', [
+        'ITEMNUM',
+        'ITEMQTY',
+        'COST',
+      ], store.jobmaterials),
+    );
+    rows.add(
+      _childTableCard('Services (${store.jobservices.length})', [
+        'ITEMNUM',
+        'ITEMQTY',
+        'COMPANY',
+        'COST',
+      ], store.jobservices),
+    );
+    return ListView(padding: const EdgeInsets.all(10), children: rows);
   }
 
   Widget _routeTab(ExtractStore store) {
@@ -908,13 +969,15 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
     }
     final route = store.route!;
     List<Widget> rows = [];
-    rows.add(Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        fieldOf(route, 'route') ?? '',
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+    rows.add(
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          fieldOf(route, 'route') ?? '',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
       ),
-    ));
+    );
     for (final header in [
       'DESCRIPTION',
       'ROUTESTOPSBECOME',
@@ -922,21 +985,23 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
       'ORGID',
     ]) {
       rows.add(
-          _fieldRow(header, fieldOf(route, header.toLowerCase()) ?? '', context));
+        _fieldRow(header, fieldOf(route, header.toLowerCase()) ?? '', context),
+      );
     }
     // one card per stop; stops with an extracted job plan show its details
-    rows.add(Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text('Stops (${store.routeStops.length})',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-    ));
+    rows.add(
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Stops (${store.routeStops.length})',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+      ),
+    );
     for (final stop in store.routeStops) {
       rows.add(_stopCard(store, stop));
     }
-    return ListView(
-      padding: const EdgeInsets.all(10),
-      children: rows,
-    );
+    return ListView(padding: const EdgeInsets.all(10), children: rows);
   }
 
   /// Card for a single route stop. The job plan linked to the stop (if
@@ -948,7 +1013,8 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
     final asset = fieldOf(stop, 'assetnum') ?? '';
     String title;
     if (plan != null) {
-      title = 'Stop $seq: $asset - ${plan.description?.isNotEmpty == true ? plan.description : jpnum}';
+      title =
+          'Stop $seq: $asset - ${plan.description?.isNotEmpty == true ? plan.description : jpnum}';
     } else if (jpnum.isEmpty) {
       title = 'Stop $seq: $asset (no job plan)';
     } else {
@@ -963,33 +1029,49 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: SelectableText(
-                  'JP: ${plan.jpnum ?? jpnum} - ${plan.description ?? ''}',
-                  style: const TextStyle(fontFamily: 'RobotoMono', fontSize: 12)),
+                'JP: ${plan.jpnum ?? jpnum} - ${plan.description ?? ''}',
+                style: const TextStyle(fontFamily: 'RobotoMono', fontSize: 12),
+              ),
             ),
           ] else ...[
             Padding(
               padding: const EdgeInsets.all(4.0),
-              child: SelectableText(jpnum.isEmpty
-                  ? 'No linked job plan'
-                  : 'Linked job plan $jpnum was not extracted',
-                  style: TextStyle(
-                      fontSize: 11,
-                      fontStyle: FontStyle.italic,
-                      color: Theme.of(context).colorScheme.onSurface)),
+              child: SelectableText(
+                jpnum.isEmpty
+                    ? 'No linked job plan'
+                    : 'Linked job plan $jpnum was not extracted',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
             ),
           ],
           if (plan != null && plan.jobtasks.isNotEmpty)
-            _childTableCard('Job Plan Tasks',
-                ['JPTASK', 'DESCRIPTION', 'METERNAME'], plan.jobtasks),
+            _childTableCard('Job Plan Tasks', [
+              'JPTASK',
+              'DESCRIPTION',
+              'METERNAME',
+            ], plan.jobtasks),
           if (plan != null && plan.joblabors.isNotEmpty)
-            _childTableCard('Job Plan Labour',
-                ['CRAFT', 'QUANTITY', 'LABORHRS'], plan.joblabors),
+            _childTableCard('Job Plan Labour', [
+              'CRAFT',
+              'QUANTITY',
+              'LABORHRS',
+            ], plan.joblabors),
           if (plan != null && plan.jobmaterials.isNotEmpty)
-            _childTableCard('Job Plan Materials',
-                ['ITEMNUM', 'ITEMQTY', 'COST'], plan.jobmaterials),
+            _childTableCard('Job Plan Materials', [
+              'ITEMNUM',
+              'ITEMQTY',
+              'COST',
+            ], plan.jobmaterials),
           if (plan != null && plan.jobservices.isNotEmpty)
-            _childTableCard('Job Plan Services',
-                ['ITEMNUM', 'COST', 'COMPANY'], plan.jobservices),
+            _childTableCard('Job Plan Services', [
+              'ITEMNUM',
+              'COST',
+              'COMPANY',
+            ], plan.jobservices),
         ],
       ),
     );
@@ -997,7 +1079,11 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
 
   /// Expandable card listing child rows (tasks / labor / materials) with a
   /// column header row, styled like the upload detail tables in pm_details.
-  Widget _childTableCard(String title, List<String> headers, List<dynamic> rows) {
+  Widget _childTableCard(
+    String title,
+    List<String> headers,
+    List<dynamic> rows,
+  ) {
     final themeData = Theme.of(context);
     return Card(
       child: ExpansionTile(
@@ -1008,8 +1094,10 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
             Container(
               width: double.maxFinite,
               color: themeData.colorScheme.onSurface,
-              child: Text(headers.join(','),
-                  style: TextStyle(color: themeData.colorScheme.surface)),
+              child: Text(
+                headers.join(','),
+                style: TextStyle(color: themeData.colorScheme.surface),
+              ),
             ),
           for (final row in rows)
             Padding(
@@ -1017,8 +1105,9 @@ class _ExtractDetailViewState extends State<ExtractDetailView>
               child: SelectableText(
                 stripHtml(headers.map((h) => rowValue(row, h)).join(',')),
                 style: TextStyle(
-                    fontFamily: 'RobotoMono',
-                    color: themeData.colorScheme.onSurface),
+                  fontFamily: 'RobotoMono',
+                  color: themeData.colorScheme.onSurface,
+                ),
               ),
             ),
         ],

@@ -14,34 +14,37 @@ class NavDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SettingsNotifier settingsNotifier =
-        Provider.of<SettingsNotifier>(context, listen: true);
+    SettingsNotifier settingsNotifier = Provider.of<SettingsNotifier>(
+      context,
+      listen: true,
+    );
     return ListView(
       padding: EdgeInsets.zero,
       children: <Widget>[
         DrawerHeader(
-            padding: EdgeInsetsGeometry.fromLTRB(0, 16, 0, 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const ListTile(
-                  title: Text(
-                    style: TextStyle(fontSize: 24),
-                    'IKO Reliability Tool',
-                  ),
+          padding: EdgeInsetsGeometry.fromLTRB(0, 16, 0, 8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const ListTile(
+                title: Text(
+                  style: TextStyle(fontSize: 24),
+                  'IKO Reliability Tool',
                 ),
-                ListTile(
-                  leading: const Icon(Icons.home),
-                  title: const Text('Home'),
-                  onTap: () {
-                    context.router.replacePath("/");
-                    // change app state...
-                    Navigator.pop(context); // close the drawer
-                  },
-                ),
-              ],
-            )),
+              ),
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('Home'),
+                onTap: () {
+                  context.router.replacePath("/");
+                  // change app state...
+                  Navigator.pop(context); // close the drawer
+                },
+              ),
+            ],
+          ),
+        ),
         // top-level print tool, available to all users
         ListTile(
           leading: const Icon(Icons.print),
@@ -60,13 +63,14 @@ class NavDrawer extends StatelessWidget {
               title: const Text('System Criticality'),
               onTap: () {
                 showDialog(
-                    context: context,
-                    builder: (context) {
-                      return const AlertDialog(
-                        title: Text('Loading...'),
-                        content: SystemLoadingIndicator(),
-                      );
-                    });
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text('Loading...'),
+                      content: SystemLoadingIndicator(),
+                    );
+                  },
+                );
               },
             ),
             ListTile(
@@ -74,13 +78,14 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Asset Criticality'),
               onTap: () {
                 showDialog(
-                    context: context,
-                    builder: (context) {
-                      return const AlertDialog(
-                        title: Text('Loading...'),
-                        content: AssetCriticalityLoadingIndicator(),
-                      );
-                    });
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text('Loading...'),
+                      content: AssetCriticalityLoadingIndicator(),
+                    );
+                  },
+                );
               },
             ),
             ListTile(
@@ -88,13 +93,14 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Spare Part Criticality'),
               onTap: () {
                 showDialog(
-                    context: context,
-                    builder: (context) {
-                      return const AlertDialog(
-                        title: Text('Loading...'),
-                        content: SparePartsLoadingIndicator(),
-                      );
-                    });
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text('Loading...'),
+                      content: SparePartsLoadingIndicator(),
+                    );
+                  },
+                );
               },
             ),
             ListTile(
@@ -102,13 +108,14 @@ class NavDrawer extends StatelessWidget {
               title: const Text('Item Tool'),
               onTap: () {
                 showDialog(
-                    context: context,
-                    builder: (context) {
-                      return const AlertDialog(
-                        title: Text('Loading...'),
-                        content: ItemLoadingIndicator(),
-                      );
-                    });
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text('Loading...'),
+                      content: ItemLoadingIndicator(),
+                    );
+                  },
+                );
               },
             ),
           ],
@@ -170,7 +177,7 @@ class NavDrawer extends StatelessWidget {
                   ),
                 ],
               )
-            : const SizedBox.shrink()
+            : const SizedBox.shrink(),
       ],
     );
   }

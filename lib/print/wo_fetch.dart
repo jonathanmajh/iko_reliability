@@ -1,4 +1,4 @@
-﻿// Maximo fetch layer for the Work Order Print Pack.
+// Maximo fetch layer for the Work Order Print Pack.
 //
 // Builds [WoPacket]s for a batch of parent work orders using the app's
 // `maximoRequest` OSLC client. Every heavy lookup (child work orders, task
@@ -126,7 +126,9 @@ class WoPrintFetcher {
     final result = <String, Set<String>>{};
     for (final r in rows) {
       final codes = result.putIfAbsent(
-          '${r['wonum']}'.toUpperCase(), () => <String>{});
+        '${r['wonum']}'.toUpperCase(),
+        () => <String>{},
+      );
       for (final a
           in (r['assignment'] as List<dynamic>? ?? const [])
               .cast<Map<String, dynamic>>()) {
@@ -158,11 +160,13 @@ class WoPrintFetcher {
   }) async {
     final rows = <Map<String, dynamic>>[];
     for (var i = 0; i < values.length; i += chunkSize) {
-      final end = (i + chunkSize) > values.length ? values.length : i + chunkSize;
-      final inList =
-          values.sublist(i, end).map((v) => '"$v"').join(',');
+      final end = (i + chunkSize) > values.length
+          ? values.length
+          : i + chunkSize;
+      final inList = values.sublist(i, end).map((v) => '"$v"').join(',');
       final where = '$field in [$inList] and siteid="$site"$extraWhere';
-      var url = '$structure?oslc.where=$where&oslc.select=${select.join(',')}'
+      var url =
+          '$structure?oslc.where=$where&oslc.select=${select.join(',')}'
           '&oslc.pageSize=$pageSize';
       // collectioncount=1 makes responseInfo carry totalPages, used for
       // live progress when [onStatus] is given
@@ -173,8 +177,10 @@ class WoPrintFetcher {
       var totalPages = 0;
       final followedHrefs = <String>{};
       while (true) {
-        onStatus?.call('Fetching $step (page $page of '
-            '${totalPages == 0 ? '?' : totalPages})...');
+        onStatus?.call(
+          'Fetching $step (page $page of '
+          '${totalPages == 0 ? '?' : totalPages})...',
+        );
         Map<String, dynamic> res;
         try {
           res = await maximoRequest(url, 'get', env);
@@ -183,7 +189,8 @@ class WoPrintFetcher {
         }
         if (res['status'] == 'Failed to Connect') {
           throw WoPrintFetchException(
-              'Failed to connect to Maximo ($env) while fetching $step.');
+            'Failed to connect to Maximo ($env) while fetching $step.',
+          );
         }
         final member = res['member'] as List<dynamic>? ?? const [];
         rows.addAll(member.cast<Map<String, dynamic>>());
@@ -199,20 +206,24 @@ class WoPrintFetcher {
         if (nextUrl == null || !followedHrefs.add(nextHref)) {
           // a next page exists but cannot be followed - fail loudly instead
           // of silently returning a truncated list
-          logger?.e('Maximo paging: could not follow next page link while '
-              'fetching "$step" (page $page). Next page URL: $nextHref');
+          logger?.e(
+            'Maximo paging: could not follow next page link while '
+            'fetching "$step" (page $page). Next page URL: $nextHref',
+          );
           throw WoPrintFetchException(
-              'Could not follow the Maximo next page link while fetching '
-              '$step (page $page). Next page URL: $nextHref');
+            'Could not follow the Maximo next page link while fetching '
+            '$step (page $page). Next page URL: $nextHref',
+          );
         }
-        logger?.i('Maximo paging: "$step" following next page link '
-            '(page $page -> ${page + 1}, ${rows.length} rows so far)');
+        logger?.i(
+          'Maximo paging: "$step" following next page link '
+          '(page $page -> ${page + 1}, ${rows.length} rows so far)',
+        );
         url = nextUrl;
         page++;
       }
     }
-    logger?.i(
-        'Maximo query "$step" fetched ${rows.length} row(s).');
+    logger?.i('Maximo query "$step" fetched ${rows.length} row(s).');
     return rows;
   }
 
@@ -247,11 +258,15 @@ class WoPrintFetcher {
   Future<List<Map<String, dynamic>>> fetchReleasedWorkOrderRows({
     void Function(String status)? onStatus,
   }) async {
-    final rows = await _queryIn('mxwo', 'status', const ['RELEASED'],
-        extraWhere: ' and istask=0',
-        select: _parentSelect,
-        step: 'the released work order list',
-        onStatus: onStatus);
+    final rows = await _queryIn(
+      'mxwo',
+      'status',
+      const ['RELEASED'],
+      extraWhere: ' and istask=0',
+      select: _parentSelect,
+      step: 'the released work order list',
+      onStatus: onStatus,
+    );
     return rows.where((r) => '${r['parent'] ?? ''}'.isEmpty).toList();
   }
 
@@ -259,15 +274,21 @@ class WoPrintFetcher {
   /// released parents be selected). Returned rows keep their `parent` field
   /// so pasted children can be shown with a reason instead of "not found".
   Future<List<Map<String, dynamic>>> fetchWorkOrderRowsForWonums(
-      List<String> wonums) async {
+    List<String> wonums,
+  ) async {
     final cleaned = wonums
         .map((w) => w.trim().toUpperCase())
         .where((w) => w.isNotEmpty)
         .toSet()
         .toList();
     if (cleaned.isEmpty) return const [];
-    return _queryIn('mxwo', 'wonum', cleaned,
-        select: _parentSelect, step: 'the pasted work orders');
+    return _queryIn(
+      'mxwo',
+      'wonum',
+      cleaned,
+      select: _parentSelect,
+      step: 'the pasted work orders',
+    );
   }
 
   /// Fetches complete packets for [parentWonums], in request order.
@@ -278,19 +299,25 @@ class WoPrintFetcher {
     List<String> parentWonums, {
     void Function(String status)? onStatus,
   }) async {
-    final parents =
-        parentWonums.map((w) => w.trim().toUpperCase()).toSet().toList();
+    final parents = parentWonums
+        .map((w) => w.trim().toUpperCase())
+        .toSet()
+        .toList();
     if (parents.isEmpty) {
       return const WoPrintBatch(packets: []);
     }
 
     // 1. parent headers (also covers pasted WOs that turn out to be children)
     onStatus?.call('Fetching work order headers...');
-    final returnedRows = await _queryIn('mxwo', 'wonum', parents,
-        select: _parentSelect, step: 'work order headers');
+    final returnedRows = await _queryIn(
+      'mxwo',
+      'wonum',
+      parents,
+      select: _parentSelect,
+      step: 'work order headers',
+    );
 
-    final returnedWonums =
-        returnedRows.map((r) => '${r['wonum']}').toSet();
+    final returnedWonums = returnedRows.map((r) => '${r['wonum']}').toSet();
     final notFound = <String>[
       for (final w in parents)
         if (!returnedWonums.contains(w)) w,
@@ -308,15 +335,21 @@ class WoPrintFetcher {
 
     if (validParents.isEmpty) {
       return WoPrintBatch(
-          packets: const [],
-          notFound: notFound,
-          skippedChildren: skippedChildren);
+        packets: const [],
+        notFound: notFound,
+        skippedChildren: skippedChildren,
+      );
     }
 
     // 2. child work orders (istask=0 with a parent set)
     onStatus?.call('Fetching child work orders...');
-    final childRowsRaw = await _queryIn('mxwo', 'parent', validParents,
-        select: _childSelect, step: 'child work orders');
+    final childRowsRaw = await _queryIn(
+      'mxwo',
+      'parent',
+      validParents,
+      select: _childSelect,
+      step: 'child work orders',
+    );
     final childRows = childRowsRaw
         .where((r) => r['istask'].toString() != 'true')
         .toList();
@@ -327,10 +360,14 @@ class WoPrintFetcher {
       ...validParents,
       ...childRows.map((r) => '${r['wonum']}'),
     ];
-    final taskRows = await _queryIn('mxwo', 'parent', treeWonums,
-        extraWhere: ' and istask=1',
-        select: _taskSelect,
-        step: 'task work orders');
+    final taskRows = await _queryIn(
+      'mxwo',
+      'parent',
+      treeWonums,
+      extraWhere: ' and istask=1',
+      select: _taskSelect,
+      step: 'task work orders',
+    );
 
     // 4. asset descriptions (parent + children) in one in-list query
     onStatus?.call('Fetching asset descriptions...');
@@ -340,29 +377,34 @@ class WoPrintFetcher {
     }.toList();
     final assetRows = assetNums.isEmpty
         ? const <Map<String, dynamic>>[]
-        : await _queryIn('mxasset', 'assetnum', assetNums,
+        : await _queryIn(
+            'mxasset',
+            'assetnum',
+            assetNums,
             select: const ['assetnum', 'description'],
-            step: 'asset descriptions');
+            step: 'asset descriptions',
+          );
 
     // 5. planned labor / materials / tools / assignments for the whole tree
     //    in one ikomxwodetail query.
     onStatus?.call('Fetching planned labor, materials and tools...');
     final planRows = await _queryIn(
-        'ikomxwodetail',
+      'ikomxwodetail',
+      'wonum',
+      treeWonums,
+      select: const [
         'wonum',
-        treeWonums,
-        select: const [
-          'wonum',
-          'istask',
-          'wplabor',
-          'wpmaterial',
-          'wptool',
-          'assignment',
-          // Reserved-material storeroom bins (BINNUM) live on INVRESERVE;
-          // each WPMATERIAL row links to its reservation via reserveid.
-          'invreserve',
-        ],
-        step: 'planned labor and materials');
+        'istask',
+        'wplabor',
+        'wpmaterial',
+        'wptool',
+        'assignment',
+        // Reserved-material storeroom bins (BINNUM) live on INVRESERVE;
+        // each WPMATERIAL row links to its reservation via reserveid.
+        'invreserve',
+      ],
+      step: 'planned labor and materials',
+    );
 
     // 6. assemble packets in requested order
     onStatus?.call('Fetched work order data.');

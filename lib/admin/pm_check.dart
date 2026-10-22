@@ -117,7 +117,8 @@ class _PmCheckPageState extends State<PmCheckPage> {
       const rowHeight = 105.0;
       final position = _listController.position;
       final offset = _listController.offset;
-      if (top >= offset && top + rowHeight <= offset + position.viewportDimension) {
+      if (top >= offset &&
+          top + rowHeight <= offset + position.viewportDimension) {
         return; // row is already fully visible
       }
       final target = (top + rowHeight / 2 - position.viewportDimension / 2)
@@ -136,64 +137,70 @@ class _PmCheckPageState extends State<PmCheckPage> {
       // populate with 3 options
       temp = [
         Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-            child: FloatingActionButton.extended(
-              heroTag: UniqueKey(),
-              onPressed: () async {
-                final templateNotifier = context.read<TemplateNotifier>();
-                if (!templateNotifier.loadingFiles) {
-                  final uploadNotifier = context.read<UploadNotifier>();
-                  final maximo = context.read<MaximoServerNotifier>();
-                  for (final filename in templateNotifier.getFiles()) {
-                    for (final template
-                        in templateNotifier.getTemplates(filename)) {
-                      var processedTemplate = templateNotifier
-                          .getProcessedTemplate(filename, template);
-                      await generateUploadHelper(
-                        processedTemplate,
-                        templateNotifier,
-                        filename,
-                        template,
-                        uploadNotifier,
-                      );
-                      uploadPMToMaximo(
-                        maximo.maximoServerSelected,
-                        filename,
-                        template,
-                        templateNotifier,
-                        uploadNotifier,
-                      );
-                    }
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+          child: FloatingActionButton.extended(
+            heroTag: UniqueKey(),
+            onPressed: () async {
+              final templateNotifier = context.read<TemplateNotifier>();
+              if (!templateNotifier.loadingFiles) {
+                final uploadNotifier = context.read<UploadNotifier>();
+                final maximo = context.read<MaximoServerNotifier>();
+                for (final filename in templateNotifier.getFiles()) {
+                  for (final template in templateNotifier.getTemplates(
+                    filename,
+                  )) {
+                    var processedTemplate = templateNotifier
+                        .getProcessedTemplate(filename, template);
+                    await generateUploadHelper(
+                      processedTemplate,
+                      templateNotifier,
+                      filename,
+                      template,
+                      uploadNotifier,
+                    );
+                    uploadPMToMaximo(
+                      maximo.maximoServerSelected,
+                      filename,
+                      template,
+                      templateNotifier,
+                      uploadNotifier,
+                    );
                   }
-                } else {
-                  _show(
-                      'Please Wait Until Templates have been loaded before uploading');
                 }
-                _updateFab();
-              },
-              label: const Text('Upload All'),
-              tooltip: 'Upload All PMs',
-              icon: const Icon(Icons.cloud_upload),
-            )),
+              } else {
+                _show(
+                  'Please Wait Until Templates have been loaded before uploading',
+                );
+              }
+              _updateFab();
+            },
+            label: const Text('Upload All'),
+            tooltip: 'Upload All PMs',
+            icon: const Icon(Icons.cloud_upload),
+          ),
+        ),
         Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-            child: FloatingActionButton.extended(
-              heroTag: UniqueKey(),
-              onPressed: () {
-                copyTemplates(context.read<TemplateNotifier>().getAllPmnum());
-                _updateFab();
-              },
-              label: const Text('Copy'),
-              tooltip: 'Copy filenames and PM number to clipboard',
-              icon: const Icon(Icons.content_copy),
-            )),
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+          child: FloatingActionButton.extended(
+            heroTag: UniqueKey(),
+            onPressed: () {
+              copyTemplates(context.read<TemplateNotifier>().getAllPmnum());
+              _updateFab();
+            },
+            label: const Text('Copy'),
+            tooltip: 'Copy filenames and PM number to clipboard',
+            icon: const Icon(Icons.content_copy),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
           child: FloatingActionButton.extended(
             heroTag: UniqueKey(),
             onPressed: () async {
-              var processNotifier = Provider.of<ProcessStateNotifier>(context,
-                  listen: false); //for recording PM file loading process state
+              var processNotifier = Provider.of<ProcessStateNotifier>(
+                context,
+                listen: false,
+              ); //for recording PM file loading process state
               try {
                 processNotifier.addTask('loadPMFilesState');
                 await pickTemplates();
@@ -208,18 +215,19 @@ class _PmCheckPageState extends State<PmCheckPage> {
           ),
         ),
         Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-            child: FloatingActionButton.extended(
-              heroTag: UniqueKey(),
-              onPressed: () {
-                context.read<TemplateNotifier>().clearTemplates();
-                numberNotifier.clear();
-                _updateFab();
-              },
-              tooltip: 'Clear PM templates',
-              label: const Text('Clear'),
-              icon: const Icon(Icons.delete_sweep),
-            )),
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+          child: FloatingActionButton.extended(
+            heroTag: UniqueKey(),
+            onPressed: () {
+              context.read<TemplateNotifier>().clearTemplates();
+              numberNotifier.clear();
+              _updateFab();
+            },
+            tooltip: 'Clear PM templates',
+            label: const Text('Clear'),
+            icon: const Icon(Icons.delete_sweep),
+          ),
+        ),
         FloatingActionButton(
           heroTag: UniqueKey(),
           onPressed: () {
@@ -236,7 +244,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
             _updateFab();
           },
           child: const Icon(Icons.add),
-        )
+        ),
       ];
     }
 
@@ -262,174 +270,186 @@ class _PmCheckPageState extends State<PmCheckPage> {
           ),
         },
         child: Focus(
-            autofocus: true,
-            child: Scaffold(
-              drawer: const Drawer(
-                //navigation drawer
-                child: NavDrawer(),
-              ),
-              appBar: AppBar(
-                title: const Text("PM Verify and Upload"),
-                // keep back button with a right side hamburger menu
-                actions: [
-                  Builder(
-                    builder: (context) => IconButton(
-                      icon: const Icon(Icons.settings),
-                      onPressed: () => Scaffold.of(context).openEndDrawer(),
-                      tooltip: MaterialLocalizations.of(context)
-                          .openAppDrawerTooltip,
-                    ),
+          autofocus: true,
+          child: Scaffold(
+            drawer: const Drawer(
+              //navigation drawer
+              child: NavDrawer(),
+            ),
+            appBar: AppBar(
+              title: const Text("PM Verify and Upload"),
+              // keep back button with a right side hamburger menu
+              actions: [
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.settings),
+                    onPressed: () => Scaffold.of(context).openEndDrawer(),
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).openAppDrawerTooltip,
                   ),
-                ],
-              ),
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.startFloat,
-              floatingActionButton: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: fabList,
-              ),
-              body: Column(
-                children: <Widget>[
-                  Divider(
-                    height: 10,
-                    thickness: 1,
-                    indent: 0,
-                    endIndent: 0,
-                    color: Theme.of(context).colorScheme.surface,
-                  ),
-                  Expanded(
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                        SizedBox(
-                            width: 550,
-                            child: Consumer<TemplateNotifier>(
-                                builder: (context, value, child) {
-                              return DropRegion(
-                                  // Formats this region can accept.
-                                  formats: Formats.standardFormats,
-                                  hitTestBehavior: HitTestBehavior.opaque,
-                                  onDropOver: (event) {
-                                    // You can inspect local data here, as well as formats of each item.
-                                    // However on certain platforms (mobile / web) the actual data is
-                                    // only available when the drop is accepted (onPerformDrop).
-                                    final item = event.session.items.first;
-                                    if (item.localData is Map) {
-                                      // This is a drag within the app and has custom local data set.
-                                    }
-                                    if (item.canProvide(Formats.plainText)) {
-                                      // this item contains plain text.
-                                    }
-                                    // This drop region only supports copy operation.
-                                    if (event.session.allowedOperations
-                                        .contains(DropOperation.copy)) {
-                                      return DropOperation.copy;
-                                    } else {
-                                      return DropOperation.none;
-                                    }
-                                  },
-                                  onDropEnter: (event) {
-                                    setState(() {
-                                      dropHover = true;
-                                    });
-                                    // This is called when region first accepts a drag. You can use this
-                                    // to display a visual indicator that the drop is allowed.
-                                  },
-                                  onDropLeave: (event) {
-                                    setState(() {
-                                      dropHover = false;
-                                    });
-                                    // Called when drag leaves the region. Will also be called after
-                                    // drag completion.
-                                    // This is a good place to remove any visual indicators.
-                                  },
-                                  onPerformDrop: (event) async {
-                                    // Called when user dropped the item. You can now request the data.
-                                    // Note that data must be requested before the performDrop callback
-                                    // is over.
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content: Text(
-                                          'Processing ${event.session.items.length} dropped files'),
-                                    ));
-                                    for (final item in event.session.items) {
-                                      // data reader is available now
-                                      final reader = item.dataReader;
+                ),
+              ],
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.startFloat,
+            floatingActionButton: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: fabList,
+            ),
+            body: Column(
+              children: <Widget>[
+                Divider(
+                  height: 10,
+                  thickness: 1,
+                  indent: 0,
+                  endIndent: 0,
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      SizedBox(
+                        width: 550,
+                        child: Consumer<TemplateNotifier>(
+                          builder: (context, value, child) {
+                            return DropRegion(
+                              // Formats this region can accept.
+                              formats: Formats.standardFormats,
+                              hitTestBehavior: HitTestBehavior.opaque,
+                              onDropOver: (event) {
+                                // You can inspect local data here, as well as formats of each item.
+                                // However on certain platforms (mobile / web) the actual data is
+                                // only available when the drop is accepted (onPerformDrop).
+                                final item = event.session.items.first;
+                                if (item.localData is Map) {
+                                  // This is a drag within the app and has custom local data set.
+                                }
+                                if (item.canProvide(Formats.plainText)) {
+                                  // this item contains plain text.
+                                }
+                                // This drop region only supports copy operation.
+                                if (event.session.allowedOperations.contains(
+                                  DropOperation.copy,
+                                )) {
+                                  return DropOperation.copy;
+                                } else {
+                                  return DropOperation.none;
+                                }
+                              },
+                              onDropEnter: (event) {
+                                setState(() {
+                                  dropHover = true;
+                                });
+                                // This is called when region first accepts a drag. You can use this
+                                // to display a visual indicator that the drop is allowed.
+                              },
+                              onDropLeave: (event) {
+                                setState(() {
+                                  dropHover = false;
+                                });
+                                // Called when drag leaves the region. Will also be called after
+                                // drag completion.
+                                // This is a good place to remove any visual indicators.
+                              },
+                              onPerformDrop: (event) async {
+                                // Called when user dropped the item. You can now request the data.
+                                // Note that data must be requested before the performDrop callback
+                                // is over.
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Processing ${event.session.items.length} dropped files',
+                                    ),
+                                  ),
+                                );
+                                for (final item in event.session.items) {
+                                  // data reader is available now
+                                  final reader = item.dataReader;
 
-                                      if (reader != null) {
-                                        reader.getFile(null, (file) async {
-                                          var fileDetails = FileDetails(
-                                              name: file.fileName!,
-                                              bytes: await file.readAll());
-                                          processDroppedFiles(
-                                              value, [fileDetails]);
-                                        });
-                                      }
-                                    }
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      ListView(
-                                        controller: _listController,
-                                        children: buildPMList(value, context),
-                                      ),
-                                      dropHover
-                                          ? BackdropFilter(
-                                              filter: ImageFilter.blur(
-                                                  sigmaX: 5,
-                                                  sigmaY: 5), // Blur effect
-                                              child: Container(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .surface
-                                                    .withValues(
-                                                        alpha:
-                                                            0.2), // Slight dark overlay
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  'Drop Files Here',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .onSurface,
-                                                      fontSize: 24),
-                                                ),
+                                  if (reader != null) {
+                                    reader.getFile(null, (file) async {
+                                      var fileDetails = FileDetails(
+                                        name: file.fileName!,
+                                        bytes: await file.readAll(),
+                                      );
+                                      processDroppedFiles(value, [fileDetails]);
+                                    });
+                                  }
+                                }
+                              },
+                              child: Stack(
+                                children: [
+                                  ListView(
+                                    controller: _listController,
+                                    children: buildPMList(value, context),
+                                  ),
+                                  dropHover
+                                      ? BackdropFilter(
+                                          filter: ImageFilter.blur(
+                                            sigmaX: 5,
+                                            sigmaY: 5,
+                                          ), // Blur effect
+                                          child: Container(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surface
+                                                .withValues(
+                                                  alpha: 0.2,
+                                                ), // Slight dark overlay
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              'Drop Files Here',
+                                              style: TextStyle(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
+                                                fontSize: 24,
                                               ),
-                                            )
-                                          : const SizedBox(),
-                                    ],
-                                  ));
-                            })),
-                        VerticalDivider(
-                          width: 20,
-                          thickness: 1,
-                          indent: 5,
-                          endIndent: 5,
-                          color: Theme.of(context).dividerColor,
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox(),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                        const Expanded(child: PMDetailView()),
-                        VerticalDivider(
-                          width: 8,
-                          thickness: 1,
-                          indent: 5,
-                          endIndent: 5,
-                          color: Theme.of(context).colorScheme.surface,
-                        ),
-                      ]))
-                ],
-              ),
-              endDrawer: const EndDrawer(),
-            )),
+                      ),
+                      VerticalDivider(
+                        width: 20,
+                        thickness: 1,
+                        indent: 5,
+                        endIndent: 5,
+                        color: Theme.of(context).dividerColor,
+                      ),
+                      const Expanded(child: PMDetailView()),
+                      VerticalDivider(
+                        width: 8,
+                        thickness: 1,
+                        indent: 5,
+                        endIndent: 5,
+                        color: Theme.of(context).colorScheme.surface,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            endDrawer: const EndDrawer(),
+          ),
+        ),
       ),
     );
   }
 
-// for displaying bottom status notifications
+  // for displaying bottom status notifications
   void _show(String toastMsg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(toastMsg),
-    ));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(toastMsg)));
   }
 
   void copyTemplates(Map<String, List<String>> data) {
@@ -448,8 +468,10 @@ class _PmCheckPageState extends State<PmCheckPage> {
   /// Opens file picker to select PM template files.
   Future<void> pickTemplates() async {
     final template = context.read<TemplateNotifier>();
-    FilePickerResult? result =
-        await FilePicker.pickFiles(allowMultiple: true, withData: true);
+    FilePickerResult? result = await FilePicker.pickFiles(
+      allowMultiple: true,
+      withData: true,
+    );
     List<PlatformFile> files = [];
     String msg = '';
     if (result != null) {
@@ -463,21 +485,22 @@ class _PmCheckPageState extends State<PmCheckPage> {
     }
     List<FileDetails> filesDetails = [];
     for (var file in files) {
-      filesDetails.add(FileDetails(
-        name: file.name,
-        bytes: file.bytes!,
-      ));
+      filesDetails.add(FileDetails(name: file.name, bytes: file.bytes!));
     }
     processDroppedFiles(template, filesDetails);
   }
 
   /// process files selected by file picker or dropped
   Future<void> processDroppedFiles(
-      TemplateNotifier templateNotifier, List<FileDetails> files) async {
+    TemplateNotifier templateNotifier,
+    List<FileDetails> files,
+  ) async {
     final maximo = context.read<MaximoServerNotifier>();
-    final includeFrequency = context
-        .read<SettingsNotifier>()
-        .getSetting(ApplicationSetting.includeFrequencyInDescriptions) as bool?;
+    final includeFrequency =
+        context.read<SettingsNotifier>().getSetting(
+              ApplicationSetting.includeFrequencyInDescriptions,
+            )
+            as bool?;
     setState(() {
       templates = files;
     });
@@ -489,8 +512,12 @@ class _PmCheckPageState extends State<PmCheckPage> {
       setState(() {
         debugPrint('Processing files...');
       });
-      processAllTemplates(templateNotifier, files, maximo.maximoServerSelected,
-          includeFrequency ?? true);
+      processAllTemplates(
+        templateNotifier,
+        files,
+        maximo.maximoServerSelected,
+        includeFrequency ?? true,
+      );
     }
   }
 }
@@ -499,20 +526,27 @@ class _PmCheckPageState extends State<PmCheckPage> {
 Future<List<dynamic>> parseSpreadsheets(List<FileDetails> files) async {
   List<Future> futures = [];
   for (var file in files) {
-    futures.add(compute(
-        ParsedTemplate(pmName: 'Error', pmNumber: 'Error', nextDueDate: '')
-            .fromExcel,
-        file));
+    futures.add(
+      compute(
+        ParsedTemplate(
+          pmName: 'Error',
+          pmNumber: 'Error',
+          nextDueDate: '',
+        ).fromExcel,
+        file,
+      ),
+    );
   }
   return await Future.wait(futures);
 }
 
 ///processes loaded PM template files
 void processAllTemplates(
-    TemplateNotifier templateNotifier,
-    List<FileDetails> files,
-    String maximoServerSelected,
-    bool includeFrequency) async {
+  TemplateNotifier templateNotifier,
+  List<FileDetails> files,
+  String maximoServerSelected,
+  bool includeFrequency,
+) async {
   templateNotifier.setLoading(true);
   var parsedTmpts = await parseSpreadsheets(files);
   for (var thing in parsedTmpts) {
@@ -521,7 +555,10 @@ void processAllTemplates(
       for (var templateNumber in thing[template].keys) {
         //process each template in a file
         templateNotifier.setParsedTemplate(
-            template, templateNumber, thing[template][templateNumber]);
+          template,
+          templateNumber,
+          thing[template][templateNumber],
+        );
       }
     }
   }

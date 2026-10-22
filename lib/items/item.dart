@@ -33,31 +33,30 @@ class ItemPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: const Drawer(
-          child: NavDrawer(),
-        ),
-        appBar: AppBar(
-          title: const Text("Item Search & Request"),
-          actions: [
-            Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () => Scaffold.of(context).openEndDrawer(),
-                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-              ),
+      drawer: const Drawer(child: NavDrawer()),
+      appBar: AppBar(
+        title: const Text("Item Search & Request"),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
             ),
+          ),
+        ],
+      ),
+      endDrawer: const EndDrawer(),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: const [
+            ItemSearchWidget(),
+            Expanded(child: ItemResultDisplay()),
           ],
         ),
-        endDrawer: const EndDrawer(),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: const [
-              ItemSearchWidget(),
-              Expanded(child: ItemResultDisplay()),
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }
 
@@ -110,8 +109,10 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
     var nextItems = context.read<ItemNotifier>().getResults();
     final selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
     final details = await itemDatabase!.getItemDetails(items: nextItems);
-    final invDetails = await itemDatabase!
-        .getInventoryDetails(items: nextItems, site: selectedSite);
+    final invDetails = await itemDatabase!.getInventoryDetails(
+      items: nextItems,
+      site: selectedSite,
+    );
     if (!mounted) return;
     setState(() {
       items.addAll(nextItems);
@@ -148,16 +149,18 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
           return _isLoading
               ? Center(
                   child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(),
-                ))
+                    padding: EdgeInsets.all(16),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
               : SizedBox.shrink();
         }
         final formattedText = textFormatter(
           text: itemDetails[items[index]]!.description,
           searchTerms: context.watch<ItemNotifier>().searchTerms,
         );
-        double percent = (((formattedText.length - 1) / 2) /
+        double percent =
+            (((formattedText.length - 1) / 2) /
             context.watch<ItemNotifier>().searchTerms.length);
         if (percent > 1) {
           percent = 1;
@@ -168,62 +171,72 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
         return Card(
           child: ExpansionTile(
             title: Text(items[index]),
-            leading: Row(mainAxisSize: MainAxisSize.min, children: [
-              CircularPercentIndicator(
-                percent: percent,
-                center: Text('${(percent * 100).toStringAsFixed(0)}%'),
-                progressColor: colour,
-                radius: 24,
-              ),
-              IconButton(
-                onPressed: () {},
-                tooltip: inventoryDetails.containsKey(items[index])
-                    ? 'Item in Storeroom'
-                    : 'Item not in Storeroom',
-                icon: const Icon(Icons.warehouse),
-                color: inventoryDetails.containsKey(items[index])
-                    ? Colors.green
-                    : Colors.red,
-              ),
-              IconButton(
-                icon: const Icon(Icons.copy),
-                tooltip: 'Copy Item Number',
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: items[index]));
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Copied ${items[index]} to clipboard'),
-                  ));
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.open_in_new),
-                tooltip: 'Open in Maximo',
-                onPressed: () {
-                  launchUrl(Uri.parse(
-                      'https://prod.manage.prod.iko.max-it-eam.com/maximo/oslc/graphite/manage-shell/index.html?event=loadapp&value=item&additionalevent=useqbe&additionaleventvalue=itemnum%3D${items[index]}'));
-                },
-              ),
-            ]),
+            leading: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularPercentIndicator(
+                  percent: percent,
+                  center: Text('${(percent * 100).toStringAsFixed(0)}%'),
+                  progressColor: colour,
+                  radius: 24,
+                ),
+                IconButton(
+                  onPressed: () {},
+                  tooltip: inventoryDetails.containsKey(items[index])
+                      ? 'Item in Storeroom'
+                      : 'Item not in Storeroom',
+                  icon: const Icon(Icons.warehouse),
+                  color: inventoryDetails.containsKey(items[index])
+                      ? Colors.green
+                      : Colors.red,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  tooltip: 'Copy Item Number',
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: items[index]));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Copied ${items[index]} to clipboard'),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.open_in_new),
+                  tooltip: 'Open in Maximo',
+                  onPressed: () {
+                    launchUrl(
+                      Uri.parse(
+                        'https://prod.manage.prod.iko.max-it-eam.com/maximo/oslc/graphite/manage-shell/index.html?event=loadapp&value=item&additionalevent=useqbe&additionaleventvalue=itemnum%3D${items[index]}',
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
             subtitle: Text.rich(
               TextSpan(
-                  children: itemDetails.containsKey(items[index])
-                      ? formattedText
-                      : null),
+                children: itemDetails.containsKey(items[index])
+                    ? formattedText
+                    : null,
+              ),
             ),
             children: [
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0.0),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'UOM: ${itemDetails[items[index]]!.uom ?? ''}',
-                          ),
-                          Text(
-                              'Details: ${itemDetails[items[index]]!.extDescription ?? ''}')
-                        ])),
+                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('UOM: ${itemDetails[items[index]]!.uom ?? ''}'),
+                      Text(
+                        'Details: ${itemDetails[items[index]]!.extDescription ?? ''}',
+                      ),
+                    ],
+                  ),
+                ),
               ),
               Align(
                 alignment: Alignment.centerLeft,
@@ -259,8 +272,10 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
   }
 }
 
-List<TextSpan> textFormatter(
-    {required String text, required List<String> searchTerms}) {
+List<TextSpan> textFormatter({
+  required String text,
+  required List<String> searchTerms,
+}) {
   for (var term in searchTerms) {
     text = text.replaceAll(term, '**$term**');
   }
@@ -271,10 +286,7 @@ List<TextSpan> textFormatter(
     if (i % 2 == 0) {
       children.add(TextSpan(text: split[i]));
     } else {
-      children.add(TextSpan(
-        text: split[i],
-        style: (style),
-      ));
+      children.add(TextSpan(text: split[i], style: (style)));
     }
   }
   return children;
@@ -317,47 +329,48 @@ class _ItemSearchWidgetState extends State<ItemSearchWidget> {
   @override
   Widget build(BuildContext context) {
     return Shortcuts(
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.enter): Search(),
-          SingleActivator(LogicalKeyboardKey.enter, shift: true): SearchExt(),
+      shortcuts: const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.enter): Search(),
+        SingleActivator(LogicalKeyboardKey.enter, shift: true): SearchExt(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          Search: CallbackAction<Search>(
+            onInvoke: (Search intent) => {_performSearch()},
+          ),
+          SearchExt: CallbackAction<SearchExt>(
+            onInvoke: (SearchExt intent) => {_performSearch(extended: true)},
+          ),
         },
-        child: Actions(
-            actions: <Type, Action<Intent>>{
-              Search: CallbackAction<Search>(
-                onInvoke: (Search intent) => {_performSearch()},
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: searchTextFieldController,
+                decoration: InputDecoration(
+                  labelText: 'Search Description',
+                  border: const OutlineInputBorder(),
+                ),
+                autofocus: true,
+                showCursor: true,
               ),
-              SearchExt: CallbackAction<SearchExt>(
-                onInvoke: (SearchExt intent) =>
-                    {_performSearch(extended: true)},
-              ),
-            },
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: searchTextFieldController,
-                    decoration: InputDecoration(
-                      labelText: 'Search Description',
-                      border: const OutlineInputBorder(),
-                    ),
-                    autofocus: true,
-                    showCursor: true,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    _performSearch();
-                  },
-                  icon: const Icon(Icons.search),
-                ),
-                IconButton(
-                  onPressed: () {
-                    _performSearch(extended: true);
-                  },
-                  icon: const Icon(Icons.travel_explore),
-                ),
-              ],
-            )));
+            ),
+            IconButton(
+              onPressed: () async {
+                _performSearch();
+              },
+              icon: const Icon(Icons.search),
+            ),
+            IconButton(
+              onPressed: () {
+                _performSearch(extended: true);
+              },
+              icon: const Icon(Icons.travel_explore),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _performSearch({bool extended = false}) async {
@@ -365,9 +378,7 @@ class _ItemSearchWidgetState extends State<ItemSearchWidget> {
       return;
     }
     final itemNotifier = context.read<ItemNotifier>();
-    final searchTerms = await cleanSearchText(
-      searchTextFieldController.text,
-    );
+    final searchTerms = await cleanSearchText(searchTextFieldController.text);
     itemNotifier.newResults(
       ranked: await itemDatabase!.rankResults(phrases: searchTerms),
       searchTerm: searchTerms,
@@ -403,8 +414,11 @@ class _ItemLoadingIndicatorState extends State<ItemLoadingIndicator> {
 class InventoryQuantity extends StatefulWidget {
   final String itemnum;
   final String siteID;
-  const InventoryQuantity(
-      {super.key, required this.itemnum, required this.siteID});
+  const InventoryQuantity({
+    super.key,
+    required this.itemnum,
+    required this.siteID,
+  });
 
   @override
   State<InventoryQuantity> createState() => _InventoryQuantityState();

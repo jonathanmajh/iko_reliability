@@ -48,20 +48,22 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                   children: [
                     ElevatedButton(
                       style: ButtonStyle(
-                          shape:
-                              WidgetStateProperty.all<RoundedRectangleBorder>(
-                                  const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(18),
-                          bottomLeft: Radius.circular(18),
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(18),
+                              bottomLeft: Radius.circular(18),
+                            ),
+                          ),
                         ),
-                      ))),
+                      ),
                       onPressed: () async {
                         try {
-                          meterNameController.text =
-                              meterNameController.text.toUpperCase();
-                          final temp = await database!
-                              .getMeter(meterNameController.text);
+                          meterNameController.text = meterNameController.text
+                              .toUpperCase();
+                          final temp = await database!.getMeter(
+                            meterNameController.text,
+                          );
                           setState(() {
                             meterDetails = temp;
                           });
@@ -69,10 +71,12 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                           // widget already takes care of null case
                         }
                         try {
-                          oldMeterNameController.text =
-                              oldMeterNameController.text.toUpperCase();
-                          final temp = await database!
-                              .getMeter(oldMeterNameController.text);
+                          oldMeterNameController.text = oldMeterNameController
+                              .text
+                              .toUpperCase();
+                          final temp = await database!.getMeter(
+                            oldMeterNameController.text,
+                          );
                           setState(() {
                             oldMeterDetails = temp;
                           });
@@ -81,22 +85,24 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                         }
                         if (oldMeterNameController.text.isNotEmpty) {
                           final temp = await getJobtasks(
-                              oldMeterNameController.text,
-                              Provider.of<MaximoServerNotifier>(
-                                      navigatorKey.currentContext!,
-                                      listen: false)
-                                  .maximoServerSelected);
+                            oldMeterNameController.text,
+                            Provider.of<MaximoServerNotifier>(
+                              navigatorKey.currentContext!,
+                              listen: false,
+                            ).maximoServerSelected,
+                          );
                           setState(() {
                             affectedJobPlans.addAll(temp);
                           });
                         }
                         if (meterNameController.text.isNotEmpty) {
                           final temp = await getJobtasks(
-                              meterNameController.text,
-                              Provider.of<MaximoServerNotifier>(
-                                      navigatorKey.currentContext!,
-                                      listen: false)
-                                  .maximoServerSelected);
+                            meterNameController.text,
+                            Provider.of<MaximoServerNotifier>(
+                              navigatorKey.currentContext!,
+                              listen: false,
+                            ).maximoServerSelected,
+                          );
                           setState(() {
                             affectedJobPlans.addAll(temp);
                           });
@@ -111,14 +117,15 @@ class _PmMeterUpdatePageState extends State<PmMeterUpdatePage> {
                     ),
                     ElevatedButton(
                       style: ButtonStyle(
-                          shape:
-                              WidgetStateProperty.all<RoundedRectangleBorder>(
-                                  const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(18),
-                          bottomRight: Radius.circular(18),
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(18),
+                              bottomRight: Radius.circular(18),
+                            ),
+                          ),
                         ),
-                      ))),
+                      ),
                       onPressed: (() {}),
                       child: const Row(
                         children: [
@@ -200,7 +207,8 @@ Widget observationDetails(Meter? observation, String whichMeter) {
         title: Text('${whichMeter}Meter'),
         children: const [
           Text(
-              'No Meter Entered or Meter cannot be found, please check observation list')
+            'No Meter Entered or Meter cannot be found, please check observation list',
+          ),
         ],
       ),
     );

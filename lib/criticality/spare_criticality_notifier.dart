@@ -39,13 +39,14 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
   bool useCriticality = false;
 
   AbcCriticality get abcCriticality => AbcCriticality(
-        a: percentA.toDouble(),
-        b: percentB.toDouble(),
-        c: percentC.toDouble(),
-      );
+    a: percentA.toDouble(),
+    b: percentB.toDouble(),
+    c: percentC.toDouble(),
+  );
 
-  DateTime purchaseCutoffStart =
-      DateTime.now().subtract(const Duration(days: 10 * 365));
+  DateTime purchaseCutoffStart = DateTime.now().subtract(
+    const Duration(days: 10 * 365),
+  );
   DateTime purchaseCutoffEnd = DateTime.now();
 
   ///Site Filter for work orders used to determine frequency + impact
@@ -58,30 +59,37 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
 
   TrinaColumn? sortColumn;
 
-  Future<void> setPercentages(
-      {int percentA = -1,
-      int percentB = -1,
-      int percentC = -1,
-      required String selectedSite}) async {
+  Future<void> setPercentages({
+    int percentA = -1,
+    int percentB = -1,
+    int percentC = -1,
+    required String selectedSite,
+  }) async {
     if (percentA > 0) {
       this.percentA = percentA;
       await database!.setSettings(
-        newSetting:
-            Setting(key: '$selectedSite-percentA', value: percentA.toString()),
+        newSetting: Setting(
+          key: '$selectedSite-percentA',
+          value: percentA.toString(),
+        ),
       );
     }
     if (percentB > 0) {
       this.percentB = percentB;
       await database!.setSettings(
-        newSetting:
-            Setting(key: '$selectedSite-percentB', value: percentA.toString()),
+        newSetting: Setting(
+          key: '$selectedSite-percentB',
+          value: percentA.toString(),
+        ),
       );
     }
     if (percentC > 0) {
       this.percentC = percentC;
       await database!.setSettings(
-        newSetting:
-            Setting(key: '$selectedSite-percentC', value: percentA.toString()),
+        newSetting: Setting(
+          key: '$selectedSite-percentC',
+          value: percentA.toString(),
+        ),
       );
     }
   }
@@ -89,53 +97,68 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
   void setSite(String site) async {
     String selectedSite = site;
     final settings = await database!.getSettings();
-    percentC = int.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-percentC',
-          orElse: () => Setting(key: '', value: percentC.toString()),
-        )
-        .value);
-    percentB = int.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-percentB',
-          orElse: () => Setting(key: '', value: percentB.toString()),
-        )
-        .value);
-    percentA = int.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-percentA',
-          orElse: () => Setting(key: '', value: percentA.toString()),
-        )
-        .value);
-    useCriticality = bool.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-useCriticality',
-          orElse: () => Setting(key: '', value: useCriticality.toString()),
-        )
-        .value);
-    purchaseCutoffStart = DateTime.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-purchaseCutoffStart',
-          orElse: () => Setting(key: '', value: purchaseCutoffStart.toString()),
-        )
-        .value);
-    purchaseCutoffEnd = DateTime.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-purchaseCutoffEnd',
-          orElse: () => Setting(key: '', value: purchaseCutoffEnd.toString()),
-        )
-        .value);
+    percentC = int.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-percentC',
+            orElse: () => Setting(key: '', value: percentC.toString()),
+          )
+          .value,
+    );
+    percentB = int.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-percentB',
+            orElse: () => Setting(key: '', value: percentB.toString()),
+          )
+          .value,
+    );
+    percentA = int.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-percentA',
+            orElse: () => Setting(key: '', value: percentA.toString()),
+          )
+          .value,
+    );
+    useCriticality = bool.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-useCriticality',
+            orElse: () => Setting(key: '', value: useCriticality.toString()),
+          )
+          .value,
+    );
+    purchaseCutoffStart = DateTime.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-purchaseCutoffStart',
+            orElse: () =>
+                Setting(key: '', value: purchaseCutoffStart.toString()),
+          )
+          .value,
+    );
+    purchaseCutoffEnd = DateTime.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-purchaseCutoffEnd',
+            orElse: () => Setting(key: '', value: purchaseCutoffEnd.toString()),
+          )
+          .value,
+    );
     final filterByString = settings
         .firstWhere(
           (element) => element.key == '$selectedSite-purchaseFilterBy',
           orElse: () => Setting(
-              key: '', value: WorkOrderFilterBy.currentSite.name.toString()),
+            key: '',
+            value: WorkOrderFilterBy.currentSite.name.toString(),
+          ),
         )
         .value;
     purchaseFilterBy = WorkOrderFilterBy.values.byName(filterByString);
     frequencyPeriodYears =
         purchaseCutoffEnd.difference(purchaseCutoffStart).inDays.toDouble() /
-            365;
+        365;
     notifyListeners();
   }
 
@@ -150,43 +173,48 @@ class SpareCriticalitySettingNotifier extends ChangeNotifier {
       this.purchaseCutoffStart = purchaseCutoffStart;
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-purchaseCutoffStart',
-            value: purchaseCutoffStart.toString()),
+          key: '$selectedSite-purchaseCutoffStart',
+          value: purchaseCutoffStart.toString(),
+        ),
       );
     }
     if (purchaseCutoffEnd != null) {
       this.purchaseCutoffEnd = purchaseCutoffEnd;
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-purchaseCutoffEnd',
-            value: purchaseCutoffEnd.toString()),
+          key: '$selectedSite-purchaseCutoffEnd',
+          value: purchaseCutoffEnd.toString(),
+        ),
       );
     }
     if (purchaseFilterBy != null) {
       this.purchaseFilterBy = purchaseFilterBy;
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-purchaseFilterBy',
-            value: purchaseFilterBy.name.toString()),
+          key: '$selectedSite-purchaseFilterBy',
+          value: purchaseFilterBy.name.toString(),
+        ),
       );
     }
     if (useCriticality != null) {
       this.useCriticality = useCriticality;
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-useCriticality',
-            value: useCriticality.toString()),
+          key: '$selectedSite-useCriticality',
+          value: useCriticality.toString(),
+        ),
       );
     }
-    frequencyPeriodYears = this
-            .purchaseCutoffEnd
+    frequencyPeriodYears =
+        this.purchaseCutoffEnd
             .difference(this.purchaseCutoffStart)
             .inDays
             .toDouble() /
         365;
     if (this.purchaseCutoffEnd.compareTo(this.purchaseCutoffStart) < 0) {
       throw Exception(
-          'End Date is before Start Date! Please review purchase history cutoff dates');
+        'End Date is before Start Date! Please review purchase history cutoff dates',
+      );
     }
     notifyListeners();
   }
@@ -197,11 +225,7 @@ class AbcCriticality {
   double b;
   double a;
 
-  AbcCriticality({
-    required this.c,
-    required this.b,
-    required this.a,
-  });
+  AbcCriticality({required this.c, required this.b, required this.a});
 
   double getOrdered(int i) {
     switch (i) {
@@ -217,11 +241,7 @@ class AbcCriticality {
   }
 
   List<double> ordered() {
-    return [
-      c,
-      b,
-      a,
-    ];
+    return [c, b, a];
   }
 }
 
@@ -231,7 +251,8 @@ AbcCriticality calculateRPNCutOffsSpares({
 }) {
   if (frequencyOfRPNs.keys.length < 3) {
     throw Exception(
-        'At least 3 unique values required to calculate Criticality from RPN\nCurrent values ${frequencyOfRPNs.keys.toList()}');
+      'At least 3 unique values required to calculate Criticality from RPN\nCurrent values ${frequencyOfRPNs.keys.toList()}',
+    );
   }
   List<double> sortedUniqueRPNs = frequencyOfRPNs.keys.toList();
   sortedUniqueRPNs.sort();
@@ -254,15 +275,12 @@ AbcCriticality calculateRPNCutOffsSpares({
       results2.add(result[2]);
     } catch (e) {
       throw Exception(
-          'RPN calculation failed: ${abcStrings[i]} target of ${targetPercentages.getOrdered(i)}% cannot be achieved');
+        'RPN calculation failed: ${abcStrings[i]} target of ${targetPercentages.getOrdered(i)}% cannot be achieved',
+      );
     }
   }
   debugPrint('Number of items in each group: $results2, Total: $totalRPNCount');
-  return AbcCriticality(
-    c: results[0],
-    b: results[1],
-    a: results[2],
-  );
+  return AbcCriticality(c: results[0], b: results[1], a: results[2]);
 }
 
 class SpareCriticalityNotifier extends ChangeNotifier {

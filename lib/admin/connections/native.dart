@@ -37,8 +37,9 @@ Future<File> databaseFile({required String name}) async {
     if (!file.existsSync()) {
       // copy prepopulated database
       final bytes = await fetchAndUnzipDb(
-          'https://iko-proxy.jonathanmajh.workers.dev/program.zip',
-          'program.db');
+        'https://iko-proxy.jonathanmajh.workers.dev/program.zip',
+        'program.db',
+      );
       await file.create(recursive: true);
       await file.writeAsBytes(bytes);
     }
@@ -47,7 +48,8 @@ Future<File> databaseFile({required String name}) async {
     // auto-backup function, runs every 10 minutes
     Timer.periodic(const Duration(minutes: 5), (arg) async {
       (File(dbPath)).copy(
-          '$dbPath-${DateFormat('yyyyMMddHHmmSS').format(DateTime.now())}.db');
+        '$dbPath-${DateFormat('yyyyMMddHHmmSS').format(DateTime.now())}.db',
+      );
       // remove backups past 100
       final myDir = Directory(p.join(appDir.path, 'ReliabilityApp'));
       final files = myDir.listSync();
@@ -61,10 +63,13 @@ Future<File> databaseFile({required String name}) async {
 
 /// Obtains a database connection for running drift in a Dart VM.
 DatabaseConnection connect({required String name}) {
-  return DatabaseConnection.delayed(Future(() async {
-    return NativeDatabase.createBackgroundConnection(
-        await databaseFile(name: name));
-  }));
+  return DatabaseConnection.delayed(
+    Future(() async {
+      return NativeDatabase.createBackgroundConnection(
+        await databaseFile(name: name),
+      );
+    }),
+  );
 }
 
 // Future<void> validateDatabaseSchema(GeneratedDatabase database) async {

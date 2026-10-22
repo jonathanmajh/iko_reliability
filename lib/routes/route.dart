@@ -24,21 +24,20 @@ class AppRouter extends RootStackRouter {
 
   @override
   List<AutoRoute> get routes => [
-        AutoRoute(path: "/", page: HomeRoute.page, initial: true),
-        // AutoRoute(path: "/test", page: MyTestPage),
-        // AutoRoute(path: "/readbook", page: EpubPage),
-        AutoRoute(path: "/asset", page: AssetRoute.page),
-        AutoRoute(path: "/criticality/asset", page: AssetCriticalityRoute.page),
-        AutoRoute(
-            path: "/criticality/system", page: SystemCriticalityRoute.page),
-        AutoRoute(path: "/contractor", page: ContractorRoute.page),
-        AutoRoute(path: "/pm/check", page: PmCheckRoute.page),
-        AutoRoute(path: "/pm/extract", page: PmExtractRoute.page),
-        AutoRoute(path: "/pm/update-meter", page: PmMeterUpdateRoute.page),
-        AutoRoute(path: '/criticality/spare', page: SpareCriticalityRoute.page),
-        AutoRoute(path: "/timesheet", page: TimesheetRoute.page),
-        AutoRoute(path: "/item", page: ItemRoute.page),
-        AutoRoute(path: "/pdf-link-tool", page: PdfLinkToolRoute.page),
-        AutoRoute(path: "/wo-print", page: WoPrintRoute.page),
-      ];
+    AutoRoute(path: "/", page: HomeRoute.page, initial: true),
+    // AutoRoute(path: "/test", page: MyTestPage),
+    // AutoRoute(path: "/readbook", page: EpubPage),
+    AutoRoute(path: "/asset", page: AssetRoute.page),
+    AutoRoute(path: "/criticality/asset", page: AssetCriticalityRoute.page),
+    AutoRoute(path: "/criticality/system", page: SystemCriticalityRoute.page),
+    AutoRoute(path: "/contractor", page: ContractorRoute.page),
+    AutoRoute(path: "/pm/check", page: PmCheckRoute.page),
+    AutoRoute(path: "/pm/extract", page: PmExtractRoute.page),
+    AutoRoute(path: "/pm/update-meter", page: PmMeterUpdateRoute.page),
+    AutoRoute(path: '/criticality/spare', page: SpareCriticalityRoute.page),
+    AutoRoute(path: "/timesheet", page: TimesheetRoute.page),
+    AutoRoute(path: "/item", page: ItemRoute.page),
+    AutoRoute(path: "/pdf-link-tool", page: PdfLinkToolRoute.page),
+    AutoRoute(path: "/wo-print", page: WoPrintRoute.page),
+  ];
 }

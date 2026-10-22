@@ -230,7 +230,10 @@ Future<Uint8List> buildImportTemplateWorkbook(
   }
 
   Future<void> putTaskCells(
-      int row, Map<dynamic, dynamic> task, String? stopAsset) async {
+    int row,
+    Map<dynamic, dynamic> task,
+    String? stopAsset,
+  ) async {
     final asset = stopAsset ?? fieldOf(task, 'assetnum');
     if (asset != null && asset.toString().isNotEmpty) {
       put(row, 4, TextCellValue(asset.toString().toUpperCase()), styles.free);
@@ -244,12 +247,20 @@ Future<Uint8List> buildImportTemplateWorkbook(
     }
     final jptask = fieldOf(task, 'jptask');
     if (jptask != null) {
-      put(row, 6, IntCellValue(int.tryParse(jptask.toString()) ?? 0), styles.free);
+      put(
+        row,
+        6,
+        IntCellValue(int.tryParse(jptask.toString()) ?? 0),
+        styles.free,
+      );
     }
     put(row, 7, TextCellValue(fieldOf(task, 'description') ?? ''), styles.free);
-    put(row, 8,
-        TextCellValue(stripHtml(fieldOf(task, 'description_longdescription'))),
-        styles.free);
+    put(
+      row,
+      8,
+      TextCellValue(stripHtml(fieldOf(task, 'description_longdescription'))),
+      styles.free,
+    );
   }
 
   /// Writes labour, task, route asset, materials and services rows of one PM
@@ -264,8 +275,12 @@ Future<Uint8List> buildImportTemplateWorkbook(
     // the block that holds a value in this column is then parsed as a
     // route asset
     if (store.routeStops.isNotEmpty) {
-      put(row, 3, TextCellValue('Task Route Assets (one per cell):'),
-          styles.label);
+      put(
+        row,
+        3,
+        TextCellValue('Task Route Assets (one per cell):'),
+        styles.label,
+      );
     }
 
     // labour (craft) rows
@@ -278,14 +293,21 @@ Future<Uint8List> buildImportTemplateWorkbook(
       final option = options.crafts[letter];
       final laborCode = rowValue(labor, 'LABORCODE');
       put(
-          row,
-          0,
-          TextCellValue(laborCode.isEmpty
+        row,
+        0,
+        TextCellValue(
+          laborCode.isEmpty
               ? (option ?? '${options.craftPrefix(letter)}: $letter')
-              : '${options.craftPrefix(letter)}@$laborCode'),
-          styles.dropdown);
-      put(row, 1, IntCellValue(int.tryParse(rowValue(labor, 'QUANTITY')) ?? 1),
-          styles.plain);
+              : '${options.craftPrefix(letter)}@$laborCode',
+        ),
+        styles.dropdown,
+      );
+      put(
+        row,
+        1,
+        IntCellValue(int.tryParse(rowValue(labor, 'QUANTITY')) ?? 1),
+        styles.plain,
+      );
       put(row, 2, DoubleCellValue(hoursFromRow(labor)), styles.plain);
       row++;
     }
@@ -322,8 +344,12 @@ Future<Uint8List> buildImportTemplateWorkbook(
           put(row, 6, IntCellValue(taskSeq), styles.free);
         }
         if (fieldOf(task, 'description') == null) {
-          put(row, 7, TextCellValue(fieldOf(stop, 'description') ?? ''),
-              styles.free);
+          put(
+            row,
+            7,
+            TextCellValue(fieldOf(stop, 'description') ?? ''),
+            styles.free,
+          );
         }
         row++;
       }
@@ -337,9 +363,12 @@ Future<Uint8List> buildImportTemplateWorkbook(
     row++;
     for (final material in store.jobmaterials) {
       put(row, 0, TextCellValue(rowValue(material, 'ITEMNUM')), styles.plain);
-      put(row, 1,
-          DoubleCellValue(double.tryParse(rowValue(material, 'ITEMQTY')) ?? 1),
-          styles.plain);
+      put(
+        row,
+        1,
+        DoubleCellValue(double.tryParse(rowValue(material, 'ITEMQTY')) ?? 1),
+        styles.plain,
+      );
       final cost = double.tryParse(rowValue(material, 'COST'));
       if (cost != null) {
         put(row, 2, DoubleCellValue(cost), styles.plain);
@@ -388,19 +417,25 @@ Future<Uint8List> buildImportTemplateWorkbook(
       'MONTHS': 'Months',
       'YEARS': 'Years',
     };
-    final rawFreqUnit =
-        (fieldOf(store.pm, 'frequnit') ?? '').toString().toUpperCase();
+    final rawFreqUnit = (fieldOf(store.pm, 'frequnit') ?? '')
+        .toString()
+        .toUpperCase();
     // fall back to the template's own unfilled dropdowns for missing values
     // so the parser's substring calls never fail on empty cells
-    final freqWord = freqWords[rawFreqUnit] ??
+    final freqWord =
+        freqWords[rawFreqUnit] ??
         (rawFreqUnit.isEmpty ? 'Select Frequency' : rawFreqUnit);
     final asset = fieldOf(store.pm, 'assetnum') ?? '';
     if (asset.isNotEmpty) {
       put(dataRow, 0, TextCellValue(asset), styles.plain);
     }
     put(dataRow, 1, TextCellValue(routeTypeLabel(store)), styles.dropdown);
-    put(dataRow, 2, TextCellValue(_dateOnly(fieldOf(store.pm, 'nextdate'))),
-        styles.plain);
+    put(
+      dataRow,
+      2,
+      TextCellValue(_dateOnly(fieldOf(store.pm, 'nextdate'))),
+      styles.plain,
+    );
     put(dataRow, 3, TextCellValue(store.siteid), styles.plain);
     put(dataRow, 4, TextCellValue(freqWord), styles.plain);
     final frequency = int.tryParse(fieldOf(store.pm, 'frequency') ?? '');
@@ -411,26 +446,35 @@ Future<Uint8List> buildImportTemplateWorkbook(
     // cell: placeholder texts like 'Select Work Order' would parse as
     // bogus 'Sel'/'Sele' codes when the file is loaded into pm_check
     put(
-        dataRow,
-        6,
-        TextCellValue(workType.isEmpty ? '' : options.workTypes[workType] ?? workType),
-        styles.dropdown);
+      dataRow,
+      6,
+      TextCellValue(
+        workType.isEmpty ? '' : options.workTypes[workType] ?? workType,
+      ),
+      styles.dropdown,
+    );
     put(
-        dataRow,
-        7,
-        TextCellValue(condition.isEmpty
-            ? ''
-            : options.conditions[condition] ?? condition),
-        styles.dropdown);
+      dataRow,
+      7,
+      TextCellValue(
+        condition.isEmpty ? '' : options.conditions[condition] ?? condition,
+      ),
+      styles.dropdown,
+    );
     final pmName = fieldOf(store.pm, 'description') ?? store.pmnum;
     if (pmName.isNotEmpty) {
       put(dataRow, 8, TextCellValue(pmName), styles.plain);
     }
-    put(dataRow, 9,
-        TextCellValue(route == null || route.isEmpty
+    put(
+      dataRow,
+      9,
+      TextCellValue(
+        route == null || route.isEmpty
             ? 'Select Route (Optional)'
-            : fieldOf(store.route!, 'description') ?? ''),
-        styles.route);
+            : fieldOf(store.route!, 'description') ?? '',
+      ),
+      styles.route,
+    );
 
     // the existing PM number as reference beside the name (K8, col 10);
     // nothing is written on the number row below (I9/J9): a route code
@@ -450,8 +494,12 @@ Future<Uint8List> buildImportTemplateWorkbook(
     put(base + 4, 3, TextCellValue('Replacement (ONLY for LC1)'), styles.label);
     put(base + 4, 4, TextCellValue('Job Task:'), styles.label);
     put(base + 4, 9, TextCellValue('IKO PM History Notes'), styles.label);
-    put(base + 5, 0, TextCellValue('Craft @ (Optional) Labour Code'),
-        styles.label);
+    put(
+      base + 5,
+      0,
+      TextCellValue('Craft @ (Optional) Labour Code'),
+      styles.label,
+    );
     put(base + 5, 1, TextCellValue('Quantity'), styles.labelPlain);
     put(base + 5, 2, TextCellValue('Hours'), styles.labelPlain);
     put(base + 5, 4, TextCellValue('Child Route Assets:'), styles.free);

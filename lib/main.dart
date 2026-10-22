@@ -86,11 +86,7 @@ Future<void> main(List<String> args) async {
     );
   };
   PlatformDispatcher.instance.onError = (exception, stackTrace) {
-    logger?.f(
-      "Unhandled Exception",
-      error: exception,
-      stackTrace: stackTrace,
-    );
+    logger?.f("Unhandled Exception", error: exception, stackTrace: stackTrace);
     return false;
   };
   numberNotifier.clear();
@@ -104,13 +100,7 @@ Future<void> main(List<String> args) async {
   // Resolve the update feed and bind it to Velopack while the app loads;
   // checkForUpdate waits for this to complete.
   unawaited(initializeAppUpdates());
-  runApp(
-    MyApp(
-      settingsNotifier,
-      selectedSiteNotifier,
-      themeManager,
-    ),
-  );
+  runApp(MyApp(settingsNotifier, selectedSiteNotifier, themeManager));
   // Pass context to checkForUpdate via WidgetsBinding
   WidgetsBinding.instance.addPostFrameCallback((_) {
     final context = navigatorKey.currentContext;
@@ -123,8 +113,12 @@ Future<void> main(List<String> args) async {
 /// The root widget of the IKO Reliability Maximo Tool application.
 class MyApp extends StatelessWidget {
   /// Constructs the app with required notifiers and theme manager.
-  MyApp(this.settingsNotifier, this.selectedSiteNotifier, this.themeManager,
-      {super.key});
+  MyApp(
+    this.settingsNotifier,
+    this.selectedSiteNotifier,
+    this.themeManager, {
+    super.key,
+  });
   final _appRouter = AppRouter(navigatorKey: navigatorKey);
   final SettingsNotifier settingsNotifier;
   final SelectedSiteNotifier selectedSiteNotifier;
@@ -133,57 +127,62 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => TemplateNotifier()),
-          ChangeNotifierProvider(create: (context) => ExtractNotifier()),
-          ChangeNotifierProvider(create: (context) => UploadNotifier()),
-          ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
-          ChangeNotifierProvider(create: (context) => settingsNotifier),
-          ChangeNotifierProvider(create: (context) => themeManager),
-          //set initial brightness according to system settings
-          ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
-          ChangeNotifierProvider(
-              create: (context) => AssetCriticalityNotifier()),
-          ChangeNotifierProvider(create: (context) => AssetCreationNotifier()),
-          ChangeNotifierProvider(
-              create: (context) => AssetCriticalitySettingsNotifier()),
-          ChangeNotifierProvider(
-              create: (context) => SpareCriticalitySettingNotifier()),
-          ChangeNotifierProvider(
-              create: (context) => SpareCriticalityNotifier()),
-          ChangeNotifierProvider(create: (context) => AssetStatusNotifier()),
-          ChangeNotifierProvider(create: (context) => selectedSiteNotifier),
-          ChangeNotifierProvider(create: (context) => AssetOverrideNotifier()),
-          ChangeNotifierProvider(create: (context) => SpareOverrideNotifier()),
-          ChangeNotifierProvider(
-              create: (context) => SystemCriticalityNotifier()),
-          ChangeNotifierProvider(create: (context) => ItemNotifier()),
-        ],
-        child: Builder(
-          builder: (context) {
-            return MaterialApp.router(
-              routerConfig: _appRouter.config(),
-              title: 'IKO Flutter Reliability',
-              theme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
-              ),
-              //sets color for theme
-              darkTheme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: const Color(0xFFFF0000),
-                brightness: Brightness.dark,
-              ),
-              themeMode: Provider.of<ThemeManager>(context).theme,
-            );
-          },
-        ));
+      providers: [
+        ChangeNotifierProvider(create: (context) => TemplateNotifier()),
+        ChangeNotifierProvider(create: (context) => ExtractNotifier()),
+        ChangeNotifierProvider(create: (context) => UploadNotifier()),
+        ChangeNotifierProvider(create: (context) => MaximoServerNotifier()),
+        ChangeNotifierProvider(create: (context) => settingsNotifier),
+        ChangeNotifierProvider(create: (context) => themeManager),
+        //set initial brightness according to system settings
+        ChangeNotifierProvider(create: (context) => ProcessStateNotifier()),
+        ChangeNotifierProvider(create: (context) => AssetCriticalityNotifier()),
+        ChangeNotifierProvider(create: (context) => AssetCreationNotifier()),
+        ChangeNotifierProvider(
+          create: (context) => AssetCriticalitySettingsNotifier(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SpareCriticalitySettingNotifier(),
+        ),
+        ChangeNotifierProvider(create: (context) => SpareCriticalityNotifier()),
+        ChangeNotifierProvider(create: (context) => AssetStatusNotifier()),
+        ChangeNotifierProvider(create: (context) => selectedSiteNotifier),
+        ChangeNotifierProvider(create: (context) => AssetOverrideNotifier()),
+        ChangeNotifierProvider(create: (context) => SpareOverrideNotifier()),
+        ChangeNotifierProvider(
+          create: (context) => SystemCriticalityNotifier(),
+        ),
+        ChangeNotifierProvider(create: (context) => ItemNotifier()),
+      ],
+      child: Builder(
+        builder: (context) {
+          return MaterialApp.router(
+            routerConfig: _appRouter.config(),
+            title: 'IKO Flutter Reliability',
+            theme: ThemeData(
+              useMaterial3: true,
+              colorSchemeSeed: const Color(0xFFFF0000),
+            ),
+            //sets color for theme
+            darkTheme: ThemeData(
+              useMaterial3: true,
+              colorSchemeSeed: const Color(0xFFFF0000),
+              brightness: Brightness.dark,
+            ),
+            themeMode: Provider.of<ThemeManager>(context).theme,
+          );
+        },
+      ),
+    );
   }
 }
 
 /// Loads application settings from the database and applies them to notifiers.
-Future<void> loadAppSettings(SelectedSiteNotifier selectedSiteNotifier,
-    ThemeManager themeManager, SettingsNotifier settingsNotifier) async {
+Future<void> loadAppSettings(
+  SelectedSiteNotifier selectedSiteNotifier,
+  ThemeManager themeManager,
+  SettingsNotifier settingsNotifier,
+) async {
   logger?.d('Loading App Settings Before Start');
   final settings = await database!.getSettings();
   final selectedSite = settings
@@ -193,19 +192,22 @@ Future<void> loadAppSettings(SelectedSiteNotifier selectedSiteNotifier,
       )
       .value;
   selectedSiteNotifier.selectedSite = selectedSite;
-  final darkMode = bool.parse(settings
-      .firstWhere(
-        (element) => element.key == 'darkMode',
-        orElse: () => const Setting(key: '', value: 'false'),
-      )
-      .value);
+  final darkMode = bool.parse(
+    settings
+        .firstWhere(
+          (element) => element.key == 'darkMode',
+          orElse: () => const Setting(key: '', value: 'false'),
+        )
+        .value,
+  );
   themeManager.setDarkTheme(darkMode);
-  final isAdmin = bool.parse(settings
-      .firstWhere(
-        (element) => element.key == 'isAdmin',
-        orElse: () => const Setting(key: '', value: 'false'),
-      )
-      .value);
+  final isAdmin = bool.parse(
+    settings
+        .firstWhere(
+          (element) => element.key == 'isAdmin',
+          orElse: () => const Setting(key: '', value: 'false'),
+        )
+        .value,
+  );
   settingsNotifier.setAdmin(isAdmin);
 }
-

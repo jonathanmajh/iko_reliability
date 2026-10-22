@@ -33,12 +33,15 @@ class PMName {
 }
 
 ///Auto-generate name for PM
-Future<PMName> generateName(ParsedTemplate pmdetails,
-    String maximoServerSelected, bool includeFrequency) async {
-// validate the template's dropdown fields against the value lists: a
-// blank field (unfilled dropdown, e.g. where the extracted PM had no Work
-// Order Type / Stopped-Running) or an unknown value must not run through
-// generation, pm_check reports it as a template error instead
+Future<PMName> generateName(
+  ParsedTemplate pmdetails,
+  String maximoServerSelected,
+  bool includeFrequency,
+) async {
+  // validate the template's dropdown fields against the value lists: a
+  // blank field (unfilled dropdown, e.g. where the extracted PM had no Work
+  // Order Type / Stopped-Running) or an unknown value must not run through
+  // generation, pm_check reports it as a template error instead
   if (pmdetails.workOrderType == 'LC1') {
     // the PM request template lists life cycle as 'LC1', Maximo uses 'LIF'
     pmdetails.workOrderType = 'LIF';
@@ -46,12 +49,14 @@ Future<PMName> generateName(ParsedTemplate pmdetails,
   final workOrderType = pmdetails.workOrderType ?? '';
   if (!workType.containsKey(workOrderType)) {
     throw Exception(
-        'Work Order Type "${workOrderType.isEmpty ? '(blank)' : workOrderType}" is not in the value list, must be one of: ${workType.keys.join(', ')}');
+      'Work Order Type "${workOrderType.isEmpty ? '(blank)' : workOrderType}" is not in the value list, must be one of: ${workType.keys.join(', ')}',
+    );
   }
   final processCondition = pmdetails.processCondition ?? '';
   if (!processConditions.contains(processCondition)) {
     throw Exception(
-        'Stopped/Running "${processCondition.isEmpty ? '(blank)' : processCondition}" is not in the value list, must be one of: ${processConditions.join(', ')}');
+      'Stopped/Running "${processCondition.isEmpty ? '(blank)' : processCondition}" is not in the value list, must be one of: ${processConditions.join(', ')}',
+    );
   }
   String number = '';
   String name = '';
@@ -84,14 +89,14 @@ Future<PMName> generateName(ParsedTemplate pmdetails,
   // number, name | XXXXX asset number, !!! duplicate counter
   String wotype = pmdetails.workOrderType!.substring(0, 3);
 
-// add frequency details if pm
+  // add frequency details if pm
   if (pmdetails.frequency != null && includeFrequency) {
     replaceable[1] =
         '${replaceable[1]} - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
     name =
         '$name - ${pmdetails.frequency} ${freqUnitToString[pmdetails.frequencyUnit]}';
   }
-// add work order type
+  // add work order type
   if (wotype != 'LIF') {
     number = '$number$wotype';
     name = '$name - ${workType[wotype]}';
@@ -126,7 +131,10 @@ Future<PMName> generateName(ParsedTemplate pmdetails,
     }
   }
   final counter = await findAvailablePMNumber(
-      number, pmdetails.siteId!, maximoServerSelected);
+    number,
+    pmdetails.siteId!,
+    maximoServerSelected,
+  );
   NumberFormat formatter = NumberFormat("0" * '|'.allMatches(number).length);
   number = number.replaceAll(RegExp(r'\|+'), formatter.format(counter));
   name = name.replaceAll(RegExp(r'\|+'), numberToLetter(counter));
@@ -155,11 +163,12 @@ Future<String> findAvailableRouteCode(
   String routeNumber = '$routeCode${"$counter".padLeft(3, "0")}';
   bool unAvailable =
       await existRouteNumberMaximo(routeNumber, siteID, server) ||
-          existRouteNumberCache(routeNumber, siteID);
+      existRouteNumberCache(routeNumber, siteID);
   while (unAvailable) {
     counter++;
     routeNumber = '$routeCode${"$counter".padLeft(3, "0")}';
-    unAvailable = await existRouteNumberMaximo(routeNumber, siteID, server) ||
+    unAvailable =
+        await existRouteNumberMaximo(routeNumber, siteID, server) ||
         existRouteNumberCache(routeNumber, siteID);
   }
   return routeNumber;
@@ -179,10 +188,13 @@ Future<int> findAvailablePMNumber(
   int counter = 0;
   while (existPM || existJP || existRoute || counter == 0) {
     counter++;
-    NumberFormat formatter =
-        NumberFormat("0" * '|'.allMatches(pmNumber).length);
-    var pmNumberTemp =
-        pmNumber.replaceAll(RegExp(r'\|+'), formatter.format(counter));
+    NumberFormat formatter = NumberFormat(
+      "0" * '|'.allMatches(pmNumber).length,
+    );
+    var pmNumberTemp = pmNumber.replaceAll(
+      RegExp(r'\|+'),
+      formatter.format(counter),
+    );
     existPM = existPmNumberCache(pmNumberTemp, siteID);
     existJP = existJpNumberCache('$siteID$pmNumberTemp');
     existRoute = existRouteNumberCache(pmNumberTemp, siteID);

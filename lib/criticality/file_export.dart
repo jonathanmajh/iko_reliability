@@ -17,8 +17,11 @@ import '../main.dart';
 ///
 ///[contents] - String contents of the file
 ///[allowedExtentions] - list of allowed file extensions to save as
-Future<dynamic> saveFileFromString(String contents,
-    {List<String>? allowedExtensions, BuildContext? context}) async {
+Future<dynamic> saveFileFromString(
+  String contents, {
+  List<String>? allowedExtensions,
+  BuildContext? context,
+}) async {
   try {
     String? savePath;
     String? fileName;
@@ -28,7 +31,8 @@ Future<dynamic> saveFileFromString(String contents,
         lockParentWindow: true,
         type: (allowedExtensions != null) ? FileType.custom : FileType.any,
         allowedExtensions: allowedExtensions,
-        fileName: fileName ??
+        fileName:
+            fileName ??
             ((allowedExtensions != null && allowedExtensions.isNotEmpty)
                 ? '.${allowedExtensions.first}'
                 : ''),
@@ -41,23 +45,27 @@ Future<dynamic> saveFileFromString(String contents,
         int indexOfLastBackslash = savePath.lastIndexOf('\\');
         int indexOfLastPeriod = savePath.lastIndexOf(".");
         if (indexOfLastPeriod > indexOfLastBackslash) {
-          if (!allowedExtensions
-              .contains(savePath.substring(indexOfLastPeriod + 1))) {
+          if (!allowedExtensions.contains(
+            savePath.substring(indexOfLastPeriod + 1),
+          )) {
             fileName = savePath.substring(indexOfLastBackslash + 1);
             debugPrint('File type not supported');
             if (context != null) {
               await showDialog(
-                  context: navigatorKey.currentContext!,
-                  builder: (context) => AlertDialog(
-                        title: const Text('Unsupported File Type'),
-                        content: Text(
-                            'File extension must be one of the following:\n\t$allowedExtensions\nTry again.'),
-                        actions: [
-                          ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Ok'))
-                        ],
-                      ));
+                context: navigatorKey.currentContext!,
+                builder: (context) => AlertDialog(
+                  title: const Text('Unsupported File Type'),
+                  content: Text(
+                    'File extension must be one of the following:\n\t$allowedExtensions\nTry again.',
+                  ),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Ok'),
+                    ),
+                  ],
+                ),
+              );
             }
           } else {
             fileName = null;
@@ -70,8 +78,9 @@ Future<dynamic> saveFileFromString(String contents,
       //repeat filepicker if improper file type given
     } while (fileName != null);
     //add BOM header
-    await File(savePath)
-        .writeAsBytes([239, 187, 191, ...utf8.encode(contents)]);
+    await File(
+      savePath,
+    ).writeAsBytes([239, 187, 191, ...utf8.encode(contents)]);
     return true;
   } catch (e) {
     return e;
@@ -79,46 +88,57 @@ Future<dynamic> saveFileFromString(String contents,
 }
 
 ///Handles saving the data from the AssetCriticality Trinagrid into a csv file.
-Future<void> exportAssetCriticalityAsCSV(
-    {required TrinaGridStateManager stateManager,
-    required BuildContext context}) async {
-  String contents = const CsvEncoder().convert(generateTrinagrid(stateManager,
-      excludeFields: const ['hierarchy', 'action']));
-  saveFileFromString(contents, allowedExtensions: ['csv'], context: context)
-      .then((result) {
+Future<void> exportAssetCriticalityAsCSV({
+  required TrinaGridStateManager stateManager,
+  required BuildContext context,
+}) async {
+  String contents = const CsvEncoder().convert(
+    generateTrinagrid(
+      stateManager,
+      excludeFields: const ['hierarchy', 'action'],
+    ),
+  );
+  saveFileFromString(
+    contents,
+    allowedExtensions: ['csv'],
+    context: context,
+  ).then((result) {
     if (result.runtimeType == FileSystemException) {
       if (context.mounted) {
         showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                  title: const Text('Could not save file'),
-                  content: Text(result
-                      .toString()
-                      .substring(result.toString().indexOf(' ') + 1)),
-                  actions: [
-                    Center(
-                      child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Ok')),
-                    )
-                  ],
-                ));
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Could not save file'),
+            content: Text(
+              result.toString().substring(result.toString().indexOf(' ') + 1),
+            ),
+            actions: [
+              Center(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Ok'),
+                ),
+              ),
+            ],
+          ),
+        );
       }
     } else if (result == true) {
       if (context.mounted) {
         showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                  title: const Text('Save Complete'),
-                  actions: [
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Ok'),
-                      ),
-                    )
-                  ],
-                ));
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Save Complete'),
+            actions: [
+              Center(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Ok'),
+                ),
+              ),
+            ],
+          ),
+        );
       }
     }
   });

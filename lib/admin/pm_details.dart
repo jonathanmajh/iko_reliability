@@ -32,8 +32,10 @@ class _PMDetailViewState extends State<PMDetailView>
   void initState() {
     super.initState();
 
-    _tabController =
-        TabController(vsync: this, length: 3); //hard-coded tab length of 3
+    _tabController = TabController(
+      vsync: this,
+      length: 3,
+    ); //hard-coded tab length of 3
     _updateFab();
     _tabController.addListener(() {
       _updateFab();
@@ -50,13 +52,15 @@ class _PMDetailViewState extends State<PMDetailView>
     final index = _tabController.index;
     List<Widget> temp = [];
     if (index == 0) {
-      temp.add(FloatingActionButton(
-        heroTag: UniqueKey(),
-        onPressed: () {
-          _tabController.animateTo(1);
-        },
-        child: const Icon(Icons.navigate_next),
-      ));
+      temp.add(
+        FloatingActionButton(
+          heroTag: UniqueKey(),
+          onPressed: () {
+            _tabController.animateTo(1);
+          },
+          child: const Icon(Icons.navigate_next),
+        ),
+      );
     } else if (index == 1) {
       if (show) {
         final templateNotifier = context.read<TemplateNotifier>();
@@ -64,7 +68,9 @@ class _PMDetailViewState extends State<PMDetailView>
         final maximo = context.read<MaximoServerNotifier>();
         final selected = templateNotifier.getSelectedTemplate();
         final processedTemplate = templateNotifier.getProcessedTemplate(
-            selected.selectedFile!, selected.selectedTemplate!);
+          selected.selectedFile!,
+          selected.selectedTemplate!,
+        );
         temp = [
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
@@ -85,36 +91,41 @@ class _PMDetailViewState extends State<PMDetailView>
             ),
           ),
           Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-              child: FloatingActionButton.extended(
-                label: const Text('Upload'),
-                icon: const Icon(Icons.cloud_upload),
-                heroTag: UniqueKey(),
-                onPressed: () async {
-                  await generateUploadHelper(
-                    processedTemplate,
-                    templateNotifier,
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: FloatingActionButton.extended(
+              label: const Text('Upload'),
+              icon: const Icon(Icons.cloud_upload),
+              heroTag: UniqueKey(),
+              onPressed: () async {
+                await generateUploadHelper(
+                  processedTemplate,
+                  templateNotifier,
+                  selected.selectedFile!,
+                  selected.selectedTemplate!,
+                  uploadNotifier,
+                );
+                _updateFab();
+                try {
+                  await uploadPMToMaximo(
+                    maximo.maximoServerSelected,
                     selected.selectedFile!,
                     selected.selectedTemplate!,
+                    templateNotifier,
                     uploadNotifier,
                   );
-                  _updateFab();
-                  try {
-                    await uploadPMToMaximo(
-                      maximo.maximoServerSelected,
-                      selected.selectedFile!,
-                      selected.selectedTemplate!,
-                      templateNotifier,
-                      uploadNotifier,
-                    );
-                  } catch (e) {
-                    templateNotifier.addStatusMessage(selected.selectedFile!,
-                        selected.selectedTemplate!, '$e');
-                    ScaffoldMessenger.of(navigatorKey.currentContext!)
-                        .showSnackBar(SnackBar(content: Text('$e')));
-                  }
-                },
-              )),
+                } catch (e) {
+                  templateNotifier.addStatusMessage(
+                    selected.selectedFile!,
+                    selected.selectedTemplate!,
+                    '$e',
+                  );
+                  ScaffoldMessenger.of(
+                    navigatorKey.currentContext!,
+                  ).showSnackBar(SnackBar(content: Text('$e')));
+                }
+              },
+            ),
+          ),
           FloatingActionButton(
             heroTag: UniqueKey(),
             onPressed: () {
@@ -148,13 +159,14 @@ class _PMDetailViewState extends State<PMDetailView>
             ),
           ),
           Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-              child: FloatingActionButton.extended(
-                heroTag: UniqueKey(),
-                onPressed: () {},
-                label: const Text('Import'),
-                icon: const Icon(Icons.delete_sweep),
-              )),
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: FloatingActionButton.extended(
+              heroTag: UniqueKey(),
+              onPressed: () {},
+              label: const Text('Import'),
+              icon: const Icon(Icons.delete_sweep),
+            ),
+          ),
           FloatingActionButton(
             heroTag: UniqueKey(),
             onPressed: () {
@@ -182,27 +194,19 @@ class _PMDetailViewState extends State<PMDetailView>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TemplateNotifier>(builder: (context, value, child) {
-      final selected = value.getSelectedTemplate();
-      if (selected.selectedFile == null) {
-        return const Text('Select a template to see details');
-      }
-      return Scaffold(
+    return Consumer<TemplateNotifier>(
+      builder: (context, value, child) {
+        final selected = value.getSelectedTemplate();
+        if (selected.selectedFile == null) {
+          return const Text('Select a template to see details');
+        }
+        return Scaffold(
           appBar: TabBar(
             controller: _tabController,
             tabs: [
-              Tab(
-                  icon: Icon(
-                Icons.tune,
-              )),
-              Tab(
-                  icon: Icon(
-                Icons.cloud_upload,
-              )),
-              Tab(
-                  icon: Icon(
-                Icons.edit_note,
-              )),
+              Tab(icon: Icon(Icons.tune)),
+              Tab(icon: Icon(Icons.cloud_upload)),
+              Tab(icon: Icon(Icons.edit_note)),
             ],
           ),
           floatingActionButton: Column(
@@ -226,8 +230,10 @@ class _PMDetailViewState extends State<PMDetailView>
                 ],
               );
             },
-          ));
-    });
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -246,11 +252,16 @@ List<Widget> generateUploadDetailsList(
     //table header
     String header = tableHeaders[table]!.join(',');
     List<Widget> rows = [];
-    rows.add(Container(
+    rows.add(
+      Container(
         width: double.maxFinite,
         color: themeData.colorScheme.onSurface,
-        child: Text((header),
-            style: TextStyle(color: themeData.colorScheme.surface))));
+        child: Text(
+          (header),
+          style: TextStyle(color: themeData.colorScheme.surface),
+        ),
+      ),
+    );
     //table details
     if (uploadDetails[table]!.isNotEmpty) {
       for (final row in uploadDetails[table]!) {
@@ -263,41 +274,47 @@ List<Widget> generateUploadDetailsList(
           } else if (row.last == '+') {
             info++;
           }
-          rows.add(Container(
+          rows.add(
+            Container(
               width: double.maxFinite,
               color: textColor,
               child: Text(
                 row.join(','),
                 style: TextStyle(
-                    fontFamily: 'RobotoMono',
-                    color: themeData.colorScheme.onSurface),
-              )));
+                  fontFamily: 'RobotoMono',
+                  color: themeData.colorScheme.onSurface,
+                ),
+              ),
+            ),
+          );
         } else {
-          rows.add(Text(
-            row.join(','),
-            style: TextStyle(
+          rows.add(
+            Text(
+              row.join(','),
+              style: TextStyle(
                 fontFamily: 'RobotoMono',
-                color: themeData.colorScheme.onSurface),
-          ));
+                color: themeData.colorScheme.onSurface,
+              ),
+            ),
+          );
         }
       }
-      cards.add(Card(
+      cards.add(
+        Card(
           child: ExpansionTile(
-        title: Text(table),
-        expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        children: rows,
-      )));
+            title: Text(table),
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            children: rows,
+          ),
+        ),
+      );
     }
   }
   cards.add(Text('Errors: $errors, Warnings: $warnings, Uploaded: $info'));
   return cards;
 }
 
-const status = {
-  '+': Colors.green,
-  '~': Colors.yellow,
-  '!': Colors.red,
-};
+const status = {'+': Colors.green, '~': Colors.yellow, '!': Colors.red};
 
 class PMDetails extends StatefulWidget {
   const PMDetails({super.key});
@@ -331,28 +348,35 @@ class _PMDetailsState extends State<PMDetails> {
   @override
   Widget build(BuildContext context) {
     return Consumer<TemplateNotifier>(
-        builder: (context, templateNotifier, child) {
-      final selected = templateNotifier.getSelectedTemplate();
-      if (selected.selectedFile == null) {
-        return const Text('Select a template to see details');
-      }
-      final processedTemplate = templateNotifier.getProcessedTemplate(
-          selected.selectedFile!, selected.selectedTemplate!);
-      pmNameFieldController.text = processedTemplate?.description ?? 'TBD...';
-      suggestNameFieldController.text = templateNotifier.getTemplateSuggestName(
-              selected.selectedFile!, selected.selectedTemplate!) ??
-          '';
-      autoNameFieldController.text = templateNotifier.getTemplateAutoName(
-          selected.selectedFile!, selected.selectedTemplate!);
-      fmecaPackageController.text =
-          processedTemplate?.jobplan.ikoPmpackage ?? '';
-      pmNumberFieldController.text = processedTemplate?.pmNumber ?? 'TBD...';
-      routeNameFieldController.text =
-          processedTemplate?.route?.description ?? '';
-      routeNumberFieldController.text =
-          processedTemplate?.route?.routeNumber ?? '';
+      builder: (context, templateNotifier, child) {
+        final selected = templateNotifier.getSelectedTemplate();
+        if (selected.selectedFile == null) {
+          return const Text('Select a template to see details');
+        }
+        final processedTemplate = templateNotifier.getProcessedTemplate(
+          selected.selectedFile!,
+          selected.selectedTemplate!,
+        );
+        pmNameFieldController.text = processedTemplate?.description ?? 'TBD...';
+        suggestNameFieldController.text =
+            templateNotifier.getTemplateSuggestName(
+              selected.selectedFile!,
+              selected.selectedTemplate!,
+            ) ??
+            '';
+        autoNameFieldController.text = templateNotifier.getTemplateAutoName(
+          selected.selectedFile!,
+          selected.selectedTemplate!,
+        );
+        fmecaPackageController.text =
+            processedTemplate?.jobplan.ikoPmpackage ?? '';
+        pmNumberFieldController.text = processedTemplate?.pmNumber ?? 'TBD...';
+        routeNameFieldController.text =
+            processedTemplate?.route?.description ?? '';
+        routeNumberFieldController.text =
+            processedTemplate?.route?.routeNumber ?? '';
 
-      return ListView(
+        return ListView(
           padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
           primary: false,
           children: [
@@ -360,24 +384,25 @@ class _PMDetailsState extends State<PMDetails> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Expanded(
-                    child: TextField(
-                        controller: pmNumberFieldController,
-                        decoration: InputDecoration(
-                          labelText:
-                              'PM Number (NO DUPLICATE CHECK IF CHANGED)',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              templateNotifier.setPMNumber(
-                                pmNumberFieldController.text,
-                                selected.selectedFile!,
-                                selected.selectedTemplate!,
-                                // hasRouteCode,
-                              );
-                            },
-                            icon: const Icon(Icons.save),
-                          ),
-                        ))),
+                  child: TextField(
+                    controller: pmNumberFieldController,
+                    decoration: InputDecoration(
+                      labelText: 'PM Number (NO DUPLICATE CHECK IF CHANGED)',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          templateNotifier.setPMNumber(
+                            pmNumberFieldController.text,
+                            selected.selectedFile!,
+                            selected.selectedTemplate!,
+                            // hasRouteCode,
+                          );
+                        },
+                        icon: const Icon(Icons.save),
+                      ),
+                    ),
+                  ),
+                ),
                 VerticalDivider(
                   width: 10,
                   thickness: 1,
@@ -386,22 +411,24 @@ class _PMDetailsState extends State<PMDetails> {
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
                 Expanded(
-                    child: TextField(
-                  controller: fmecaPackageController,
-                  decoration: InputDecoration(
-                    labelText: 'Edit FMECA Package',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        templateNotifier.setPMPackage(
+                  child: TextField(
+                    controller: fmecaPackageController,
+                    decoration: InputDecoration(
+                      labelText: 'Edit FMECA Package',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          templateNotifier.setPMPackage(
                             fmecaPackageController.text,
                             selected.selectedFile!,
-                            selected.selectedTemplate!);
-                      },
-                      icon: const Icon(Icons.save),
+                            selected.selectedTemplate!,
+                          );
+                        },
+                        icon: const Icon(Icons.save),
+                      ),
                     ),
                   ),
-                )),
+                ),
               ],
             ),
             Divider(
@@ -416,54 +443,62 @@ class _PMDetailsState extends State<PMDetails> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Expanded(
-                    child: TextField(
-                        controller: routeNameFieldController,
-                        decoration: InputDecoration(
-                            labelText: 'Edit Route Name',
-                            border: const OutlineInputBorder(),
-                            suffixIcon: IconButton(
-                              onPressed: () {
-                                templateNotifier.setRouteName(
-                                  routeNameFieldController.text,
-                                  selected.selectedFile!,
-                                  selected.selectedTemplate!,
-                                  // hasRouteCode,
-                                );
-                              },
-                              icon: const Icon(Icons.save),
-                            )))),
-                const Icon(Icons.link),
-                Expanded(
-                    child: TextField(
-                  controller: routeNumberFieldController,
-                  decoration: InputDecoration(
-                    labelText: 'Edit Route Code',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        if (routeNumberFieldController.text.isNotEmpty &&
-                            routeNameFieldController.text.isNotEmpty) {
-                          templateNotifier.setRouteInfo(
-                            routeNumberFieldController.text,
+                  child: TextField(
+                    controller: routeNameFieldController,
+                    decoration: InputDecoration(
+                      labelText: 'Edit Route Name',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          templateNotifier.setRouteName(
                             routeNameFieldController.text,
                             selected.selectedFile!,
                             selected.selectedTemplate!,
-                            Provider.of<MaximoServerNotifier>(context,
-                                    listen: false)
-                                .maximoServerSelected,
-                            Provider.of<SettingsNotifier>(context,
-                                            listen: false)
-                                        .getSetting(ApplicationSetting
-                                            .includeFrequencyInDescriptions)
-                                    as bool? ??
-                                true,
+                            // hasRouteCode,
                           );
-                        }
-                      },
-                      icon: const Icon(Icons.sync),
+                        },
+                        icon: const Icon(Icons.save),
+                      ),
                     ),
                   ),
-                )),
+                ),
+                const Icon(Icons.link),
+                Expanded(
+                  child: TextField(
+                    controller: routeNumberFieldController,
+                    decoration: InputDecoration(
+                      labelText: 'Edit Route Code',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          if (routeNumberFieldController.text.isNotEmpty &&
+                              routeNameFieldController.text.isNotEmpty) {
+                            templateNotifier.setRouteInfo(
+                              routeNumberFieldController.text,
+                              routeNameFieldController.text,
+                              selected.selectedFile!,
+                              selected.selectedTemplate!,
+                              Provider.of<MaximoServerNotifier>(
+                                context,
+                                listen: false,
+                              ).maximoServerSelected,
+                              Provider.of<SettingsNotifier>(
+                                        context,
+                                        listen: false,
+                                      ).getSetting(
+                                        ApplicationSetting
+                                            .includeFrequencyInDescriptions,
+                                      )
+                                      as bool? ??
+                                  true,
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.sync),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
             Divider(
@@ -475,24 +510,25 @@ class _PMDetailsState extends State<PMDetails> {
               color: Theme.of(context).scaffoldBackgroundColor,
             ),
             TextField(
-                controller: pmNameFieldController,
-                maxLength: 100,
-                maxLengthEnforcement: MaxLengthEnforcement.none,
-                decoration: InputDecoration(
-                  labelText: 'Edit PM Name',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      templateNotifier.setPMName(
-                        pmNameFieldController.text,
-                        selected.selectedFile!,
-                        selected.selectedTemplate!,
-                        // hasRouteCode,
-                      );
-                    },
-                    icon: const Icon(Icons.save),
-                  ),
-                )),
+              controller: pmNameFieldController,
+              maxLength: 100,
+              maxLengthEnforcement: MaxLengthEnforcement.none,
+              decoration: InputDecoration(
+                labelText: 'Edit PM Name',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    templateNotifier.setPMName(
+                      pmNameFieldController.text,
+                      selected.selectedFile!,
+                      selected.selectedTemplate!,
+                      // hasRouteCode,
+                    );
+                  },
+                  icon: const Icon(Icons.save),
+                ),
+              ),
+            ),
             Divider(
               // spacer
               height: 10,
@@ -505,37 +541,40 @@ class _PMDetailsState extends State<PMDetails> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Expanded(
-                    child: TextFormField(
-                        controller: suggestNameFieldController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: 'Suggested PM Name',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            tooltip: "Use suggested name",
-                            onPressed: () {
-                              if (suggestNameFieldController.text != '') {
-                                pmNameFieldController.text =
-                                    suggestNameFieldController.text;
-                                if (routeNameFieldController.text.isNotEmpty) {
-                                  routeNameFieldController.text =
-                                      suggestNameFieldController.text;
-                                }
-                                templateNotifier.setPMName(
-                                    pmNameFieldController.text,
-                                    selected.selectedFile!,
-                                    selected.selectedTemplate!);
-                                templateNotifier.setRouteName(
-                                  routeNameFieldController.text,
-                                  selected.selectedFile!,
-                                  selected.selectedTemplate!,
-                                  // hasRouteCode,
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.eject),
-                          ),
-                        ))),
+                  child: TextFormField(
+                    controller: suggestNameFieldController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Suggested PM Name',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        tooltip: "Use suggested name",
+                        onPressed: () {
+                          if (suggestNameFieldController.text != '') {
+                            pmNameFieldController.text =
+                                suggestNameFieldController.text;
+                            if (routeNameFieldController.text.isNotEmpty) {
+                              routeNameFieldController.text =
+                                  suggestNameFieldController.text;
+                            }
+                            templateNotifier.setPMName(
+                              pmNameFieldController.text,
+                              selected.selectedFile!,
+                              selected.selectedTemplate!,
+                            );
+                            templateNotifier.setRouteName(
+                              routeNameFieldController.text,
+                              selected.selectedFile!,
+                              selected.selectedTemplate!,
+                              // hasRouteCode,
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.eject),
+                      ),
+                    ),
+                  ),
+                ),
                 VerticalDivider(
                   width: 10,
                   thickness: 1,
@@ -544,45 +583,62 @@ class _PMDetailsState extends State<PMDetails> {
                   color: Theme.of(context).scaffoldBackgroundColor,
                 ),
                 Expanded(
-                    child: TextFormField(
-                  controller: autoNameFieldController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: 'Auto-Generated PM Name',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      tooltip: "Use auto-generated name",
-                      onPressed: () {
-                        pmNameFieldController.text =
-                            autoNameFieldController.text;
-                        templateNotifier.setPMName(pmNameFieldController.text,
-                            selected.selectedFile!, selected.selectedTemplate!);
-                      },
-                      icon: const Icon(Icons.eject),
+                  child: TextFormField(
+                    controller: autoNameFieldController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Auto-Generated PM Name',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        tooltip: "Use auto-generated name",
+                        onPressed: () {
+                          pmNameFieldController.text =
+                              autoNameFieldController.text;
+                          templateNotifier.setPMName(
+                            pmNameFieldController.text,
+                            selected.selectedFile!,
+                            selected.selectedTemplate!,
+                          );
+                        },
+                        icon: const Icon(Icons.eject),
+                      ),
                     ),
                   ),
-                )),
+                ),
               ],
             ),
-          ]);
-    });
+          ],
+        );
+      },
+    );
   }
 }
 
-Widget uploadDetailsTab(TemplateNotifier templateNotifier,
-    UploadNotifier uploadNotifier, BuildContext context) {
+Widget uploadDetailsTab(
+  TemplateNotifier templateNotifier,
+  UploadNotifier uploadNotifier,
+  BuildContext context,
+) {
   final selected = templateNotifier.getSelectedTemplate();
   final details = generateUploadDetailsList(
     uploadNotifier.getUploadDetails(
-        selected.selectedFile!, selected.selectedTemplate!),
-    (['done', 'uploading', 'retry'].contains(templateNotifier.getStatus(
-            selected.selectedFile!, selected.selectedTemplate!)))
+      selected.selectedFile!,
+      selected.selectedTemplate!,
+    ),
+    (['done', 'uploading', 'retry'].contains(
+          templateNotifier.getStatus(
+            selected.selectedFile!,
+            selected.selectedTemplate!,
+          ),
+        ))
         ? true
         : false,
     context,
   );
   final statusMessages = templateNotifier.getStatusMessages(
-      selected.selectedFile!, selected.selectedTemplate!);
+    selected.selectedFile!,
+    selected.selectedTemplate!,
+  );
   return ListView(
     padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
     primary: false,
@@ -595,13 +651,9 @@ Widget uploadDetailsTab(TemplateNotifier templateNotifier,
                   ListView.builder(
                     shrinkWrap: true,
                     itemCount: statusMessages.length,
-                    prototypeItem: ListTile(
-                      title: Text(statusMessages.first),
-                    ),
+                    prototypeItem: ListTile(title: Text(statusMessages.first)),
                     itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(statusMessages[index]),
-                      );
+                      return ListTile(title: Text(statusMessages[index]));
                     },
                   ),
                 ],
@@ -614,23 +666,28 @@ Widget uploadDetailsTab(TemplateNotifier templateNotifier,
           subtitle: details.removeLast(),
           children: details,
         ),
-      )
+      ),
     ],
   );
 }
 
 void copyExportDetails(
-    TemplateNotifier templateNotifier, UploadNotifier uploadNotifier) {
+  TemplateNotifier templateNotifier,
+  UploadNotifier uploadNotifier,
+) {
   final selected = templateNotifier.getSelectedTemplate();
   final details = uploadNotifier.getUploadDetails(
-      selected.selectedFile!, selected.selectedTemplate!);
+    selected.selectedFile!,
+    selected.selectedTemplate!,
+  );
   String allData = '';
   for (final tables in details.keys) {
     final headerRow = tableHeaders[tables]!.cast<dynamic>();
     final detailRows = details[tables]!
         .map((row) => row.cast<dynamic>())
         .toList(growable: false);
-    allData = '''
+    allData =
+        '''
 $allData\n
 $tables
 ${CsvEncoder().convert([headerRow])}
@@ -658,10 +715,6 @@ Future<void> generateUploadHelper(
         templateNotifier.addStatusMessage(file, template, msg[0]);
       }
     }
-    uploadNotifier.setUploadDetails(
-      file,
-      template,
-      upload,
-    );
+    uploadNotifier.setUploadDetails(file, template, upload);
   }
 }

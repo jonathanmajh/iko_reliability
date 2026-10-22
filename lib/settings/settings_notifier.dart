@@ -43,7 +43,8 @@ class SettingsNotifier extends ChangeNotifier {
       //load default settings
       changeSettings(ApplicationSetting.defaultSettings);
       await Future.delayed(
-          const Duration(seconds: 1)); //to give time for settings to load
+        const Duration(seconds: 1),
+      ); //to give time for settings to load
     }
   }
 
@@ -68,8 +69,10 @@ class SettingsNotifier extends ChangeNotifier {
     try {
       List<Setting> databaseSettings = (await database!.getSettings());
       //get a list of settings keys in database
-      List<String> databaseKeys =
-          List<String>.filled(databaseSettings.length, '');
+      List<String> databaseKeys = List<String>.filled(
+        databaseSettings.length,
+        '',
+      );
       for (int i = 0; i < databaseKeys.length; i++) {
         databaseKeys[i] = databaseSettings[i].key;
       }
@@ -81,8 +84,12 @@ class SettingsNotifier extends ChangeNotifier {
         if (index == -1) {
           // Add missing settings using their default values.
           currentSettings[setting] = setting.defaultValue;
-          missingSettings.add(Setting(
-              key: setting.toString(), value: setting.defaultValue.toString()));
+          missingSettings.add(
+            Setting(
+              key: setting.toString(),
+              value: setting.defaultValue.toString(),
+            ),
+          );
           continue;
         }
 
@@ -96,7 +103,8 @@ class SettingsNotifier extends ChangeNotifier {
               currentSettings[setting] = false;
             } else {
               throw Exception(
-                  'Unexpected value for setting [${setting.keyString}]. Should be of type ${setting.dataType}');
+                'Unexpected value for setting [${setting.keyString}]. Should be of type ${setting.dataType}',
+              );
             }
             break;
           case 'bool?':
@@ -108,7 +116,8 @@ class SettingsNotifier extends ChangeNotifier {
               currentSettings[setting] = null;
             } else {
               throw Exception(
-                  'Unexpected value for setting [${setting.keyString}]. Should be of type ${setting.dataType}');
+                'Unexpected value for setting [${setting.keyString}]. Should be of type ${setting.dataType}',
+              );
             }
             break;
           case 'String':
@@ -131,29 +140,32 @@ class SettingsNotifier extends ChangeNotifier {
             if (tempSetting.value == '' || tempSetting.value == 'null') {
               currentSettings[setting] = null;
             } else {
-              currentSettings[setting] = DateTime.parse(tempSetting.value
-                  .substring(0,
-                      tempSetting.value.indexOf(' '))); //remove time component
+              currentSettings[setting] = DateTime.parse(
+                tempSetting.value.substring(0, tempSetting.value.indexOf(' ')),
+              ); //remove time component
             }
             break;
           case 'Set<String>':
             try {
               Set<String> strSet = {};
-              for (String str in tempSetting.value
-                  .substring(1, tempSetting.value.length - 1)
-                  .split(', ')) {
+              for (String str
+                  in tempSetting.value
+                      .substring(1, tempSetting.value.length - 1)
+                      .split(', ')) {
                 if (str.isNotEmpty) strSet.add(str);
               }
               currentSettings[setting] = strSet;
             } catch (e) {
               throw Exception(
-                  'String ${tempSetting.value} is not recognized for type [${setting.dataType}] for setting [${setting.keyString}]');
+                'String ${tempSetting.value} is not recognized for type [${setting.dataType}] for setting [${setting.keyString}]',
+              );
             }
             break;
 
           default:
             throw Exception(
-                'Unexpected type [${setting.dataType}] for setting [${setting.keyString}]');
+              'Unexpected type [${setting.dataType}] for setting [${setting.keyString}]',
+            );
         }
       }
       if (missingSettings.isNotEmpty) {

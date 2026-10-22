@@ -37,21 +37,30 @@ const _demoNote =
     'object structure).';
 
 const _demoMaterials = [
-  PlannedMaterialRow('13252258',
-      description: 'Plastic film wrap 16" x 1500m (demo)',
-      qty: '1 RL',
-      binnum: 'AA-B12',
-      storeroom: 'PKG-AA'),
-  PlannedMaterialRow('C-440012',
-      description: 'Dry film lubricant spray (demo)',
-      qty: '1 EA',
-      binnum: 'SB-01',
-      storeroom: 'SB-AA'),
+  PlannedMaterialRow(
+    '13252258',
+    description: 'Plastic film wrap 16" x 1500m (demo)',
+    qty: '1 RL',
+    binnum: 'AA-B12',
+    storeroom: 'PKG-AA',
+  ),
+  PlannedMaterialRow(
+    'C-440012',
+    description: 'Dry film lubricant spray (demo)',
+    qty: '1 EA',
+    binnum: 'SB-01',
+    storeroom: 'SB-AA',
+  ),
 ];
 
 const _demoTools = [
-  PlannedToolRow('GL40FT',
-      description: 'Aerial lift, 40 ft (demo)', qty: '1', hours: '2', rate: '125.00/h'),
+  PlannedToolRow(
+    'GL40FT',
+    description: 'Aerial lift, 40 ft (demo)',
+    qty: '1',
+    hours: '2',
+    rate: '125.00/h',
+  ),
 ];
 
 /// Demo plan rows only where the tree has no live data.
@@ -73,9 +82,12 @@ Future<void> main(List<String> args) async {
     await _runFromData(dataDir);
     return;
   }
-  final key = Platform.environment['IKO_TEST2_APIKEY'] ?? _arg('--key', args) ?? '';
+  final key =
+      Platform.environment['IKO_TEST2_APIKEY'] ?? _arg('--key', args) ?? '';
   if (key.isEmpty) {
-    stderr.writeln('Missing API key: set IKO_TEST2_APIKEY or pass --key <key>.');
+    stderr.writeln(
+      'Missing API key: set IKO_TEST2_APIKEY or pass --key <key>.',
+    );
     exit(2);
   }
   final wonum = _arg('--wonum', args) ?? _defaultWonum;
@@ -83,8 +95,12 @@ Future<void> main(List<String> args) async {
 
   // OSLC helper: returns the member list of a structure query.
   Future<List<Map<String, dynamic>>> q(
-      String struct, String where, List<String> sel) async {
-    final url = '$_base$struct'
+    String struct,
+    String where,
+    List<String> sel,
+  ) async {
+    final url =
+        '$_base$struct'
         '?oslc.where=${Uri.encodeQueryComponent(where)}'
         '&oslc.select=${Uri.encodeQueryComponent(sel.join(','))}'
         '&lean=1';
@@ -96,7 +112,8 @@ Future<void> main(List<String> args) async {
       final body = await utf8.decodeStream(res);
       if (res.statusCode != 200) {
         throw Exception(
-            'HTTP ${res.statusCode} on $struct: ${body.substring(0, body.length.clamp(0, 300))}');
+          'HTTP ${res.statusCode} on $struct: ${body.substring(0, body.length.clamp(0, 300))}',
+        );
       }
       final parsed = jsonDecode(body) as Map<String, dynamic>;
       return (parsed['member'] as List<dynamic>? ?? const [])
@@ -107,43 +124,68 @@ Future<void> main(List<String> args) async {
   }
 
   // 1. parent work order with everything
-  final parentRaw =
-      (await q('mxwo', 'wonum="$wonum" and siteid="$_site"', ['*'])).first;
+  final parentRaw = (await q('mxwo', 'wonum="$wonum" and siteid="$_site"', [
+    '*',
+  ])).first;
   stdout.writeln('parent: ${parentRaw['wonum']}');
 
   // 2. tree descendants: task WOs + child WOs (parent needed for banner)
   final descend = await q('mxwo', 'parent="$wonum" and siteid="$_site"', [
-    'wonum', 'taskid', 'istask', 'description', 'status', 'worktype',
-    'wopriority', 'assetnum', 'location', 'estdur', 'targstartdate',
-    'targcompdate', 'parent',
+    'wonum',
+    'taskid',
+    'istask',
+    'description',
+    'status',
+    'worktype',
+    'wopriority',
+    'assetnum',
+    'location',
+    'estdur',
+    'targstartdate',
+    'targcompdate',
+    'parent',
   ]);
-  final childrenRaw =
-      descend.where((r) => r['istask'].toString() != 'true').toList();
+  final childrenRaw = descend
+      .where((r) => r['istask'].toString() != 'true')
+      .toList();
   stdout.writeln(
-      'tree: ${descend.length} records, ${childrenRaw.length} child work orders');
+    'tree: ${descend.length} records, ${childrenRaw.length} child work orders',
+  );
 
   // 3. all tasks of the whole tree in one in-list query
   final listForIn = ['"$wonum"', ...childrenRaw.map((k) => '"${k['wonum']}"')];
   final tasksAll = await q(
-      'mxwo',
-      'parent in [${listForIn.join(',')}] and siteid="$_site" and istask=1',
-      [
-        'wonum', 'taskid', 'parent', 'description',
-        'description_longdescription', 'status',
-      ]);
+    'mxwo',
+    'parent in [${listForIn.join(',')}] and siteid="$_site" and istask=1',
+    [
+      'wonum',
+      'taskid',
+      'parent',
+      'description',
+      'description_longdescription',
+      'status',
+    ],
+  );
   final tasksByParent = <String, List<WoTask>>{};
   for (final t in tasksAll) {
-    tasksByParent.putIfAbsent('${t['parent']}', () => []).add(WoTask(
-          wonum: '${t['wonum']}',
-          taskid: t['taskid'] == null ? null : '${t['taskid']}',
-          description: '${t['description'] ?? ''}',
-          longDesc: t['description_longdescription']?.toString(),
-          status: t['status'] == null ? null : '${t['status']}',
-        ));
+    tasksByParent
+        .putIfAbsent('${t['parent']}', () => [])
+        .add(
+          WoTask(
+            wonum: '${t['wonum']}',
+            taskid: t['taskid'] == null ? null : '${t['taskid']}',
+            description: '${t['description'] ?? ''}',
+            longDesc: t['description_longdescription']?.toString(),
+            status: t['status'] == null ? null : '${t['status']}',
+          ),
+        );
   }
   tasksByParent.updateAll((_, list) {
-    list.sort((a, b) =>
-        (int.tryParse(a.taskid ?? '') ?? 0).compareTo(int.tryParse(b.taskid ?? '') ?? 0));
+    list.sort(
+      (a, b) => (int.tryParse(a.taskid ?? '') ?? 0).compareTo(
+        int.tryParse(b.taskid ?? '') ?? 0,
+      ),
+    );
     return list;
   });
   stdout.writeln('tasks: ${tasksAll.length} across the tree');
@@ -165,17 +207,20 @@ Future<void> main(List<String> args) async {
   //    ikomxwodetail query. Child objects: WPLABOR / WPMATERIAL / WPTOOL
   //    (+ ASSIGNMENT - assignments replace planned labor on the cover
   //    when present).
-  final plan = await q('ikomxwodetail',
-      'wonum in [${listForIn.join(',')}] and siteid="$_site"', [
-    'wonum',
-    'istask',
-    'wplabor',
-    'wpmaterial',
-    'wptool',
-    'assignment',
-    // same reason as the app: bins come from INVRESERVE
-    'invreserve',
-  ]);
+  final plan = await q(
+    'ikomxwodetail',
+    'wonum in [${listForIn.join(',')}] and siteid="$_site"',
+    [
+      'wonum',
+      'istask',
+      'wplabor',
+      'wpmaterial',
+      'wptool',
+      'assignment',
+      // same reason as the app: bins come from INVRESERVE
+      'invreserve',
+    ],
+  );
   final planByWonum = <String, Map<String, dynamic>>{
     for (final r in plan) '${r['wonum']}': r,
   };
@@ -185,21 +230,23 @@ Future<void> main(List<String> args) async {
     final craft = l['craft'] == null ? '' : '${l['craft']}';
     if (code.isEmpty && craft.isEmpty) return null;
     final hrs = l['laborhrs'];
-    final hours =
-        hrs is num ? _fmtNum(hrs) : (hrs == null ? '' : '$hrs');
+    final hours = hrs is num ? _fmtNum(hrs) : (hrs == null ? '' : '$hrs');
     final skill = l['skilllevel'] == null ? '' : '${l['skilllevel']}';
     return PlannedLaborRow(code, craft: craft, skilllevel: skill, hours: hours);
   }
 
-  PlannedMaterialRow? materialFrom(Map<String, dynamic> m,
-      [Map<String, String> bins = const {}]) {
+  PlannedMaterialRow? materialFrom(
+    Map<String, dynamic> m, [
+    Map<String, String> bins = const {},
+  ]) {
     final item = m['itemnum'] == null ? '' : '${m['itemnum']}';
     final desc = m['description'] == null ? '' : '${m['description']}';
     if (item.isEmpty && desc.isEmpty) return null;
     final loc = m['location'] == null ? '' : '${m['location']}';
     final rid = '${m['reserveid'] ?? ''}';
     // BINNUM is on INVRESERVE, not WPMATERIAL (see wo_assemble.dart).
-    final bin = (rid.isNotEmpty && rid != '0' ? bins[rid] : null) ??
+    final bin =
+        (rid.isNotEmpty && rid != '0' ? bins[rid] : null) ??
         bins['$item|$loc'] ??
         '';
     return PlannedMaterialRow(
@@ -224,64 +271,75 @@ Future<void> main(List<String> args) async {
   }
 
   List<PlannedLaborRow> liveLabor(Map<String, dynamic>? rec) => [
-        for (final l in (rec?['wplabor'] as List<dynamic>? ?? const [])
+    for (final l
+        in (rec?['wplabor'] as List<dynamic>? ?? const [])
             .cast<Map<String, dynamic>>())
-          if (laborFrom(l) != null) laborFrom(l)!,
-      ];
+      if (laborFrom(l) != null) laborFrom(l)!,
+  ];
   List<PlannedMaterialRow> liveMaterials(Map<String, dynamic>? rec) {
     final bins = invReserveBinsOf(
-        (rec?['invreserve'] as List<dynamic>? ?? const [])
-            .cast<Map<String, dynamic>>());
+      (rec?['invreserve'] as List<dynamic>? ?? const [])
+          .cast<Map<String, dynamic>>(),
+    );
     return [
-      for (final m in (rec?['wpmaterial'] as List<dynamic>? ?? const [])
-          .cast<Map<String, dynamic>>())
+      for (final m
+          in (rec?['wpmaterial'] as List<dynamic>? ?? const [])
+              .cast<Map<String, dynamic>>())
         if (materialFrom(m, bins) != null) materialFrom(m, bins)!,
     ];
   }
+
   List<PlannedToolRow> liveTools(Map<String, dynamic>? rec) => [
-        for (final t in (rec?['wptool'] as List<dynamic>? ?? const [])
+    for (final t
+        in (rec?['wptool'] as List<dynamic>? ?? const [])
             .cast<Map<String, dynamic>>())
-          if (toolFrom(t) != null) toolFrom(t)!,
-      ];
+      if (toolFrom(t) != null) toolFrom(t)!,
+  ];
 
   List<PlannedLaborRow> assignmentsFrom(Map<String, dynamic>? rec) => [
-        for (final a in (rec?['assignment'] as List<dynamic>? ?? const [])
+    for (final a
+        in (rec?['assignment'] as List<dynamic>? ?? const [])
             .cast<Map<String, dynamic>>())
-          if (a['laborcode'] != null || a['craft'] != null)
-            PlannedLaborRow(
-              a['laborcode'] == null ? '' : '${a['laborcode']}',
-              craft: a['craft'] == null ? '' : '${a['craft']}',
-              skilllevel: a['skilllevel'] == null ? '' : '${a['skilllevel']}',
-              hours: a['laborhrs'] == null ? '' : _fmtVal(a['laborhrs']),
-            ),
-      ];
+      if (a['laborcode'] != null || a['craft'] != null)
+        PlannedLaborRow(
+          a['laborcode'] == null ? '' : '${a['laborcode']}',
+          craft: a['craft'] == null ? '' : '${a['craft']}',
+          skilllevel: a['skilllevel'] == null ? '' : '${a['skilllevel']}',
+          hours: a['laborhrs'] == null ? '' : _fmtVal(a['laborhrs']),
+        ),
+  ];
 
   final parentPlan = planByWonum[wonum];
   stdout.writeln(
-      'plan: parent labor=${liveLabor(parentPlan).length}, tree materials=${liveMaterials(parentPlan).length}');
+    'plan: parent labor=${liveLabor(parentPlan).length}, tree materials=${liveMaterials(parentPlan).length}',
+  );
 
   // ---- assemble packet ------------------------------------------------------
-  WoRecord headerFrom(Map<String, dynamic> p, {required String parentWonum, bool isChild = false}) => {
-        'wonum': '${p['wonum']}',
-        'description': '${p['description'] ?? ''}',
-        'longdesc': '${p['description_longdescription'] ?? ''}',
-        'status': '${p['status'] ?? ''}',
-        if (!isChild) 'worktype': '${p['worktype'] ?? ''}',
-        if (!isChild) 'wopriority': p['wopriority'],
-        'siteid': '${p['siteid'] ?? _site}',
-        'assetnum': '${p['assetnum'] ?? ''}',
-        'assetdesc': assetDesc['${p['assetnum']}'] ?? '',
-        'location': '${p['location'] ?? ''}',
-        if (!isChild) 'jpnum': '${p['jpnum'] ?? ''}',
-        if (!isChild) 'pmnum': '${p['pmnum'] ?? ''}',
-        if (!isChild) 'supervisor': '${p['supervisor'] ?? ''}',
-        if (!isChild) 'targstartdate': p['targstartdate']?.toString(),
-        if (!isChild) 'targcompdate': p['targcompdate']?.toString(),
-        if (!isChild) 'reportdate': p['reportdate']?.toString(),
-        if (!isChild) 'conditions': '${p['iko_conditions_description'] ?? ''}',
-        if (!isChild) 'duration': p['estdur']?.toString(),
-        'parent': '${p['parent'] ?? parentWonum}',
-      };
+  WoRecord headerFrom(
+    Map<String, dynamic> p, {
+    required String parentWonum,
+    bool isChild = false,
+  }) => {
+    'wonum': '${p['wonum']}',
+    'description': '${p['description'] ?? ''}',
+    'longdesc': '${p['description_longdescription'] ?? ''}',
+    'status': '${p['status'] ?? ''}',
+    if (!isChild) 'worktype': '${p['worktype'] ?? ''}',
+    if (!isChild) 'wopriority': p['wopriority'],
+    'siteid': '${p['siteid'] ?? _site}',
+    'assetnum': '${p['assetnum'] ?? ''}',
+    'assetdesc': assetDesc['${p['assetnum']}'] ?? '',
+    'location': '${p['location'] ?? ''}',
+    if (!isChild) 'jpnum': '${p['jpnum'] ?? ''}',
+    if (!isChild) 'pmnum': '${p['pmnum'] ?? ''}',
+    if (!isChild) 'supervisor': '${p['supervisor'] ?? ''}',
+    if (!isChild) 'targstartdate': p['targstartdate']?.toString(),
+    if (!isChild) 'targcompdate': p['targcompdate']?.toString(),
+    if (!isChild) 'reportdate': p['reportdate']?.toString(),
+    if (!isChild) 'conditions': '${p['iko_conditions_description'] ?? ''}',
+    if (!isChild) 'duration': p['estdur']?.toString(),
+    'parent': '${p['parent'] ?? parentWonum}',
+  };
 
   final packet = WoPacket(
     header: headerFrom(parentRaw, parentWonum: wonum),
@@ -298,13 +356,19 @@ Future<void> main(List<String> args) async {
           tasks: tasksByParent['${k['wonum']}'] ?? const [],
           // Materials live data when present; demo rows only where the
           // tree has none, so the section layout can be reviewed.
-          materials: _fallbackDemo(liveMaterials(planByWonum['${k['wonum']}']), _demoMaterials),
+          materials: _fallbackDemo(
+            liveMaterials(planByWonum['${k['wonum']}']),
+            _demoMaterials,
+          ),
         ),
     ],
   );
 
   // ---- render ---------------------------------------------------------------
-  final bytes = await buildWoPacketPdf(packet, fonts: loadWoPrintFontsFromDirectory());
+  final bytes = await buildWoPacketPdf(
+    packet,
+    fonts: loadWoPrintFontsFromDirectory(),
+  );
   final out = File('samples/${wonum}_print_pack.pdf')
     ..createSync(recursive: true)
     ..writeAsBytesSync(bytes);
@@ -338,9 +402,9 @@ Future<void> _runFromData(String dir) async {
   final site = '${parentRows.first['siteid']}';
   stdout.writeln('Rendering $wonum (site $site) from dumped data ...');
 
-  final childRows = rows('children')
-      .where((r) => r['istask'].toString() != 'true')
-      .toList();
+  final childRows = rows(
+    'children',
+  ).where((r) => r['istask'].toString() != 'true').toList();
   final batch = assembleWoPrintBatch(
     parents: [wonum],
     validParentRows: parentRows
@@ -348,8 +412,9 @@ Future<void> _runFromData(String dir) async {
         .toList(),
     childRows: childRows,
     taskRows: rows('tasks'),
-    assetRows:
-        File('$dir/assets.json').existsSync() ? rows('assets') : const [],
+    assetRows: File('$dir/assets.json').existsSync()
+        ? rows('assets')
+        : const [],
     planRows: rows('plan'),
     site: site,
   );
@@ -358,8 +423,9 @@ Future<void> _runFromData(String dir) async {
     exit(2);
   }
   stdout.writeln(
-      'packet: ${batch.packets.first.children.length} child WOs, '
-      '${batch.packets.first.tasks.length} parent tasks');
+    'packet: ${batch.packets.first.children.length} child WOs, '
+    '${batch.packets.first.tasks.length} parent tasks',
+  );
   final bytes = await buildWoPacketPdf(
     batch.packets.first,
     fonts: loadWoPrintFontsFromDirectory(),

@@ -62,7 +62,9 @@ ParsedPmInput parsePmInputLines(String text, String? fallbackSite) {
       result.invalid.add('$line: $reason');
       continue;
     }
-    site ??= (fallbackSite == null || fallbackSite.isEmpty) ? null : fallbackSite;
+    site ??= (fallbackSite == null || fallbackSite.isEmpty)
+        ? null
+        : fallbackSite;
     if (site == null) {
       result.invalid.add('$line: no site specified');
       continue;
@@ -73,7 +75,8 @@ ParsedPmInput parsePmInputLines(String text, String? fallbackSite) {
 }
 
 /// Field list for PM header lookups, mirrored from tableHeaders['PM'].
-String get pmExtractSelect => tableHeaders['PM']!.map((e) => e.toLowerCase()).join(',');
+String get pmExtractSelect =>
+    tableHeaders['PM']!.map((e) => e.toLowerCase()).join(',');
 
 /// Encodes an OSLC where clause for use in a URL (spaces as %20).
 String encodeOslcWhere(String where) => where.replaceAll(' ', '%20');
@@ -82,7 +85,10 @@ String encodeOslcWhere(String where) => where.replaceAll(' ', '%20');
 /// detail (job plan, tasks, labor, materials, services, route) of every PM
 /// that was found. Updates [notifier] progressively.
 Future<void> fetchExtracts(
-    List<ExtractStore> stores, String env, ExtractNotifier notifier) async {
+  List<ExtractStore> stores,
+  String env,
+  ExtractNotifier notifier,
+) async {
   notifier.setFetching(true);
   try {
     await _fetchPmHeaders(stores, env, notifier);
@@ -100,10 +106,17 @@ Future<void> fetchExtracts(
 /// Batched PM header lookup. Pairs are grouped into OR clauses so a list of
 /// PMs costs one request per [pmExtractBatchSize] pairs.
 Future<void> _fetchPmHeaders(
-    List<ExtractStore> stores, String env, ExtractNotifier notifier) async {
+  List<ExtractStore> stores,
+  String env,
+  ExtractNotifier notifier,
+) async {
   for (var i = 0; i < stores.length; i += pmExtractBatchSize) {
-    final chunk =
-        stores.sublist(i, i + pmExtractBatchSize > stores.length ? stores.length : i + pmExtractBatchSize);
+    final chunk = stores.sublist(
+      i,
+      i + pmExtractBatchSize > stores.length
+          ? stores.length
+          : i + pmExtractBatchSize,
+    );
     for (final store in chunk) {
       store.status = 'fetching';
     }
@@ -146,32 +159,58 @@ Future<void> _fetchPmHeaders(
 /// Fetches the job plan (with nested tasks/labor/materials/services) and the
 /// route (with stops) referenced by the extracted PM.
 Future<void> _fetchPmDetails(
-    ExtractStore store, String env, ExtractNotifier notifier) async {
+  ExtractStore store,
+  String env,
+  ExtractNotifier notifier,
+) async {
   try {
     final jpnum = fieldOf(store.pm, 'jpnum');
     if (jpnum != null && jpnum.isNotEmpty) {
       final where = 'jpnum="$jpnum"';
       store.jobplan = await _fetchSingle('iko_jobplan', where, env);
-      store.jobtasks = await _fetchChildren('iko_jobtask', 'jobtask', where, env);
-      store.joblabors = await _fetchChildren('iko_joblabor', 'joblabor', where, env);
-      store.jobmaterials =
-          await _fetchChildren('iko_jobmaterial', 'jobmaterial', where, env);
-      store.jobservices =
-          await _fetchChildren('iko_jobservice', 'jobservice', where, env);
+      store.jobtasks = await _fetchChildren(
+        'iko_jobtask',
+        'jobtask',
+        where,
+        env,
+      );
+      store.joblabors = await _fetchChildren(
+        'iko_joblabor',
+        'joblabor',
+        where,
+        env,
+      );
+      store.jobmaterials = await _fetchChildren(
+        'iko_jobmaterial',
+        'jobmaterial',
+        where,
+        env,
+      );
+      store.jobservices = await _fetchChildren(
+        'iko_jobservice',
+        'jobservice',
+        where,
+        env,
+      );
     }
     final route = fieldOf(store.pm, 'route');
     if (route != null && route.isNotEmpty) {
       final where = 'route="$route" and siteid="${store.siteid}"';
       store.route = await _fetchSingle('iko_route', where, env);
-      store.routeStops =
-          await _fetchChildren('iko_route_stop', 'route_stop', where, env);
+      store.routeStops = await _fetchChildren(
+        'iko_route_stop',
+        'route_stop',
+        where,
+        env,
+      );
       // order the stops by sequence
       store.routeStops.sort(_compareByStopSequence);
       // fetch the job plans that the route stops link to (child job plans)
       final stopJpnums = store.routeStops
           .map((row) => fieldOf(row as Map, 'jpnum') ?? '')
-          .where((jpnum) =>
-              jpnum.isNotEmpty && jpnum != fieldOf(store.pm, 'jpnum'))
+          .where(
+            (jpnum) => jpnum.isNotEmpty && jpnum != fieldOf(store.pm, 'jpnum'),
+          )
           .toSet()
           .toList();
       if (stopJpnums.isNotEmpty) {
@@ -196,15 +235,19 @@ int _compareByStopSequence(dynamic a, dynamic b) {
 /// Fetches the job plans linked to route stops (child job plans) in batches,
 /// including their nested task / labor / material / service collections.
 Future<Map<String, FetchedJobPlan>> _fetchStopJobPlans(
-    List<String> jpnums, String env) async {
+  List<String> jpnums,
+  String env,
+) async {
   final result = <String, FetchedJobPlan>{};
   for (var i = 0; i < jpnums.length; i += pmExtractBatchSize) {
-    final end =
-        i + pmExtractBatchSize > jpnums.length ? jpnums.length : i + pmExtractBatchSize;
+    final end = i + pmExtractBatchSize > jpnums.length
+        ? jpnums.length
+        : i + pmExtractBatchSize;
     final chunk = jpnums.sublist(i, end);
     final where = chunk.map((jpnum) => '(jpnum="$jpnum")').join(' or ');
     // job plan headers
-    final url = 'iko_jobplan?oslc.select=*&oslc.where=${encodeOslcWhere(where)}';
+    final url =
+        'iko_jobplan?oslc.select=*&oslc.where=${encodeOslcWhere(where)}';
     final headers = await maximoRequest(url, 'get', env);
     if (headers['member'] == null) {
       throw Exception('Invalid Response from Maximo (iko_jobplan)');
@@ -219,7 +262,10 @@ Future<Map<String, FetchedJobPlan>> _fetchStopJobPlans(
     }
     // nested child collections per object
     for (final object in const [
-      'iko_jobtask', 'iko_joblabor', 'iko_jobmaterial', 'iko_jobservice'
+      'iko_jobtask',
+      'iko_joblabor',
+      'iko_jobmaterial',
+      'iko_jobservice',
     ]) {
       final childUrl =
           '$object?oslc.select=*&oslc.where=${encodeOslcWhere(where)}';
@@ -256,7 +302,10 @@ Future<Map<String, FetchedJobPlan>> _fetchStopJobPlans(
 
 /// GET a single Maximo record; returns null when nothing matches [where].
 Future<Map<String, dynamic>?> _fetchSingle(
-    String object, String where, String env) async {
+  String object,
+  String where,
+  String env,
+) async {
   final url = '$object?oslc.select=*&oslc.where=${encodeOslcWhere(where)}';
   final result = await maximoRequest(url, 'get', env);
   if (result['member'] == null) {
@@ -276,7 +325,11 @@ Future<Map<String, dynamic>?> _fetchSingle(
 /// array). Falls back to the first list-typed value, then to the members
 /// themselves when Maximo returns flat child rows.
 Future<List<dynamic>> _fetchChildren(
-    String object, String childKey, String where, String env) async {
+  String object,
+  String childKey,
+  String where,
+  String env,
+) async {
   final url = '$object?oslc.select=*&oslc.where=${encodeOslcWhere(where)}';
   final result = await maximoRequest(url, 'get', env);
   if (result['member'] == null) {
@@ -326,50 +379,57 @@ Future<String> exportExtractsToExcel(List<ExtractStore> stores) async {
   }
 
   // PM header sheet, one row per extracted PM
-  writeSheet('PM', tableHeaders['PM']! + ['STATUS'],
-      extracted.map((s) => tableHeaders['PM']!.map((h) => rowValue(s.pm, h)).toList() + [fieldOf(s.pm, 'status') ?? '']).toList());
+  writeSheet(
+    'PM',
+    tableHeaders['PM']! + ['STATUS'],
+    extracted
+        .map(
+          (s) =>
+              tableHeaders['PM']!.map((h) => rowValue(s.pm, h)).toList() +
+              [fieldOf(s.pm, 'status') ?? ''],
+        )
+        .toList(),
+  );
 
   // job plan headers
   final jps = extracted.where((s) => s.jobplan != null).toList();
   writeSheet('JobPlan', tableHeaders['JobPlan']!, [
     for (final s in jps)
-      tableHeaders['JobPlan']!
-          .map((h) => rowValue(s.jobplan!, h))
-          .toList()
+      tableHeaders['JobPlan']!.map((h) => rowValue(s.jobplan!, h)).toList(),
   ]);
 
   // job plan children
   writeSheet('Tasks', tableHeaders['JobTask']!, [
     for (final s in extracted)
       for (final row in s.jobtasks)
-        tableHeaders['JobTask']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['JobTask']!.map((h) => rowValue(row, h)).toList(),
   ]);
   writeSheet('Labor', tableHeaders['JobLabor']!, [
     for (final s in extracted)
       for (final row in s.joblabors)
-        tableHeaders['JobLabor']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['JobLabor']!.map((h) => rowValue(row, h)).toList(),
   ]);
   writeSheet('Materials', tableHeaders['JobMaterial']!, [
     for (final s in extracted)
       for (final row in s.jobmaterials)
-        tableHeaders['JobMaterial']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['JobMaterial']!.map((h) => rowValue(row, h)).toList(),
   ]);
   writeSheet('Services', tableHeaders['JobService']!, [
     for (final s in extracted)
       for (final row in s.jobservices)
-        tableHeaders['JobService']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['JobService']!.map((h) => rowValue(row, h)).toList(),
   ]);
 
   // routes
   final routes = extracted.where((s) => s.route != null).toList();
   writeSheet('Route', tableHeaders['Route']!, [
     for (final s in routes)
-      tableHeaders['Route']!.map((h) => rowValue(s.route!, h)).toList()
+      tableHeaders['Route']!.map((h) => rowValue(s.route!, h)).toList(),
   ]);
   writeSheet('Route Stops', tableHeaders['Route_Stop']!, [
     for (final s in extracted)
       for (final row in s.routeStops)
-        tableHeaders['Route_Stop']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['Route_Stop']!.map((h) => rowValue(row, h)).toList(),
   ]);
 
   // job plans linked to route stops (child job plans)
@@ -380,27 +440,27 @@ Future<String> exportExtractsToExcel(List<ExtractStore> stores) async {
   final stopPlans = allStopJps.values.toList();
   writeSheet('Stop JobPlan', tableHeaders['JobPlan']!, [
     for (final plan in stopPlans)
-      tableHeaders['JobPlan']!.map((h) => rowValue(plan.jobplan, h)).toList()
+      tableHeaders['JobPlan']!.map((h) => rowValue(plan.jobplan, h)).toList(),
   ]);
   writeSheet('Stop Tasks', tableHeaders['JobTask']!, [
     for (final plan in stopPlans)
       for (final row in plan.jobtasks)
-        tableHeaders['JobTask']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['JobTask']!.map((h) => rowValue(row, h)).toList(),
   ]);
   writeSheet('Stop Labor', tableHeaders['JobLabor']!, [
     for (final plan in stopPlans)
       for (final row in plan.joblabors)
-        tableHeaders['JobLabor']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['JobLabor']!.map((h) => rowValue(row, h)).toList(),
   ]);
   writeSheet('Stop Materials', tableHeaders['JobMaterial']!, [
     for (final plan in stopPlans)
       for (final row in plan.jobmaterials)
-        tableHeaders['JobMaterial']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['JobMaterial']!.map((h) => rowValue(row, h)).toList(),
   ]);
   writeSheet('Stop Services', tableHeaders['JobService']!, [
     for (final plan in stopPlans)
       for (final row in plan.jobservices)
-        tableHeaders['JobService']!.map((h) => rowValue(row, h)).toList()
+        tableHeaders['JobService']!.map((h) => rowValue(row, h)).toList(),
   ]);
 
   final bytes = excel.encode();
@@ -419,7 +479,8 @@ Future<String> exportExtractsToExcel(List<ExtractStore> stores) async {
   }
   final file = XFile.fromData(
     Uint8List.fromList(bytes),
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    mimeType:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     name: fileName,
   );
   await file.saveTo(location.path);
@@ -434,7 +495,6 @@ String? _freqUnitFromMaximo(String? frequnit) {
   const map = {'DAYS': 'D', 'WEEKS': 'W', 'MONTHS': 'M', 'YEARS': 'Y'};
   return map[frequnit.toUpperCase()] ?? frequnit.substring(0, 1).toUpperCase();
 }
-
 
 /// Maps a Maximo meter name (e.g. 'LNWK01') back to the template meter field
 ///
@@ -489,7 +549,8 @@ Future<String> exportExtractsToImportTemplate(List<ExtractStore> stores) async {
   }
   final file = XFile.fromData(
     bytes,
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    mimeType:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     name: fileName,
   );
   await file.saveTo(location.path);
@@ -527,26 +588,32 @@ Future<void> populateTemplateFromExtract(
   for (final row in store.joblabors) {
     final craft = rowValue(row, 'CRAFT');
     final qty = int.tryParse(rowValue(row, 'QUANTITY'));
-    parsed.crafts.add(JobCraft(
-      laborType: laborTypeFromCraft(craft),
-      quantity: qty ?? 1,
-      hours: hoursFromRow(row),
-      laborCode: '',
-    ));
+    parsed.crafts.add(
+      JobCraft(
+        laborType: laborTypeFromCraft(craft),
+        quantity: qty ?? 1,
+        hours: hoursFromRow(row),
+        laborCode: '',
+      ),
+    );
   }
   for (final row in store.jobmaterials) {
-    parsed.materials.add(JobMaterial(
-      itemNumber: rowValue(row, 'ITEMNUM'),
-      quantity: double.tryParse(rowValue(row, 'ITEMQTY')) ?? 1.0,
-      cost: double.tryParse(rowValue(row, 'COST')),
-    ));
+    parsed.materials.add(
+      JobMaterial(
+        itemNumber: rowValue(row, 'ITEMNUM'),
+        quantity: double.tryParse(rowValue(row, 'ITEMQTY')) ?? 1.0,
+        cost: double.tryParse(rowValue(row, 'COST')),
+      ),
+    );
   }
   for (final row in store.jobservices) {
-    parsed.services.add(JobService(
-      itemNumber: rowValue(row, 'ITEMNUM'),
-      vendorId: rowValue(row, 'COMPANY'),
-      cost: double.tryParse(rowValue(row, 'COST')),
-    ));
+    parsed.services.add(
+      JobService(
+        itemNumber: rowValue(row, 'ITEMNUM'),
+        vendorId: rowValue(row, 'COMPANY'),
+        cost: double.tryParse(rowValue(row, 'COST')),
+      ),
+    );
   }
   for (final row in store.jobtasks) {
     final task = Map<String, dynamic>.from(row as Map);
@@ -555,13 +622,17 @@ Future<void> populateTemplateFromExtract(
     if (assetNumber != null && assetNumber.isNotEmpty) {
       parsed.assets.add(assetNumber);
     }
-    parsed.tasks.add(JobTask(
-      jptask: int.tryParse(fieldOf(task, 'jptask') ?? ''),
-      description: taskDescription,
-      assetNumber: assetNumber,
-      metername: await _meterInspectFromMaximo(fieldOf(task, 'metername')),
-      longdescription: stripHtml(fieldOf(task, 'description_longdescription')),
-    ));
+    parsed.tasks.add(
+      JobTask(
+        jptask: int.tryParse(fieldOf(task, 'jptask') ?? ''),
+        description: taskDescription,
+        assetNumber: assetNumber,
+        metername: await _meterInspectFromMaximo(fieldOf(task, 'metername')),
+        longdescription: stripHtml(
+          fieldOf(task, 'description_longdescription'),
+        ),
+      ),
+    );
   }
   // route stops: children job plans become tasks with asset numbers,
   // plain stops become route assets of the PM
@@ -577,21 +648,26 @@ Future<void> populateTemplateFromExtract(
       parsed.assets.add(stopAsset);
       continue;
     }
-    final stopSeq =
-        int.tryParse(fieldOf(row, 'stopsequence') ?? '') ?? 0;
+    final stopSeq = int.tryParse(fieldOf(row, 'stopsequence') ?? '') ?? 0;
     // all tasks of the stop job plan belong to the child job plan of the
     // stop asset; generatePM groups tasks by asset number
     parsed.assets.add(stopAsset);
     for (final t in plan.jobtasks) {
       final stopTask = Map<String, dynamic>.from(t as Map);
-      parsed.tasks.add(JobTask(
-        jptask: int.tryParse(fieldOf(stopTask, 'jptask') ?? '') ?? stopSeq,
-        description:
-            fieldOf(stopTask, 'description') ?? fieldOf(row, 'description'),
-        assetNumber: stopAsset,
-        metername: await _meterInspectFromMaximo(fieldOf(stopTask, 'metername')),
-        longdescription: stripHtml(fieldOf(stopTask, 'description_longdescription')),
-      ));
+      parsed.tasks.add(
+        JobTask(
+          jptask: int.tryParse(fieldOf(stopTask, 'jptask') ?? '') ?? stopSeq,
+          description:
+              fieldOf(stopTask, 'description') ?? fieldOf(row, 'description'),
+          assetNumber: stopAsset,
+          metername: await _meterInspectFromMaximo(
+            fieldOf(stopTask, 'metername'),
+          ),
+          longdescription: stripHtml(
+            fieldOf(stopTask, 'description_longdescription'),
+          ),
+        ),
+      );
     }
   }
 
@@ -609,11 +685,17 @@ Future<void> populateTemplateFromExtract(
       maximoServerSelected,
     );
     templateNotifier.setProcessedTemplate(file, 1, pm);
-    templateNotifier.addStatusMessage(file, 1,
-        'Best effort template from Maximo ($file), fields with manual edits may not match, review before uploading');
+    templateNotifier.addStatusMessage(
+      file,
+      1,
+      'Best effort template from Maximo ($file), fields with manual edits may not match, review before uploading',
+    );
   } catch (e) {
     debugPrint(e.toString());
-    templateNotifier.addStatusMessage(file, 1,
-        'Best effort template from Maximo ($file) could not be fully generated: $e');
+    templateNotifier.addStatusMessage(
+      file,
+      1,
+      'Best effort template from Maximo ($file) could not be fully generated: $e',
+    );
   }
 }

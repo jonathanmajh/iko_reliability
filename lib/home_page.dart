@@ -41,8 +41,9 @@ class _HomePageState extends State<HomePage> {
         }
         //check if there are any processes running
         var processNotifier = Provider.of<ProcessStateNotifier>(
-            navigatorKey.currentContext!,
-            listen: false);
+          navigatorKey.currentContext!,
+          listen: false,
+        );
 
         if (!processNotifier.processRunning()) {
           return true;
@@ -50,27 +51,31 @@ class _HomePageState extends State<HomePage> {
         _alertShowing = true;
 
         return await showDialog(
-            //create confirmation prompt
-            context: navigatorKey.currentContext!,
-            builder: (context) {
-              return AlertDialog(
-                  title: const Text('Are you sure you want to quit?'),
-                  content: const Text('You may have unsaved changes.'),
-                  actions: [
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                          _alertShowing = false;
-                        },
-                        child: const Text('Quit')),
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                          _alertShowing = false;
-                        },
-                        child: const Text('Cancel'))
-                  ]);
-            });
+          //create confirmation prompt
+          context: navigatorKey.currentContext!,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Are you sure you want to quit?'),
+              content: const Text('You may have unsaved changes.'),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                    _alertShowing = false;
+                  },
+                  child: const Text('Quit'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                    _alertShowing = false;
+                  },
+                  child: const Text('Cancel'),
+                ),
+              ],
+            );
+          },
+        );
       });
     }
   }
@@ -90,7 +95,7 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
             ),
-          )
+          ),
         ],
       ),
       drawer: const Drawer(
@@ -98,22 +103,24 @@ class _HomePageState extends State<HomePage> {
         child: NavDrawer(),
       ),
       body: SizedBox(
-          width: 550,
-          child: ListView(children: <Widget>[
+        width: 550,
+        child: ListView(
+          children: <Widget>[
             Consumer<MaximoServerNotifier>(
-                //login
-                builder: (context, maximo, child) {
-              return FutureBuilder<Credentials>(
-                future: getLoginMaximo(maximo.maximoServerSelected),
-                builder: ((context, snapshot) {
-                  if (snapshot.hasData) {
-                    if (snapshot.data?.password != null &&
-                        snapshot.data?.password != '') {
-                      return FutureBuilder(
+              //login
+              builder: (context, maximo, child) {
+                return FutureBuilder<Credentials>(
+                  future: getLoginMaximo(maximo.maximoServerSelected),
+                  builder: ((context, snapshot) {
+                    if (snapshot.hasData) {
+                      if (snapshot.data?.password != null &&
+                          snapshot.data?.password != '') {
+                        return FutureBuilder(
                           future: getUserMaximo(
-                              '[APIKEY]',
-                              snapshot.data!.password,
-                              maximo.maximoServerSelected),
+                            '[APIKEY]',
+                            snapshot.data!.password,
+                            maximo.maximoServerSelected,
+                          ),
                           builder: ((context, snapshot) {
                             if (snapshot.hasData) {
                               var text = '';
@@ -129,44 +136,47 @@ class _HomePageState extends State<HomePage> {
                                 text =
                                     'Welcome: ${snapshot.data!['displayName']}. Logged into: ${maximo.maximoServerSelected}';
                               }
-                              return ListTile(
-                                title: Text(text),
-                              );
+                              return ListTile(title: Text(text));
                             } else {
                               return const ListTile(
                                 leading: CircularProgressIndicator.adaptive(),
                                 title: Text('Logging in...'),
                               );
                             }
-                          }));
+                          }),
+                        );
+                      } else {
+                        return ListTile(
+                          title: const Text('First time using this program?'),
+                          subtitle: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('Open the Right settings '),
+                              Icon(Icons.settings),
+                              Text(' menu to login'),
+                            ],
+                          ),
+                          trailing: ElevatedButton(
+                            onPressed: () {
+                              launchUrl(
+                                Uri.parse(
+                                  'https://hssbiz.sharepoint.com/:w:/r/sites/IKOIndustries/Shared%20Documents/Corporate%20Reliability/Asset%20%26%20Spare%20Parts%20Criticality.docx?d=wf2c406fea68f47349cd718ec24a8cee5&csf=1&web=1&e=hYFDFA',
+                                ),
+                              );
+                            },
+                            child: const Text('Documentation'),
+                          ),
+                        );
+                      }
                     } else {
-                      return ListTile(
-                        title: const Text('First time using this program?'),
-                        subtitle: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Open the Right settings '),
-                            Icon(Icons.settings),
-                            Text(' menu to login'),
-                          ],
-                        ),
-                        trailing: ElevatedButton(
-                          onPressed: () {
-                            launchUrl(Uri.parse(
-                                'https://hssbiz.sharepoint.com/:w:/r/sites/IKOIndustries/Shared%20Documents/Corporate%20Reliability/Asset%20%26%20Spare%20Parts%20Criticality.docx?d=wf2c406fea68f47349cd718ec24a8cee5&csf=1&web=1&e=hYFDFA'));
-                          },
-                          child: const Text('Documentation'),
-                        ),
+                      return const ListTile(
+                        title: Text('Error! Please restart the program'),
                       );
                     }
-                  } else {
-                    return const ListTile(
-                      title: Text('Error! Please restart the program'),
-                    );
-                  }
-                }),
-              );
-            }),
+                  }),
+                );
+              },
+            ),
             const ListTile(
               // a spacer
               title: Row(
@@ -178,7 +188,9 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-          ])),
+          ],
+        ),
+      ),
       endDrawer: const EndDrawer(),
     );
   }

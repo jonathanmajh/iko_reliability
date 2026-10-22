@@ -4,10 +4,7 @@ class AssetMeterMaximo {
   final String assetNumber;
   final String meter;
 
-  const AssetMeterMaximo({
-    required this.assetNumber,
-    required this.meter,
-  });
+  const AssetMeterMaximo({required this.assetNumber, required this.meter});
 }
 
 class JobPlanMeterCheckMaximo {
@@ -35,7 +32,9 @@ class JobPlanMeterCheckMaximo {
 }
 
 Future<List<JobPlanMeterCheckMaximo>> getJobtasks(
-    String meterName, String env) async {
+  String meterName,
+  String env,
+) async {
   final url = 'IKO_JOBTASK_METER?metername=$meterName';
   final result = await maximoRequest(url, 'api', env);
   List<JobPlanMeterCheckMaximo> list = [];
@@ -43,27 +42,32 @@ Future<List<JobPlanMeterCheckMaximo>> getJobtasks(
     return list;
   }
   for (final jobtask in result['jobtasks']) {
-    list.add(JobPlanMeterCheckMaximo(
-      orgid: jobtask['orgid'],
-      siteid: jobtask['siteid'],
-      metername: jobtask['metername'],
-      jpnum: jobtask['jpnum'],
-      jptask: jobtask['jptask'],
-      description: jobtask['description'],
-      details: jobtask['details'],
-      worktype: jobtask['worktype'],
-      assetnum: jobtask['assetnum'],
-    ));
+    list.add(
+      JobPlanMeterCheckMaximo(
+        orgid: jobtask['orgid'],
+        siteid: jobtask['siteid'],
+        metername: jobtask['metername'],
+        jpnum: jobtask['jpnum'],
+        jptask: jobtask['jptask'],
+        description: jobtask['description'],
+        details: jobtask['details'],
+        worktype: jobtask['worktype'],
+        assetnum: jobtask['assetnum'],
+      ),
+    );
   }
   return list;
 }
 
 List<String> assetMeterPairs(
-    List<JobPlanMeterCheckMaximo> jobplans, String meterName) {
+  List<JobPlanMeterCheckMaximo> jobplans,
+  String meterName,
+) {
   List<String> result = [];
   for (final jobplan in jobplans) {
-    final meterCount =
-        jobplan.metername.substring(jobplan.metername.length - 2);
+    final meterCount = jobplan.metername.substring(
+      jobplan.metername.length - 2,
+    );
     final pair = '${jobplan.assetnum}$meterName$meterCount';
     result.add(pair);
   }

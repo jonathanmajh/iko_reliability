@@ -6,7 +6,9 @@ import 'package:flutter/services.dart';
 import '../bin/db_drift.dart';
 
 Future<String> exportCriticalityDB(
-    MyDatabase database, String selectedSite) async {
+  MyDatabase database,
+  String selectedSite,
+) async {
   try {
     // line for current site
     String export = '{"selectedSite":"$selectedSite"}';
@@ -56,8 +58,11 @@ Future<void> saveFile(String saveText) async {
   final String text = saveText;
   final Uint8List fileData = Uint8List.fromList(text.codeUnits);
   const String fileMimeType = 'text/plain';
-  final XFile textFile =
-      XFile.fromData(fileData, mimeType: fileMimeType, name: fileName);
+  final XFile textFile = XFile.fromData(
+    fileData,
+    mimeType: fileMimeType,
+    name: fileName,
+  );
 
   await textFile.saveTo(result.path);
 }

@@ -29,11 +29,13 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
     if (pmpkg.nextDate.contains('/')) {
       try {
         DateFormat formatter = DateFormat('MM/dd/yyyy');
-        pmpkg.nextDate =
-            formatter.parse(pmpkg.nextDate).toString().substring(0, 10);
+        pmpkg.nextDate = formatter
+            .parse(pmpkg.nextDate)
+            .toString()
+            .substring(0, 10);
       } catch (e) {
         generated['Errors']!.add([
-          'PM next due date is not in MM/DD/YYYY format: ${pmpkg.nextDate}'
+          'PM next due date is not in MM/DD/YYYY format: ${pmpkg.nextDate}',
         ]);
       }
     }
@@ -56,12 +58,12 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
         pmpkg.orgID,
         pmpkg.targetStartTime,
         pmpkg.ikoPMHistoryNotes ?? '',
-        pmpkg.fmecaPM ? 'Y' : 'N'
-      ]
+        pmpkg.fmecaPM ? 'Y' : 'N',
+      ],
     ];
     if (pmpkg.description.length > 100) {
       generated['Errors']!.add([
-        'PM Description is too long: ${pmpkg.description.length}/100 character limit'
+        'PM Description is too long: ${pmpkg.description.length}/100 character limit',
       ]);
     }
   }
@@ -81,7 +83,7 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
         pmpkg.route!.routeNumber,
         pmpkg.route!.routeStopsBecome,
         pmpkg.route!.description,
-      ]
+      ],
     ];
 
     for (final routeStop in pmpkg.route!.routeStops) {
@@ -126,7 +128,8 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
         Meter? meter;
         try {
           meter = await database!.getMeter(
-              jobtask.metername!.substring(0, jobtask.metername!.length - 2));
+            jobtask.metername!.substring(0, jobtask.metername!.length - 2),
+          );
           generated['MeasurePoint']!.add([
             pmpkg.siteID,
             assetNumber,
@@ -142,30 +145,31 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
           jobtask.metername ?? '',
           '${meter?.inspect ?? ''} ${jobtask.metername!.substring(jobtask.metername!.length - 2)}',
           'CHARACTERISTIC',
-          'M-${jobtask.metername!.substring(0, jobtask.metername!.length - 2)}'
+          'M-${jobtask.metername!.substring(0, jobtask.metername!.length - 2)}',
         ]);
         final newGen = await generateMeterJobplan(
-            await database!.getAsset(pmpkg.siteID, assetNumber),
-            jobtask.metername!);
+          await database!.getAsset(pmpkg.siteID, assetNumber),
+          jobtask.metername!,
+        );
         generated['JobPlan'] = [
           ...generated['JobPlan']!,
-          ...newGen['JobPlan']!
+          ...newGen['JobPlan']!,
         ];
         generated['JobLabor'] = [
           ...generated['JobLabor']!,
-          ...newGen['JobLabor']!
+          ...newGen['JobLabor']!,
         ];
         generated['JPASSETLINK'] = [
           ...generated['JPASSETLINK']!,
-          ...newGen['JPASSETLINK']!
+          ...newGen['JPASSETLINK']!,
         ];
         generated['JobTask'] = [
           ...generated['JobTask']!,
-          ...newGen['JobTask']!
+          ...newGen['JobTask']!,
         ];
         generated['MeasurePoint2'] = [
           ...generated['MeasurePoint2']!,
-          ...newGen['MeasurePoint2']!
+          ...newGen['MeasurePoint2']!,
         ];
         generated['Errors'] = [...generated['Errors']!, ...newGen['Errors']!];
       }
@@ -175,8 +179,12 @@ Future<Map<String, List<List<String>>>> generateUploads(PMMaximo pmpkg) async {
   return generated;
 }
 
-Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
-    String siteID, String orgID, Map<String, List<List<String>>> generated) {
+Map<String, List<List<String>>> generateJobplan(
+  JobPlanMaximo jobplan,
+  String siteID,
+  String orgID,
+  Map<String, List<List<String>>> generated,
+) {
   generated['JobPlan']!.add([
     // consider constants moving into object
     // if len(description) > 100 then put it into extended description
@@ -277,7 +285,9 @@ Map<String, List<List<String>>> generateJobplan(JobPlanMaximo jobplan,
 }
 
 Future<Map<String, List<List<String>>>> generateMeterJobplan(
-    Asset asset, String meterCode) async {
+  Asset asset,
+  String meterCode,
+) async {
   Map<String, List<List<String>>> generated = {};
   generated['JobPlan'] = [];
   generated['JobTask'] = [];
@@ -287,8 +297,9 @@ Future<Map<String, List<List<String>>>> generateMeterJobplan(
   generated['Errors'] = [];
   Meter meter;
   try {
-    meter =
-        await database!.getMeter(meterCode.substring(0, meterCode.length - 2));
+    meter = await database!.getMeter(
+      meterCode.substring(0, meterCode.length - 2),
+    );
   } catch (e) {
     generated['Errors']!.add(['$e']);
     return generated;
@@ -386,20 +397,31 @@ Future<Map<String, List<List<String>>>> generateMeterJobplan(
 
 ///Creates a jagged array (list) from data from a Trinagrid. A list of rows from top to bottom (visible columns only).
 ///The first value of each column is its title.
-List<List<String>> generateTrinagrid(TrinaGridStateManager stateManager,
-    {List<String> excludeFields = const []}) {
+List<List<String>> generateTrinagrid(
+  TrinaGridStateManager stateManager, {
+  List<String> excludeFields = const [],
+}) {
   List<List<String>> generated = [];
-  List<String> fields = List<String>.from(stateManager.columns
-      .where((column) => !(column.hide || excludeFields.contains(column.field)))
-      .map((column) => column.field));
+  List<String> fields = List<String>.from(
+    stateManager.columns
+        .where(
+          (column) => !(column.hide || excludeFields.contains(column.field)),
+        )
+        .map((column) => column.field),
+  );
   //add header row
-  generated.add(List.from(stateManager.columns
-      .where((column) => fields.contains(column.field))
-      .map((column) => column.title)));
+  generated.add(
+    List.from(
+      stateManager.columns
+          .where((column) => fields.contains(column.field))
+          .map((column) => column.title),
+    ),
+  );
   //add body rows
   for (TrinaRow row in stateManager.rows) {
     generated.add(
-        List.from(fields.map((e) => (row.cells[e]?.value ?? '').toString())));
+      List.from(fields.map((e) => (row.cells[e]?.value ?? '').toString())),
+    );
   }
   return generated;
 }

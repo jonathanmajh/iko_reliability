@@ -161,11 +161,11 @@ class ParsedTemplate {
     this.suggestedPmNumber,
     List<JobService>? services,
     List<JobTask>? tasks,
-  })  : assets = assets ?? [],
-        crafts = crafts ?? [],
-        materials = materials ?? [],
-        services = services ?? [],
-        tasks = tasks ?? [];
+  }) : assets = assets ?? [],
+       crafts = crafts ?? [],
+       materials = materials ?? [],
+       services = services ?? [],
+       tasks = tasks ?? [];
 
   Map<dynamic, dynamic> fromExcel(FileDetails stuff) {
     Uint8List bytes = stuff.bytes;
@@ -243,26 +243,27 @@ class ParsedTemplate {
                     .substring(0, 10);
               } else if (nextRow[2] is num) {
                 nextDate = DateTime.fromMillisecondsSinceEpoch(
-                        (((nextRow[2] as num) - 25569) * 86400000).toInt(),
-                        isUtc: true)
-                    .toString()
-                    .substring(0, 10);
+                  (((nextRow[2] as num) - 25569) * 86400000).toInt(),
+                  isUtc: true,
+                ).toString().substring(0, 10);
               }
             }
             //write to template object
             //PM number: new exports put it beside the name on the data row
             //(K8, col 10) as a reference; older conventions keep it below
             //the name on the number row (I9, col 8 of row i+2)
-            String? suggestedNumber =
-                nextRow.length > 10 ? _toNativeString(nextRow[10]) : null;
+            String? suggestedNumber = nextRow.length > 10
+                ? _toNativeString(nextRow[10])
+                : null;
             if (suggestedNumber == null || suggestedNumber.isEmpty) {
               suggestedNumber = _toNativeString(nextNextRow[8]);
             }
             pmTemplates[filename][pmNumber] = ParsedTemplate(
               nextDueDate: nextDate,
               siteId: _toNativeString(nextRow[3])?.toUpperCase(),
-              frequencyUnit:
-                  _toNativeString(nextRow[4])?.substring(0, 1).toUpperCase(),
+              frequencyUnit: _toNativeString(
+                nextRow[4],
+              )?.substring(0, 1).toUpperCase(),
               frequency: _toNativeInt(nextRow[5]),
               workOrderType: workOrderType,
               processCondition: processCondition,
@@ -273,34 +274,37 @@ class ParsedTemplate {
               suggestedPmNumber: suggestedNumber,
               routeName:
                   (_toNativeString(nextRow[9]) == 'Select Route (Optional)'
-                      ? null
-                      : _toNativeString(nextRow[9])),
+                  ? null
+                  : _toNativeString(nextRow[9])),
               routeCode:
                   (_toNativeString(nextRow[9]) == 'Select Route (Optional)' ||
-                          nextRow[9] == null
-                      ? null
-                      : _toNativeString(nextNextRow[9])),
+                      nextRow[9] == null
+                  ? null
+                  : _toNativeString(nextNextRow[9])),
             );
           }
           if (row[7] != null && readTasks) {
             //reading job task info of current PM, writing data to [ParsedTemplate] object(s)
-            pmTemplates[filename][pmNumber].tasks.add(JobTask(
+            pmTemplates[filename][pmNumber].tasks.add(
+              JobTask(
                 jptask: _toNativeInt(row[6]),
                 description: _toNativeString(row[7]),
                 assetNumber: _toNativeString(row[4])?.toUpperCase(),
                 metername: _toNativeString(row[5]),
-                longdescription: _toNativeString(row[8])));
+                longdescription: _toNativeString(row[8]),
+              ),
+            );
             if (row[4] != null) {
-              pmTemplates[filename][pmNumber]
-                  .assets
-                  .add(_toNativeString(row[4])!);
+              pmTemplates[filename][pmNumber].assets.add(
+                _toNativeString(row[4])!,
+              );
             }
           }
           if (row[3] != null && readRouteAsset) {
             //reading task rout asset data of current PM and write it to [ParsedTemplate] object
-            pmTemplates[filename][pmNumber]
-                .assets
-                .add(_toNativeString(row[3])!.toUpperCase());
+            pmTemplates[filename][pmNumber].assets.add(
+              _toNativeString(row[3])!.toUpperCase(),
+            );
           }
           if (row[0] == 'Materials (Mapics Number)') {
             //check if current row has materials/mapics # header for PM. If so, read the data next iteration(s)
@@ -332,25 +336,34 @@ class ParsedTemplate {
               laborCode = str.substring(pos + 1).trim();
             }
 
-            pmTemplates[filename][pmNumber].crafts.add(JobCraft(
+            pmTemplates[filename][pmNumber].crafts.add(
+              JobCraft(
                 laborType: laborType,
                 quantity: _toNativeInt(row[1]) ?? 0,
                 hours: parseTime(row[2]),
-                laborCode: laborCode));
+                laborCode: laborCode,
+              ),
+            );
           }
           if (row[0] != null && readMaterials) {
             //read/write material data
-            pmTemplates[filename][pmNumber].materials.add(JobMaterial(
+            pmTemplates[filename][pmNumber].materials.add(
+              JobMaterial(
                 itemNumber: _toNativeString(row[0]) ?? '',
                 quantity: _toNativeDouble(row[1]) ?? 1.0,
-                cost: _toNativeDouble(row[2])));
+                cost: _toNativeDouble(row[2]),
+              ),
+            );
           }
           if (row[0] != null && readService) {
             //read/write service data
-            pmTemplates[filename][pmNumber].services.add(JobService(
+            pmTemplates[filename][pmNumber].services.add(
+              JobService(
                 itemNumber: _toNativeString(row[0]) ?? '',
                 vendorId: _toNativeString(row[2]) ?? '',
-                cost: _toNativeDouble(row[1])));
+                cost: _toNativeDouble(row[1]),
+              ),
+            );
           }
           if (row[0] == 'Craft @ (Optional) Labour Code' ||
               row[0] == 'Craft (Labour Code(Optional))') {
@@ -370,7 +383,8 @@ class ParsedTemplate {
           }
         } catch (e) {
           errors.add(
-              'Error parsing PM Templates\nFile: $filename | Row: ${i + 1}\n$e');
+            'Error parsing PM Templates\nFile: $filename | Row: ${i + 1}\n$e',
+          );
         }
       }
     }

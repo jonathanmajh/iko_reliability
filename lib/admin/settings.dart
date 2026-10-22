@@ -15,30 +15,30 @@ import '../settings/settings_notifier.dart';
 Future<void> displayLoginAttempt(String password, String env) async {
   var result = await getUserMaximo('[APIKEY]', password, env);
   if (result['status'] == 'fail|connection') {
-    showDataAlert(
-        navigatorKey.currentContext!,
-        ['No response from Maximo servers', 'Check internet connection'],
-        'Failed to Login');
+    showDataAlert(navigatorKey.currentContext!, [
+      'No response from Maximo servers',
+      'Check internet connection',
+    ], 'Failed to Login');
   } else if (result['status'] == 'fail|account') {
-    showDataAlert(
-        navigatorKey.currentContext!,
-        ['Please check credentials', 'Check internet connection'],
-        'Failed to Login');
+    showDataAlert(navigatorKey.currentContext!, [
+      'Please check credentials',
+      'Check internet connection',
+    ], 'Failed to Login');
   } else {
-    showDataAlert(
-        navigatorKey.currentContext!,
-        [
-          'Logged into: $env',
-          'As: ${result['displayName']}',
-          'Server URL: ${result['maslogouturl'].toString().substring(0, 42)}'
-        ],
-        'Logged in!');
+    showDataAlert(navigatorKey.currentContext!, [
+      'Logged into: $env',
+      'As: ${result['displayName']}',
+      'Server URL: ${result['maslogouturl'].toString().substring(0, 42)}',
+    ], 'Logged in!');
   }
 }
 
 ///gets a Map of user data information from Maximo using HTTP and saves login data into local database if successful
 Future<Map<String, dynamic>> getUserMaximo(
-    String userid, String password, String env) async {
+  String userid,
+  String password,
+  String env,
+) async {
   // check if credentials are valid before saving
   // password is same as APIKEY, userid is [APIKEY] for apikey
   String url = '${maximoServerDomains[env]}whoami';
@@ -66,21 +66,26 @@ Future<Map<String, dynamic>> getUserMaximo(
       parsed['status'] = 'pass';
       saveLoginMaximo(userid, password, env);
       database!.setSettings(
-        newSetting:
-            Setting(key: 'isAdmin', value: parsed['inactiveSites'].toString()),
+        newSetting: Setting(
+          key: 'isAdmin',
+          value: parsed['inactiveSites'].toString(),
+        ),
       );
       // set the site to the user's default site on first login, but only when
       // no site has been selected previously
       if ((parsed['defaultSite'] as String? ?? '').isNotEmpty) {
         final siteNotifier = Provider.of<SelectedSiteNotifier>(
-            navigatorKey.currentContext!,
-            listen: false);
+          navigatorKey.currentContext!,
+          listen: false,
+        );
         if (siteNotifier.selectedSite.isEmpty) {
           siteNotifier.setSite(parsed['defaultSite'].toString().toUpperCase());
         }
       }
-      Provider.of<SettingsNotifier>(navigatorKey.currentContext!, listen: false)
-          .setAdmin(parsed['inactiveSites']);
+      Provider.of<SettingsNotifier>(
+        navigatorKey.currentContext!,
+        listen: false,
+      ).setAdmin(parsed['inactiveSites']);
       return parsed;
     }
   }
@@ -103,10 +108,7 @@ class Credentials {
   final String login;
   final String password;
 
-  const Credentials({
-    required this.login,
-    required this.password,
-  });
+  const Credentials({required this.login, required this.password});
 }
 
 ///Gets saved login credentials from local database for the environment specified by [env]

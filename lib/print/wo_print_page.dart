@@ -150,9 +150,11 @@ class _WoPrintPageState extends State<WoPrintPage> {
     final q = _searchController.text.trim().toLowerCase();
     Iterable<WoListRow> result = _rows;
     if (q.isNotEmpty) {
-      result = result.where((r) =>
-          r.wonum.toLowerCase().contains(q) ||
-          r.description.toLowerCase().contains(q));
+      result = result.where(
+        (r) =>
+            r.wonum.toLowerCase().contains(q) ||
+            r.description.toLowerCase().contains(q),
+      );
     }
     if (_releasedOn != null) {
       result = result.where((r) => _sameDate(r.statusDate, _releasedOn!));
@@ -184,8 +186,10 @@ class _WoPrintPageState extends State<WoPrintPage> {
 
   Future<void> _loadReleased() async {
     if (!_siteValid) {
-      setState(() => _status =
-          'Select your site from the end drawer. (Top right gear icon)');
+      setState(
+        () => _status =
+            'Select your site from the end drawer. (Top right gear icon)',
+      );
       return;
     }
     setState(() {
@@ -196,9 +200,11 @@ class _WoPrintPageState extends State<WoPrintPage> {
     });
     try {
       final raw = await WoPrintFetcher(env: _env, site: _site)
-          .fetchReleasedWorkOrderRows(onStatus: (s) {
-        if (mounted) setState(() => _status = s);
-      });
+          .fetchReleasedWorkOrderRows(
+            onStatus: (s) {
+              if (mounted) setState(() => _status = s);
+            },
+          );
       raw.sort((a, b) => '${a['wonum']}'.compareTo('${b['wonum']}'));
       final loaded = raw.map(WoListRow.new).toList();
       final printable = loaded.where((r) => r.printable).length;
@@ -223,7 +229,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
   Future<void> _checkPastedList() async {
     if (!_siteValid) {
       setState(
-          () => _status = 'Select a site on the home page first (not "All").');
+        () => _status = 'Select a site on the home page first (not "All").',
+      );
       return;
     }
     final wonums = _pasteController.text
@@ -243,8 +250,10 @@ class _WoPrintPageState extends State<WoPrintPage> {
       _selected.clear();
     });
     try {
-      final found = await WoPrintFetcher(env: _env, site: _site)
-          .fetchWorkOrderRowsForWonums(wonums);
+      final found = await WoPrintFetcher(
+        env: _env,
+        site: _site,
+      ).fetchWorkOrderRowsForWonums(wonums);
       final byWonum = {for (final r in found) '${r['wonum']}': r};
       // show every requested wonum, so misses are visible
       final display = <Map<String, dynamic>>[
@@ -254,7 +263,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
       setState(() {
         _rows = display.map(WoListRow.new).toList();
         final printable = _rows.where((r) => r.printable).length;
-        _status = 'Checked ${wonums.length} work order(s) - '
+        _status =
+            'Checked ${wonums.length} work order(s) - '
             '$printable released and printable.';
       });
       // when the labor filter is active, fetch its data right away so the
@@ -326,17 +336,18 @@ class _WoPrintPageState extends State<WoPrintPage> {
     try {
       final found = await WoPrintFetcher(env: _env, site: _site)
           .fetchAssignmentLaborcodes(
-        missing,
-        onStatus: (s) {
-          if (mounted) setState(() => _status = s);
-        },
-      );
+            missing,
+            onStatus: (s) {
+              if (mounted) setState(() => _status = s);
+            },
+          );
       if (!mounted) return;
       setState(() {
         for (final w in missing) {
           _laborByWonum[w] = found[w] ?? <String>{};
         }
-        _status = 'Assigned labor codes loaded for '
+        _status =
+            'Assigned labor codes loaded for '
             '${missing.length} work order(s).';
       });
     } on WoPrintFetchException catch (e) {
@@ -374,7 +385,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
   Future<List<WoPacket>?> _generatePackets() async {
     if (!_siteValid) {
       setState(
-          () => _status = 'Select a site on the home page first (not "All").');
+        () => _status = 'Select a site on the home page first (not "All").',
+      );
       return null;
     }
     final wonums = _selected.toList();
@@ -387,10 +399,12 @@ class _WoPrintPageState extends State<WoPrintPage> {
       _status = 'Fetching work order data (${wonums.length} parent(s))...';
     });
     try {
-      final batch = await WoPrintFetcher(env: _env, site: _site)
-          .fetchPackets(wonums, onStatus: (s) {
-        if (mounted) setState(() => _status = s);
-      });
+      final batch = await WoPrintFetcher(env: _env, site: _site).fetchPackets(
+        wonums,
+        onStatus: (s) {
+          if (mounted) setState(() => _status = s);
+        },
+      );
       if (!mounted) return null;
       setState(() {
         _generating = false;
@@ -432,7 +446,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
     if (packets == null || !mounted) return;
     setState(() {
       _rendering = true;
-      _status = 'Rendering print pack PDF '
+      _status =
+          'Rendering print pack PDF '
           '(${packets.length} work order packet(s))...';
     });
     try {
@@ -450,14 +465,19 @@ class _WoPrintPageState extends State<WoPrintPage> {
       // https://github.com/DavBfr/dart_pdf/pull/1985 ("print on a worker
       // thread", fixes DavBfr/dart_pdf#1982) - bump the `printing` version
       // once it ships, then delete this warning status.
-      setState(() =>
-          _status = 'Print package ready - choose a printer and confirm. After '
-              'confirming, the job is sent to the printer and the window may '
-              'not respond while the job is submitted.');
+      setState(
+        () => _status =
+            'Print package ready - choose a printer and confirm. After '
+            'confirming, the job is sent to the printer and the window may '
+            'not respond while the job is submitted.',
+      );
       await Printing.layoutPdf(onLayout: (format) async => bytes);
       if (mounted) {
-        setState(() => _status = 'Print dialog closed - '
-            '${packets.length} work order packet(s) in the pack.');
+        setState(
+          () => _status =
+              'Print dialog closed - '
+              '${packets.length} work order packet(s) in the pack.',
+        );
       }
     } catch (e) {
       if (mounted) setState(() => _status = 'Print failed: $e');
@@ -473,7 +493,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
     if (packets == null || !mounted) return;
     setState(() {
       _rendering = true;
-      _status = 'Rendering print pack PDF '
+      _status =
+          'Rendering print pack PDF '
           '(${packets.length} work order packet(s))...';
     });
     try {
@@ -482,7 +503,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
       // run, so the heavy layouts never block the window
       final kit = await buildWoPdfKitIsolated(packets, fonts: fonts);
       final dir = await FilePicker.getDirectoryPath(
-          dialogTitle: 'Choose a folder for the PDF files');
+        dialogTitle: 'Choose a folder for the PDF files',
+      );
       if (dir == null || !mounted) {
         setState(() => _status = 'Save cancelled');
         return;
@@ -498,8 +520,11 @@ class _WoPrintPageState extends State<WoPrintPage> {
       }
       final opened = await _openWithDefaultHandler(dir);
       if (mounted) {
-        setState(() => _status = 'Wrote $written PDF file(s) to $dir'
-            '${opened ? ' - folder opened' : ' (could not open the folder)'}');
+        setState(
+          () => _status =
+              'Wrote $written PDF file(s) to $dir'
+              '${opened ? ' - folder opened' : ' (could not open the folder)'}',
+        );
       }
     } catch (e) {
       setState(() => _status = 'Save failed: $e');
@@ -529,7 +554,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
     if (packets == null || !mounted) return;
     setState(() {
       _rendering = true;
-      _status = 'Rendering print pack PDF '
+      _status =
+          'Rendering print pack PDF '
           '(${packets.length} work order packet(s))...';
     });
     try {
@@ -552,8 +578,11 @@ class _WoPrintPageState extends State<WoPrintPage> {
       await File(file).writeAsBytes(bytes);
       final opened = await _openWithDefaultHandler(file);
       if (mounted) {
-        setState(() => _status = 'Wrote 1 PDF file: $file'
-            '${opened ? ' - opened' : ' (could not open it)'}');
+        setState(
+          () => _status =
+              'Wrote 1 PDF file: $file'
+              '${opened ? ' - opened' : ' (could not open it)'}',
+        );
       }
     } catch (e) {
       setState(() => _status = 'Save failed: $e');
@@ -615,8 +644,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
     final siteLabel = _site.isEmpty
         ? 'no site selected'
         : siteIDAndDescription[_site] == null
-            ? _site
-            : '$_site - ${siteIDAndDescription[_site]}';
+        ? _site
+        : '$_site - ${siteIDAndDescription[_site]}';
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -625,13 +654,15 @@ class _WoPrintPageState extends State<WoPrintPage> {
         SegmentedButton<bool>(
           segments: const [
             ButtonSegment(
-                value: false,
-                icon: Icon(Icons.filter_alt),
-                label: Text('Filter')),
+              value: false,
+              icon: Icon(Icons.filter_alt),
+              label: Text('Filter'),
+            ),
             ButtonSegment(
-                value: true,
-                icon: Icon(Icons.paste),
-                label: Text('Pasted list')),
+              value: true,
+              icon: Icon(Icons.paste),
+              label: Text('Pasted list'),
+            ),
           ],
           selected: {_pasteMode},
           onSelectionChanged: (s) => setState(() => _pasteMode = s.first),
@@ -708,11 +739,16 @@ class _WoPrintPageState extends State<WoPrintPage> {
   /// One optional date filter chip: pick a date in the selector, WOs whose
   /// field falls on that calendar day stay in the list. Delete icon clears.
   Widget _dateFilterChip(
-      String label, DateTime? value, void Function(DateTime?) onPicked) {
+    String label,
+    DateTime? value,
+    void Function(DateTime?) onPicked,
+  ) {
     return FilterChip(
-      label: Text(value == null
-          ? '$label: any'
-          : '$label: ${DateFormat('MMM d, y').format(value)}'),
+      label: Text(
+        value == null
+            ? '$label: any'
+            : '$label: ${DateFormat('MMM d, y').format(value)}',
+      ),
       selected: value != null,
       onSelected: (_) async {
         final picked = await showDatePicker(
@@ -737,12 +773,21 @@ class _WoPrintPageState extends State<WoPrintPage> {
         spacing: 8,
         runSpacing: 4,
         children: [
-          _dateFilterChip('Released on', _releasedOn,
-              (d) => setState(() => _releasedOn = d)),
           _dateFilterChip(
-              'Target start', _targetOn, (d) => setState(() => _targetOn = d)),
-          _dateFilterChip('Scheduled', _scheduledOn,
-              (d) => setState(() => _scheduledOn = d)),
+            'Released on',
+            _releasedOn,
+            (d) => setState(() => _releasedOn = d),
+          ),
+          _dateFilterChip(
+            'Target start',
+            _targetOn,
+            (d) => setState(() => _targetOn = d),
+          ),
+          _dateFilterChip(
+            'Scheduled',
+            _scheduledOn,
+            (d) => setState(() => _scheduledOn = d),
+          ),
           _laborFilterChip(),
         ],
       ),
@@ -759,13 +804,14 @@ class _WoPrintPageState extends State<WoPrintPage> {
         codes.isEmpty
             ? 'Assigned labor: any'
             : codes.length == 1
-                ? 'Assigned labor: ${codes.first}'
-                : 'Assigned labor: ${codes.first} +${codes.length - 1}',
+            ? 'Assigned labor: ${codes.first}'
+            : 'Assigned labor: ${codes.first} +${codes.length - 1}',
       ),
       selected: codes.isNotEmpty,
       onSelected: _laborLoading ? null : (_) => _openLaborFilter(),
-      onDeleted:
-          codes.isEmpty ? null : () => setState(() => _assignedLabors.clear()),
+      onDeleted: codes.isEmpty
+          ? null
+          : () => setState(() => _assignedLabors.clear()),
       deleteIcon: const Icon(Icons.close, size: 16),
     );
   }
@@ -801,9 +847,9 @@ class _WoPrintPageState extends State<WoPrintPage> {
           _loadingList
               ? 'Loading...'
               : _pasteMode
-                  ? 'Paste work order numbers above, then press "Check list".'
-                  : 'Press "Load released WOs" to list the released work '
-                      'orders for the selected site.',
+              ? 'Paste work order numbers above, then press "Check list".'
+              : 'Press "Load released WOs" to list the released work '
+                    'orders for the selected site.',
           textAlign: TextAlign.center,
         ),
       );
@@ -817,17 +863,16 @@ class _WoPrintPageState extends State<WoPrintPage> {
   }
 
   Widget _rowHeader() {
-    final headerStyle = Theme.of(context)
-        .textTheme
-        .labelMedium
-        ?.copyWith(fontWeight: FontWeight.bold);
+    final headerStyle = Theme.of(
+      context,
+    ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold);
     return Container(
       height: 34,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         border: Border(
-            bottom:
-                BorderSide(color: Theme.of(context).dividerColor, width: 1)),
+          bottom: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+        ),
       ),
       child: Row(
         children: [
@@ -853,14 +898,16 @@ class _WoPrintPageState extends State<WoPrintPage> {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: selected
-              ? Theme.of(context)
-                  .colorScheme
-                  .primaryContainer
-                  .withValues(alpha: 0.35)
+              ? Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.35)
               : null,
           border: Border(
-              bottom: BorderSide(
-                  color: Theme.of(context).dividerColor, width: 0.5)),
+            bottom: BorderSide(
+              color: Theme.of(context).dividerColor,
+              width: 0.5,
+            ),
+          ),
         ),
         child: Row(
           children: [
@@ -873,9 +920,10 @@ class _WoPrintPageState extends State<WoPrintPage> {
             ),
             SizedBox(
               width: 110,
-              child: Text(row.wonum,
-                  style:
-                      const TextStyle(fontFamily: 'RobotoMono', fontSize: 12)),
+              child: Text(
+                row.wonum,
+                style: const TextStyle(fontFamily: 'RobotoMono', fontSize: 12),
+              ),
             ),
             Expanded(
               flex: 4,
@@ -904,9 +952,10 @@ class _WoPrintPageState extends State<WoPrintPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: muted?.copyWith(
-                    color: printable
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.error),
+                  color: printable
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.error,
+                ),
               ),
             ),
           ],
@@ -928,7 +977,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
           Tooltip(
             waitDuration: const Duration(milliseconds: 500),
             preferBelow: false,
-            message: 'Use Save as PDF if a PDF file is desired. '
+            message:
+                'Use Save as PDF if a PDF file is desired. '
                 'Print to PDF is slow and freezes the window',
             child: FilledButton.icon(
               onPressed: busy ? null : _printSelected,
@@ -954,16 +1004,18 @@ class _WoPrintPageState extends State<WoPrintPage> {
                 ? Row(
                     children: [
                       const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2)),
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                       const SizedBox(width: 8),
                       Expanded(child: Text(_status)),
                     ],
                   )
                 : Text(
                     _status,
-                    style: _status.startsWith('Failed') ||
+                    style:
+                        _status.startsWith('Failed') ||
                             _status.startsWith('Fetch')
                         ? TextStyle(color: Theme.of(context).colorScheme.error)
                         : null,

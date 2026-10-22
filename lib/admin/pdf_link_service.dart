@@ -84,8 +84,10 @@ class PdfLinkToolService {
       return <File>[];
     }
 
-    final entities =
-        directory.listSync(recursive: recursive, followLinks: false);
+    final entities = directory.listSync(
+      recursive: recursive,
+      followLinks: false,
+    );
     final files = entities.whereType<File>().where((file) {
       final normalized = file.path.toLowerCase();
       return normalized.endsWith('.pdf');
@@ -125,10 +127,12 @@ class PdfLinkToolService {
     required String outputFolder,
   }) async {
     final bytes = await pdfFile.readAsBytes();
-    final outputFile = File(p.join(
-      outputFolder,
-      '${p.basenameWithoutExtension(pdfFile.path)}_updated.pdf',
-    ));
+    final outputFile = File(
+      p.join(
+        outputFolder,
+        '${p.basenameWithoutExtension(pdfFile.path)}_updated.pdf',
+      ),
+    );
 
     try {
       final doc = PdfDocument.open(bytes);
@@ -215,12 +219,14 @@ class PdfLinkToolService {
 
     final csvData = csv.encode([
       ['site', 'assetNumber', 'fileName', 'link'],
-      ...rows.map((row) => [
-            row['site'] ?? '',
-            row['assetNumber'] ?? '',
-            row['fileName'] ?? '',
-            row['link'] ?? '',
-          ]),
+      ...rows.map(
+        (row) => [
+          row['site'] ?? '',
+          row['assetNumber'] ?? '',
+          row['fileName'] ?? '',
+          row['link'] ?? '',
+        ],
+      ),
     ]);
 
     await outputFile.writeAsString(csvData);

@@ -19,14 +19,20 @@ double? rpnFunc(AssetCriticalityWithAsset asset) {
 
 /// Calculates the score of a system using the root mean square of its parameters.
 ///Just the root mean square between all parameters
-double systemScoreFunc(int safety, int regulatory, int economic, int throughput,
-        int quality) =>
-    sqrt((safety * safety +
-            regulatory * regulatory +
-            economic * economic +
-            throughput * throughput +
-            quality * quality) /
-        5);
+double systemScoreFunc(
+  int safety,
+  int regulatory,
+  int economic,
+  int throughput,
+  int quality,
+) => sqrt(
+  (safety * safety +
+          regulatory * regulatory +
+          economic * economic +
+          throughput * throughput +
+          quality * quality) /
+      5,
+);
 
 /// Returns a rating from a value using a definition map.
 int ratingFromValue(double value, Map<int, Map<String, dynamic>> definition) {
@@ -48,7 +54,8 @@ int ratingFromValue(double value, Map<int, Map<String, dynamic>> definition) {
 double calculateSystemScore(List<int> ratings) {
   if (ratings.length != 5) {
     throw Exception(
-        'Error in parameter [ratings] for function [calculateSystemScore]. Must have a length of 5');
+      'Error in parameter [ratings] for function [calculateSystemScore]. Must have a length of 5',
+    );
   }
   num sum2 = 0;
   for (int rating in ratings) {

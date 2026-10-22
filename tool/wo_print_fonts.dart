@@ -15,8 +15,9 @@ import 'package:iko_reliability_flutter/print/wo_packet.dart';
 WoPrintFonts? loadWoPrintFontsFromDirectory([String dir = 'fonts']) {
   pw.Font load(String name) {
     final bytes = File('$dir/Roboto-$name.ttf').readAsBytesSync();
-    return pw.Font.ttf(ByteData.view(bytes.buffer, bytes.offsetInBytes,
-        bytes.lengthInBytes));
+    return pw.Font.ttf(
+      ByteData.view(bytes.buffer, bytes.offsetInBytes, bytes.lengthInBytes),
+    );
   }
 
   try {

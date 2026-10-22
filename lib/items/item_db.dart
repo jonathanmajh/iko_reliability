@@ -55,12 +55,7 @@ class Abbreviations extends Table {
 }
 
 @DriftDatabase(
-  tables: [
-    ItemCaches,
-    InventoryCaches,
-    Manufacturers,
-    Abbreviations,
-  ],
+  tables: [ItemCaches, InventoryCaches, Manufacturers, Abbreviations],
   queries: {
     'findItems':
         '''select itemnum from itemCache where search_text like :search''',
@@ -93,8 +88,10 @@ class ItemDatabase extends _$ItemDatabase {
 
   /// retrive lists of items with phrase in the description
   /// return map with the number of times each item appears across all lists
-  Future<Map<int, List<String>>> rankResults(
-      {required List<String> phrases, bool extended = false}) async {
+  Future<Map<int, List<String>>> rankResults({
+    required List<String> phrases,
+    bool extended = false,
+  }) async {
     List<List<String>> results = [];
     Map<String, bool> allSet = {};
     // get results for each phrase
@@ -124,10 +121,12 @@ class ItemDatabase extends _$ItemDatabase {
     return ranked;
   }
 
-  Future<Map<String, ItemCache>> getItemDetails(
-      {required List<String> items}) async {
-    final result =
-        await (select(itemCaches)..where((a) => a.itemnum.isIn(items))).get();
+  Future<Map<String, ItemCache>> getItemDetails({
+    required List<String> items,
+  }) async {
+    final result = await (select(
+      itemCaches,
+    )..where((a) => a.itemnum.isIn(items))).get();
     Map<String, ItemCache> details = {};
     for (var item in result) {
       details[item.itemnum] = item;
@@ -135,12 +134,16 @@ class ItemDatabase extends _$ItemDatabase {
     return details;
   }
 
-  Future<Map<String, InventoryCache>> getInventoryDetails(
-      {required List<String> items, required String site}) async {
-    final result = await (select(inventoryCaches)
-          ..where((a) =>
-              a.itemnum.isIn(items) & a.siteid.equals(site.toUpperCase())))
-        .get();
+  Future<Map<String, InventoryCache>> getInventoryDetails({
+    required List<String> items,
+    required String site,
+  }) async {
+    final result =
+        await (select(inventoryCaches)..where(
+              (a) =>
+                  a.itemnum.isIn(items) & a.siteid.equals(site.toUpperCase()),
+            ))
+            .get();
     Map<String, InventoryCache> details = {};
     for (var item in result) {
       details[item.itemnum] = item;

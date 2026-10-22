@@ -25,18 +25,15 @@ class UploadStore {
   UploadStore({
     Map<String, List<List<String>>>? uploadDetails,
     int? uploadedLines,
-  })  : uploadDetails = uploadDetails ?? {},
-        uploadedLines = uploadedLines ?? 0;
+  }) : uploadDetails = uploadDetails ?? {},
+       uploadedLines = uploadedLines ?? 0;
 }
 
 class SelectedTemplate {
   String? selectedFile;
   int? selectedTemplate;
 
-  SelectedTemplate({
-    this.selectedFile,
-    this.selectedTemplate,
-  });
+  SelectedTemplate({this.selectedFile, this.selectedTemplate});
 }
 
 class UploadNotifier extends ChangeNotifier {
@@ -52,8 +49,11 @@ class UploadNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setUploadDetails(String file, int template,
-      Map<String, List<List<String>>> uploadDetails) {
+  void setUploadDetails(
+    String file,
+    int template,
+    Map<String, List<List<String>>> uploadDetails,
+  ) {
     addTemplate(file);
     if (!templateUpload[file]!.containsKey(template)) {
       templateUpload[file]![template] = UploadStore();
@@ -63,7 +63,9 @@ class UploadNotifier extends ChangeNotifier {
   }
 
   Map<String, List<List<String>>> getUploadDetails(
-      String file, int templateNumber) {
+    String file,
+    int templateNumber,
+  ) {
     /// Return details for selected template
     return templateUpload[file]?[templateNumber]?.uploadDetails ?? {};
   }
@@ -73,7 +75,7 @@ class TemplateNotifier extends ChangeNotifier {
   Map<String, Map<int, TemplateStore>> allTemplates = {};
   SelectedTemplate selectedTemplate = SelectedTemplate();
   bool loadingFiles = false;
-// check and add file name to map if necessary
+  // check and add file name to map if necessary
   void addTemplate(String file) {
     if (!allTemplates.keys.contains(file)) {
       allTemplates[file] = {};
@@ -161,7 +163,9 @@ class TemplateNotifier extends ChangeNotifier {
     // simple case if there are template in the same file
     if (templateIndex != templates.length - 1) {
       setSelectedTemplate(
-          selectedTemplate.selectedFile!, templates[templateIndex + 1]);
+        selectedTemplate.selectedFile!,
+        templates[templateIndex + 1],
+      );
       return;
     }
     // if we need to go to the next template
@@ -190,7 +194,9 @@ class TemplateNotifier extends ChangeNotifier {
     // simple case if there are template in the same file
     if (templateIndex != 0) {
       setSelectedTemplate(
-          selectedTemplate.selectedFile!, templates[templateIndex - 1]);
+        selectedTemplate.selectedFile!,
+        templates[templateIndex - 1],
+      );
       return;
     }
     // if we need to go to the previous template
@@ -201,7 +207,9 @@ class TemplateNotifier extends ChangeNotifier {
     }
     // first template of previous file
     setSelectedTemplate(
-        files[fileIndex - 1], allTemplates[files[fileIndex - 1]]!.keys.length);
+      files[fileIndex - 1],
+      allTemplates[files[fileIndex - 1]]!.keys.length,
+    );
   }
 
   SelectedTemplate getSelectedTemplate() {
@@ -235,8 +243,14 @@ class TemplateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setRouteInfo(String code, String description, String file, int template,
-      String maximoServerSelected, bool includeFrequency) async {
+  void setRouteInfo(
+    String code,
+    String description,
+    String file,
+    int template,
+    String maximoServerSelected,
+    bool includeFrequency,
+  ) async {
     final parsedTemplate = allTemplates[file]![template]!.parsedTemplate;
     parsedTemplate.routeCode = code;
     parsedTemplate.routeName = description;
@@ -269,10 +283,15 @@ class TemplateNotifier extends ChangeNotifier {
   }
 
   void setParsedTemplate(
-      String file, int templateNumber, ParsedTemplate template) {
+    String file,
+    int templateNumber,
+    ParsedTemplate template,
+  ) {
     addTemplate(file);
-    allTemplates[file]![templateNumber] =
-        TemplateStore(templateStatus: 'processing', parsedTemplate: template);
+    allTemplates[file]![templateNumber] = TemplateStore(
+      templateStatus: 'processing',
+      parsedTemplate: template,
+    );
     notifyListeners();
   }
 
@@ -283,7 +302,10 @@ class TemplateNotifier extends ChangeNotifier {
   }
 
   void setProcessedTemplate(
-      String file, int templateNumber, PMMaximo template) {
+    String file,
+    int templateNumber,
+    PMMaximo template,
+  ) {
     addTemplate(file);
     allTemplates[file]![templateNumber]!.processedTemplate = template;
     setStatus(file, templateNumber, 'processing-done');

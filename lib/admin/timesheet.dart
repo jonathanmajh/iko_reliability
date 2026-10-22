@@ -30,12 +30,13 @@ class LaborRecord {
   final String name;
   final double hours;
 
-  const LaborRecord(
-      {required this.siteid,
-      required this.laborid,
-      required this.laborCode,
-      required this.name,
-      required this.hours});
+  const LaborRecord({
+    required this.siteid,
+    required this.laborid,
+    required this.laborCode,
+    required this.name,
+    required this.hours,
+  });
 }
 
 class TimesheetEntry {
@@ -75,47 +76,41 @@ class _TimesheetPageState extends State<TimesheetPage>
   void initState() {
     super.initState();
 
-    _tabController =
-        TabController(vsync: this, length: 3); //hard-coded tab length of 3
+    _tabController = TabController(
+      vsync: this,
+      length: 3,
+    ); //hard-coded tab length of 3
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Timesheet Generator"),
-          // keep back button with a right side hamburger menu
-          leading: (ModalRoute.of(context)?.canPop ?? false)
-              ? const BackButton()
-              : null,
+      appBar: AppBar(
+        title: const Text("Timesheet Generator"),
+        // keep back button with a right side hamburger menu
+        leading: (ModalRoute.of(context)?.canPop ?? false)
+            ? const BackButton()
+            : null,
+      ),
+      body: Scaffold(
+        appBar: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(icon: Icon(Icons.tune)),
+            Tab(icon: Icon(Icons.cloud_upload)),
+            Tab(icon: Icon(Icons.edit_note)),
+          ],
         ),
-        body: Scaffold(
-          appBar: TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(
-                  icon: Icon(
-                Icons.tune,
-              )),
-              Tab(
-                  icon: Icon(
-                Icons.cloud_upload,
-              )),
-              Tab(
-                  icon: Icon(
-                Icons.edit_note,
-              )),
-            ],
-          ),
-          body: TabBarView(
-            controller: _tabController,
-            children: [
-              monthYear(),
-              timesheetTable(),
-              workingDays.isNotEmpty ? uploadDetails() : const Text('no data'),
-            ],
-          ),
-        ));
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            monthYear(),
+            timesheetTable(),
+            workingDays.isNotEmpty ? uploadDetails() : const Text('no data'),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget monthYear() {
@@ -128,9 +123,12 @@ class _TimesheetPageState extends State<TimesheetPage>
             DropdownButton(
               items: [DateTime.now().year, DateTime.now().year - 1]
                   .map<DropdownMenuItem<int>>((int value) {
-                return DropdownMenuItem<int>(
-                    value: value, child: Text(value.toString()));
-              }).toList(),
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text(value.toString()),
+                    );
+                  })
+                  .toList(),
               onChanged: (int? value) {
                 setState(() {
                   selectedYear = value!;
@@ -141,9 +139,12 @@ class _TimesheetPageState extends State<TimesheetPage>
             DropdownButton(
               items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
                   .map<DropdownMenuItem<int>>((int value) {
-                return DropdownMenuItem<int>(
-                    value: value, child: Text(value.toString()));
-              }).toList(),
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text(value.toString()),
+                    );
+                  })
+                  .toList(),
               onChanged: (int? value) {
                 setState(() {
                   selectedMonth = value!;
@@ -154,7 +155,9 @@ class _TimesheetPageState extends State<TimesheetPage>
           ],
         ),
         const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround, children: []),
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [],
+        ),
         ElevatedButton(
           onPressed: () async {
             labors = await laborFromClipboard();
@@ -182,9 +185,7 @@ class _TimesheetPageState extends State<TimesheetPage>
               }
             });
           },
-          child: const Text(
-            "Generate Uploads",
-          ),
+          child: const Text("Generate Uploads"),
         ),
         ElevatedButton(
           onPressed: () {
@@ -200,14 +201,13 @@ class _TimesheetPageState extends State<TimesheetPage>
     return ListView(
       children: <Widget>[
         ListView.builder(
-            shrinkWrap: true,
-            prototypeItem: ListTile(title: Text(workingDays.first.laborcode)),
-            itemCount: workingDays.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(workingDays[index].checkout),
-              );
-            })
+          shrinkWrap: true,
+          prototypeItem: ListTile(title: Text(workingDays.first.laborcode)),
+          itemCount: workingDays.length,
+          itemBuilder: (context, index) {
+            return ListTile(title: Text(workingDays[index].checkout));
+          },
+        ),
       ],
     );
   }
@@ -217,30 +217,21 @@ class _TimesheetPageState extends State<TimesheetPage>
       return const Text('Add some timesheets');
     }
     return DataTable(
-        rows: timesheets.entries.map((item) {
-          return DataRow(cells: [
+      rows: timesheets.entries.map((item) {
+        return DataRow(
+          cells: [
             DataCell(Text(item.value.siteid)),
             DataCell(Text(item.value.laborcode)),
             DataCell(Text(item.value.hours.toString())),
-          ]);
-        }).toList(),
-        columns: const [
-          DataColumn(
-            label: Expanded(
-              child: Text('SiteID'),
-            ),
-          ),
-          DataColumn(
-            label: Expanded(
-              child: Text('LaborCode'),
-            ),
-          ),
-          DataColumn(
-            label: Expanded(
-              child: Text('Hours'),
-            ),
-          )
-        ]);
+          ],
+        );
+      }).toList(),
+      columns: const [
+        DataColumn(label: Expanded(child: Text('SiteID'))),
+        DataColumn(label: Expanded(child: Text('LaborCode'))),
+        DataColumn(label: Expanded(child: Text('Hours'))),
+      ],
+    );
   }
 }
 
@@ -276,24 +267,29 @@ List<WorkingDay> generateWorkDays(TimesheetEntry worker) {
     }
     if (hoursLeft < workday) {
       final minutes = ((hoursLeft - hoursLeft.floor()) * 60).floor();
-      entries.add(WorkingDay(
-        checkin: formatter.format(checkin),
-        checkout: formatter.format(
-            checkin.add(Duration(hours: hoursLeft.floor(), minutes: minutes))),
-        siteid: worker.siteid,
-        laborcode: worker.laborcode,
-        hours: hoursLeft,
-        weekday: wdFormatter.format(checkin),
-      ));
+      entries.add(
+        WorkingDay(
+          checkin: formatter.format(checkin),
+          checkout: formatter.format(
+            checkin.add(Duration(hours: hoursLeft.floor(), minutes: minutes)),
+          ),
+          siteid: worker.siteid,
+          laborcode: worker.laborcode,
+          hours: hoursLeft,
+          weekday: wdFormatter.format(checkin),
+        ),
+      );
     } else {
-      entries.add(WorkingDay(
-        checkin: formatter.format(checkin),
-        checkout: formatter.format(checkin.add(Duration(hours: workday))),
-        siteid: worker.siteid,
-        laborcode: worker.laborcode,
-        hours: workday * 1.0,
-        weekday: wdFormatter.format(checkin),
-      ));
+      entries.add(
+        WorkingDay(
+          checkin: formatter.format(checkin),
+          checkout: formatter.format(checkin.add(Duration(hours: workday))),
+          siteid: worker.siteid,
+          laborcode: worker.laborcode,
+          hours: workday * 1.0,
+          weekday: wdFormatter.format(checkin),
+        ),
+      );
     }
     hoursLeft = hoursLeft - workday;
   }

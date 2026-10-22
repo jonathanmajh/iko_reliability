@@ -21,7 +21,8 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
   bool result;
   if (templates.getStatus(file, template) == 'error') {
     throw Exception(
-        'Please fix errors in template before upload: $file: $template');
+      'Please fix errors in template before upload: $file: $template',
+    );
   }
   List<String> newJobPlans = [];
   var uploadData = uploadNotifier.getUploadDetails(file, template);
@@ -50,8 +51,11 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
       uploadNotifier.setUploadDetails(file, template, uploadData);
     }
     if (stop) {
-      templates.addStatusMessage(file, template,
-          'Please add missing Meter Domains, then retry upload again');
+      templates.addStatusMessage(
+        file,
+        template,
+        'Please add missing Meter Domains, then retry upload again',
+      );
       templates.setStatus(file, template, 'retry');
       return uploadData;
     }
@@ -99,8 +103,11 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
   }
   if (uploadData.containsKey('MeasurePoint')) {
     for (int i = 0; i < uploadData['MeasurePoint']!.length; i++) {
-      if (await isNewMeasurePoint(uploadData['MeasurePoint']![i][3],
-          uploadData['MeasurePoint']![i][0], env)) {
+      if (await isNewMeasurePoint(
+        uploadData['MeasurePoint']![i][3],
+        uploadData['MeasurePoint']![i][0],
+        env,
+      )) {
         result = await uploadGeneric(
           uploadData['MeasurePoint']![i],
           env,
@@ -120,8 +127,11 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
   } // should cache
   if (uploadData.containsKey('MeasurePoint2')) {
     for (int i = 0; i < uploadData['MeasurePoint2']!.length; i++) {
-      if (await isNewMeasurePoint2(uploadData['MeasurePoint2']![i][3],
-          uploadData['MeasurePoint2']![i][0], env)) {
+      if (await isNewMeasurePoint2(
+        uploadData['MeasurePoint2']![i][3],
+        uploadData['MeasurePoint2']![i][0],
+        env,
+      )) {
         result = await uploadGeneric(
           uploadData['MeasurePoint2']![i],
           env,
@@ -176,12 +186,7 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
   if (uploadData.containsKey('PM')) {
     // no checks
     for (int i = 0; i < uploadData['PM']!.length; i++) {
-      result = await uploadGeneric(
-        uploadData['PM']![i],
-        env,
-        'PM',
-        'iko_pm',
-      );
+      result = await uploadGeneric(uploadData['PM']![i], env, 'PM', 'iko_pm');
       if (result) {
         uploadData['PM']![i].add('+');
       } else {
@@ -250,7 +255,10 @@ Future<Map<String, List<List<String>>>> uploadPMToMaximo(
       if (uploadData['JobTask']![i][2].contains('CBM') &&
           !(newJobPlans.contains(uploadData['JobTask']![i][2]))) {
         if (!(await isNewJobTask(
-            uploadData['JobTask']![i][2], uploadData['JobTask']![i][4], env))) {
+          uploadData['JobTask']![i][2],
+          uploadData['JobTask']![i][4],
+          env,
+        ))) {
           uploadData['JobTask']![i].add('~');
           continue;
         }
@@ -368,7 +376,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
         'OPERATING',
         'GENERAL',
         'OPERATING',
-        'L-${asset.asset.parent}'
+        'L-${asset.asset.parent}',
       ],
       env,
       'Location',
@@ -442,19 +450,21 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       'iko_jobplan',
     );
     handlePostResult(
-        jobPlanResult,
-        'jobplan ${asset.asset.assetnum}${entry.key}',
-        ['jobplan', '${asset.asset.assetnum}${entry.key}']);
+      jobPlanResult,
+      'jobplan ${asset.asset.assetnum}${entry.key}',
+      ['jobplan', '${asset.asset.assetnum}${entry.key}'],
+    );
   }
 
   result['joblabor'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
     if (!(await isNewJobLabor(
-        '${asset.asset.assetnum}${entry.key}',
-        siteIDAndOrgID[selectedSite]!,
-        craftCode[entry.key[entry.key.length - 1]]!,
-        "1",
-        env))) {
+      '${asset.asset.assetnum}${entry.key}',
+      siteIDAndOrgID[selectedSite]!,
+      craftCode[entry.key[entry.key.length - 1]]!,
+      "1",
+      env,
+    ))) {
       debugPrint('${asset.asset.assetnum}${entry.key} joblabor exists');
       result['joblabor']['${asset.asset.assetnum}${entry.key}'] = 'duplicate';
       numDuplicates++;
@@ -470,7 +480,7 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
       '1',
       '1',
       siteIDAndOrgID[selectedSite]!,
-      ''
+      '',
     ];
 
     var jobLaborResult = await uploadGeneric(
@@ -481,15 +491,20 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     );
 
     handlePostResult(
-        jobLaborResult,
-        'joblabor ${asset.asset.assetnum}${entry.key}',
-        ['joblabor', '${asset.asset.assetnum}${entry.key}']);
+      jobLaborResult,
+      'joblabor ${asset.asset.assetnum}${entry.key}',
+      ['joblabor', '${asset.asset.assetnum}${entry.key}'],
+    );
   }
 
   result['jpassetlink'] = <String, String>{};
   for (var entry in assetWorkType.entries) {
-    if (!(await isNewJobAsset('${asset.asset.assetnum}${entry.key}',
-        selectedSite, asset.asset.assetnum, env))) {
+    if (!(await isNewJobAsset(
+      '${asset.asset.assetnum}${entry.key}',
+      selectedSite,
+      asset.asset.assetnum,
+      env,
+    ))) {
       debugPrint('${asset.asset.assetnum}${entry.key} jpasset exists');
       result['jpassetlink']['${asset.asset.assetnum}${entry.key}'] =
           'duplicate';
@@ -516,9 +531,10 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
     );
 
     handlePostResult(
-        jpassetlinkResult,
-        'jpassetlink ${asset.asset.assetnum}${entry.key}',
-        ['jpassetlink', '${asset.asset.assetnum}${entry.key}']);
+      jpassetlinkResult,
+      'jpassetlink ${asset.asset.assetnum}${entry.key}',
+      ['jpassetlink', '${asset.asset.assetnum}${entry.key}'],
+    );
   }
 
   if (numDuplicates >= 56) {
@@ -535,8 +551,13 @@ Future<Map<String, dynamic>> uploadAssetToMaximo(
   return result;
 }
 
-Future<bool> isNewJobLabor(String jpNumber, String orgid, String craft,
-    String hours, String maximoEnvironment) async {
+Future<bool> isNewJobLabor(
+  String jpNumber,
+  String orgid,
+  String craft,
+  String hours,
+  String maximoEnvironment,
+) async {
   // do for all in case of retries
   final url =
       'iko_joblabor?oslc.select=jpnum&oslc.where=jpnum="$jpNumber" and joblabor.orgid="$orgid" and joblabor.craft="$craft" and joblabor.laborhrs="$hours"';
@@ -549,7 +570,10 @@ Future<bool> isNewJobLabor(String jpNumber, String orgid, String craft,
 }
 
 Future<bool> isNewJobTask(
-    String jpNumber, String jptask, String maximoEnvironment) async {
+  String jpNumber,
+  String jptask,
+  String maximoEnvironment,
+) async {
   // is only needed for CBMs
   final url =
       'iko_jobtask?oslc.select=*&oslc.where=jpnum="$jpNumber" and jobtask.jptask="$jptask"';
@@ -561,8 +585,12 @@ Future<bool> isNewJobTask(
   }
 }
 
-Future<bool> isNewJobAsset(String jpNumber, String siteid, String assetnum,
-    String maximoEnvironment) async {
+Future<bool> isNewJobAsset(
+  String jpNumber,
+  String siteid,
+  String assetnum,
+  String maximoEnvironment,
+) async {
   // is only needed for CBMs
   final url =
       'iko_jpassetlink?oslc.select=*&oslc.where=jpnum="$jpNumber" and JPASSETSPLINK.siteid="$siteid" and JPASSETSPLINK.assetnum="$assetnum"';
@@ -586,7 +614,10 @@ Future<bool> isNewJobPlan(String jpNumber, String maximoEnvironment) async {
 }
 
 Future<bool> isNewMeasurePoint(
-    String measurePoint, String siteid, String maximoEnvironment) async {
+  String measurePoint,
+  String siteid,
+  String maximoEnvironment,
+) async {
   final url =
       'iko_measurepoint?oslc.select=pointnum&oslc.where=pointnum="$measurePoint" and siteid="$siteid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
@@ -598,7 +629,10 @@ Future<bool> isNewMeasurePoint(
 }
 
 Future<bool> isNewMeasurePoint2(
-    String jpnum, String siteid, String maximoEnvironment) async {
+  String jpnum,
+  String siteid,
+  String maximoEnvironment,
+) async {
   final url =
       'iko_measurepoint?oslc.select=charpointaction&oslc.where=charpointaction.jpnum="$jpnum" and siteid="$siteid"';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
@@ -621,7 +655,10 @@ Future<bool> isNewMeter(String meterName, String maximoEnvironment) async {
 }
 
 Future<bool> isNewLocation(
-    String location, String siteId, String maximoEnvironment) async {
+  String location,
+  String siteId,
+  String maximoEnvironment,
+) async {
   final url =
       'iko_location?oslc.where=siteid="$siteId" and location="$location"&oslc.select=location,siteid';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
@@ -641,7 +678,10 @@ Future<bool> isNewLocation(
 }
 
 Future<bool> isNewAsset(
-    String assetNum, String siteId, String maximoEnvironment) async {
+  String assetNum,
+  String siteId,
+  String maximoEnvironment,
+) async {
   final url =
       'iko_asset?oslc.where=siteid="$siteId" and assetnum="$assetNum"&oslc.select=assetnum,siteid';
   final result = await maximoRequest(url, 'get', maximoEnvironment);
@@ -666,8 +706,12 @@ Future<bool> uploadGeneric(
   String url,
 ) async {
   final rows = [tableHeaders[table]!.cast<dynamic>(), data.cast<dynamic>()];
-  final result = await maximoRequest('$url?action=importfile', 'post',
-      maximoEnvironment, CsvEncoder().convert(rows));
+  final result = await maximoRequest(
+    '$url?action=importfile',
+    'post',
+    maximoEnvironment,
+    CsvEncoder().convert(rows),
+  );
   if (result['status'] == 'uploaded') {
     debugPrint('uploaded');
     return true;
@@ -739,11 +783,7 @@ Future<Map<String, dynamic>> maximoRequest(
     header['preview'] = '1';
     header['Content-Type'] = 'text/plain';
     try {
-      response = await http.post(
-        Uri.parse(url),
-        headers: header,
-        body: body,
-      );
+      response = await http.post(Uri.parse(url), headers: header, body: body);
     } catch (err) {
       return {'status': 'Failed to Connect'};
     }

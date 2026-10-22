@@ -54,8 +54,10 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
       return;
     }
 
-    final files =
-        await _service.collectPdfFilesFromFolder(result, recursive: _recursive);
+    final files = await _service.collectPdfFilesFromFolder(
+      result,
+      recursive: _recursive,
+    );
     setState(() {
       _selectedFiles
         ..clear()
@@ -119,8 +121,10 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
         outputs.add(outputPath);
 
         if (mounted) {
-          setState(() => _status =
-              'Processed ${index + 1}/${_selectedFiles.length} file(s)');
+          setState(
+            () => _status =
+                'Processed ${index + 1}/${_selectedFiles.length} file(s)',
+          );
         }
       }
     } finally {
@@ -178,15 +182,18 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
         }
 
         if (mounted) {
-          setState(() => _status =
-              'Scanned ${index + 1}/${_selectedFiles.length} file(s)');
+          setState(
+            () => _status =
+                'Scanned ${index + 1}/${_selectedFiles.length} file(s)',
+          );
         }
       }
 
       final outputPath = await _service.exportLinksCsv(rows, _outputFolder);
       if (mounted) {
         setState(
-            () => _status = 'Exported ${rows.length} link(s) to $outputPath');
+          () => _status = 'Exported ${rows.length} link(s) to $outputPath',
+        );
       }
     } finally {
       if (mounted) {
@@ -249,16 +256,22 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
         }
 
         if (mounted) {
-          setState(() => _status =
-              'Scanned ${index + 1}/${_selectedFiles.length} file(s)');
+          setState(
+            () => _status =
+                'Scanned ${index + 1}/${_selectedFiles.length} file(s)',
+          );
         }
       }
 
-      final outputPath =
-          await _service.exportAssetNumbersCsv(rows, _outputFolder);
+      final outputPath = await _service.exportAssetNumbersCsv(
+        rows,
+        _outputFolder,
+      );
       if (mounted) {
-        setState(() => _status =
-            'Exported ${rows.length} asset reference(s) to $outputPath');
+        setState(
+          () => _status =
+              'Exported ${rows.length} asset reference(s) to $outputPath',
+        );
       }
     } finally {
       if (mounted) {
@@ -297,8 +310,10 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Status: $_status',
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Status: $_status',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 16),
             Wrap(
               spacing: 12,
@@ -360,8 +375,9 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
             const SizedBox(height: 12),
             TextField(
               controller: _siteController,
-              decoration:
-                  const InputDecoration(labelText: 'Site name (optional)'),
+              decoration: const InputDecoration(
+                labelText: 'Site name (optional)',
+              ),
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -400,8 +416,9 @@ class _PdfLinkToolPageState extends State<PdfLinkToolPage> {
                     children: [
                       Text('Selected files (${_selectedFiles.length})'),
                       const SizedBox(height: 8),
-                      ..._selectedFiles
-                          .map((file) => Text(p.basename(file.path))),
+                      ..._selectedFiles.map(
+                        (file) => Text(p.basename(file.path)),
+                      ),
                     ],
                   ),
                 ),

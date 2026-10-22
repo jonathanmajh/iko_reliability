@@ -32,11 +32,7 @@ String rowValue(dynamic row, String header) {
 }
 
 /// Maps person group codes to their string representations.
-final personGroups = {
-  'O': 'PRODSUP',
-  'M': 'MECHSUP',
-  'E': 'ELECTSUP',
-};
+final personGroups = {'O': 'PRODSUP', 'M': 'MECHSUP', 'E': 'ELECTSUP'};
 
 /// Maps asset criticality levels to their string descriptions.
 final assetCriticality = {
@@ -56,11 +52,7 @@ final spareCriticality = {
 };
 
 /// Maps spare criticality levels to their Z values.
-final spareZValue = {
-  1: 1.28,
-  2: 1.65,
-  3: 2.44,
-};
+final spareZValue = {1: 1.28, 2: 1.65, 3: 2.44};
 
 final itemSearchDescCleanup = [',', ' ', '-', '	'];
 
@@ -74,28 +66,13 @@ List<String> criticalityStrings = [
 ];
 
 /// List of ABC string codes for spares.
-List<String> abcStrings = [
-  'A',
-  'B',
-  'C',
-];
+List<String> abcStrings = ['A', 'B', 'C'];
 
 /// Enum for criticality percentage categories.
-enum CriticalityEnums {
-  percentVL,
-  percentL,
-  percentM,
-  percentH,
-  percentVH,
-}
+enum CriticalityEnums { percentVL, percentL, percentM, percentH, percentVH }
 
 /// Maps frequency units to their equivalent values in days.
-final freqUnitToDays = {
-  'D': 1,
-  'W': 7,
-  'M': 30,
-  'Y': 365,
-};
+final freqUnitToDays = {'D': 1, 'W': 7, 'M': 30, 'Y': 365};
 
 /// Maps production line codes to their string representations.
 final productionLines = {
@@ -107,7 +84,7 @@ final productionLines = {
   'W': 'Wrapper',
   'G': 'Mortar',
   'M': 'Mod',
-  'U': 'Rubber'
+  'U': 'Rubber',
 };
 
 /// Maps work type codes to their full descriptions.
@@ -137,10 +114,16 @@ const assetWorkType = {
   "BDO": AssetWorkType("BDO", "Breakdown - Operational", 4),
   "CORE": AssetWorkType("CORE", "Corrective - Post-Repair - Electrical", 3),
   "CORM": AssetWorkType("CORM", "Corrective - Post-Repair - Mechanical", 3),
-  "EPIE":
-      AssetWorkType("EPIE", "Equipment/Process Improvement - Electrical", 1),
-  "EPIM":
-      AssetWorkType("EPIM", "Equipment/Process Improvement - Mechanical", 1),
+  "EPIE": AssetWorkType(
+    "EPIE",
+    "Equipment/Process Improvement - Electrical",
+    1,
+  ),
+  "EPIM": AssetWorkType(
+    "EPIM",
+    "Equipment/Process Improvement - Mechanical",
+    1,
+  ),
   "HKGM": AssetWorkType("HKGM", "Housekeeping", 1),
   "INAE": AssetWorkType("INAE", "Inspection - Ad Hoc - Electrical", 3),
   "INAM": AssetWorkType("INAM", "Inspection - Ad Hoc - Mechanical", 3),
@@ -155,18 +138,10 @@ const assetWorkType = {
 };
 
 /// Maps craft codes to their full craft descriptions.
-const crafts = {
-  'E': 'Electrical',
-  'M': 'Mechanical',
-  'O': 'Production',
-};
+const crafts = {'E': 'Electrical', 'M': 'Mechanical', 'O': 'Production'};
 
 /// Maps craft codes to their corresponding code used in the system.
-const craftCode = {
-  'E': 'ELECT',
-  'M': 'MECH-MW',
-  'O': 'PROD',
-};
+const craftCode = {'E': 'ELECT', 'M': 'MECH-MW', 'O': 'PROD'};
 
 /// Maps frequency units to their string representations.
 final freqUnitToString = {
@@ -261,13 +236,7 @@ const tableHeaders = {
     'IKO_PMHISTORYNOTES',
     'IKO_FMECA',
   ],
-  'Route': [
-    'ORGID',
-    'SITEID',
-    'ROUTE',
-    'ROUTESTOPSBECOME',
-    'DESCRIPTION',
-  ],
+  'Route': ['ORGID', 'SITEID', 'ROUTE', 'ROUTESTOPSBECOME', 'DESCRIPTION'],
   'Route_Stop': [
     'ORGID',
     'SITEID',
@@ -311,7 +280,7 @@ const tableHeaders = {
     'LOCATION',
     'STORELOCSITE',
     'COMPANY',
-    'COST'
+    'COST',
   ],
   'JobService': [
     'JP_ORGID',
@@ -324,7 +293,7 @@ const tableHeaders = {
     'ITEMQTY',
     'ITEMSETID',
     'COMPANY',
-    'COST'
+    'COST',
   ],
   'JobLabor': [
     'JP_ORGID',
@@ -335,7 +304,7 @@ const tableHeaders = {
     'LABORHRS',
     'QUANTITY',
     'ORGID',
-    'LABORCODE'
+    'LABORCODE',
   ],
   'JPASSETLINK': [
     'JP_ORGID',
@@ -356,7 +325,7 @@ const tableHeaders = {
     'PLUSCJPREVNUM',
     'METERNAME',
     'DESCRIPTION',
-    'DESCRIPTION_LONGDESCRIPTION'
+    'DESCRIPTION_LONGDESCRIPTION',
   ],
   'Asset': ['SITEID', 'ASSETNUM', 'IKO_PMPACKAGE'],
   'AssetMeter': ['SITEID', 'ASSETNUM', 'METERNAME'],
@@ -365,7 +334,7 @@ const tableHeaders = {
     'ASSETNUM',
     'METERNAME',
     'POINTNUM',
-    'DESCRIPTION'
+    'DESCRIPTION',
   ],
   'Meter': ['METERNAME', 'DESCRIPTION', 'METERTYPE', 'DOMAINID'],
   'MeasurePoint2': ['SITEID', 'POINTNUM', 'VALUE', 'JPNUM'],
@@ -376,7 +345,7 @@ const tableHeaders = {
     'STATUS',
     'SYSTEMID',
     'TYPE',
-    'PARENT'
+    'PARENT',
   ],
   'AssetUpload': [
     'SITEID',
@@ -590,7 +559,7 @@ List<String> systemSafety = [
   'Long-Term Disability',
   'Fatality',
   'Multiple Fatalities',
-  'Catastrophic Event'
+  'Catastrophic Event',
 ];
 
 /// List of regulatory impact categories for the system.
@@ -651,60 +620,15 @@ List<String> systemQuality = [
 
 /// Contains usage rating information for different levels of maintenance.
 Map<int, Map<String, dynamic>> usageRating = {
-  1: {
-    'description': '1 Time',
-    'longdesc': '',
-    'low': 0.0,
-    'high': 1,
-  },
-  2: {
-    'description': '2 Times',
-    'longdesc': '',
-    'low': 1,
-    'high': 2,
-  },
-  3: {
-    'description': '3 - 4 Times',
-    'longdesc': '',
-    'low': 2,
-    'high': 4,
-  },
-  4: {
-    'description': '5 - 10 Times',
-    'longdesc': '',
-    'low': 5,
-    'high': 10,
-  },
-  5: {
-    'description': '11 - 20 Times',
-    'longdesc': '',
-    'low': 10,
-    'high': 20,
-  },
-  6: {
-    'description': '21 - 30 Times',
-    'longdesc': '',
-    'low': 20,
-    'high': 30,
-  },
-  7: {
-    'description': '31 - 40 Times',
-    'longdesc': '',
-    'low': 30,
-    'high': 40,
-  },
-  8: {
-    'description': '41 - 50 Times',
-    'longdesc': '',
-    'low': 40,
-    'high': 50,
-  },
-  9: {
-    'description': '51 - 60 Times',
-    'longdesc': '',
-    'low': 50,
-    'high': 60,
-  },
+  1: {'description': '1 Time', 'longdesc': '', 'low': 0.0, 'high': 1},
+  2: {'description': '2 Times', 'longdesc': '', 'low': 1, 'high': 2},
+  3: {'description': '3 - 4 Times', 'longdesc': '', 'low': 2, 'high': 4},
+  4: {'description': '5 - 10 Times', 'longdesc': '', 'low': 5, 'high': 10},
+  5: {'description': '11 - 20 Times', 'longdesc': '', 'low': 10, 'high': 20},
+  6: {'description': '21 - 30 Times', 'longdesc': '', 'low': 20, 'high': 30},
+  7: {'description': '31 - 40 Times', 'longdesc': '', 'low': 30, 'high': 40},
+  8: {'description': '41 - 50 Times', 'longdesc': '', 'low': 40, 'high': 50},
+  9: {'description': '51 - 60 Times', 'longdesc': '', 'low': 50, 'high': 60},
   10: {
     'description': '> 60 Times',
     'longdesc': '',
@@ -780,42 +704,12 @@ Map<int, Map<String, dynamic>> leadTimeRating = {
 
 /// Contains cost rating information for different levels of maintenance.
 Map<int, Map<String, dynamic>> costRating = {
-  1: {
-    'description': '< \$10',
-    'longdesc': '',
-    'low': 0.0,
-    'high': 10,
-  },
-  2: {
-    'description': '\$10 - \$50',
-    'longdesc': '',
-    'low': 10,
-    'high': 50,
-  },
-  3: {
-    'description': '\$50 - \$100',
-    'longdesc': '',
-    'low': 50,
-    'high': 100,
-  },
-  4: {
-    'description': '\$100 - \$250',
-    'longdesc': '',
-    'low': 100,
-    'high': 250,
-  },
-  5: {
-    'description': '\$250 - \$500',
-    'longdesc': '',
-    'low': 250,
-    'high': 500,
-  },
-  6: {
-    'description': '\$500 - \$750',
-    'longdesc': '',
-    'low': 500,
-    'high': 750,
-  },
+  1: {'description': '< \$10', 'longdesc': '', 'low': 0.0, 'high': 10},
+  2: {'description': '\$10 - \$50', 'longdesc': '', 'low': 10, 'high': 50},
+  3: {'description': '\$50 - \$100', 'longdesc': '', 'low': 50, 'high': 100},
+  4: {'description': '\$100 - \$250', 'longdesc': '', 'low': 100, 'high': 250},
+  5: {'description': '\$250 - \$500', 'longdesc': '', 'low': 250, 'high': 500},
+  6: {'description': '\$500 - \$750', 'longdesc': '', 'low': 500, 'high': 750},
   7: {
     'description': '\$750 - \$1000',
     'longdesc': '',
@@ -850,31 +744,44 @@ enum ApplicationSetting {
 
   ///TRUE FALSE for hiding the update availiable prompt
   updateWindowOff(
-      keyString: 'update window off', dataType: 'bool', defaultValue: false),
+    keyString: 'update window off',
+    dataType: 'bool',
+    defaultValue: false,
+  ),
 
   ///TRUE FALSE for including frequency text in generated PM / JP / Route descriptions
   includeFrequencyInDescriptions(
-      keyString: 'include frequency in generated descriptions',
-      dataType: 'bool',
-      defaultValue: true),
+    keyString: 'include frequency in generated descriptions',
+    dataType: 'bool',
+    defaultValue: true,
+  ),
 
   ///int for asset criticality RPN risk distribution percentage (very low)
   rpnPercentVL(
-      keyString: 'RPN percent very low', dataType: 'int', defaultValue: 30),
+    keyString: 'RPN percent very low',
+    dataType: 'int',
+    defaultValue: 30,
+  ),
 
   ///int for asset criticality RPN distribution percentage (low)
   rpnPercentL(keyString: 'RPN percent low', dataType: 'int', defaultValue: 25),
 
   ///int for asset criticality RPN distribution percentage (medium)
   rpnPercentM(
-      keyString: 'RPN percent medium', dataType: 'int', defaultValue: 20),
+    keyString: 'RPN percent medium',
+    dataType: 'int',
+    defaultValue: 20,
+  ),
 
   ///int for asset criticality RPN risk distribution percentage (high)
   rpnPercentH(keyString: 'RPN percent high', dataType: 'int', defaultValue: 15),
 
   ///int for asset criticality RPN risk distribution percentage (very high)
   rpnPercentVH(
-      keyString: 'RPN percent very high', dataType: 'int', defaultValue: 10),
+    keyString: 'RPN percent very high',
+    dataType: 'int',
+    defaultValue: 10,
+  ),
 
   ///set of the ids of the loaded IKO sites
   loadedSites(
@@ -883,10 +790,11 @@ enum ApplicationSetting {
     defaultValue: <String>{},
   );
 
-  const ApplicationSetting(
-      {required this.keyString,
-      required this.dataType,
-      required this.defaultValue});
+  const ApplicationSetting({
+    required this.keyString,
+    required this.dataType,
+    required this.defaultValue,
+  });
 
   final String keyString;
   final String dataType;
@@ -930,7 +838,7 @@ enum ProcessStates {
   loginState(),
   loadAssetState(),
   loadPMFilesState(),
-  uploadPMFilesState();
+  uploadPMFilesState(),
 }
 
 class AssetWorkType {
@@ -962,8 +870,5 @@ class FileDetails {
   final String name;
   final Uint8List bytes;
 
-  FileDetails({
-    required this.name,
-    required this.bytes,
-  });
+  FileDetails({required this.name, required this.bytes});
 }

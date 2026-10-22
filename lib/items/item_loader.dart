@@ -20,9 +20,7 @@ class _ItemLoadingIndivatorState extends State<ItemLoadingIndivator> {
     if (context.watch<SelectedSiteNotifier>().selectedSite.isEmpty) {
       return const SiteToggle();
     }
-    itemLoading(
-      env: context.read<MaximoServerNotifier>().maximoServerSelected,
-    );
+    itemLoading(env: context.read<MaximoServerNotifier>().maximoServerSelected);
     return Text(message);
   }
 

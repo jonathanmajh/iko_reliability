@@ -26,7 +26,8 @@ class WoTask {
   final String wonum;
   final String? taskid;
   final String description;
-  final String? longDesc; // raw long description (html or plain) -> notes column
+  final String?
+  longDesc; // raw long description (html or plain) -> notes column
   final String? measurement; // meter point / reading text, when available
   final String? status;
 
@@ -48,8 +49,13 @@ class PlannedLaborRow {
   final String? skilllevel;
   final String? hours;
 
-  const PlannedLaborRow(this.laborcode,
-      {this.name, this.craft, this.skilllevel, this.hours});
+  const PlannedLaborRow(
+    this.laborcode, {
+    this.name,
+    this.craft,
+    this.skilllevel,
+    this.hours,
+  });
 }
 
 /// Planned material row (WPMATERIAL).
@@ -63,8 +69,13 @@ class PlannedMaterialRow {
   final String? binnum;
   final String? storeroom;
 
-  const PlannedMaterialRow(this.item,
-      {this.description, this.qty, this.binnum, this.storeroom});
+  const PlannedMaterialRow(
+    this.item, {
+    this.description,
+    this.qty,
+    this.binnum,
+    this.storeroom,
+  });
 }
 
 /// Planned tool row (WPTOOL).
@@ -75,7 +86,13 @@ class PlannedToolRow {
   final String? hours;
   final String? rate;
 
-  const PlannedToolRow(this.item, {this.description, this.qty, this.hours, this.rate});
+  const PlannedToolRow(
+    this.item, {
+    this.description,
+    this.qty,
+    this.hours,
+    this.rate,
+  });
 }
 
 /// One child work order with its own tasks and planned materials.
@@ -146,9 +163,30 @@ const Map<int, String> _charReplacements = {
 /// Code points in the cp1252 upper range (curly quotes, dashes, tm, oe...)
 /// that standard PDF fonts encode.
 const Set<int> _cp1252Extras = {
-  0x20AC, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030,
-  0x0160, 0x2039, 0x0152, 0x017D, 0x2018, 0x2019, 0x201C, 0x201D, 0x02DC,
-  0x2122, 0x0161, 0x203A, 0x0153, 0x017E, 0x0178,
+  0x20AC,
+  0x201A,
+  0x0192,
+  0x201E,
+  0x2026,
+  0x2020,
+  0x2021,
+  0x02C6,
+  0x2030,
+  0x0160,
+  0x2039,
+  0x0152,
+  0x017D,
+  0x2018,
+  0x2019,
+  0x201C,
+  0x201D,
+  0x02DC,
+  0x2122,
+  0x0161,
+  0x203A,
+  0x0153,
+  0x017E,
+  0x0178,
 };
 
 /// True for characters that never render well in the print pack and are
@@ -181,7 +219,9 @@ bool _isDroppedCodePoint(int r) {
 String sanitizePdfText(String src) {
   var needsWork = false;
   for (final r in src.runes) {
-    if (r > 0x7E || _isDroppedCodePoint(r) || _charReplacements.containsKey(r)) {
+    if (r > 0x7E ||
+        _isDroppedCodePoint(r) ||
+        _charReplacements.containsKey(r)) {
       needsWork = true;
       break;
     }
@@ -239,7 +279,9 @@ String htmlToPlainText(String? src) {
       .replaceAll('&#39;', "'")
       .replaceAll('&bull;', '-');
   s = s.replaceAllMapped(
-      RegExp(r'&#(\d+);'), (m) => String.fromCharCode(int.parse(m.group(1)!)));
+    RegExp(r'&#(\d+);'),
+    (m) => String.fromCharCode(int.parse(m.group(1)!)),
+  );
   final lines = s
       .split('\n')
       .map((l) => l.replaceAll(RegExp(r'[ \t]+'), ' ').trim())
@@ -276,10 +318,26 @@ const _fillHeader = PdfColor.fromInt(0xFFE8E9EA);
 const _fillBanner = PdfColor.fromInt(0xFFF2F3F4);
 const _fillRow = PdfColor.fromInt(0xFFF8F9FA);
 
-const _labelStyle = pw.TextStyle(fontSize: 6.4, color: _muted, letterSpacing: 0.8);
+const _labelStyle = pw.TextStyle(
+  fontSize: 6.4,
+  color: _muted,
+  letterSpacing: 0.8,
+);
 
-const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const _months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 
 String _v(WoRecord m, String key) {
   final v = m[key];
@@ -308,12 +366,15 @@ pw.Widget _sectionTitle(String title, {double top = 10}) {
     child: pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(title.toUpperCase(),
-            style: const pw.TextStyle(
-                fontSize: 8.6,
-                fontWeight: pw.FontWeight.bold,
-                letterSpacing: 1.4,
-                color: _ink)),
+        pw.Text(
+          title.toUpperCase(),
+          style: const pw.TextStyle(
+            fontSize: 8.6,
+            fontWeight: pw.FontWeight.bold,
+            letterSpacing: 1.4,
+            color: _ink,
+          ),
+        ),
         pw.Padding(
           padding: const pw.EdgeInsets.only(top: 2),
           child: pw.Divider(color: _ink, thickness: 0.9, height: 0.2),
@@ -324,26 +385,34 @@ pw.Widget _sectionTitle(String title, {double top = 10}) {
 }
 
 pw.Widget _emptyNote(String text) => pw.Padding(
-      padding: const pw.EdgeInsets.only(top: 2, bottom: 1),
-      child: pw.Text(text,
-          style: const pw.TextStyle(
-              fontSize: 8, color: _muted, fontStyle: pw.FontStyle.italic)),
-    );
+  padding: const pw.EdgeInsets.only(top: 2, bottom: 1),
+  child: pw.Text(
+    text,
+    style: const pw.TextStyle(
+      fontSize: 8,
+      color: _muted,
+      fontStyle: pw.FontStyle.italic,
+    ),
+  ),
+);
 
 pw.Widget _chip(String text) => pw.Container(
-      padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: _ink, width: 0.9),
-        borderRadius: pw.BorderRadius.circular(2.5),
-        color: PdfColors.white,
-      ),
-      child: pw.Text(sanitizePdfText(text).toUpperCase(),
-          style: const pw.TextStyle(
-              fontSize: 7.6,
-              fontWeight: pw.FontWeight.bold,
-              letterSpacing: 1.1,
-              color: _ink)),
-    );
+  padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+  decoration: pw.BoxDecoration(
+    border: pw.Border.all(color: _ink, width: 0.9),
+    borderRadius: pw.BorderRadius.circular(2.5),
+    color: PdfColors.white,
+  ),
+  child: pw.Text(
+    sanitizePdfText(text).toUpperCase(),
+    style: const pw.TextStyle(
+      fontSize: 7.6,
+      fontWeight: pw.FontWeight.bold,
+      letterSpacing: 1.1,
+      color: _ink,
+    ),
+  ),
+);
 
 /// Key/value grid, three pairs per row.
 pw.Widget _kvGrid(List<(String, String)> kv) {
@@ -354,16 +423,21 @@ pw.Widget _kvGrid(List<(String, String)> kv) {
     for (var j = i; j < i + 3; j++) {
       final label = j < kv.length ? kv[j].$1 : '';
       final value = j < kv.length ? kv[j].$2 : '';
-      cells.add(pw.Padding(
-        padding: pw.EdgeInsets.only(right: 5, top: 2.5, bottom: 2.5),
-        child: pw.Text(label.toUpperCase(), style: _labelStyle),
-      ));
-      cells.add(pw.Padding(
-        padding: pw.EdgeInsets.only(right: 10, top: 2.5, bottom: 2.5),
-        child: pw.Text(
+      cells.add(
+        pw.Padding(
+          padding: pw.EdgeInsets.only(right: 5, top: 2.5, bottom: 2.5),
+          child: pw.Text(label.toUpperCase(), style: _labelStyle),
+        ),
+      );
+      cells.add(
+        pw.Padding(
+          padding: pw.EdgeInsets.only(right: 10, top: 2.5, bottom: 2.5),
+          child: pw.Text(
             value.isEmpty ? '-' : sanitizePdfText(value),
-            style: const pw.TextStyle(fontSize: 8.4, color: _ink)),
-      ));
+            style: const pw.TextStyle(fontSize: 8.4, color: _ink),
+          ),
+        ),
+      );
     }
     tableRows.add(pw.TableRow(children: cells));
   }
@@ -393,12 +467,15 @@ pw.Widget _table({
       for (final h in headers)
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 4),
-          child: pw.Text(sanitizePdfText(h).toUpperCase(),
-              style: const pw.TextStyle(
-                  fontSize: 7.4,
-                  fontWeight: pw.FontWeight.bold,
-                  letterSpacing: 0.6,
-                  color: _ink)),
+          child: pw.Text(
+            sanitizePdfText(h).toUpperCase(),
+            style: const pw.TextStyle(
+              fontSize: 7.4,
+              fontWeight: pw.FontWeight.bold,
+              letterSpacing: 0.6,
+              color: _ink,
+            ),
+          ),
         ),
     ],
   );
@@ -409,12 +486,17 @@ pw.Widget _table({
       children: [
         for (final cell in e.value)
           pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 3.5),
+            padding: const pw.EdgeInsets.symmetric(
+              horizontal: 5,
+              vertical: 3.5,
+            ),
             // No `lineSpacing` here: with it, dart_pdf's row splitter loops
             // forever when a row has to break across pages — regression
             // covered by the page-spanning packet in wo_print_batch_smoke.
-            child: pw.Text(sanitizePdfText(cell),
-                style: pw.TextStyle(fontSize: fontSize, color: _ink)),
+            child: pw.Text(
+              sanitizePdfText(cell),
+              style: pw.TextStyle(fontSize: fontSize, color: _ink),
+            ),
           ),
       ],
     );
@@ -433,21 +515,21 @@ pw.Widget _table({
 }
 
 pw.Widget _signature(String label) => pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Container(
-          height: 20,
-          width: 158,
-          decoration: const pw.BoxDecoration(
-            border: pw.Border(bottom: pw.BorderSide(color: _rule, width: 0.6)),
-          ),
-        ),
-        pw.Padding(
-          padding: const pw.EdgeInsets.only(top: 3),
-          child: pw.Text(label.toUpperCase(), style: _labelStyle),
-        ),
-      ],
-    );
+  crossAxisAlignment: pw.CrossAxisAlignment.start,
+  children: [
+    pw.Container(
+      height: 20,
+      width: 158,
+      decoration: const pw.BoxDecoration(
+        border: pw.Border(bottom: pw.BorderSide(color: _rule, width: 0.6)),
+      ),
+    ),
+    pw.Padding(
+      padding: const pw.EdgeInsets.only(top: 3),
+      child: pw.Text(label.toUpperCase(), style: _labelStyle),
+    ),
+  ],
+);
 
 // dart_pdf's Table splits tables BETWEEN rows only, and defers a row that
 // doesn't fit the remaining space to the next page. That's fine visually as
@@ -459,17 +541,14 @@ const _taskMaxLinesPerRow = 45; // ≈ 460pt — well under a page
 const _taskCharsPerLine = 64; // conservative vs the real wrap (~79)
 
 List<List<String>> _tasksRows(List<WoTask> tasks) {
-  return [
-    for (final t in tasks) ..._taskRowFragments(t),
-  ];
+  return [for (final t in tasks) ..._taskRowFragments(t)];
 }
 
 /// Text of a task as it renders in the table: description, then the long
 /// description below it.
-String _taskText(WoTask t) =>
-    (t.longDesc != null && t.longDesc!.isNotEmpty)
-        ? '${t.description}\n${htmlToPlainText(t.longDesc!)}'
-        : t.description;
+String _taskText(WoTask t) => (t.longDesc != null && t.longDesc!.isNotEmpty)
+    ? '${t.description}\n${htmlToPlainText(t.longDesc!)}'
+    : t.description;
 
 /// Fragments of one task in the table: one row for normal tasks; numbered
 /// continuation rows marked `…` only when a single task would overflow a
@@ -502,7 +581,9 @@ List<List<String>> _taskRowFragments(WoTask t) {
 int _estimateLines(String text) {
   var n = 0;
   for (final para in text.split('\n')) {
-    n += para.isEmpty ? 1 : (para.length + _taskCharsPerLine - 1) ~/ _taskCharsPerLine;
+    n += para.isEmpty
+        ? 1
+        : (para.length + _taskCharsPerLine - 1) ~/ _taskCharsPerLine;
   }
   return n;
 }
@@ -558,99 +639,130 @@ List<pw.Widget> _coverWidgets(WoPacket packet, String printedDate) {
   final body = <pw.Widget>[];
 
   // title block
-  body.add(pw.Padding(
-    padding: pw.EdgeInsets.only(bottom: 5),
-    child: pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-          pw.Text(wonum,
-              style: const pw.TextStyle(fontSize: 21, fontWeight: pw.FontWeight.bold)),
-        ]),
-        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
-          _chip(status.isEmpty ? 'WORK ORDER' : status),
-          pw.Padding(
-              padding: pw.EdgeInsets.only(top: 4),
-              child: pw.Text('Printed $printedDate',
-                  style: pw.TextStyle(fontSize: 6.8, color: _muted))),
-        ]),
-      ],
+  body.add(
+    pw.Padding(
+      padding: pw.EdgeInsets.only(bottom: 5),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                wonum,
+                style: const pw.TextStyle(
+                  fontSize: 21,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
+            children: [
+              _chip(status.isEmpty ? 'WORK ORDER' : status),
+              pw.Padding(
+                padding: pw.EdgeInsets.only(top: 4),
+                child: pw.Text(
+                  'Printed $printedDate',
+                  style: pw.TextStyle(fontSize: 6.8, color: _muted),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     ),
-  ));
+  );
   body.add(pw.Divider(color: _ink, thickness: 1.1, height: 1));
-  body.add(pw.Padding(
-    padding: pw.EdgeInsets.symmetric(vertical: 7),
-    child: pw.Text(_v(h, 'description'), style: pw.TextStyle(fontSize: 10.6, color: _ink)),
-  ));
+  body.add(
+    pw.Padding(
+      padding: pw.EdgeInsets.symmetric(vertical: 7),
+      child: pw.Text(
+        _v(h, 'description'),
+        style: pw.TextStyle(fontSize: 10.6, color: _ink),
+      ),
+    ),
+  );
 
   // info grid
-  body.add(_kvGrid([
-    ('Site', _v(h, 'siteid')),
-    ('Work Type', _v(h, 'worktype')),
-    ('Priority', _v(h, 'wopriority') == '' ? '' : 'P${_v(h, 'wopriority')}'),
-    (
-      'Asset',
-      _v(h, 'assetnum').isEmpty
-          ? ''
-          : _v(h, 'assetdesc').isEmpty
-              ? _v(h, 'assetnum')
-              : '${_v(h, 'assetnum')} - ${_v(h, 'assetdesc')}'
-    ),
-    ('Location', _v(h, 'location')),
-    ('Conditions', _v(h, 'conditions')),
-    ('Job Plan', _v(h, 'jpnum')),
-    ('PM', _v(h, 'pmnum')),
-    ('Duration (h)', _v(h, 'duration')),
-    ('Supervisor', _v(h, 'supervisor')),
-    ('Reported', _fmtDate(_v(h, 'reportdate'))),
-    (
-      'Target',
-      _v(h, 'targstartdate') == '' && _v(h, 'targcompdate') == ''
-          ? ''
-          : '${_fmtDate(_v(h, 'targstartdate'))} - ${_fmtDate(_v(h, 'targcompdate'))}'
-    ),
-    ('Child WOs', packet.children.isEmpty ? '' : '${packet.children.length}'),
-  ]));
+  body.add(
+    _kvGrid([
+      ('Site', _v(h, 'siteid')),
+      ('Work Type', _v(h, 'worktype')),
+      ('Priority', _v(h, 'wopriority') == '' ? '' : 'P${_v(h, 'wopriority')}'),
+      (
+        'Asset',
+        _v(h, 'assetnum').isEmpty
+            ? ''
+            : _v(h, 'assetdesc').isEmpty
+            ? _v(h, 'assetnum')
+            : '${_v(h, 'assetnum')} - ${_v(h, 'assetdesc')}',
+      ),
+      ('Location', _v(h, 'location')),
+      ('Conditions', _v(h, 'conditions')),
+      ('Job Plan', _v(h, 'jpnum')),
+      ('PM', _v(h, 'pmnum')),
+      ('Duration (h)', _v(h, 'duration')),
+      ('Supervisor', _v(h, 'supervisor')),
+      ('Reported', _fmtDate(_v(h, 'reportdate'))),
+      (
+        'Target',
+        _v(h, 'targstartdate') == '' && _v(h, 'targcompdate') == ''
+            ? ''
+            : '${_fmtDate(_v(h, 'targstartdate'))} - ${_fmtDate(_v(h, 'targcompdate'))}',
+      ),
+      ('Child WOs', packet.children.isEmpty ? '' : '${packet.children.length}'),
+    ]),
+  );
 
   // details / long description
   final longDesc = htmlToPlainText(h['longdesc'] as String?);
   if (longDesc.isNotEmpty) {
     body.add(_sectionTitle('Work Details'));
-    body.add(pw.Text(longDesc, style: pw.TextStyle(fontSize: 9.6, color: _ink)));
+    body.add(
+      pw.Text(longDesc, style: pw.TextStyle(fontSize: 9.6, color: _ink)),
+    );
   }
 
   // parent tasks
   body.add(_sectionTitle('Tasks'));
-  body.add(packet.tasks.isEmpty
-      ? _emptyNote('No tasks planned.')
-      : _table(
-          headers: _taskTableSpec.headers,
-          widths: _taskTableSpec.widths,
-          rows: _tasksRows(packet.tasks),
-        ));
+  body.add(
+    packet.tasks.isEmpty
+        ? _emptyNote('No tasks planned.')
+        : _table(
+            headers: _taskTableSpec.headers,
+            widths: _taskTableSpec.widths,
+            rows: _tasksRows(packet.tasks),
+          ),
+  );
 
   // labor: assignments replace planned labor when present
   final showAssignments = packet.assignments.isNotEmpty;
   body.add(_sectionTitle(showAssignments ? 'Assigned Labor' : 'Planned Labor'));
   final laborRows = showAssignments ? packet.assignments : packet.labor;
   if (laborRows.isEmpty) {
-    body.add(_emptyNote(showAssignments ? 'No assigned labor.' : 'No planned labor.'));
+    body.add(
+      _emptyNote(showAssignments ? 'No assigned labor.' : 'No planned labor.'),
+    );
   } else {
-    body.add(_table(
-      headers: const ['Labor', 'Name', 'Craft', 'Skill', 'Hrs'],
-      widths: const [74, -1, 76, 58, 44],
-      rows: [
-        for (final l in laborRows)
-          [
-            l.laborcode,
-            l.name ?? '',
-            l.craft ?? '',
-            l.skilllevel ?? '',
-            l.hours ?? '',
-          ],
-      ],
-    ));
+    body.add(
+      _table(
+        headers: const ['Labor', 'Name', 'Craft', 'Skill', 'Hrs'],
+        widths: const [74, -1, 76, 58, 44],
+        rows: [
+          for (final l in laborRows)
+            [
+              l.laborcode,
+              l.name ?? '',
+              l.craft ?? '',
+              l.skilllevel ?? '',
+              l.hours ?? '',
+            ],
+        ],
+      ),
+    );
   }
 
   // planned materials
@@ -658,21 +770,23 @@ List<pw.Widget> _coverWidgets(WoPacket packet, String printedDate) {
   if (packet.materials.isEmpty) {
     body.add(_emptyNote('No planned materials.'));
   } else {
-    body.add(_table(
-      headers: ['Item', 'Description', 'Qty', 'Qty Used', 'Bin', 'Storeroom'],
-      widths: [70, -1, 40, 42, 56, 76],
-      rows: [
-        for (final m in packet.materials)
-          [
-            m.item,
-            m.description ?? '',
-            m.qty ?? '',
-            '', // blank: technician writes the quantity used
-            m.binnum ?? '',
-            m.storeroom ?? '',
-          ],
-      ],
-    ));
+    body.add(
+      _table(
+        headers: ['Item', 'Description', 'Qty', 'Qty Used', 'Bin', 'Storeroom'],
+        widths: [70, -1, 40, 42, 56, 76],
+        rows: [
+          for (final m in packet.materials)
+            [
+              m.item,
+              m.description ?? '',
+              m.qty ?? '',
+              '', // blank: technician writes the quantity used
+              m.binnum ?? '',
+              m.storeroom ?? '',
+            ],
+        ],
+      ),
+    );
   }
 
   // planned tools
@@ -680,47 +794,68 @@ List<pw.Widget> _coverWidgets(WoPacket packet, String printedDate) {
   if (packet.tools.isEmpty) {
     body.add(_emptyNote('No planned tools.'));
   } else {
-    body.add(_table(
-      headers: ['Item', 'Description', 'Qty', 'Hrs', 'Rate'],
-      widths: [70, -1, 44, 46, 62],
-      rows: [
-        for (final t in packet.tools)
-          [t.item, t.description ?? '', t.qty ?? '', t.hours ?? '', t.rate ?? ''],
-      ],
-    ));
+    body.add(
+      _table(
+        headers: ['Item', 'Description', 'Qty', 'Hrs', 'Rate'],
+        widths: [70, -1, 44, 46, 62],
+        rows: [
+          for (final t in packet.tools)
+            [
+              t.item,
+              t.description ?? '',
+              t.qty ?? '',
+              t.hours ?? '',
+              t.rate ?? '',
+            ],
+        ],
+      ),
+    );
   }
 
   // demo placeholder note (design review only)
   if (packet.demoNote != null && packet.demoNote!.isNotEmpty) {
-    body.add(pw.Padding(
-      padding: pw.EdgeInsets.only(top: 10),
-      child: pw.Container(
-        padding: pw.EdgeInsets.all(6),
-        decoration: pw.BoxDecoration(
-          border: pw.Border.all(color: _rule, width: 0.5),
-          color: _fillRow,
+    body.add(
+      pw.Padding(
+        padding: pw.EdgeInsets.only(top: 10),
+        child: pw.Container(
+          padding: pw.EdgeInsets.all(6),
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(color: _rule, width: 0.5),
+            color: _fillRow,
+          ),
+          child: pw.Text(
+            sanitizePdfText(packet.demoNote!),
+            style: pw.TextStyle(
+              fontSize: 7.6,
+              color: _muted,
+              fontStyle: pw.FontStyle.italic,
+            ),
+          ),
         ),
-        child: pw.Text(sanitizePdfText(packet.demoNote!),
-            style: pw.TextStyle(fontSize: 7.6, color: _muted, fontStyle: pw.FontStyle.italic)),
       ),
-    ));
+    );
   }
 
   // sign-off strip
-  body.add(pw.Padding(
-    padding: pw.EdgeInsets.only(top: 14),
-    child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-      pw.Divider(color: _rule, thickness: 0.6, height: 0.6),
-      pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+  body.add(
+    pw.Padding(
+      padding: pw.EdgeInsets.only(top: 14),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          _signature('Completed by / Date'),
-          _signature('Time / Hours'),
-          _signature('Reviewed by'),
+          pw.Divider(color: _rule, thickness: 0.6, height: 0.6),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              _signature('Completed by / Date'),
+              _signature('Time / Hours'),
+              _signature('Reviewed by'),
+            ],
+          ),
         ],
       ),
-    ]),
-  ));
+    ),
+  );
 
   // Flat list, NOT a Column — same reason as the child section: the tables
   // must negotiate page breaks directly with the MultiPage.
@@ -737,88 +872,111 @@ List<pw.Widget> _childWidgets(WoChildPacket child) {
   final parts = <pw.Widget>[];
 
   // banner
-  parts.add(pw.Container(
-    padding: pw.EdgeInsets.all(8),
-    decoration: pw.BoxDecoration(color: _fillBanner),
-    child: pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(_v(h, 'wonum'),
+  parts.add(
+    pw.Container(
+      padding: pw.EdgeInsets.all(8),
+      decoration: pw.BoxDecoration(color: _fillBanner),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                _v(h, 'wonum'),
                 style: pw.TextStyle(
-                    fontSize: 12.5, fontWeight: pw.FontWeight.bold, color: _ink)),
-            pw.Text(_v(h, 'status').toUpperCase(),
+                  fontSize: 12.5,
+                  fontWeight: pw.FontWeight.bold,
+                  color: _ink,
+                ),
+              ),
+              pw.Text(
+                _v(h, 'status').toUpperCase(),
                 style: pw.TextStyle(
-                    fontSize: 7.6,
-                    fontWeight: pw.FontWeight.bold,
-                    letterSpacing: 1,
-                    color: _muted)),
-          ],
-        ),
-        pw.Padding(
-          padding: pw.EdgeInsets.only(top: 2, bottom: 3),
-          child: pw.Text(_v(h, 'description'), style: pw.TextStyle(fontSize: 9, color: _ink)),
-        ),
-        pw.Text(
-          [
-            if (_v(h, 'assetnum').isNotEmpty)
-              _v(h, 'assetdesc').isNotEmpty
-                  ? 'Asset ${_v(h, 'assetnum')} - ${_v(h, 'assetdesc')}'
-                  : 'Asset ${_v(h, 'assetnum')}'
-            else
-              'Asset -',
-            if (_v(h, 'location').isNotEmpty) 'Location ${_v(h, 'location')}',
-            'Child of ${_v(h, 'parent')}'
-          ].join('    |    '),
-          style: pw.TextStyle(fontSize: 6.8, color: _muted),
-        ),
-      ],
+                  fontSize: 7.6,
+                  fontWeight: pw.FontWeight.bold,
+                  letterSpacing: 1,
+                  color: _muted,
+                ),
+              ),
+            ],
+          ),
+          pw.Padding(
+            padding: pw.EdgeInsets.only(top: 2, bottom: 3),
+            child: pw.Text(
+              _v(h, 'description'),
+              style: pw.TextStyle(fontSize: 9, color: _ink),
+            ),
+          ),
+          pw.Text(
+            [
+              if (_v(h, 'assetnum').isNotEmpty)
+                _v(h, 'assetdesc').isNotEmpty
+                    ? 'Asset ${_v(h, 'assetnum')} - ${_v(h, 'assetdesc')}'
+                    : 'Asset ${_v(h, 'assetnum')}'
+              else
+                'Asset -',
+              if (_v(h, 'location').isNotEmpty) 'Location ${_v(h, 'location')}',
+              'Child of ${_v(h, 'parent')}',
+            ].join('    |    '),
+            style: pw.TextStyle(fontSize: 6.8, color: _muted),
+          ),
+        ],
+      ),
     ),
-  ));
+  );
 
   if (longDesc.isNotEmpty) {
     parts.add(_sectionTitle('Details'));
-    parts.add(pw.Text(longDesc, style: pw.TextStyle(fontSize: 9.2, color: _ink)));
+    parts.add(
+      pw.Text(longDesc, style: pw.TextStyle(fontSize: 9.2, color: _ink)),
+    );
   }
 
   parts.add(_sectionTitle('Tasks'));
-  parts.add(child.tasks.isEmpty
-      ? _emptyNote('No tasks planned.')
-      : _table(
-          headers: _taskTableSpec.headers,
-          widths: _taskTableSpec.widths,
-          rows: _tasksRows(child.tasks),
-        ));
+  parts.add(
+    child.tasks.isEmpty
+        ? _emptyNote('No tasks planned.')
+        : _table(
+            headers: _taskTableSpec.headers,
+            widths: _taskTableSpec.widths,
+            rows: _tasksRows(child.tasks),
+          ),
+  );
 
   parts.add(_sectionTitle('Planned Materials'));
   if (child.materials.isEmpty) {
     parts.add(_emptyNote('No planned materials.'));
   } else {
-    parts.add(_table(
-      headers: ['Item', 'Description', 'Qty', 'Qty Used', 'Bin', 'Storeroom'],
-      widths: [70, -1, 40, 42, 56, 76],
-      rows: [
-        for (final m in child.materials)
-          [
-            m.item,
-            m.description ?? '',
-            m.qty ?? '',
-            '', // blank: technician writes the quantity used
-            m.binnum ?? '',
-            m.storeroom ?? '',
-          ],
-      ],
-    ));
+    parts.add(
+      _table(
+        headers: ['Item', 'Description', 'Qty', 'Qty Used', 'Bin', 'Storeroom'],
+        widths: [70, -1, 40, 42, 56, 76],
+        rows: [
+          for (final m in child.materials)
+            [
+              m.item,
+              m.description ?? '',
+              m.qty ?? '',
+              '', // blank: technician writes the quantity used
+              m.binnum ?? '',
+              m.storeroom ?? '',
+            ],
+        ],
+      ),
+    );
   }
 
-  parts.add(pw.Padding(
-    padding: pw.EdgeInsets.only(top: 16),
-    child: pw.Text('Completed by: ______________    Date: ____________',
-        style: pw.TextStyle(fontSize: 7.4, color: _muted)),
-  ));
+  parts.add(
+    pw.Padding(
+      padding: pw.EdgeInsets.only(top: 16),
+      child: pw.Text(
+        'Completed by: ______________    Date: ____________',
+        style: pw.TextStyle(fontSize: 7.4, color: _muted),
+      ),
+    ),
+  );
 
   // Flat list, NOT a Column: MultiPage's page-break negotiation must reach
   // the tasks/materials tables directly. Inside a Column they'd be deferred
@@ -852,35 +1010,40 @@ Future<({Uint8List bytes, int pages})> _renderAll(
     final wonum = _v(packet.header, 'wonum');
     // Guard against runaway layout, but scale with the tree: a parent with
     // hundreds of child WOs legitimately produces hundreds of pages.
-    final taskCount = packet.tasks.length +
+    final taskCount =
+        packet.tasks.length +
         packet.children.fold<int>(0, (n, c) => n + c.tasks.length);
     final maxPages = 100 + packet.children.length * 3 + taskCount;
 
-    doc.addPage(pw.MultiPage(
-      pageFormat: PdfPageFormat.letter,
-      margin: pw.EdgeInsets.fromLTRB(32, 30, 32, 36),
-      maxPages: maxPages,
-      build: (ctx) => [
-        ..._coverWidgets(packet, printedDate),
-        for (final child in packet.children) ...[
-          pw.NewPage(),
-          ..._childWidgets(child),
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.letter,
+        margin: pw.EdgeInsets.fromLTRB(32, 30, 32, 36),
+        maxPages: maxPages,
+        build: (ctx) => [
+          ..._coverWidgets(packet, printedDate),
+          for (final child in packet.children) ...[
+            pw.NewPage(),
+            ..._childWidgets(child),
+          ],
         ],
-      ],
-      footer: (ctx) => pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(
-            totalPages == null
-                ? 'WO $wonum - Page ${ctx.pageNumber}'
-                : 'WO $wonum - Page ${ctx.pageNumber} of $totalPages',
-            style: pw.TextStyle(fontSize: 6.6, color: _muted),
-          ),
-          pw.Text('Printed $printedDate',
-              style: pw.TextStyle(fontSize: 6.6, color: _muted)),
-        ],
+        footer: (ctx) => pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(
+              totalPages == null
+                  ? 'WO $wonum - Page ${ctx.pageNumber}'
+                  : 'WO $wonum - Page ${ctx.pageNumber} of $totalPages',
+              style: pw.TextStyle(fontSize: 6.6, color: _muted),
+            ),
+            pw.Text(
+              'Printed $printedDate',
+              style: pw.TextStyle(fontSize: 6.6, color: _muted),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   final bytes = await doc.save();
@@ -896,8 +1059,7 @@ Future<Uint8List> buildWoPacketPdf(
   WoPacket packet, {
   DateTime? printed,
   WoPrintFonts? fonts,
-}) =>
-    buildWoBatchPdf([packet], printed: printed, fonts: fonts);
+}) => buildWoBatchPdf([packet], printed: printed, fonts: fonts);
 
 /// Builds one merged PDF for a batch of work order packets (each packet is
 /// a cover + one page per child WO, pages numbered continuously).

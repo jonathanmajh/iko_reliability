@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 
 void toast(BuildContext context, String msg, [int? time]) {
   ScaffoldMessenger.of(context).clearSnackBars();
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    content: Text(msg),
-    duration: Duration(seconds: (time ?? 2)),
-  ));
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(msg),
+      duration: Duration(seconds: (time ?? 2)),
+    ),
+  );
 }
 
 class BlinkingWidget extends StatefulWidget {
@@ -33,10 +35,7 @@ class _BlinkingWidgetState extends State<BlinkingWidget>
   initState() {
     super.initState();
 
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -57,37 +56,29 @@ class _BlinkingWidgetState extends State<BlinkingWidget>
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) => Opacity(
-          opacity: _controller.value,
-          child: widget.child,
-        ),
-        child: widget.child,
-      );
+    animation: _controller,
+    builder: (context, child) =>
+        Opacity(opacity: _controller.value, child: widget.child),
+    child: widget.child,
+  );
 }
 
 /// Shows an alert dialog with [title] as the title and [messages] as the description rows.
 Future<T?> showDataAlert<T>(
-    BuildContext context, List<String> messages, String title,
-    [List<Widget> widgets = const []]) {
+  BuildContext context,
+  List<String> messages,
+  String title, [
+  List<Widget> widgets = const [],
+]) {
   return showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(
-              20.0,
-            ),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(20.0)),
         ),
-        contentPadding: const EdgeInsets.only(
-          top: 10.0,
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 24.0),
-        ),
+        contentPadding: const EdgeInsets.only(top: 10.0),
+        title: Text(title, style: const TextStyle(fontSize: 24.0)),
         content: SizedBox(
           height: 500,
           width: 400,
@@ -126,9 +117,7 @@ Future<T?> showDataAlert<T>(
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
-                        child: const Text(
-                          "OK",
-                        ),
+                        child: const Text("OK"),
                       ),
                     ),
                   ),

@@ -26,16 +26,17 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   int percentVHigh = 10;
 
   FiveCriticality get fiveCriticality => FiveCriticality(
-        veryLow: percentVLow.toDouble(),
-        low: percentLow.toDouble(),
-        medium: percentMedium.toDouble(),
-        high: percentHigh.toDouble(),
-        veryHigh: percentVHigh.toDouble(),
-      );
+    veryLow: percentVLow.toDouble(),
+    low: percentLow.toDouble(),
+    medium: percentMedium.toDouble(),
+    high: percentHigh.toDouble(),
+    veryHigh: percentVHigh.toDouble(),
+  );
 
   ///Cut off dates for work orders used to determine frequency + impact
-  DateTime workOrderCutoffStart =
-      DateTime.now().subtract(const Duration(days: 10 * 365));
+  DateTime workOrderCutoffStart = DateTime.now().subtract(
+    const Duration(days: 10 * 365),
+  );
   DateTime workOrderCutoffEnd = DateTime.now();
 
   ///Site Filter for work orders used to determine frequency + impact
@@ -50,54 +51,71 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
   void setSite(String site) async {
     String selectedSite = site;
     final settings = await database!.getSettings();
-    percentVLow = int.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-percentVLow',
-          orElse: () => Setting(key: '', value: percentVLow.toString()),
-        )
-        .value);
-    percentLow = int.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-percentLow',
-          orElse: () => Setting(key: '', value: percentLow.toString()),
-        )
-        .value);
-    percentMedium = int.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-percentMedium',
-          orElse: () => Setting(key: '', value: percentMedium.toString()),
-        )
-        .value);
-    percentHigh = int.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-percentHigh',
-          orElse: () => Setting(key: '', value: percentHigh.toString()),
-        )
-        .value);
-    percentVHigh = int.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-percentVHigh',
-          orElse: () => Setting(key: '', value: percentVHigh.toString()),
-        )
-        .value);
-    workOrderCutoffStart = DateTime.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-workOrderCutoffStart',
-          orElse: () =>
-              Setting(key: '', value: workOrderCutoffStart.toString()),
-        )
-        .value);
-    workOrderCutoffEnd = DateTime.parse(settings
-        .firstWhere(
-          (element) => element.key == '$selectedSite-workOrderCutoffEnd',
-          orElse: () => Setting(key: '', value: workOrderCutoffEnd.toString()),
-        )
-        .value);
+    percentVLow = int.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-percentVLow',
+            orElse: () => Setting(key: '', value: percentVLow.toString()),
+          )
+          .value,
+    );
+    percentLow = int.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-percentLow',
+            orElse: () => Setting(key: '', value: percentLow.toString()),
+          )
+          .value,
+    );
+    percentMedium = int.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-percentMedium',
+            orElse: () => Setting(key: '', value: percentMedium.toString()),
+          )
+          .value,
+    );
+    percentHigh = int.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-percentHigh',
+            orElse: () => Setting(key: '', value: percentHigh.toString()),
+          )
+          .value,
+    );
+    percentVHigh = int.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-percentVHigh',
+            orElse: () => Setting(key: '', value: percentVHigh.toString()),
+          )
+          .value,
+    );
+    workOrderCutoffStart = DateTime.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-workOrderCutoffStart',
+            orElse: () =>
+                Setting(key: '', value: workOrderCutoffStart.toString()),
+          )
+          .value,
+    );
+    workOrderCutoffEnd = DateTime.parse(
+      settings
+          .firstWhere(
+            (element) => element.key == '$selectedSite-workOrderCutoffEnd',
+            orElse: () =>
+                Setting(key: '', value: workOrderCutoffEnd.toString()),
+          )
+          .value,
+    );
     final filterByString = settings
         .firstWhere(
           (element) => element.key == '$selectedSite-workOrderFilterBy',
           orElse: () => Setting(
-              key: '', value: WorkOrderFilterBy.currentSite.name.toString()),
+            key: '',
+            value: WorkOrderFilterBy.currentSite.name.toString(),
+          ),
         )
         .value;
     workOrderFilterBy = WorkOrderFilterBy.values.byName(filterByString);
@@ -115,42 +133,51 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
     if (percentVLow != null) {
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-percentVLow', value: percentVLow.toString()),
+          key: '$selectedSite-percentVLow',
+          value: percentVLow.toString(),
+        ),
       );
       this.percentVLow = percentVLow;
     }
     if (percentLow != null) {
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-percentLow', value: percentLow.toString()),
+          key: '$selectedSite-percentLow',
+          value: percentLow.toString(),
+        ),
       );
       this.percentLow = percentLow;
     }
     if (percentMedium != null) {
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-percentMedium',
-            value: percentMedium.toString()),
+          key: '$selectedSite-percentMedium',
+          value: percentMedium.toString(),
+        ),
       );
       this.percentMedium = percentMedium;
     }
     if (percentHigh != null) {
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-percentHigh', value: percentHigh.toString()),
+          key: '$selectedSite-percentHigh',
+          value: percentHigh.toString(),
+        ),
       );
       this.percentHigh = percentHigh;
     }
     if (percentVHigh != null) {
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-percentVHigh', value: percentVHigh.toString()),
+          key: '$selectedSite-percentVHigh',
+          value: percentVHigh.toString(),
+        ),
       );
       this.percentVHigh = percentVHigh;
     }
     frequencyPeriodYears =
         workOrderCutoffEnd.difference(workOrderCutoffStart).inDays.toDouble() /
-            365;
+        365;
     notifyListeners();
   }
 
@@ -165,35 +192,39 @@ class AssetCriticalitySettingsNotifier extends ChangeNotifier {
       this.workOrderCutoffStart = workOrderCutoffStart;
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-workOrderCutoffStart',
-            value: workOrderCutoffStart.toString()),
+          key: '$selectedSite-workOrderCutoffStart',
+          value: workOrderCutoffStart.toString(),
+        ),
       );
     }
     if (workOrderCutoffEnd != null) {
       this.workOrderCutoffEnd = workOrderCutoffEnd;
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-workOrderCutoffEnd',
-            value: workOrderCutoffEnd.toString()),
+          key: '$selectedSite-workOrderCutoffEnd',
+          value: workOrderCutoffEnd.toString(),
+        ),
       );
     }
     if (workOrderFilterBy != null) {
       this.workOrderFilterBy = workOrderFilterBy;
       database!.setSettings(
         newSetting: Setting(
-            key: '$selectedSite-workOrderFilterBy',
-            value: workOrderFilterBy.name.toString()),
+          key: '$selectedSite-workOrderFilterBy',
+          value: workOrderFilterBy.name.toString(),
+        ),
       );
     }
-    frequencyPeriodYears = this
-            .workOrderCutoffEnd
+    frequencyPeriodYears =
+        this.workOrderCutoffEnd
             .difference(this.workOrderCutoffStart)
             .inDays
             .toDouble() /
         365;
     if (this.workOrderCutoffEnd.compareTo(this.workOrderCutoffStart) < 0) {
       throw Exception(
-          'End Date is before Start Date! Please review work order history cutoff dates');
+        'End Date is before Start Date! Please review work order history cutoff dates',
+      );
     }
     notifyListeners();
   }
@@ -232,13 +263,7 @@ class FiveCriticality {
   }
 
   List<double> ordered() {
-    return [
-      veryLow,
-      low,
-      medium,
-      high,
-      veryHigh,
-    ];
+    return [veryLow, low, medium, high, veryHigh];
   }
 }
 
@@ -248,7 +273,8 @@ FiveCriticality calculateRPNCutOffs({
 }) {
   if (frequencyOfRPNs.keys.length < 5) {
     throw Exception(
-        'At least 5 unique values required to calculate Criticality from RPN\nCurrent values ${frequencyOfRPNs.keys.toList()}');
+      'At least 5 unique values required to calculate Criticality from RPN\nCurrent values ${frequencyOfRPNs.keys.toList()}',
+    );
   }
   List<double> sortedUniqueRPNs = frequencyOfRPNs.keys.toList();
   sortedUniqueRPNs.sort();
@@ -271,11 +297,13 @@ FiveCriticality calculateRPNCutOffs({
       results2.add(result[2]);
     } catch (e) {
       throw Exception(
-          'RPN calculation failed: ${criticalityStrings[i]} target of ${targetPercentages.getOrdered(i)}% cannot be achieved');
+        'RPN calculation failed: ${criticalityStrings[i]} target of ${targetPercentages.getOrdered(i)}% cannot be achieved',
+      );
     }
   }
   debugPrint(
-      'Number of assets in each group: $results2, Total: $totalRPNCount');
+    'Number of assets in each group: $results2, Total: $totalRPNCount',
+  );
   return FiveCriticality(
     veryLow: results[0],
     low: results[1],
@@ -310,7 +338,7 @@ List<double> calculateSingleCutoff({
       return [
         previousPercent,
         sortedUniqueRPNs[i - 1],
-        previousSumRpn.toDouble()
+        previousSumRpn.toDouble(),
       ];
     } else {
       previousPercent = currentPercent;

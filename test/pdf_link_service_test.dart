@@ -64,69 +64,84 @@ void main() {
       expect(result, 'ABC12345');
     });
 
-    test('preserves binary bytes while replacing links in a PDF-like payload',
-        () async {
-      final tempDir =
-          await Directory.systemTemp.createTemp('pdf_link_service_test_binary');
-      addTearDown(() async => tempDir.delete(recursive: true));
+    test(
+      'preserves binary bytes while replacing links in a PDF-like payload',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'pdf_link_service_test_binary',
+        );
+        addTearDown(() async => tempDir.delete(recursive: true));
 
-      final sourceFile = File(p.join(tempDir.path, 'sample.pdf'));
-      final sourceBytes = <int>[
-        ...utf8.encode('%PDF-1.4\n'),
-        0x00,
-        0xFF,
-        0x01,
-        ...utf8.encode('/URI (https://old.example.com/path)\n'),
-      ];
-      await sourceFile.writeAsBytes(sourceBytes, flush: true);
+        final sourceFile = File(p.join(tempDir.path, 'sample.pdf'));
+        final sourceBytes = <int>[
+          ...utf8.encode('%PDF-1.4\n'),
+          0x00,
+          0xFF,
+          0x01,
+          ...utf8.encode('/URI (https://old.example.com/path)\n'),
+        ];
+        await sourceFile.writeAsBytes(sourceBytes, flush: true);
 
-      final outputDir = Directory(p.join(tempDir.path, 'output'));
-      await outputDir.create(recursive: true);
+        final outputDir = Directory(p.join(tempDir.path, 'output'));
+        await outputDir.create(recursive: true);
 
-      final result = await service.processPdfFile(
-        sourceFile,
-        find: 'old.example.com',
-        replacement: 'new.example.com',
-        mode: PdfLinkReplacementMode.replaceAll,
-        outputFolder: outputDir.path,
-      );
+        final result = await service.processPdfFile(
+          sourceFile,
+          find: 'old.example.com',
+          replacement: 'new.example.com',
+          mode: PdfLinkReplacementMode.replaceAll,
+          outputFolder: outputDir.path,
+        );
 
-      expect(result, p.join(outputDir.path, 'sample_updated.pdf'));
-      final outputBytes = await File(result).readAsBytes();
-      expect(
-        containsSublist(
-            outputBytes, utf8.encode('https://new.example.com/path')),
-        isTrue,
-        reason: 'output should contain the replaced URL '
-            '(${String.fromCharCodes(outputBytes)})',
-      );
-      expect(containsSublist(outputBytes, [0x00, 0xFF, 0x01]), isTrue,
-          reason: 'output should preserve the binary bytes');
-    });
+        expect(result, p.join(outputDir.path, 'sample_updated.pdf'));
+        final outputBytes = await File(result).readAsBytes();
+        expect(
+          containsSublist(
+            outputBytes,
+            utf8.encode('https://new.example.com/path'),
+          ),
+          isTrue,
+          reason:
+              'output should contain the replaced URL '
+              '(${String.fromCharCodes(outputBytes)})',
+        );
+        expect(
+          containsSublist(outputBytes, [0x00, 0xFF, 0x01]),
+          isTrue,
+          reason: 'output should preserve the binary bytes',
+        );
+      },
+    );
 
-    test('leaves the source file untouched when no matching links are found',
-        () async {
-      final tempDir =
-          await Directory.systemTemp.createTemp('pdf_link_service_test');
-      addTearDown(() async => tempDir.delete(recursive: true));
+    test(
+      'leaves the source file untouched when no matching links are found',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'pdf_link_service_test',
+        );
+        addTearDown(() async => tempDir.delete(recursive: true));
 
-      final sourceFile = File(p.join(tempDir.path, 'sample.pdf'));
-      await sourceFile.writeAsString('plain pdf content', flush: true);
+        final sourceFile = File(p.join(tempDir.path, 'sample.pdf'));
+        await sourceFile.writeAsString('plain pdf content', flush: true);
 
-      final outputDir = Directory(p.join(tempDir.path, 'output'));
-      await outputDir.create(recursive: true);
+        final outputDir = Directory(p.join(tempDir.path, 'output'));
+        await outputDir.create(recursive: true);
 
-      final result = await service.processPdfFile(
-        sourceFile,
-        find: 'missing-value',
-        replacement: 'replacement-value',
-        mode: PdfLinkReplacementMode.replaceAll,
-        outputFolder: outputDir.path,
-      );
+        final result = await service.processPdfFile(
+          sourceFile,
+          find: 'missing-value',
+          replacement: 'replacement-value',
+          mode: PdfLinkReplacementMode.replaceAll,
+          outputFolder: outputDir.path,
+        );
 
-      expect(result, sourceFile.path);
-      expect(await sourceFile.readAsString(), 'plain pdf content');
-      expect(File(p.join(outputDir.path, 'sample.pdf')).existsSync(), isFalse);
-    });
+        expect(result, sourceFile.path);
+        expect(await sourceFile.readAsString(), 'plain pdf content');
+        expect(
+          File(p.join(outputDir.path, 'sample.pdf')).existsSync(),
+          isFalse,
+        );
+      },
+    );
   });
 }

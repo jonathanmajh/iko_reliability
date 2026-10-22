@@ -56,7 +56,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
   void initState() {
     super.initState();
 
-// Columns for Work Orders
+    // Columns for Work Orders
     detailColumns.addAll([
       TrinaColumn(
         readOnly: true,
@@ -80,19 +80,18 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         type: TrinaColumnType.text(),
       ),
       TrinaColumn(
-          width: 100,
-          readOnly: true,
-          title: 'Status',
-          field: 'status',
-          type: TrinaColumnType.text()),
+        width: 100,
+        readOnly: true,
+        title: 'Status',
+        field: 'status',
+        type: TrinaColumnType.text(),
+      ),
       TrinaColumn(
         width: 150,
         readOnly: true,
         title: 'Reported Date',
         field: 'reportdate',
-        type: TrinaColumnType.date(
-          format: 'yyyy-MM-dd',
-        ),
+        type: TrinaColumnType.date(format: 'yyyy-MM-dd'),
       ),
       TrinaColumn(
         width: 100,
@@ -124,7 +123,7 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       ),
     ]);
 
-// Columns for Assets
+    // Columns for Assets
     columns.addAll([
       TrinaColumn(
         title: '',
@@ -134,13 +133,14 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         hide: true,
       ),
       TrinaColumn(
-          title: 'Hierarchy (Parent Filter)',
-          field: 'hierarchy',
-          width: 250,
-          type: TrinaColumnType.text(),
-          renderer: (rendererContext) {
-            return Container();
-          }),
+        title: 'Hierarchy (Parent Filter)',
+        field: 'hierarchy',
+        width: 250,
+        type: TrinaColumnType.text(),
+        renderer: (rendererContext) {
+          return Container();
+        },
+      ),
       TrinaColumn(
         width: 100,
         title: 'Asset Number',
@@ -148,41 +148,42 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         type: TrinaColumnType.text(),
       ),
       TrinaColumn(
-          width: 100,
-          title: 'Status',
-          field: 'action',
-          type: TrinaColumnType.text(),
-          renderer: (rendererContext) {
-            return Row(
-              children: [
-                IconButton(
-                  tooltip:
-                      'Refresh breakdown information from Maximo.\nUpdates child assets if parent selected',
-                  icon: const Icon(
-                    Icons.refresh,
-                  ),
-                  onPressed: () {
-                    String assetnum =
-                        rendererContext.row.cells['assetnum']!.value;
-                    refreshAsset(assetnum);
-                    //refresh children assets
-                    Set<String> childAssetnums =
-                        getChildAssetnums(assetnum, parentAssets);
-                    for (TrinaRow row in stateManager.iterateAllRowAndGroup) {
-                      String tempAssetnum = row.cells['assetnum']!.value;
-                      if (childAssetnums.contains(tempAssetnum)) {
-                        refreshAsset(tempAssetnum);
-                      }
+        width: 100,
+        title: 'Status',
+        field: 'action',
+        type: TrinaColumnType.text(),
+        renderer: (rendererContext) {
+          return Row(
+            children: [
+              IconButton(
+                tooltip:
+                    'Refresh breakdown information from Maximo.\nUpdates child assets if parent selected',
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  String assetnum =
+                      rendererContext.row.cells['assetnum']!.value;
+                  refreshAsset(assetnum);
+                  //refresh children assets
+                  Set<String> childAssetnums = getChildAssetnums(
+                    assetnum,
+                    parentAssets,
+                  );
+                  for (TrinaRow row in stateManager.iterateAllRowAndGroup) {
+                    String tempAssetnum = row.cells['assetnum']!.value;
+                    if (childAssetnums.contains(tempAssetnum)) {
+                      refreshAsset(tempAssetnum);
                     }
-                  },
-                  iconSize: 18,
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(0),
-                ),
-                StatusIcon(rendererContext: rendererContext),
-              ],
-            );
-          }),
+                  }
+                },
+                iconSize: 18,
+                color: Colors.green,
+                padding: const EdgeInsets.all(0),
+              ),
+              StatusIcon(rendererContext: rendererContext),
+            ],
+          );
+        },
+      ),
       TrinaColumn(
         title: 'Description',
         field: 'description',
@@ -205,44 +206,56 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         renderer: (rendererContext) {
           // change cell to dropdown button
           return Consumer<SelectedSiteNotifier>(
-              builder: (context, site, child) {
-            return FutureBuilder(
-              future: () async {
-                if (context.read<SystemCriticalityNotifier>().selectedSite ==
-                    site.selectedSite) {
-                  return context.read<SystemCriticalityNotifier>().systems;
-                }
-                return database!
-                    .getSystemCriticalitiesFiltered(site.selectedSite);
-              }(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<SystemCriticality>> snapshot) {
-                List<DropdownMenuItem<int>> items = [];
-                if (snapshot.hasData) {
-                  if (snapshot.data?.isNotEmpty ?? false) {
-                    items = snapshot.data!.map<DropdownMenuItem<int>>((value) {
-                      return DropdownMenuItem<int>(
-                        value: value.id,
-                        child: Text(value.description),
-                      );
-                    }).toList();
-                    items.add(const DropdownMenuItem<int>(
-                      value: 0,
-                      child: Text(''),
-                    ));
-                    context.read<SystemCriticalityNotifier>().selectedSite =
-                        site.selectedSite;
-                    context.read<SystemCriticalityNotifier>().systems =
-                        snapshot.data!;
+            builder: (context, site, child) {
+              return FutureBuilder(
+                future: () async {
+                  if (context.read<SystemCriticalityNotifier>().selectedSite ==
+                      site.selectedSite) {
+                    return context.read<SystemCriticalityNotifier>().systems;
                   }
-                }
-                return SystemDropdown(
-                    rendererContext: rendererContext,
-                    items: items,
-                    parentAssets: parentAssets);
-              },
-            );
-          });
+                  return database!.getSystemCriticalitiesFiltered(
+                    site.selectedSite,
+                  );
+                }(),
+                builder:
+                    (
+                      BuildContext context,
+                      AsyncSnapshot<List<SystemCriticality>> snapshot,
+                    ) {
+                      List<DropdownMenuItem<int>> items = [];
+                      if (snapshot.hasData) {
+                        if (snapshot.data?.isNotEmpty ?? false) {
+                          items = snapshot.data!.map<DropdownMenuItem<int>>((
+                            value,
+                          ) {
+                            return DropdownMenuItem<int>(
+                              value: value.id,
+                              child: Text(value.description),
+                            );
+                          }).toList();
+                          items.add(
+                            const DropdownMenuItem<int>(
+                              value: 0,
+                              child: Text(''),
+                            ),
+                          );
+                          context
+                                  .read<SystemCriticalityNotifier>()
+                                  .selectedSite =
+                              site.selectedSite;
+                          context.read<SystemCriticalityNotifier>().systems =
+                              snapshot.data!;
+                        }
+                      }
+                      return SystemDropdown(
+                        rendererContext: rendererContext,
+                        items: items,
+                        parentAssets: parentAssets,
+                      );
+                    },
+              );
+            },
+          );
         },
       ),
       TrinaColumn(
@@ -282,12 +295,14 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text(
-                    '$value: ${frequencyRating[value]?["description"] ?? ""}'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text(
+                      '$value: ${frequencyRating[value]?["description"] ?? ""}',
+                    ),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -328,14 +343,17 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                   },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                  value: value,
-                  child: Tooltip(
-                    message: impactRating[value]?["longdesc"] ?? '',
-                    child: Text(
-                        '$value: ${impactRating[value]?["description"] ?? ""}'),
-                  ));
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Tooltip(
+                      message: impactRating[value]?["longdesc"] ?? '',
+                      child: Text(
+                        '$value: ${impactRating[value]?["description"] ?? ""}',
+                      ),
+                    ),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -389,8 +407,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
                       stateManager.changeCellValue(rendererContext.cell, value);
                     });
                   },
-            items: [0, ...assetCriticality.keys]
-                .map<DropdownMenuItem<int>>((int value) {
+            items: [0, ...assetCriticality.keys].map<DropdownMenuItem<int>>((
+              int value,
+            ) {
               return DropdownMenuItem<int>(
                 value: value,
                 child: Text('$value: ${assetCriticality[value] ?? ""}'),
@@ -400,45 +419,42 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
         },
       ),
       TrinaColumn(
-          width: 100,
-          title: 'Override',
-          field: 'override',
-          type: TrinaColumnType.text(),
-          renderer: (rendererContext) {
-            return Row(
-              children: [
-                OverrideStatusIcon(rendererContext: rendererContext),
-              ],
-            );
-          }),
+        width: 100,
+        title: 'Override',
+        field: 'override',
+        type: TrinaColumnType.text(),
+        renderer: (rendererContext) {
+          return Row(
+            children: [OverrideStatusIcon(rendererContext: rendererContext)],
+          );
+        },
+      ),
       TrinaColumn(
-          width: 100,
-          title: 'System Locked',
-          field: 'lockedSystem',
-          type: TrinaColumnType.text(),
-          renderer: (rendererContext) {
-            Color color = Colors.green;
-            IconData icon = Icons.lock_open;
-            String statusText = 'System can be freely changed';
-            String searchText = rendererContext.cell.value;
-            if (searchText == 'locked') {
-              color = Colors.red;
-              icon = Icons.lock;
-              statusText = 'System has been pre-assigned by Corporate';
-            }
-            return Row(
-              children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    icon,
-                    color: color,
-                  ),
-                  tooltip: statusText,
-                )
-              ],
-            );
-          }),
+        width: 100,
+        title: 'System Locked',
+        field: 'lockedSystem',
+        type: TrinaColumnType.text(),
+        renderer: (rendererContext) {
+          Color color = Colors.green;
+          IconData icon = Icons.lock_open;
+          String statusText = 'System can be freely changed';
+          String searchText = rendererContext.cell.value;
+          if (searchText == 'locked') {
+            color = Colors.red;
+            icon = Icons.lock;
+            statusText = 'System has been pre-assigned by Corporate';
+          }
+          return Row(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: Icon(icon, color: color),
+                tooltip: statusText,
+              ),
+            ],
+          );
+        },
+      ),
     ]);
   }
 
@@ -462,33 +478,37 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     List<TrinaRow> excludedRows = [];
     for (var wo in wos) {
       if (isWorkOrderInRange(wo)) {
-        rows.add(TrinaRow(
-          cells: {
-            'wonum': TrinaCell(value: wo.wonum),
-            'description': TrinaCell(value: wo.description),
-            'type': TrinaCell(value: wo.type),
-            'status': TrinaCell(value: wo.status),
-            'reportdate': TrinaCell(value: wo.reportdate),
-            'downtime': TrinaCell(value: wo.downtime),
-            'site': TrinaCell(value: siteIDAndDescription[wo.siteid]),
-            'included': TrinaCell(value: ('Yes')),
-            'details': TrinaCell(value: wo.details),
-          },
-        ));
+        rows.add(
+          TrinaRow(
+            cells: {
+              'wonum': TrinaCell(value: wo.wonum),
+              'description': TrinaCell(value: wo.description),
+              'type': TrinaCell(value: wo.type),
+              'status': TrinaCell(value: wo.status),
+              'reportdate': TrinaCell(value: wo.reportdate),
+              'downtime': TrinaCell(value: wo.downtime),
+              'site': TrinaCell(value: siteIDAndDescription[wo.siteid]),
+              'included': TrinaCell(value: ('Yes')),
+              'details': TrinaCell(value: wo.details),
+            },
+          ),
+        );
       } else {
-        excludedRows.add(TrinaRow(
-          cells: {
-            'wonum': TrinaCell(value: wo.wonum),
-            'description': TrinaCell(value: wo.description),
-            'type': TrinaCell(value: wo.type),
-            'status': TrinaCell(value: wo.status),
-            'reportdate': TrinaCell(value: wo.reportdate),
-            'downtime': TrinaCell(value: wo.downtime),
-            'site': TrinaCell(value: siteIDAndDescription[wo.siteid]),
-            'included': TrinaCell(value: ('No')),
-            'details': TrinaCell(value: wo.details),
-          },
-        ));
+        excludedRows.add(
+          TrinaRow(
+            cells: {
+              'wonum': TrinaCell(value: wo.wonum),
+              'description': TrinaCell(value: wo.description),
+              'type': TrinaCell(value: wo.type),
+              'status': TrinaCell(value: wo.status),
+              'reportdate': TrinaCell(value: wo.reportdate),
+              'downtime': TrinaCell(value: wo.downtime),
+              'site': TrinaCell(value: siteIDAndDescription[wo.siteid]),
+              'included': TrinaCell(value: ('No')),
+              'details': TrinaCell(value: wo.details),
+            },
+          ),
+        );
       }
     }
 
@@ -518,34 +538,43 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           context.read<AssetStatusNotifier>().assets[child.asset.assetnum] =
               AssetStatus.complete;
         }
-        rows.add(TrinaRow(
-          cells: {
-            'assetnum': TrinaCell(value: child.asset.assetnum),
-            'parent': TrinaCell(value: child.asset.parent),
-            'description': TrinaCell(value: child.asset.description),
-            'priority': TrinaCell(value: child.asset.priority),
-            'system': TrinaCell(value: child.systemCriticality?.id ?? 0),
-            'action': TrinaCell(value: ''),
-            'frequency':
-                TrinaCell(value: child.assetCriticality?.frequency ?? 0),
-            'downtime': TrinaCell(value: child.assetCriticality?.downtime ?? 0),
-            'earlyDetection': TrinaCell(
-                value: f.format(child.assetCriticality?.earlyDetection ?? 0)),
-            'hierarchy': TrinaCell(value: child.asset.hierarchy ?? ''),
-            'newPriority': TrinaCell(value: priorityText),
-            'rpn': TrinaCell(value: calculatedRPN),
-            'id': TrinaCell(value: child.asset.id),
-            'lockedSystem': TrinaCell(
+        rows.add(
+          TrinaRow(
+            cells: {
+              'assetnum': TrinaCell(value: child.asset.assetnum),
+              'parent': TrinaCell(value: child.asset.parent),
+              'description': TrinaCell(value: child.asset.description),
+              'priority': TrinaCell(value: child.asset.priority),
+              'system': TrinaCell(value: child.systemCriticality?.id ?? 0),
+              'action': TrinaCell(value: ''),
+              'frequency': TrinaCell(
+                value: child.assetCriticality?.frequency ?? 0,
+              ),
+              'downtime': TrinaCell(
+                value: child.assetCriticality?.downtime ?? 0,
+              ),
+              'earlyDetection': TrinaCell(
+                value: f.format(child.assetCriticality?.earlyDetection ?? 0),
+              ),
+              'hierarchy': TrinaCell(value: child.asset.hierarchy ?? ''),
+              'newPriority': TrinaCell(value: priorityText),
+              'rpn': TrinaCell(value: calculatedRPN),
+              'id': TrinaCell(value: child.asset.id),
+              'lockedSystem': TrinaCell(
                 value: child.assetCriticality?.lockedSystem ?? false
                     ? 'locked'
-                    : 'open'),
-            'override': TrinaCell(value: ''),
-          },
-          type: TrinaRowType.group(
+                    : 'open',
+              ),
+              'override': TrinaCell(value: ''),
+            },
+            type: TrinaRowType.group(
               expanded: true,
               children: FilteredList<TrinaRow>(
-                  initialList: getChilds(child.asset.assetnum))),
-        ));
+                initialList: getChilds(child.asset.assetnum),
+              ),
+            ),
+          ),
+        );
       }
     }
     return rows;
@@ -560,8 +589,9 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       return;
     }
     // change status icon
-    AssetStatus previousStatus =
-        context.read<AssetStatusNotifier>().getAssetStatus(assetnum);
+    AssetStatus previousStatus = context
+        .read<AssetStatusNotifier>()
+        .getAssetStatus(assetnum);
     // don't update for parent assets
     if (previousStatus == AssetStatus.parentAsset) {
       return;
@@ -570,8 +600,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
       assets: [assetnum],
       status: AssetStatus.refreshingWorkOrders,
     );
-    AssetCriticalitySettingsNotifier assetCriticalitySettings =
-        context.read<AssetCriticalitySettingsNotifier>();
+    AssetCriticalitySettingsNotifier assetCriticalitySettings = context
+        .read<AssetCriticalitySettingsNotifier>();
     // get all WOs from Maximo
     try {
       await database!.getWorkOrderMaximo(
@@ -581,7 +611,8 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
     } catch (e) {
       previousStatus = AssetStatus.refreshError;
       throw Exception(
-          'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}}');
+        'Error retriving Work Orders from Maximo for: $assetnum \n ${e.toString()}}',
+      );
     }
     // bring back previous status Icon
     if (mounted) {
@@ -624,20 +655,26 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
           type: row.cells['assetnum']!.value,
         );
         stateManager.changeCellValue(
-            row.cells['downtime']!, ratingFromValue(downtime, impactRating));
-        stateManager.changeCellValue(row.cells['frequency']!,
-            ratingFromValue(dtEvents, frequencyRating));
+          row.cells['downtime']!,
+          ratingFromValue(downtime, impactRating),
+        );
+        stateManager.changeCellValue(
+          row.cells['frequency']!,
+          ratingFromValue(dtEvents, frequencyRating),
+        );
         var f = NumberFormat('##0.0%');
         stateManager.changeCellValue(
-            row.cells['earlyDetection']!, f.format(followUps));
+          row.cells['earlyDetection']!,
+          f.format(followUps),
+        );
       }
     }
   }
 
   bool isWorkOrderInRange(Workorder workorder) {
     String selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
-    AssetCriticalitySettingsNotifier assetCriticalitySettings =
-        context.read<AssetCriticalitySettingsNotifier>();
+    AssetCriticalitySettingsNotifier assetCriticalitySettings = context
+        .read<AssetCriticalitySettingsNotifier>();
     if (workorder.status != 'CLOSE') {
       return false;
     }
@@ -680,252 +717,279 @@ class _AssetCriticalityPageState extends State<AssetCriticalityPage> {
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
             ),
-          )
+          ),
         ],
       ),
       endDrawer: const EndDrawer(),
       body: FutureBuilder<List<AssetCriticalityWithAsset>>(
         future: () async {
-          context
-              .read<AssetCriticalitySettingsNotifier>()
-              .setSite(context.watch<SelectedSiteNotifier>().selectedSite);
-          return database!.getAssetCriticalities(
-              context.watch<SelectedSiteNotifier>().selectedSite);
-        }(),
-        builder: (BuildContext context,
-            AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot) {
-          List<TrinaRow> rows = [];
-          if (snapshot.hasData) {
-            if (snapshot.data!.isNotEmpty) {
-              // only update grid if the selected site is different from what is currently loaded
-              // or if grid is marked for update
-              if (loadedSite != snapshot.data?.first.asset.siteid ||
-                  context.watch<AssetCriticalityNotifier>().updateGrid) {
-                debugPrint('Reloading Grid');
-                siteAssets = {};
-                parentAssets = {};
-                for (var row in snapshot.data!) {
-                  siteAssets[row.asset.assetnum] = row;
-                  if (parentAssets.containsKey(row.asset.parent)) {
-                    parentAssets[row.asset.parent]!.add(row);
-                  } else {
-                    parentAssets[row.asset.parent ?? "Top"] = [row];
-                  }
-                }
-                context
-                    .read<AssetStatusNotifier>()
-                    .updateParentAssets(parentAssets.keys.toList());
-                loadedSite = snapshot.data!.first.asset.siteid;
-                rows = getChilds('Top');
-                stateManager.removeAllRows();
-                stateManager.appendRows(rows);
-                //load rpn numbers from Trinagrid into AssetCriticalityNotifier
-                Map<String, double> newRpnMap = {};
-                for (TrinaRow row in stateManager.rows) {
-                  if (row.cells['id'] != null) {
-                    newRpnMap[row.cells['id']!.value] =
-                        (row.cells['rpn']?.value ?? -1) + 0.0;
-                  }
-                }
-                stateManager.toggleExpandedRowGroup(
-                    rowGroup: stateManager.rows.first);
-                stateManager.toggleExpandedRowGroup(
-                    rowGroup: stateManager.rows.first);
-                context.watch<AssetCriticalityNotifier>().updateGrid = false;
-              }
-            }
-          } else if (snapshot.hasError) {
-            rows.add(TrinaRow(
-              cells: {
-                'assetnum': TrinaCell(value: 'Error!'),
-                'parent': TrinaCell(value: ''),
-                'description': TrinaCell(value: snapshot.error),
-                'priority': TrinaCell(value: 0),
-                'system': TrinaCell(value: 0),
-                'action': TrinaCell(value: ''),
-                'frequency': TrinaCell(value: 0),
-                'earlyDetection': TrinaCell(value: "0%"),
-                'downtime': TrinaCell(value: 0),
-                'hierarchy': TrinaCell(value: ''),
-                'newPriority': TrinaCell(value: 0),
-                'rpn': TrinaCell(value: 0),
-                'id': TrinaCell(value: ''),
-                'lockedSystem': TrinaCell(value: 'open'),
-                'override': TrinaCell(value: ''),
-              },
-            ));
-          } else {
-            rows.add(TrinaRow(
-              cells: {
-                'assetnum': TrinaCell(value: ''),
-                'parent': TrinaCell(value: ''),
-                'description': TrinaCell(value: 'No Site Selected'),
-                'priority': TrinaCell(value: 0),
-                'system': TrinaCell(value: 0),
-                'action': TrinaCell(value: ''),
-                'frequency': TrinaCell(value: 0),
-                'earlyDetection': TrinaCell(value: "0%"),
-                'downtime': TrinaCell(value: 0),
-                'hierarchy': TrinaCell(value: ''),
-                'newPriority': TrinaCell(value: 0),
-                'rpn': TrinaCell(value: 0),
-                'id': TrinaCell(value: ''),
-                'lockedSystem': TrinaCell(value: 'open'),
-                'override': TrinaCell(value: ''),
-              },
-            ));
-          }
-          return TrinaDualGrid(
-            isVertical: true,
-            display: TrinaDualGridDisplayRatio(ratio: 0.75),
-            gridPropsA: TrinaDualGridProps(
-              columns: columns,
-              rows: rows,
-              onLoaded: (TrinaGridOnLoadedEvent event) {
-                stateManager = event.stateManager;
-                context.read<AssetCriticalityNotifier>().stateManager =
-                    stateManager;
-                event.stateManager.addListener(gridAHandler);
-                stateManager.setShowColumnFilter(true);
-                stateManager.setRowGroup(TrinaRowGroupTreeDelegate(
-                  resolveColumnDepth: (column) =>
-                      stateManager.columnIndex(column),
-                  showText: (cell) => true,
-                  showCount: false,
-                  showFirstExpandableIcon: true,
-                ));
-              },
-              onChanged: (TrinaGridOnChangedEvent event) async {
-                // recalculate rpn number > nre priority if not overwritten
-                if (![5, 6, 7, 8].contains(event.columnIdx)) {
-                  // only need to update if changes made to these columns
-                  return;
-                }
-                double? earlyDetection =
-                    double.tryParse(event.value.toString().split('%')[0]);
-                if (event.column.field == 'earlyDetection') {
-                  if (earlyDetection == null) {
-                    event.row.cells['earlyDetection']!.value = event.oldValue;
-                    earlyDetection = double.tryParse(
-                        event.oldValue.toString().split('%')[0]);
-                    toast(context,
-                        'Invalid value entered for Early Detection Effectiveness, reverted to previous value.');
-                  } else {
-                    if (earlyDetection < 0) {
-                      earlyDetection = 0;
-                    } else if (earlyDetection < 0.99) {
-                    } else if (earlyDetection < 100) {
-                      earlyDetection = earlyDetection / 100;
-                    } else {
-                      earlyDetection = 0.99;
-                    }
-                    var f = NumberFormat('##0.0%');
-                    event.row.cells['earlyDetection']!.value =
-                        f.format(earlyDetection);
-                    await database!.updateAssetCriticality(
-                      assetid: event.row.cells['id']!.value,
-                      downtime: event.row.cells['downtime']!.value,
-                      system: event.row.cells['system']!.value,
-                      frequency: event.row.cells['frequency']!.value,
-                      earlyDetection: earlyDetection,
-                      type: event.row.cells['assetnum']!.value,
-                    );
-                  }
-                }
-                debugPrint('running grid A on change event');
-                if (!context.mounted) {
-                  return;
-                }
-                AssetCriticalityNotifier assetCriticalityNotifier =
-                    context.read<AssetCriticalityNotifier>();
-                AssetStatusNotifier assetStatusNotifier =
-                    context.read<AssetStatusNotifier>();
-                assetCriticalityNotifier.priorityRangesUpToDate = false;
-                String rowId = event.row.cells['id']!.value;
-                // get data from db and update cache while we are at it
-                AssetCriticalityWithAsset assetCrit =
-                    await database!.getAssetCriticality(assetid: rowId);
-                siteAssets[event.row.cells['assetnum']!.value] = assetCrit;
-                // Create an new ACWA object for rpn calculation
-                try {
-                  double newRpn = rpnFunc(assetCrit) ?? -1;
-                  debugPrint('caller G');
-                  await database!.updateAssetCriticality(
-                    assetid: event.row.cells['id']!.value,
-                    downtime: event.row.cells['downtime']!.value,
-                    system: event.row.cells['system']!.value,
-                    frequency: event.row.cells['frequency']!.value,
-                    type: event.row.cells['assetnum']!.value,
-                    newRPN: newRpn,
-                  );
-                  event.row.cells['rpn']!.value = newRpn;
-                  assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
-                  event.row.cells['newPriority']!.value =
-                      assetCrit.assetCriticality?.newPriority ??
-                          assetCriticalityNotifier.rpnFindDistribution(newRpn);
-                  if (newRpn > 0) {
-                    assetStatusNotifier.updateAssetStatus(
-                      assets: [event.row.cells['assetnum']!.value],
-                      status: AssetStatus.complete,
-                    );
-                  } else if (assetStatusNotifier.getAssetStatus(
-                              event.row.cells['assetnum']!.value) ==
-                          AssetStatus.complete &&
-                      event.row.cells['newPriority']!.value < 1) {
-                    assetStatusNotifier.updateAssetStatus(
-                      assets: [event.row.cells['assetnum']!.value],
-                      status: AssetStatus.incomplete,
-                    );
-                  }
-                } catch (e) {
-                  debugPrint('Failed to calculate RPN number ${e.toString()}');
-                }
-                // debugPrint('$event');
-                // systemUpdate.remove(assetCrit.asset.assetnum);
-              },
-              configuration: TrinaGridConfiguration(
-                style: themeManager.theme == ThemeMode.dark
-                    ? const TrinaGridStyleConfig.dark()
-                    : const TrinaGridStyleConfig(),
-                shortcut: TrinaGridShortcut(actions: {
-                  ...TrinaGridShortcut.defaultActions,
-                  LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                      CustomAddKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.minus):
-                      CustomMinusKeyAction(),
-                  LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                      CustomMinusKeyAction(),
-                }),
-                scrollbar: TrinaGridScrollbarConfig(isAlwaysShown: true),
-              ),
-            ),
-            gridPropsB: TrinaDualGridProps(
-              configuration: TrinaGridConfiguration(
-                  // columnFilter: TrinaGridColumnFilterConfig(),
-                  style: themeManager.theme == ThemeMode.dark
-                      ? const TrinaGridStyleConfig.dark()
-                      : const TrinaGridStyleConfig()),
-              columns: detailColumns,
-              rows: detailRows,
-              onLoaded: (TrinaGridOnLoadedEvent event) {
-                detailStateManager = event.stateManager;
-              },
-              rowColorCallback: (rowColorContext) {
-                if (rowColorContext.row.cells['included']!.value != 'Yes') {
-                  return Colors.grey;
-                }
-                return themeManager.theme == ThemeMode.dark
-                    ? Colors.black
-                    : Colors.white;
-              },
-            ),
-            divider: themeManager.theme == ThemeMode.dark
-                ? TrinaDualGridDivider.dark(
-                    indicatorColor: Theme.of(context).colorScheme.onSurface)
-                : const TrinaDualGridDivider(),
+          context.read<AssetCriticalitySettingsNotifier>().setSite(
+            context.watch<SelectedSiteNotifier>().selectedSite,
           );
-        },
+          return database!.getAssetCriticalities(
+            context.watch<SelectedSiteNotifier>().selectedSite,
+          );
+        }(),
+        builder:
+            (
+              BuildContext context,
+              AsyncSnapshot<List<AssetCriticalityWithAsset>> snapshot,
+            ) {
+              List<TrinaRow> rows = [];
+              if (snapshot.hasData) {
+                if (snapshot.data!.isNotEmpty) {
+                  // only update grid if the selected site is different from what is currently loaded
+                  // or if grid is marked for update
+                  if (loadedSite != snapshot.data?.first.asset.siteid ||
+                      context.watch<AssetCriticalityNotifier>().updateGrid) {
+                    debugPrint('Reloading Grid');
+                    siteAssets = {};
+                    parentAssets = {};
+                    for (var row in snapshot.data!) {
+                      siteAssets[row.asset.assetnum] = row;
+                      if (parentAssets.containsKey(row.asset.parent)) {
+                        parentAssets[row.asset.parent]!.add(row);
+                      } else {
+                        parentAssets[row.asset.parent ?? "Top"] = [row];
+                      }
+                    }
+                    context.read<AssetStatusNotifier>().updateParentAssets(
+                      parentAssets.keys.toList(),
+                    );
+                    loadedSite = snapshot.data!.first.asset.siteid;
+                    rows = getChilds('Top');
+                    stateManager.removeAllRows();
+                    stateManager.appendRows(rows);
+                    //load rpn numbers from Trinagrid into AssetCriticalityNotifier
+                    Map<String, double> newRpnMap = {};
+                    for (TrinaRow row in stateManager.rows) {
+                      if (row.cells['id'] != null) {
+                        newRpnMap[row.cells['id']!.value] =
+                            (row.cells['rpn']?.value ?? -1) + 0.0;
+                      }
+                    }
+                    stateManager.toggleExpandedRowGroup(
+                      rowGroup: stateManager.rows.first,
+                    );
+                    stateManager.toggleExpandedRowGroup(
+                      rowGroup: stateManager.rows.first,
+                    );
+                    context.watch<AssetCriticalityNotifier>().updateGrid =
+                        false;
+                  }
+                }
+              } else if (snapshot.hasError) {
+                rows.add(
+                  TrinaRow(
+                    cells: {
+                      'assetnum': TrinaCell(value: 'Error!'),
+                      'parent': TrinaCell(value: ''),
+                      'description': TrinaCell(value: snapshot.error),
+                      'priority': TrinaCell(value: 0),
+                      'system': TrinaCell(value: 0),
+                      'action': TrinaCell(value: ''),
+                      'frequency': TrinaCell(value: 0),
+                      'earlyDetection': TrinaCell(value: "0%"),
+                      'downtime': TrinaCell(value: 0),
+                      'hierarchy': TrinaCell(value: ''),
+                      'newPriority': TrinaCell(value: 0),
+                      'rpn': TrinaCell(value: 0),
+                      'id': TrinaCell(value: ''),
+                      'lockedSystem': TrinaCell(value: 'open'),
+                      'override': TrinaCell(value: ''),
+                    },
+                  ),
+                );
+              } else {
+                rows.add(
+                  TrinaRow(
+                    cells: {
+                      'assetnum': TrinaCell(value: ''),
+                      'parent': TrinaCell(value: ''),
+                      'description': TrinaCell(value: 'No Site Selected'),
+                      'priority': TrinaCell(value: 0),
+                      'system': TrinaCell(value: 0),
+                      'action': TrinaCell(value: ''),
+                      'frequency': TrinaCell(value: 0),
+                      'earlyDetection': TrinaCell(value: "0%"),
+                      'downtime': TrinaCell(value: 0),
+                      'hierarchy': TrinaCell(value: ''),
+                      'newPriority': TrinaCell(value: 0),
+                      'rpn': TrinaCell(value: 0),
+                      'id': TrinaCell(value: ''),
+                      'lockedSystem': TrinaCell(value: 'open'),
+                      'override': TrinaCell(value: ''),
+                    },
+                  ),
+                );
+              }
+              return TrinaDualGrid(
+                isVertical: true,
+                display: TrinaDualGridDisplayRatio(ratio: 0.75),
+                gridPropsA: TrinaDualGridProps(
+                  columns: columns,
+                  rows: rows,
+                  onLoaded: (TrinaGridOnLoadedEvent event) {
+                    stateManager = event.stateManager;
+                    context.read<AssetCriticalityNotifier>().stateManager =
+                        stateManager;
+                    event.stateManager.addListener(gridAHandler);
+                    stateManager.setShowColumnFilter(true);
+                    stateManager.setRowGroup(
+                      TrinaRowGroupTreeDelegate(
+                        resolveColumnDepth: (column) =>
+                            stateManager.columnIndex(column),
+                        showText: (cell) => true,
+                        showCount: false,
+                        showFirstExpandableIcon: true,
+                      ),
+                    );
+                  },
+                  onChanged: (TrinaGridOnChangedEvent event) async {
+                    // recalculate rpn number > nre priority if not overwritten
+                    if (![5, 6, 7, 8].contains(event.columnIdx)) {
+                      // only need to update if changes made to these columns
+                      return;
+                    }
+                    double? earlyDetection = double.tryParse(
+                      event.value.toString().split('%')[0],
+                    );
+                    if (event.column.field == 'earlyDetection') {
+                      if (earlyDetection == null) {
+                        event.row.cells['earlyDetection']!.value =
+                            event.oldValue;
+                        earlyDetection = double.tryParse(
+                          event.oldValue.toString().split('%')[0],
+                        );
+                        toast(
+                          context,
+                          'Invalid value entered for Early Detection Effectiveness, reverted to previous value.',
+                        );
+                      } else {
+                        if (earlyDetection < 0) {
+                          earlyDetection = 0;
+                        } else if (earlyDetection < 0.99) {
+                        } else if (earlyDetection < 100) {
+                          earlyDetection = earlyDetection / 100;
+                        } else {
+                          earlyDetection = 0.99;
+                        }
+                        var f = NumberFormat('##0.0%');
+                        event.row.cells['earlyDetection']!.value = f.format(
+                          earlyDetection,
+                        );
+                        await database!.updateAssetCriticality(
+                          assetid: event.row.cells['id']!.value,
+                          downtime: event.row.cells['downtime']!.value,
+                          system: event.row.cells['system']!.value,
+                          frequency: event.row.cells['frequency']!.value,
+                          earlyDetection: earlyDetection,
+                          type: event.row.cells['assetnum']!.value,
+                        );
+                      }
+                    }
+                    debugPrint('running grid A on change event');
+                    if (!context.mounted) {
+                      return;
+                    }
+                    AssetCriticalityNotifier assetCriticalityNotifier = context
+                        .read<AssetCriticalityNotifier>();
+                    AssetStatusNotifier assetStatusNotifier = context
+                        .read<AssetStatusNotifier>();
+                    assetCriticalityNotifier.priorityRangesUpToDate = false;
+                    String rowId = event.row.cells['id']!.value;
+                    // get data from db and update cache while we are at it
+                    AssetCriticalityWithAsset assetCrit = await database!
+                        .getAssetCriticality(assetid: rowId);
+                    siteAssets[event.row.cells['assetnum']!.value] = assetCrit;
+                    // Create an new ACWA object for rpn calculation
+                    try {
+                      double newRpn = rpnFunc(assetCrit) ?? -1;
+                      debugPrint('caller G');
+                      await database!.updateAssetCriticality(
+                        assetid: event.row.cells['id']!.value,
+                        downtime: event.row.cells['downtime']!.value,
+                        system: event.row.cells['system']!.value,
+                        frequency: event.row.cells['frequency']!.value,
+                        type: event.row.cells['assetnum']!.value,
+                        newRPN: newRpn,
+                      );
+                      event.row.cells['rpn']!.value = newRpn;
+                      assetCriticalityNotifier.addToRpnMap({rowId: newRpn});
+                      event.row.cells['newPriority']!.value =
+                          assetCrit.assetCriticality?.newPriority ??
+                          assetCriticalityNotifier.rpnFindDistribution(newRpn);
+                      if (newRpn > 0) {
+                        assetStatusNotifier.updateAssetStatus(
+                          assets: [event.row.cells['assetnum']!.value],
+                          status: AssetStatus.complete,
+                        );
+                      } else if (assetStatusNotifier.getAssetStatus(
+                                event.row.cells['assetnum']!.value,
+                              ) ==
+                              AssetStatus.complete &&
+                          event.row.cells['newPriority']!.value < 1) {
+                        assetStatusNotifier.updateAssetStatus(
+                          assets: [event.row.cells['assetnum']!.value],
+                          status: AssetStatus.incomplete,
+                        );
+                      }
+                    } catch (e) {
+                      debugPrint(
+                        'Failed to calculate RPN number ${e.toString()}',
+                      );
+                    }
+                    // debugPrint('$event');
+                    // systemUpdate.remove(assetCrit.asset.assetnum);
+                  },
+                  configuration: TrinaGridConfiguration(
+                    style: themeManager.theme == ThemeMode.dark
+                        ? const TrinaGridStyleConfig.dark()
+                        : const TrinaGridStyleConfig(),
+                    shortcut: TrinaGridShortcut(
+                      actions: {
+                        ...TrinaGridShortcut.defaultActions,
+                        LogicalKeySet(LogicalKeyboardKey.add):
+                            CustomAddKeyAction(),
+                        LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                            CustomAddKeyAction(),
+                        LogicalKeySet(LogicalKeyboardKey.minus):
+                            CustomMinusKeyAction(),
+                        LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                            CustomMinusKeyAction(),
+                      },
+                    ),
+                    scrollbar: TrinaGridScrollbarConfig(isAlwaysShown: true),
+                  ),
+                ),
+                gridPropsB: TrinaDualGridProps(
+                  configuration: TrinaGridConfiguration(
+                    // columnFilter: TrinaGridColumnFilterConfig(),
+                    style: themeManager.theme == ThemeMode.dark
+                        ? const TrinaGridStyleConfig.dark()
+                        : const TrinaGridStyleConfig(),
+                  ),
+                  columns: detailColumns,
+                  rows: detailRows,
+                  onLoaded: (TrinaGridOnLoadedEvent event) {
+                    detailStateManager = event.stateManager;
+                  },
+                  rowColorCallback: (rowColorContext) {
+                    if (rowColorContext.row.cells['included']!.value != 'Yes') {
+                      return Colors.grey;
+                    }
+                    return themeManager.theme == ThemeMode.dark
+                        ? Colors.black
+                        : Colors.white;
+                  },
+                ),
+                divider: themeManager.theme == ThemeMode.dark
+                    ? TrinaDualGridDivider.dark(
+                        indicatorColor: Theme.of(context).colorScheme.onSurface,
+                      )
+                    : const TrinaDualGridDivider(),
+              );
+            },
       ),
     );
   }
@@ -959,7 +1023,9 @@ class CustomAddKeyAction extends TrinaGridShortcutAction {
       type: stateManager.currentRow!.cells['assetnum']!.value,
     );
     stateManager.changeCellValue(
-        stateManager.currentCell!, stateManager.currentCell!.value + 1);
+      stateManager.currentCell!,
+      stateManager.currentCell!.value + 1,
+    );
   }
 }
 
@@ -991,7 +1057,9 @@ class CustomMinusKeyAction extends TrinaGridShortcutAction {
       type: stateManager.currentRow!.cells['assetnum']!.value,
     );
     stateManager.changeCellValue(
-        stateManager.currentCell!, stateManager.currentCell!.value - 1);
+      stateManager.currentCell!,
+      stateManager.currentCell!.value - 1,
+    );
   }
 }
 
@@ -1003,54 +1071,64 @@ void showRpnDistDialog(BuildContext context) {
     'Low',
     'Medium',
     'High',
-    'Very High'
+    'Very High',
   ];
   AssetCriticalitySettingsNotifier settingsNotifier =
       Provider.of<AssetCriticalitySettingsNotifier>(context, listen: false);
   List<TextEditingController> distControllers = [];
   distControllers.add(
-      TextEditingController(text: settingsNotifier.percentVLow.toString()));
-  distControllers
-      .add(TextEditingController(text: settingsNotifier.percentLow.toString()));
+    TextEditingController(text: settingsNotifier.percentVLow.toString()),
+  );
   distControllers.add(
-      TextEditingController(text: settingsNotifier.percentMedium.toString()));
+    TextEditingController(text: settingsNotifier.percentLow.toString()),
+  );
   distControllers.add(
-      TextEditingController(text: settingsNotifier.percentHigh.toString()));
+    TextEditingController(text: settingsNotifier.percentMedium.toString()),
+  );
   distControllers.add(
-      TextEditingController(text: settingsNotifier.percentVHigh.toString()));
+    TextEditingController(text: settingsNotifier.percentHigh.toString()),
+  );
+  distControllers.add(
+    TextEditingController(text: settingsNotifier.percentVHigh.toString()),
+  );
 
   showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: RpnDistDialog(
-            distGroups: distGroups,
-            distControllers: distControllers,
-          ),
-        );
-      });
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        child: RpnDistDialog(
+          distGroups: distGroups,
+          distControllers: distControllers,
+        ),
+      );
+    },
+  );
 }
 
 ///Shows a dialog alerting users that they haven't updated the 'new priority'calculations yet.
 ///Returns [true] if user decides to continue export, returns [false] or [null] otherwise
 Future<bool> assetCriticalityCSVExportWarning(BuildContext context) async {
   return await showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('Risk Priority Not Calculated'),
-              content: const Text(
-                  'The new risk priorities have not been calculated yet. This can lead to inaccurate data. Do you still wish to continue?'),
-              actions: [
-                ElevatedButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('No')),
-                ElevatedButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Yes'))
-              ],
-            );
-          }) ??
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Risk Priority Not Calculated'),
+            content: const Text(
+              'The new risk priorities have not been calculated yet. This can lead to inaccurate data. Do you still wish to continue?',
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Yes'),
+              ),
+            ],
+          );
+        },
+      ) ??
       false;
 }
 
@@ -1105,7 +1183,8 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
   void initState() {
     super.initState();
     dists = List.from(
-        widget.distControllers.map((element) => int.parse(element.text)));
+      widget.distControllers.map((element) => int.parse(element.text)),
+    );
   }
 
   @override
@@ -1124,179 +1203,197 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
       Colors.green,
       Colors.yellow[600]!,
       Colors.orange,
-      Colors.red
+      Colors.red,
     ];
     return SingleChildScrollView(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.7,
         width: MediaQuery.of(context).size.width * 0.7,
         child: Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 30.0, left: 30.0, bottom: 30.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Rating Distribution',
-                        style: TextStyle(fontSize: 30.0),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Center(
-              // fancy slider
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Builder(builder: (context) {
-                  return PercentSlider(
-                    initialValues: () {
-                      List<int> initValues = [];
-                      int sum = 0;
-                      for (int i = 0; i < dists!.length - 1; i++) {
-                        sum += dists![i];
-                        initValues.add(sum);
-                      }
-                      return initValues;
-                    }(),
-                    max: total ?? 100,
-                    barColors: colorGradient,
-                    size: const Size(10, 10),
-                    onSliderUpdate: (newPercentDists) {
-                      dists = List.from(newPercentDists);
-                      setState(() {
-                        reloadTextControllers();
-                      });
-                    },
-                    onSliderUpdateEnd: (newPercentDists) async {
-                      List<int> dists2 = List.from(newPercentDists);
-                      var temp =
-                          await calculateRPNDistribution(context, dists2);
-                      setState(() {
-                        dists = dists2;
-
-                        calculationMessage = temp;
-                      });
-                    },
-                    tooltip: criticalityStrings,
-                  );
-                }),
-              ),
-            ),
-            Center(
-                //print total percentage
-                child: Text(
-                    'Total Percentage: ${total ?? calculateTotal(dists!)}%')),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: () {
-                  List<Widget> widgets = [];
-                  for (int i = 0; i < widget.distGroups.length; i++) {
-                    widgets.add(Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          labelText: widget.distGroups[i],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 30.0, left: 30.0, bottom: 30.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Rating Distribution',
+                          style: TextStyle(fontSize: 30.0),
                         ),
-                        controller: widget.distControllers[i],
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          //limits characters to digits between 0-99
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(2),
-                        ],
-                        onChanged: (value) async {
-                          int? val = int.tryParse(value);
-                          dists![i] = val ?? 0;
-                          var temp =
-                              await calculateRPNDistribution(context, dists!);
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Center(
+                // fancy slider
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Builder(
+                    builder: (context) {
+                      return PercentSlider(
+                        initialValues: () {
+                          List<int> initValues = [];
+                          int sum = 0;
+                          for (int i = 0; i < dists!.length - 1; i++) {
+                            sum += dists![i];
+                            initValues.add(sum);
+                          }
+                          return initValues;
+                        }(),
+                        max: total ?? 100,
+                        barColors: colorGradient,
+                        size: const Size(10, 10),
+                        onSliderUpdate: (newPercentDists) {
+                          dists = List.from(newPercentDists);
                           setState(() {
-                            dists![i] = val ?? 0;
+                            reloadTextControllers();
+                          });
+                        },
+                        onSliderUpdateEnd: (newPercentDists) async {
+                          List<int> dists2 = List.from(newPercentDists);
+                          var temp = await calculateRPNDistribution(
+                            context,
+                            dists2,
+                          );
+                          setState(() {
+                            dists = dists2;
+
                             calculationMessage = temp;
                           });
                         },
-                      ),
-                    )));
-                  }
-                  return widgets;
-                }(),
+                        tooltip: criticalityStrings,
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-            const Center(child: Text('RPN Cutoffs')),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: generateRow(
+              Center(
+                //print total percentage
+                child: Text(
+                  'Total Percentage: ${total ?? calculateTotal(dists!)}%',
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: () {
+                    List<Widget> widgets = [];
+                    for (int i = 0; i < widget.distGroups.length; i++) {
+                      widgets.add(
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextField(
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                labelText: widget.distGroups[i],
+                              ),
+                              controller: widget.distControllers[i],
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                //limits characters to digits between 0-99
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(2),
+                              ],
+                              onChanged: (value) async {
+                                int? val = int.tryParse(value);
+                                dists![i] = val ?? 0;
+                                var temp = await calculateRPNDistribution(
+                                  context,
+                                  dists!,
+                                );
+                                setState(() {
+                                  dists![i] = val ?? 0;
+                                  calculationMessage = temp;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return widgets;
+                  }(),
+                ),
+              ),
+              const Center(child: Text('RPN Cutoffs')),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: generateRow(
                   context
                       .read<AssetCriticalityNotifier>()
                       .rpnCutoffs
                       .asMap()
                       .entries
-                      .map((e) => RowofTextWidgets(
+                      .map(
+                        (e) => RowofTextWidgets(
                           label: '${widget.distGroups[e.key]} Cutoff',
-                          value: e.value.toString()))
+                          value: e.value.toString(),
+                        ),
+                      )
                       .toList(),
-                  5),
-            ),
-            Center(child: Text(calculationMessage)),
-            Expanded(
-              //close buttons
-              flex: 1,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
-                    child: ElevatedButton(
-                      child: const Text('Calculate RPN Cutoffs'),
-                      onPressed: () async {
-                        var temp =
-                            await calculateRPNDistribution(context, dists!);
-                        setState(() {
-                          calculationMessage = temp;
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
-                    child: ElevatedButton(
-                      child: const Text('Save Criticality'),
-                      onPressed: () async {
-                        var temp = await assignNewCriticality(
-                            context.read<AssetCriticalityNotifier>().rpnCutoffs,
-                            context.read<SelectedSiteNotifier>().selectedSite);
-                        setState(() {
-                          calculationMessage = '$temp';
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 16.0,
-                      left: 4.0,
-                    ),
-                    child: ElevatedButton(
-                      //close button ratings are auto saved
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Close'),
-                    ),
-                  )
-                ],
+                  5,
+                ),
               ),
-            )
-          ]),
+              Center(child: Text(calculationMessage)),
+              Expanded(
+                //close buttons
+                flex: 1,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
+                      child: ElevatedButton(
+                        child: const Text('Calculate RPN Cutoffs'),
+                        onPressed: () async {
+                          var temp = await calculateRPNDistribution(
+                            context,
+                            dists!,
+                          );
+                          setState(() {
+                            calculationMessage = temp;
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0, right: 4.0),
+                      child: ElevatedButton(
+                        child: const Text('Save Criticality'),
+                        onPressed: () async {
+                          var temp = await assignNewCriticality(
+                            context.read<AssetCriticalityNotifier>().rpnCutoffs,
+                            context.read<SelectedSiteNotifier>().selectedSite,
+                          );
+                          setState(() {
+                            calculationMessage = '$temp';
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0, left: 4.0),
+                      child: ElevatedButton(
+                        //close button ratings are auto saved
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Close'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1307,9 +1404,7 @@ class _RpnDistDialogState extends State<RpnDistDialog> {
 void showWOSettingsDialog(BuildContext context) {
   showDataAlert(
     navigatorKey.currentContext!,
-    [
-      'Please use the "Refresh" button for each asset after changing settings',
-    ],
+    ['Please use the "Refresh" button for each asset after changing settings'],
     'Work Order History Calculation Settings',
     [const WorkOrderSettingsDialog()],
   );
@@ -1339,8 +1434,8 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   @override
   void initState() {
     super.initState();
-    AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier =
-        context.read<AssetCriticalitySettingsNotifier>();
+    AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier = context
+        .read<AssetCriticalitySettingsNotifier>();
     startDate = assetCriticalitySettingsNotifier.workOrderCutoffStart;
     endDate = assetCriticalitySettingsNotifier.workOrderCutoffEnd;
     siteFilterBy = assetCriticalitySettingsNotifier.workOrderFilterBy;
@@ -1360,120 +1455,131 @@ class _WorkOrderSettingsDialogState extends State<WorkOrderSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return Consumer<AssetCriticalitySettingsNotifier>(
-        builder: (context, notifier, child) {
-      return Column(
-        children: [
-          TextField(
-            controller: startDateController,
-            decoration: const InputDecoration(
+      builder: (context, notifier, child) {
+        return Column(
+          children: [
+            TextField(
+              controller: startDateController,
+              decoration: const InputDecoration(
                 icon: Icon(Icons.calendar_month),
-                labelText: 'Ignore Work Orders Before'),
-            readOnly: true,
-            onTap: () async {
-              DateTime? pickedDate = await showDatePicker(
+                labelText: 'Ignore Work Orders Before',
+              ),
+              readOnly: true,
+              onTap: () async {
+                DateTime? pickedDate = await showDatePicker(
                   context: context,
                   initialDate: startDate,
                   firstDate: DateTime(1951),
                   //DateTime.now() - not to allow to choose before today.
-                  lastDate: DateTime.now());
-              if (pickedDate != null) {
-                setState(() {
-                  startDateController.text =
-                      DateFormat('yyyy-MM-dd').format(pickedDate);
-                  //set output date to TextField value.
-                  notifier.setWOSettings(
-                      selectedSite:
-                          context.read<SelectedSiteNotifier>().selectedSite,
-                      workOrderCutoffStart: pickedDate);
-                });
-              }
-            },
-          ),
-          TextField(
-            controller: endDateController,
-            decoration: const InputDecoration(
+                  lastDate: DateTime.now(),
+                );
+                if (pickedDate != null) {
+                  setState(() {
+                    startDateController.text = DateFormat(
+                      'yyyy-MM-dd',
+                    ).format(pickedDate);
+                    //set output date to TextField value.
+                    notifier.setWOSettings(
+                      selectedSite: context
+                          .read<SelectedSiteNotifier>()
+                          .selectedSite,
+                      workOrderCutoffStart: pickedDate,
+                    );
+                  });
+                }
+              },
+            ),
+            TextField(
+              controller: endDateController,
+              decoration: const InputDecoration(
                 icon: Icon(Icons.calendar_month),
-                labelText: 'Ignore Work Orders After'),
-            readOnly: true,
-            onTap: () async {
-              DateTime? pickedDate = await showDatePicker(
+                labelText: 'Ignore Work Orders After',
+              ),
+              readOnly: true,
+              onTap: () async {
+                DateTime? pickedDate = await showDatePicker(
                   context: context,
                   initialDate: endDate,
                   firstDate: DateTime(1951),
                   //DateTime.now() - not to allow to choose before today.
-                  lastDate: DateTime.now());
-              if (pickedDate != null) {
-                setState(() {
-                  endDateController.text =
-                      DateFormat('yyyy-MM-dd').format(pickedDate);
-                  //set output date to TextField value.
-                  notifier.setWOSettings(
-                      selectedSite:
-                          context.read<SelectedSiteNotifier>().selectedSite,
-                      workOrderCutoffEnd: pickedDate);
-                });
-              }
-            },
-          ),
-          ListTile(
+                  lastDate: DateTime.now(),
+                );
+                if (pickedDate != null) {
+                  setState(() {
+                    endDateController.text = DateFormat(
+                      'yyyy-MM-dd',
+                    ).format(pickedDate);
+                    //set output date to TextField value.
+                    notifier.setWOSettings(
+                      selectedSite: context
+                          .read<SelectedSiteNotifier>()
+                          .selectedSite,
+                      workOrderCutoffEnd: pickedDate,
+                    );
+                  });
+                }
+              },
+            ),
+            ListTile(
               title: const Text('Work Order Site Filter'),
               leading: const Icon(Icons.map),
               subtitle: DropdownButton(
-                  isExpanded: true,
-                  value: siteFilterBy,
-                  items: WorkOrderFilterBy.values.map((filter) {
-                    return DropdownMenuItem(
-                        value: filter, child: Text(filter.description));
-                  }).toList(),
-                  onChanged: (WorkOrderFilterBy? newValue) {
-                    setState(() {
-                      siteFilterBy = newValue!;
-                      notifier.setWOSettings(
-                          selectedSite:
-                              context.read<SelectedSiteNotifier>().selectedSite,
-                          workOrderFilterBy: newValue);
-                    });
-                  })),
-        ],
-      );
-    });
+                isExpanded: true,
+                value: siteFilterBy,
+                items: WorkOrderFilterBy.values.map((filter) {
+                  return DropdownMenuItem(
+                    value: filter,
+                    child: Text(filter.description),
+                  );
+                }).toList(),
+                onChanged: (WorkOrderFilterBy? newValue) {
+                  setState(() {
+                    siteFilterBy = newValue!;
+                    notifier.setWOSettings(
+                      selectedSite: context
+                          .read<SelectedSiteNotifier>()
+                          .selectedSite,
+                      workOrderFilterBy: newValue,
+                    );
+                  });
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  Widget buildSettingRow(
-      {Widget? checkbox,
-      required Widget title,
-      required Widget valueDisplay,
-      required Widget inputWidget}) {
+  Widget buildSettingRow({
+    Widget? checkbox,
+    required Widget title,
+    required Widget valueDisplay,
+    required Widget inputWidget,
+  }) {
     return Row(
       children: [
         Expanded(flex: 1, child: checkbox ?? Container()),
-        Expanded(
-          flex: 4,
-          child: title,
-        ),
-        Expanded(
-          flex: 3,
-          child: valueDisplay,
-        ),
-        Expanded(
-          flex: 2,
-          child: inputWidget,
-        )
+        Expanded(flex: 4, child: title),
+        Expanded(flex: 3, child: valueDisplay),
+        Expanded(flex: 2, child: inputWidget),
       ],
     );
   }
 }
 
 Future<String> calculateRPNDistribution(
-    BuildContext context, List<int> selectedPercentDistribution) async {
+  BuildContext context,
+  List<int> selectedPercentDistribution,
+) async {
   if (calculateTotal(selectedPercentDistribution) != 100) {
     return 'Please make sure percentages add up to 100%';
   }
   try {
-    AssetCriticalityNotifier assetCriticalityNotifier =
-        context.read<AssetCriticalityNotifier>();
-    AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier =
-        context.read<AssetCriticalitySettingsNotifier>();
+    AssetCriticalityNotifier assetCriticalityNotifier = context
+        .read<AssetCriticalityNotifier>();
+    AssetCriticalitySettingsNotifier assetCriticalitySettingsNotifier = context
+        .read<AssetCriticalitySettingsNotifier>();
     assetCriticalitySettingsNotifier.setPercentages(
       selectedSite: context.read<SelectedSiteNotifier>().selectedSite,
       percentVLow: selectedPercentDistribution[0],
@@ -1485,8 +1591,9 @@ Future<String> calculateRPNDistribution(
     //set rpn ranges
     List<double> newCutoffs = calculateRPNCutOffs(
       targetPercentages: assetCriticalitySettingsNotifier.fiveCriticality,
-      frequencyOfRPNs: await assetCriticalityNotifier
-          .frequencyOfRPNs(context.read<SelectedSiteNotifier>().selectedSite),
+      frequencyOfRPNs: await assetCriticalityNotifier.frequencyOfRPNs(
+        context.read<SelectedSiteNotifier>().selectedSite,
+      ),
     ).ordered();
     assetCriticalityNotifier.setRpnCutoffs(newCutoffs);
     debugPrint('new rpn cutoffs: ${assetCriticalityNotifier.rpnCutoffs}');
@@ -1541,17 +1648,15 @@ class RowofTextWidgets {
   String label;
   String value;
 
-  RowofTextWidgets({
-    required this.label,
-    required this.value,
-  });
+  RowofTextWidgets({required this.label, required this.value});
 }
 
 Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
   List<Widget> widgets = [];
   for (var i = 0; i < max(minFields, values.length); i++) {
     TextEditingController controller = TextEditingController.fromValue(
-        TextEditingValue(text: values.elementAtOrNull(i)?.value ?? ''));
+      TextEditingValue(text: values.elementAtOrNull(i)?.value ?? ''),
+    );
     widgets.add(
       Expanded(
         child: Padding(
@@ -1569,16 +1674,11 @@ Widget generateRow(List<RowofTextWidgets> values, [int minFields = 0]) {
       ),
     );
   }
-  return Row(
-    children: widgets,
-  );
+  return Row(children: widgets);
 }
 
 class StatusIcon extends StatefulWidget {
-  const StatusIcon({
-    super.key,
-    required this.rendererContext,
-  });
+  const StatusIcon({super.key, required this.rendererContext});
 
   final TrinaColumnRendererContext rendererContext;
 
@@ -1595,9 +1695,9 @@ class _StatusIconState extends State<StatusIcon> {
   @override
   Widget build(BuildContext context) {
     TrinaGridStateManager stateManager = widget.rendererContext.stateManager;
-    AssetStatus status = context
-        .watch<AssetStatusNotifier>()
-        .getAssetStatus(widget.rendererContext.row.cells['assetnum']!.value);
+    AssetStatus status = context.watch<AssetStatusNotifier>().getAssetStatus(
+      widget.rendererContext.row.cells['assetnum']!.value,
+    );
     Color color = Colors.grey;
     IconData icon = Icons.pending;
     String statusText = '';
@@ -1633,15 +1733,9 @@ class _StatusIconState extends State<StatusIcon> {
         statusText = 'Error refreshing WOs';
         searchText = 'error-child';
     }
-    stateManager.changeCellValue(
-      widget.rendererContext.cell,
-      searchText,
-    );
+    stateManager.changeCellValue(widget.rendererContext.cell, searchText);
     return IconButton(
-      icon: Icon(
-        icon,
-        color: color,
-      ),
+      icon: Icon(icon, color: color),
       onPressed: () {},
       tooltip: statusText,
     );
@@ -1649,10 +1743,7 @@ class _StatusIconState extends State<StatusIcon> {
 }
 
 class OverrideStatusIcon extends StatefulWidget {
-  const OverrideStatusIcon({
-    super.key,
-    required this.rendererContext,
-  });
+  const OverrideStatusIcon({super.key, required this.rendererContext});
 
   final TrinaColumnRendererContext rendererContext;
 
@@ -1693,22 +1784,17 @@ class _OverrideStatusIconState extends State<OverrideStatusIcon> {
         statusText = 'Breakdown information overridden';
         searchText = 'breakdowns';
     }
-    stateManager.changeCellValue(
-      widget.rendererContext.cell,
-      searchText,
-    );
+    stateManager.changeCellValue(widget.rendererContext.cell, searchText);
     return IconButton(
-      icon: Icon(
-        icon,
-        color: color,
-      ),
+      icon: Icon(icon, color: color),
       onPressed: () async {
         context.read<AssetOverrideNotifier>().updateAssetOverride(
           assets: [widget.rendererContext.row.cells['assetnum']!.value],
           status: AssetOverride.none,
         );
         await database!.removeAssetOverride(
-            assetid: widget.rendererContext.row.cells['id']!.value);
+          assetid: widget.rendererContext.row.cells['id']!.value,
+        );
         widget.rendererContext.stateManager.changeCellValue(
           widget.rendererContext.row.cells['frequency']!,
           0,
@@ -1752,19 +1838,24 @@ class _SystemDropdownState extends State<SystemDropdown> {
       elevation: 16,
       isExpanded: true,
       disabledHint: const Text('Loading Systems...'),
-      onChanged: widget.rendererContext.row.cells['lockedSystem']?.value ==
-              'locked'
+      onChanged:
+          widget.rendererContext.row.cells['lockedSystem']?.value == 'locked'
           ? null
           : (int? newValue) async {
               //modify child assets as well. do this before changing the rendererContext.row's cell as to lessen the amount of events triggered
               String assetnum =
                   widget.rendererContext.row.cells['assetnum']!.value;
               //refresh children assets
-              Set<String> childAssetnums =
-                  getChildAssetnums(assetnum, widget.parentAssets);
+              Set<String> childAssetnums = getChildAssetnums(
+                assetnum,
+                widget.parentAssets,
+              );
               // update child assets
-              for (TrinaRow row in widget
-                  .rendererContext.stateManager.iterateAllRowAndGroup) {
+              for (TrinaRow row
+                  in widget
+                      .rendererContext
+                      .stateManager
+                      .iterateAllRowAndGroup) {
                 String tempAssetnum = row.cells['assetnum']!.value;
                 if (childAssetnums.contains(tempAssetnum)) {
                   TrinaCell? tempCellRef = row.cells['system'];
@@ -1781,8 +1872,10 @@ class _SystemDropdownState extends State<SystemDropdown> {
                     );
                     if (mounted) {
                       setState(() {
-                        widget.rendererContext.stateManager
-                            .changeCellValue(tempCellRef, newValue);
+                        widget.rendererContext.stateManager.changeCellValue(
+                          tempCellRef,
+                          newValue,
+                        );
                       });
                     }
                   }
@@ -1799,8 +1892,10 @@ class _SystemDropdownState extends State<SystemDropdown> {
               );
               if (mounted) {
                 setState(() {
-                  widget.rendererContext.stateManager
-                      .changeCellValue(widget.rendererContext.cell, newValue);
+                  widget.rendererContext.stateManager.changeCellValue(
+                    widget.rendererContext.cell,
+                    newValue,
+                  );
                 });
               }
             },
@@ -1811,8 +1906,10 @@ class _SystemDropdownState extends State<SystemDropdown> {
 
 ///Gets a set of assetnums that have [assetnum] as a parent or ancestor.
 ///Recursive method
-Set<String> getChildAssetnums(String assetnum,
-    Map<String, List<AssetCriticalityWithAsset>> parentAssets) {
+Set<String> getChildAssetnums(
+  String assetnum,
+  Map<String, List<AssetCriticalityWithAsset>> parentAssets,
+) {
   List<AssetCriticalityWithAsset>? directChilds = parentAssets[assetnum];
   //exit condition
   if (directChilds == null || directChilds.isEmpty) {
@@ -1852,8 +1949,10 @@ class _AssetCriticalityLoadingIndicatorState
     return Text(message);
   }
 
-  Future<void> assetLoading(
-      {required String siteid, required String env}) async {
+  Future<void> assetLoading({
+    required String siteid,
+    required String env,
+  }) async {
     if (loading) {
       // dont load multiple times
       return;
@@ -1879,7 +1978,8 @@ bool assetEditCheck(TrinaRow row) {
 }
 
 Future<void> reCalculateAssetRpnValues(
-    TrinaGridStateManager stateManager) async {
+  TrinaGridStateManager stateManager,
+) async {
   for (TrinaRow row in stateManager.rows) {
     await database!.updateAssetCriticality(
       assetid: row.cells['id']!.value,
@@ -1888,8 +1988,9 @@ Future<void> reCalculateAssetRpnValues(
       system: row.cells['system']!.value,
       type: row.cells['assetnum']!.value,
     );
-    AssetCriticalityWithAsset assetCrit =
-        await database!.getAssetCriticality(assetid: row.cells['id']!.value);
+    AssetCriticalityWithAsset assetCrit = await database!.getAssetCriticality(
+      assetid: row.cells['id']!.value,
+    );
     double newRpn = rpnFunc(assetCrit) ?? -1;
     await database!.updateAssetCriticality(
       assetid: row.cells['id']!.value,

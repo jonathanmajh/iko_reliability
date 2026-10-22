@@ -18,22 +18,26 @@ class AppFileOutput extends LogOutput {
     // only end up in the log file.
     if (event.level >= Level.error && navigatorKey.currentContext != null) {
       showDialog(
-          context: navigatorKey.currentContext!,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('Error'),
-              content:
-                  Text(event.lines.toString().replaceAll(RegExp(r','), '\r\n')),
-            );
-          });
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text(
+              event.lines.toString().replaceAll(RegExp(r','), '\r\n'),
+            ),
+          );
+        },
+      );
     }
     final appDir = await getApplicationDocumentsDirectory();
     final path = p.join(appDir.path, 'ReliabilityApp', 'iko_reliability.log');
     late File file = File(path);
 
     for (var line in event.lines) {
-      await file.writeAsString("${line.toString()}\n",
-          mode: FileMode.writeOnlyAppend);
+      await file.writeAsString(
+        "${line.toString()}\n",
+        mode: FileMode.writeOnlyAppend,
+      );
       debugPrint(line); //print to console as well
     }
   }

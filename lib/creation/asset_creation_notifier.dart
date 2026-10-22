@@ -145,7 +145,11 @@ class AssetCreationNotifier extends ChangeNotifier {
         pendingAssets[assetNum] = 'pending';
         notifyListeners();
         var result = await uploadAssetToMaximo(
-            siteAssets[assetNum]!, env, this, selectedSite);
+          siteAssets[assetNum]!,
+          env,
+          this,
+          selectedSite,
+        );
         var assetcheck = await database!.getAsset(selectedSite, assetNum);
         debugPrint(assetcheck.toString());
         if (result['result'] == 'success') {

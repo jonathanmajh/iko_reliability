@@ -8,9 +8,7 @@ import 'pm_name_generator.dart';
 class JobAssetMaximo {
   final String assetNumber;
 
-  const JobAssetMaximo({
-    required this.assetNumber,
-  });
+  const JobAssetMaximo({required this.assetNumber});
 }
 
 class JobLaborMaximo {
@@ -101,8 +99,8 @@ class JobPlanMaximo {
     List<JobServiceMaximo>? jobservice,
     required this.jobtask,
     required this.jobasset,
-  })  : jobmaterial = jobmaterial ?? [],
-        jobservice = jobservice ?? [];
+  }) : jobmaterial = jobmaterial ?? [],
+       jobservice = jobservice ?? [];
 }
 
 class RouteStopMaximo {
@@ -177,8 +175,12 @@ class PMMaximo {
   });
 }
 
-Future<String?> generateMeterNumber(Map<String, List<String>> meters,
-    String? metername, String? assetNumber, String condition) async {
+Future<String?> generateMeterNumber(
+  Map<String, List<String>> meters,
+  String? metername,
+  String? assetNumber,
+  String condition,
+) async {
   if (metername == null ||
       metername == '' ||
       assetNumber == null ||
@@ -202,8 +204,11 @@ Future<String?> generateMeterNumber(Map<String, List<String>> meters,
   return meter;
 }
 
-Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
-    String maximoServerSelected) async {
+Future<PMMaximo> generatePM(
+  ParsedTemplate pmDetails,
+  PMName pmName,
+  String maximoServerSelected,
+) async {
   List<JobTaskMaximo> mainJobTasks = [];
   Map<String, JobPlanMaximo> childJobPlans = {};
   List<RouteStopMaximo> routeStops = [];
@@ -225,11 +230,13 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
   if (pmDetails.assets.length > 1 && routeType != 'CHILD') {
     routeType = 'TASK';
     for (final asset in pmDetails.assets) {
-      routeStops.add(RouteStopMaximo(
-        routeStopID: sequence,
-        assetNumber: asset,
-        stopSequence: sequence,
-      ));
+      routeStops.add(
+        RouteStopMaximo(
+          routeStopID: sequence,
+          assetNumber: asset,
+          stopSequence: sequence,
+        ),
+      );
       sequence++;
     }
   }
@@ -238,12 +245,14 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
   for (final joblabor in pmDetails.crafts) {
     // job plan duration should be max craft hours
     jobhrs = jobhrs < joblabor.hours ? joblabor.hours : jobhrs;
-    joblabs.add(JobLaborMaximo(
-      laborType: joblabor.laborType,
-      quantity: joblabor.quantity,
-      hours: joblabor.hours,
-      laborCode: joblabor.laborCode,
-    ));
+    joblabs.add(
+      JobLaborMaximo(
+        laborType: joblabor.laborType,
+        quantity: joblabor.quantity,
+        hours: joblabor.hours,
+        laborCode: joblabor.laborCode,
+      ),
+    );
   }
   for (final task in pmDetails.tasks) {
     if (task.jptask == null) {
@@ -251,18 +260,28 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
     }
     if (task.assetNumber == null || task.assetNumber == '') {
       // everything that does not have an asset number falls under the main job plan
-      mainJobTasks.add(JobTaskMaximo(
-        jptask: task.jptask!,
-        description: task.description!,
-        longdescription: task.longdescription,
-        metername: await generateMeterNumber(meters, task.metername,
-            pmDetails.pmAsset, pmDetails.processCondition!),
-      ));
+      mainJobTasks.add(
+        JobTaskMaximo(
+          jptask: task.jptask!,
+          description: task.description!,
+          longdescription: task.longdescription,
+          metername: await generateMeterNumber(
+            meters,
+            task.metername,
+            pmDetails.pmAsset,
+            pmDetails.processCondition!,
+          ),
+        ),
+      );
     } else {
       // tasks that have asset number goes in the child job plan for that asset
       // TODO put generateMeterNumber in try catch so that it can give all errors
-      meter = await generateMeterNumber(meters, task.metername,
-          task.assetNumber, pmDetails.processCondition!);
+      meter = await generateMeterNumber(
+        meters,
+        task.metername,
+        task.assetNumber,
+        pmDetails.processCondition!,
+      );
       var childTask = JobTaskMaximo(
         jptask: task.jptask!,
         description: task.description!,
@@ -275,8 +294,10 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         quantity: pmDetails.crafts[0].quantity,
         hours: jobhrs / routeTasks.toDouble(),
       );
-      final asset =
-          await database!.getAsset(pmDetails.siteId!, task.assetNumber!);
+      final asset = await database!.getAsset(
+        pmDetails.siteId!,
+        task.assetNumber!,
+      );
       String jpnumber;
       // if asset already has a child job plan entry add the additional task and adjust hours
       if (childJobPlans.containsKey(asset.assetnum)) {
@@ -284,7 +305,7 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         childJobPlans[asset.assetnum]!.jobtask.add(childTask);
         childJobPlans[asset.assetnum]!.jpduration =
             childJobPlans[asset.assetnum]!.jpduration +
-                (jobhrs / routeTasks.toDouble());
+            (jobhrs / routeTasks.toDouble());
         childJobPlans[asset.assetnum]!.joblabor[0].hours =
             childJobPlans[asset.assetnum]!.jpduration;
         // else we make new child job plan entry
@@ -295,21 +316,32 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
         jpdescription = jpdescription.replaceFirst('XXXXX', asset.description);
         final woType = pmDetails.workOrderType!;
         final counter = await findAvailablePMNumber(
-            jpnumber, pmDetails.siteId!, maximoServerSelected);
+          jpnumber,
+          pmDetails.siteId!,
+          maximoServerSelected,
+        );
         jpnumber = '${pmDetails.siteId}$jpnumber';
-        NumberFormat formatter =
-            NumberFormat("0" * '|'.allMatches(jpnumber).length);
-        jpnumber =
-            jpnumber.replaceAll(RegExp(r'\|+'), formatter.format(counter));
+        NumberFormat formatter = NumberFormat(
+          "0" * '|'.allMatches(jpnumber).length,
+        );
+        jpnumber = jpnumber.replaceAll(
+          RegExp(r'\|+'),
+          formatter.format(counter),
+        );
         if (woType == 'LIF') {
-          jpdescription =
-              jpdescription.replaceFirst('|', numberToLetter(counter));
+          jpdescription = jpdescription.replaceFirst(
+            '|',
+            numberToLetter(counter),
+          );
         }
-        routeStops.add(RouteStopMaximo(
+        routeStops.add(
+          RouteStopMaximo(
             routeStopID: sequence,
             assetNumber: asset.assetnum,
             stopSequence: sequence,
-            jpnum: jpnumber));
+            jpnum: jpnumber,
+          ),
+        );
         sequence++;
         childJobPlans[asset.assetnum] = JobPlanMaximo(
           description: jpdescription,
@@ -318,8 +350,10 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
           ikoWorktype: woType,
           jpduration: jobhrs / routeTasks.toDouble(),
           jpnum: jpnumber,
-          persongroup: personGroups[pmDetails.crafts[0].laborType
-              .substring(pmDetails.crafts[0].laborType.length - 1)]!,
+          persongroup:
+              personGroups[pmDetails.crafts[0].laborType.substring(
+                pmDetails.crafts[0].laborType.length - 1,
+              )]!,
           priority: 2,
           templatetype: 'PM',
           joblabor: [childLabor],
@@ -331,37 +365,43 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
   }
   List<JobMaterialMaximo> jobmats = [];
   for (final jobmaterial in pmDetails.materials) {
-    jobmats.add(JobMaterialMaximo(
-      itemNumber: jobmaterial.itemNumber,
-      quantity: jobmaterial.quantity,
-    ));
+    jobmats.add(
+      JobMaterialMaximo(
+        itemNumber: jobmaterial.itemNumber,
+        quantity: jobmaterial.quantity,
+      ),
+    );
   }
   List<JobServiceMaximo> jobservs = [];
   for (final jobservice in pmDetails.services) {
-    jobservs.add(JobServiceMaximo(
-      itemNumber: jobservice.itemNumber,
-      vendorId: jobservice.vendorId,
-    ));
+    jobservs.add(
+      JobServiceMaximo(
+        itemNumber: jobservice.itemNumber,
+        vendorId: jobservice.vendorId,
+      ),
+    );
   }
   if (!personGroups.containsKey(pmDetails.crafts[0].laborType)) {
     throw Exception(
-        'Selected craft type is not valid: ${pmDetails.crafts[0].laborType}');
+      'Selected craft type is not valid: ${pmDetails.crafts[0].laborType}',
+    );
   }
   var mainJobPlan = JobPlanMaximo(
-      description: pmName.pmName,
-      ikoConditions: pmDetails.processCondition!,
-      ikoPmpackage: pmDetails.pmPackageNumber,
-      ikoWorktype: pmDetails.workOrderType!,
-      jpduration: jobhrs,
-      jpnum: pmName.jpNumber,
-      persongroup: personGroups[pmDetails.crafts[0].laborType]!,
-      priority: 2,
-      templatetype: 'PM',
-      joblabor: joblabs,
-      jobmaterial: jobmats,
-      jobservice: jobservs,
-      jobtask: mainJobTasks,
-      jobasset: [JobAssetMaximo(assetNumber: pmName.commonParent)]);
+    description: pmName.pmName,
+    ikoConditions: pmDetails.processCondition!,
+    ikoPmpackage: pmDetails.pmPackageNumber,
+    ikoWorktype: pmDetails.workOrderType!,
+    jpduration: jobhrs,
+    jpnum: pmName.jpNumber,
+    persongroup: personGroups[pmDetails.crafts[0].laborType]!,
+    priority: 2,
+    templatetype: 'PM',
+    joblabor: joblabs,
+    jobmaterial: jobmats,
+    jobservice: jobservs,
+    jobtask: mainJobTasks,
+    jobasset: [JobAssetMaximo(assetNumber: pmName.commonParent)],
+  );
   var route = RouteMaximo(
     routeNumber: pmName.routeNumber ?? pmName.pmNumber,
     description: pmName.routeName ?? pmName.pmName,
@@ -385,8 +425,10 @@ Future<PMMaximo> generatePM(ParsedTemplate pmDetails, PMName pmName,
     description: pmName.pmName,
     jobplan: mainJobPlan,
     frequency: pmDetails.frequency!,
-    personGroup: personGroups[
-        pmDetails.crafts[0].laborType]!, // take first craft as primary craft
+    personGroup:
+        personGroups[pmDetails
+            .crafts[0]
+            .laborType]!, // take first craft as primary craft
     freqUnit: pmDetails.frequencyUnit!,
     assetNumber: pmName.commonParent,
     leadTime: pmDetails.frequencyUnit != 'J'

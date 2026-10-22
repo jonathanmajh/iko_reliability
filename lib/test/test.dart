@@ -6,13 +6,8 @@ class MyTestPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("test page title"),
-      ),
-      body: const Center(
-          child: Text(
-        'Hello World',
-      )),
+      appBar: AppBar(title: const Text("test page title")),
+      body: const Center(child: Text('Hello World')),
     );
   }
 }

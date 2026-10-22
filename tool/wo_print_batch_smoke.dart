@@ -16,9 +16,7 @@ Future<void> main() async {
       'status': 'RELEASED',
       'siteid': 'AA',
     },
-    tasks: [
-      const WoTask(wonum: 'WOA', taskid: '10', description: 'task a1'),
-    ],
+    tasks: [const WoTask(wonum: 'WOA', taskid: '10', description: 'task a1')],
     children: [
       const WoChildPacket(
         header: {
@@ -27,9 +25,7 @@ Future<void> main() async {
           'status': 'RELEASED',
           'parent': 'WOA',
         },
-        tasks: [
-          WoTask(wonum: 'WOA-1', taskid: '10', description: 't'),
-        ],
+        tasks: [WoTask(wonum: 'WOA-1', taskid: '10', description: 't')],
       ),
     ],
   );
@@ -46,13 +42,19 @@ Future<void> main() async {
   // forever when its text uses `lineSpacing` (dart_pdf bug). The filler
   // tasks push the long-description task to the bottom of the child page,
   // forcing an in-row split. Must render to a small finite page count.
-  final longLd = List.filled(30, 'Inspect the motor housing, fan, power '
-          'cable and bolts for dust, dirt buildup, damage, kinks or '
-          'looseness; clean/replace as required before release.')
-      .join(' ');
+  final longLd = List.filled(
+    30,
+    'Inspect the motor housing, fan, power '
+    'cable and bolts for dust, dirt buildup, damage, kinks or '
+    'looseness; clean/replace as required before release.',
+  ).join(' ');
   const fillerTask = WoTask(
-      wonum: 'WOA-2', taskid: '', description: 'filler: verify guards and '
-      'access covers are in place before applying test power.');
+    wonum: 'WOA-2',
+    taskid: '',
+    description:
+        'filler: verify guards and '
+        'access covers are in place before applying test power.',
+  );
   final p3 = WoPacket(
     header: {
       'wonum': 'WOC',
@@ -70,30 +72,50 @@ Future<void> main() async {
           'parent': 'WOC',
         },
         tasks: [
-          fillerTask, fillerTask, fillerTask, fillerTask,
-          fillerTask, fillerTask, fillerTask, fillerTask,
-          fillerTask, fillerTask, fillerTask, fillerTask,
-          WoTask(wonum: 'WOC-1', taskid: '20', description: 'long LD task',
-              longDesc: longLd),
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          fillerTask,
+          WoTask(
+            wonum: 'WOC-1',
+            taskid: '20',
+            description: 'long LD task',
+            longDesc: longLd,
+          ),
         ],
       ),
     ],
   );
-  final bytes = await buildWoBatchPdf(
-      [p1, p2, p3],
-      fonts: loadWoPrintFontsFromDirectory());
+  final bytes = await buildWoBatchPdf([
+    p1,
+    p2,
+    p3,
+  ], fonts: loadWoPrintFontsFromDirectory());
   final s = String.fromCharCodes(bytes);
   final pages = RegExp(r'/Type\s*/Page[^s]').allMatches(s).length;
-  stdout.writeln('batch pages: $pages (expect 7: cover+child, cover, '
-      'cover + child whose oversized task subdivides with … markers)');
+  stdout.writeln(
+    'batch pages: $pages (expect 7: cover+child, cover, '
+    'cover + child whose oversized task subdivides with … markers)',
+  );
   if (pages != 7) {
     stderr.writeln('FAIL: unexpected batch page count');
     exitCode = 1;
   }
-  final single = await buildWoPacketPdf(p2, fonts: loadWoPrintFontsFromDirectory());
-  final sp = RegExp(r'/Type\s*/Page[^s]')
-      .allMatches(String.fromCharCodes(single))
-      .length;
+  final single = await buildWoPacketPdf(
+    p2,
+    fonts: loadWoPrintFontsFromDirectory(),
+  );
+  final sp = RegExp(
+    r'/Type\s*/Page[^s]',
+  ).allMatches(String.fromCharCodes(single)).length;
   stdout.writeln('single pages: $sp (expect 1)');
 
   // sanitizer: combining marks / boxes / zero-width chars are stripped
@@ -111,6 +133,7 @@ Future<void> main() async {
   for (final e in cases.entries) {
     final out = sanitizePdfText(e.key);
     stdout.writeln(
-        '${out == e.value ? 'OK  ' : 'FAIL'} "$out" (expect "${e.value}")');
+      '${out == e.value ? 'OK  ' : 'FAIL'} "$out" (expect "${e.value}")',
+    );
   }
 }

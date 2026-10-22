@@ -68,8 +68,10 @@ Future<String> resolveUpdateFeedUrl() async {
       }
     }
   } catch (err) {
-    logger?.d('Update feed resolution failed; falling back to installed v-tag',
-        error: err);
+    logger?.d(
+      'Update feed resolution failed; falling back to installed v-tag',
+      error: err,
+    );
   }
   return fallbackFeedUrl();
 }
@@ -237,22 +239,25 @@ class _UpdateDialogState extends State<UpdateDialog> {
     } catch (err) {
       logger?.w('Failed to schedule update on exit', error: err);
       if (mounted) {
-        toast(navigatorKey.currentContext!,
-            'Failed to schedule update: $err');
+        toast(navigatorKey.currentContext!, 'Failed to schedule update: $err');
       }
       return;
     }
     if (mounted) {
       Navigator.of(context).pop();
     }
-    toast(navigatorKey.currentContext!,
-        'Update will be installed when the app closes.');
+    toast(
+      navigatorKey.currentContext!,
+      'Update will be installed when the app closes.',
+    );
   }
 
   Future<void> _openReleaseNotes() async {
     try {
-      await launchUrl(Uri.parse(repoReleasesUrl),
-          mode: LaunchMode.externalApplication);
+      await launchUrl(
+        Uri.parse(repoReleasesUrl),
+        mode: LaunchMode.externalApplication,
+      );
     } catch (err) {
       logger?.w('Failed to open release page', error: err);
     }
@@ -262,19 +267,17 @@ class _UpdateDialogState extends State<UpdateDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(
-            20.0,
-          ),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(20.0)),
       ),
       title: const Text('Update Checker'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Version ${widget.targetVersion} is available '
-              '(installed: ${widget.currentVersion}).'),
+          Text(
+            'Version ${widget.targetVersion} is available '
+            '(installed: ${widget.currentVersion}).',
+          ),
           const SizedBox(height: 16),
           if (_error != null) ...[
             Text(
@@ -288,11 +291,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
               value: _downloaded ? 1.0 : _progress / 100.0,
             ),
             const SizedBox(height: 6),
-            Text(_downloaded
-                ? 'Download complete - ready to install.'
-                : _downloading
-                    ? 'Downloading update... $_progress%'
-                    : ''),
+            Text(
+              _downloaded
+                  ? 'Download complete - ready to install.'
+                  : _downloading
+                  ? 'Downloading update... $_progress%'
+                  : '',
+            ),
           ],
         ],
       ),
@@ -303,15 +308,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
           label: const Text('Release notes'),
         ),
         TextButton(
-          onPressed:
-              _downloaded ? _installOnExit : () => Navigator.of(context).pop(),
+          onPressed: _downloaded
+              ? _installOnExit
+              : () => Navigator.of(context).pop(),
           child: Text(_downloaded ? 'Later' : 'Close'),
         ),
         if (_error != null && !_downloading)
-          TextButton(
-            onPressed: _startDownload,
-            child: const Text('Retry'),
-          ),
+          TextButton(onPressed: _startDownload, child: const Text('Retry')),
         if (!_busy && _error == null)
           FilledButton(
             onPressed: _startDownload,

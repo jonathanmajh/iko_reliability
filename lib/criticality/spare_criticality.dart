@@ -119,100 +119,122 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         width: 600,
       ),
       TrinaColumn(
-          title: 'Status',
-          field: 'status',
-          width: 140,
-          type: TrinaColumnType.text(),
-          renderer: (rendererContext) {
-            return Row(
-              children: [
-                IconButton(
-                  tooltip: 'View assets associated with item',
-                  icon: const Icon(
-                    Icons.info,
-                  ),
-                  onPressed: () async {
-                    var siteid =
-                        context.read<SelectedSiteNotifier>().selectedSite;
-                    final useCriticality = context
+        title: 'Status',
+        field: 'status',
+        width: 140,
+        type: TrinaColumnType.text(),
+        renderer: (rendererContext) {
+          return Row(
+            children: [
+              IconButton(
+                tooltip: 'View assets associated with item',
+                icon: const Icon(Icons.info),
+                onPressed: () async {
+                  var siteid = context
+                      .read<SelectedSiteNotifier>()
+                      .selectedSite;
+                  final useCriticality = context
+                      .read<SpareCriticalitySettingNotifier>()
+                      .useCriticality;
+                  var assets = await database!
+                      .assetsAssociatedWithItem(
+                        siteid,
+                        rendererContext.row.cells['itemnum']!.value,
+                      )
+                      .get();
+                  var data = assets
+                      .map(
+                        (e) => DataRow(
+                          cells: [
+                            DataCell(Text(e.assetnum)),
+                            DataCell(Text(e.description ?? '')),
+                            DataCell(Text(e.quantity.toString())),
+                            DataCell(
+                              Text(
+                                useCriticality
+                                    ? e.priority.toString()
+                                    : e.newRPN.toString(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      .toList();
+                  showDialog(
+                    context: navigatorKey.currentContext!,
+                    builder: (BuildContext context) {
+                      return Dialog(
+                        child: DataTable(
+                          columns: [
+                            const DataColumn(label: Text('Asset Number')),
+                            const DataColumn(label: Text('Asset Description')),
+                            const DataColumn(label: Text('Quantity')),
+                            DataColumn(
+                              label: Text(
+                                useCriticality
+                                    ? 'Asset Criticality'
+                                    : 'Asset RPN',
+                              ),
+                            ),
+                          ],
+                          rows: data,
+                        ),
+                      );
+                    },
+                  );
+                },
+                iconSize: 18,
+                color: Colors.green,
+                padding: const EdgeInsets.all(0),
+              ),
+              SparePartStatusIcon(rendererContext: rendererContext),
+              IconButton(
+                tooltip: 'Refresh purchasing information from Maximo.',
+                icon: const Icon(Icons.refresh),
+                onPressed: () async {
+                  String itemnum = rendererContext.row.cells['itemnum']!.value;
+                  final result = await database!.updateSparePartCriticality(
+                    itemnum: itemnum,
+                    siteid: context.read<SelectedSiteNotifier>().selectedSite,
+                    useCriticality: context
                         .read<SpareCriticalitySettingNotifier>()
-                        .useCriticality;
-                    var assets = await database!
-                        .assetsAssociatedWithItem(
-                            siteid, rendererContext.row.cells['itemnum']!.value)
-                        .get();
-                    var data = assets
-                        .map((e) => DataRow(cells: [
-                              DataCell(Text(e.assetnum)),
-                              DataCell(Text(e.description ?? '')),
-                              DataCell(Text(e.quantity.toString())),
-                              DataCell(Text(useCriticality
-                                  ? e.priority.toString()
-                                  : e.newRPN.toString()))
-                            ]))
-                        .toList();
-                    showDialog(
-                        context: navigatorKey.currentContext!,
-                        builder: (BuildContext context) {
-                          return Dialog(
-                            child: DataTable(columns: [
-                              const DataColumn(label: Text('Asset Number')),
-                              const DataColumn(
-                                  label: Text('Asset Description')),
-                              const DataColumn(label: Text('Quantity')),
-                              DataColumn(
-                                  label: Text(useCriticality
-                                      ? 'Asset Criticality'
-                                      : 'Asset RPN')),
-                            ], rows: data),
-                          );
-                        });
-                  },
-                  iconSize: 18,
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(0),
-                ),
-                SparePartStatusIcon(rendererContext: rendererContext),
-                IconButton(
-                  tooltip: 'Refresh purchasing information from Maximo.',
-                  icon: const Icon(
-                    Icons.refresh,
-                  ),
-                  onPressed: () async {
-                    String itemnum =
-                        rendererContext.row.cells['itemnum']!.value;
-                    final result = await database!.updateSparePartCriticality(
-                      itemnum: itemnum,
-                      siteid: context.read<SelectedSiteNotifier>().selectedSite,
-                      useCriticality: context
-                          .read<SpareCriticalitySettingNotifier>()
-                          .useCriticality,
-                    );
-                    setState(() {
-                      rendererContext.row.cells['assetRpn']!.value =
-                          result.first.assetRPN.toStringAsPrecision(3);
-                    });
-                    rendererContext.stateManager.changeCellValue(
-                        rendererContext.row.cells['cost']!, result.first.cost);
-                    rendererContext.stateManager.changeCellValue(
-                        rendererContext.row.cells['leadTime']!,
-                        result.first.leadTime);
-                    rendererContext.stateManager.changeCellValue(
-                        rendererContext.row.cells['usage']!,
-                        result.first.usage);
-                    rendererContext.stateManager.changeCellValue(
-                        rendererContext.row.cells['rpn']!, result.first.newRPN);
-                    rendererContext.stateManager.changeCellValue(
-                        rendererContext.row.cells['newPriority']!,
-                        result.first.newPriority);
-                  },
-                  iconSize: 18,
-                  color: Colors.green,
-                  padding: const EdgeInsets.all(0),
-                ),
-              ],
-            );
-          }),
+                        .useCriticality,
+                  );
+                  setState(() {
+                    rendererContext.row.cells['assetRpn']!.value = result
+                        .first
+                        .assetRPN
+                        .toStringAsPrecision(3);
+                  });
+                  rendererContext.stateManager.changeCellValue(
+                    rendererContext.row.cells['cost']!,
+                    result.first.cost,
+                  );
+                  rendererContext.stateManager.changeCellValue(
+                    rendererContext.row.cells['leadTime']!,
+                    result.first.leadTime,
+                  );
+                  rendererContext.stateManager.changeCellValue(
+                    rendererContext.row.cells['usage']!,
+                    result.first.usage,
+                  );
+                  rendererContext.stateManager.changeCellValue(
+                    rendererContext.row.cells['rpn']!,
+                    result.first.newRPN,
+                  );
+                  rendererContext.stateManager.changeCellValue(
+                    rendererContext.row.cells['newPriority']!,
+                    result.first.newPriority,
+                  );
+                },
+                iconSize: 18,
+                color: Colors.green,
+                padding: const EdgeInsets.all(0),
+              ),
+            ],
+          );
+        },
+      ),
       TrinaColumn(
         title: 'Asset RPN',
         field: 'assetRpn',
@@ -248,12 +270,14 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
             },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child:
-                    Text('$value: ${usageRating[value]?["description"] ?? ""}'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text(
+                      '$value: ${usageRating[value]?["description"] ?? ""}',
+                    ),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -285,12 +309,14 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
             },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text(
-                    '$value: ${leadTimeRating[value]?["description"] ?? ""}'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text(
+                      '$value: ${leadTimeRating[value]?["description"] ?? ""}',
+                    ),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -322,12 +348,14 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
             },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child:
-                    Text('$value: ${costRating[value]?["description"] ?? ""}'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text(
+                      '$value: ${costRating[value]?["description"] ?? ""}',
+                    ),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -366,8 +394,9 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
                     AssetOverride.priority;
               });
             },
-            items:
-                spareCriticality.keys.map<DropdownMenuItem<int>>((int value) {
+            items: spareCriticality.keys.map<DropdownMenuItem<int>>((
+              int value,
+            ) {
               return DropdownMenuItem<int>(
                 value: value,
                 child: Text(spareCriticality[value] ?? ""),
@@ -391,17 +420,18 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         width: 75,
       ),
       TrinaColumn(
-          width: 100,
-          title: 'Override',
-          field: 'override',
-          type: TrinaColumnType.text(),
-          renderer: (rendererContext) {
-            return Row(
-              children: [
-                OverrideSparePartStatusIcon(rendererContext: rendererContext),
-              ],
-            );
-          }),
+        width: 100,
+        title: 'Override',
+        field: 'override',
+        type: TrinaColumnType.text(),
+        renderer: (rendererContext) {
+          return Row(
+            children: [
+              OverrideSparePartStatusIcon(rendererContext: rendererContext),
+            ],
+          );
+        },
+      ),
     ]);
 
     // Listen for SpareCriticalityNotifier updates and trigger refresh
@@ -424,7 +454,8 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
       detailStateManager.setShowLoading(true);
 
       fetchPurchaseHistory(
-          itemnum: stateManager.currentRow!.cells['itemnum']!.value);
+        itemnum: stateManager.currentRow!.cells['itemnum']!.value,
+      );
     }
   }
 
@@ -435,27 +466,39 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
     List<TrinaRow> excludeRows = [];
     for (var itemPurchase in itemPurchases) {
       if (isPurchaseOrderInRange(itemPurchase, selectedSite)) {
-        rows.add(TrinaRow(cells: {
-          'prnum': TrinaCell(value: itemPurchase.prnum),
-          'ponum': TrinaCell(value: itemPurchase.ponum),
-          'startDate': TrinaCell(value: itemPurchase.startDate),
-          'endDate': TrinaCell(value: itemPurchase.endDate),
-          'leadTime': TrinaCell(value: itemPurchase.leadTime),
-          'unitCost': TrinaCell(value: itemPurchase.unitCost),
-          'site': TrinaCell(value: siteIDAndDescription[itemPurchase.siteid]),
-          'included': TrinaCell(value: 'Yes'),
-        }));
+        rows.add(
+          TrinaRow(
+            cells: {
+              'prnum': TrinaCell(value: itemPurchase.prnum),
+              'ponum': TrinaCell(value: itemPurchase.ponum),
+              'startDate': TrinaCell(value: itemPurchase.startDate),
+              'endDate': TrinaCell(value: itemPurchase.endDate),
+              'leadTime': TrinaCell(value: itemPurchase.leadTime),
+              'unitCost': TrinaCell(value: itemPurchase.unitCost),
+              'site': TrinaCell(
+                value: siteIDAndDescription[itemPurchase.siteid],
+              ),
+              'included': TrinaCell(value: 'Yes'),
+            },
+          ),
+        );
       } else {
-        excludeRows.add(TrinaRow(cells: {
-          'prnum': TrinaCell(value: itemPurchase.prnum),
-          'ponum': TrinaCell(value: itemPurchase.ponum),
-          'startDate': TrinaCell(value: itemPurchase.startDate),
-          'endDate': TrinaCell(value: itemPurchase.endDate),
-          'leadTime': TrinaCell(value: itemPurchase.leadTime),
-          'unitCost': TrinaCell(value: itemPurchase.unitCost),
-          'site': TrinaCell(value: siteIDAndDescription[itemPurchase.siteid]),
-          'included': TrinaCell(value: 'No'),
-        }));
+        excludeRows.add(
+          TrinaRow(
+            cells: {
+              'prnum': TrinaCell(value: itemPurchase.prnum),
+              'ponum': TrinaCell(value: itemPurchase.ponum),
+              'startDate': TrinaCell(value: itemPurchase.startDate),
+              'endDate': TrinaCell(value: itemPurchase.endDate),
+              'leadTime': TrinaCell(value: itemPurchase.leadTime),
+              'unitCost': TrinaCell(value: itemPurchase.unitCost),
+              'site': TrinaCell(
+                value: siteIDAndDescription[itemPurchase.siteid],
+              ),
+              'included': TrinaCell(value: 'No'),
+            },
+          ),
+        );
       }
     }
     detailStateManager.removeRows(detailStateManager.rows);
@@ -473,9 +516,9 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
     navigatorKey.currentContext!
         .read<SpareCriticalityNotifier>()
         .removeListener(_handleNotifierUpdate);
-    navigatorKey.currentContext!
-        .read<SelectedSiteNotifier>()
-        .removeListener(_handleNotifierUpdate);
+    navigatorKey.currentContext!.read<SelectedSiteNotifier>().removeListener(
+      _handleNotifierUpdate,
+    );
     super.dispose();
   }
 
@@ -503,7 +546,7 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
             ),
-          )
+          ),
         ],
       ),
       endDrawer: const EndDrawer(),
@@ -512,193 +555,239 @@ class _SpareCriticalityPageState extends State<SpareCriticalityPage> {
         builder: (context, value, _) {
           return FutureBuilder<List<SpareCriticalityWithItem>>(
             future: database!.getSpareCriticalities(
-                siteid: context.watch<SelectedSiteNotifier>().selectedSite),
-            builder: (BuildContext context,
-                AsyncSnapshot<List<SpareCriticalityWithItem>> snapshot) {
-              List<TrinaRow> rows = [];
-              debugPrint('SPC - builder');
-              if (snapshot.hasData) {
-                if (snapshot.data!.isNotEmpty) {
-                  for (var row in snapshot.data!) {
-                    AssetOverride overrideStatus = AssetOverride.none;
-                    if (row.spareCriticality.manualPriority) {
-                      overrideStatus = AssetOverride.priority;
-                    }
-                    if (row.spareCriticality.manual) {
-                      overrideStatus = AssetOverride.breakdowns;
-                    }
-                    rows.add(TrinaRow(cells: {
-                      'itemnum': TrinaCell(value: row.spareCriticality.itemnum),
-                      'description':
-                          TrinaCell(value: row.item?.description ?? ''),
-                      'assetRpn': TrinaCell(
-                          value: row.spareCriticality.assetRPN
-                              .toStringAsPrecision(3)),
-                      'usage': TrinaCell(value: row.spareCriticality.usage),
-                      'leadTime':
-                          TrinaCell(value: row.spareCriticality.leadTime),
-                      'cost': TrinaCell(value: row.spareCriticality.cost),
-                      'rpn': TrinaCell(value: row.spareCriticality.newRPN),
-                      'newPriority': TrinaCell(
-                          value: row.spareCriticality.newPriority > 0
-                              ? row.spareCriticality.newPriority
-                              : context
-                                  .read<SpareCriticalityNotifier>()
-                                  .rpnFindDistribution(
-                                      row.spareCriticality.newRPN)),
-                      'rop':
-                          TrinaCell(value: row.spareCriticality.reorderPoint),
-                      'roq':
-                          TrinaCell(value: row.spareCriticality.orderQuantity),
-                      'id': TrinaCell(value: row.spareCriticality.id),
-                      'status': TrinaCell(value: ''),
-                      'override': TrinaCell(value: overrideStatus),
-                    }));
-                  }
-                  stateManager.removeAllRows();
-                  stateManager.appendRows(rows);
-                  final settings =
-                      context.watch<SpareCriticalitySettingNotifier>();
-                  if (settings.sortType != null) {
-                    switch (settings.sortType) {
-                      case TrinaColumnSort.ascending:
-                        stateManager.sortAscending(settings.sortColumn!);
-                        break;
-                      case TrinaColumnSort.descending:
-                        stateManager.sortDescending(settings.sortColumn!);
-                        break;
-                      default:
-                    }
-                    stateManager.notifyListeners();
-                  }
-                }
-              } else if (snapshot.hasError) {
-                rows.add(TrinaRow(cells: {
-                  'itemnum': TrinaCell(value: 'Error!'),
-                  'description': TrinaCell(value: snapshot.error),
-                  'assetRpn': TrinaCell(value: ''),
-                  'usage': TrinaCell(value: 0),
-                  'leadTime': TrinaCell(value: 0),
-                  'cost': TrinaCell(value: 0),
-                  'rpn': TrinaCell(value: 0),
-                  'newPriority': TrinaCell(value: 0),
-                  'id': TrinaCell(value: 0),
-                  'rop': TrinaCell(value: 0),
-                  'roq': TrinaCell(value: 0),
-                  'status': TrinaCell(value: ''),
-                  'override': TrinaCell(value: ''),
-                }));
-              } else {
-                rows.add(TrinaRow(cells: {
-                  'itemnum': TrinaCell(value: ''),
-                  'description': TrinaCell(value: 'No Site Selected'),
-                  'assetRpn': TrinaCell(value: ''),
-                  'usage': TrinaCell(value: 0),
-                  'leadTime': TrinaCell(value: 0),
-                  'cost': TrinaCell(value: 0),
-                  'rpn': TrinaCell(value: 0),
-                  'newPriority': TrinaCell(value: 0),
-                  'id': TrinaCell(value: 0),
-                  'rop': TrinaCell(value: 0),
-                  'roq': TrinaCell(value: 0),
-                  'status': TrinaCell(value: ''),
-                  'override': TrinaCell(value: ''),
-                }));
-              }
-              return TrinaDualGrid(
-                isVertical: true,
-                display: TrinaDualGridDisplayRatio(ratio: 0.75),
-                gridPropsA: TrinaDualGridProps(
-                  columns: columns,
-                  rows: rows,
-                  onLoaded: (TrinaGridOnLoadedEvent event) {
-                    stateManager = event.stateManager;
-                    context.read<SpareCriticalityNotifier>().stateManager =
-                        stateManager;
-                    event.stateManager.addListener(gridAHandler);
-                    stateManager.setShowColumnFilter(true);
-                  },
-                  onSorted: (TrinaGridOnSortedEvent event) {
-                    context.read<SpareCriticalitySettingNotifier>().sortColumn =
-                        event.column;
-                    context.read<SpareCriticalitySettingNotifier>().sortType =
-                        event.column.sort;
-                  },
-                  onChanged: (TrinaGridOnChangedEvent event) async {
-                    // recalculate rpn number > nre priority if not overwritten
-                    if (![4, 5, 6].contains(event.columnIdx)) {
-                      // only need to update if changes made to these columns
-                      return;
-                    }
-                    debugPrint('running grid A on change event');
-                    final newRpn = rpnFunc(await database!
-                        .getSpareCriticality(id: event.row.cells['id']!.value));
-                    debugPrint(newRpn.toString());
-                    if (newRpn > 0) {
-                      await database!.updateSpareCriticality(
-                        newRPN: newRpn,
-                        spareid: event.row.cells['id']!.value,
-                      );
-                      event.row.cells['rpn']!.value = newRpn;
-                      if (context.mounted) {
-                        final newPriority = context
-                            .read<SpareCriticalityNotifier>()
-                            .rpnFindDistribution(newRpn);
-                        if (event.row.cells['override']!.value !=
-                            AssetOverride.priority) {
-                          event.row.cells['newPriority']!.value = newPriority;
-                          event.row.cells['override']!.value =
-                              AssetOverride.breakdowns;
+              siteid: context.watch<SelectedSiteNotifier>().selectedSite,
+            ),
+            builder:
+                (
+                  BuildContext context,
+                  AsyncSnapshot<List<SpareCriticalityWithItem>> snapshot,
+                ) {
+                  List<TrinaRow> rows = [];
+                  debugPrint('SPC - builder');
+                  if (snapshot.hasData) {
+                    if (snapshot.data!.isNotEmpty) {
+                      for (var row in snapshot.data!) {
+                        AssetOverride overrideStatus = AssetOverride.none;
+                        if (row.spareCriticality.manualPriority) {
+                          overrideStatus = AssetOverride.priority;
                         }
+                        if (row.spareCriticality.manual) {
+                          overrideStatus = AssetOverride.breakdowns;
+                        }
+                        rows.add(
+                          TrinaRow(
+                            cells: {
+                              'itemnum': TrinaCell(
+                                value: row.spareCriticality.itemnum,
+                              ),
+                              'description': TrinaCell(
+                                value: row.item?.description ?? '',
+                              ),
+                              'assetRpn': TrinaCell(
+                                value: row.spareCriticality.assetRPN
+                                    .toStringAsPrecision(3),
+                              ),
+                              'usage': TrinaCell(
+                                value: row.spareCriticality.usage,
+                              ),
+                              'leadTime': TrinaCell(
+                                value: row.spareCriticality.leadTime,
+                              ),
+                              'cost': TrinaCell(
+                                value: row.spareCriticality.cost,
+                              ),
+                              'rpn': TrinaCell(
+                                value: row.spareCriticality.newRPN,
+                              ),
+                              'newPriority': TrinaCell(
+                                value: row.spareCriticality.newPriority > 0
+                                    ? row.spareCriticality.newPriority
+                                    : context
+                                          .read<SpareCriticalityNotifier>()
+                                          .rpnFindDistribution(
+                                            row.spareCriticality.newRPN,
+                                          ),
+                              ),
+                              'rop': TrinaCell(
+                                value: row.spareCriticality.reorderPoint,
+                              ),
+                              'roq': TrinaCell(
+                                value: row.spareCriticality.orderQuantity,
+                              ),
+                              'id': TrinaCell(value: row.spareCriticality.id),
+                              'status': TrinaCell(value: ''),
+                              'override': TrinaCell(value: overrideStatus),
+                            },
+                          ),
+                        );
+                      }
+                      stateManager.removeAllRows();
+                      stateManager.appendRows(rows);
+                      final settings = context
+                          .watch<SpareCriticalitySettingNotifier>();
+                      if (settings.sortType != null) {
+                        switch (settings.sortType) {
+                          case TrinaColumnSort.ascending:
+                            stateManager.sortAscending(settings.sortColumn!);
+                            break;
+                          case TrinaColumnSort.descending:
+                            stateManager.sortDescending(settings.sortColumn!);
+                            break;
+                          default:
+                        }
+                        stateManager.notifyListeners();
                       }
                     }
-                  },
-                  configuration: TrinaGridConfiguration(
-                    style: themeManager.theme == ThemeMode.dark
-                        ? const TrinaGridStyleConfig.dark()
-                        : const TrinaGridStyleConfig(),
-                    shortcut: TrinaGridShortcut(actions: {
-                      ...TrinaGridShortcut.defaultActions,
-                      LogicalKeySet(LogicalKeyboardKey.add):
-                          CustomAddKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                          CustomAddKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.minus):
-                          CustomMinusKeyAction(),
-                      LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                          CustomMinusKeyAction(),
-                    }),
-                    scrollbar: TrinaGridScrollbarConfig(
-                      isAlwaysShown: true,
-                      thickness: 10,
+                  } else if (snapshot.hasError) {
+                    rows.add(
+                      TrinaRow(
+                        cells: {
+                          'itemnum': TrinaCell(value: 'Error!'),
+                          'description': TrinaCell(value: snapshot.error),
+                          'assetRpn': TrinaCell(value: ''),
+                          'usage': TrinaCell(value: 0),
+                          'leadTime': TrinaCell(value: 0),
+                          'cost': TrinaCell(value: 0),
+                          'rpn': TrinaCell(value: 0),
+                          'newPriority': TrinaCell(value: 0),
+                          'id': TrinaCell(value: 0),
+                          'rop': TrinaCell(value: 0),
+                          'roq': TrinaCell(value: 0),
+                          'status': TrinaCell(value: ''),
+                          'override': TrinaCell(value: ''),
+                        },
+                      ),
+                    );
+                  } else {
+                    rows.add(
+                      TrinaRow(
+                        cells: {
+                          'itemnum': TrinaCell(value: ''),
+                          'description': TrinaCell(value: 'No Site Selected'),
+                          'assetRpn': TrinaCell(value: ''),
+                          'usage': TrinaCell(value: 0),
+                          'leadTime': TrinaCell(value: 0),
+                          'cost': TrinaCell(value: 0),
+                          'rpn': TrinaCell(value: 0),
+                          'newPriority': TrinaCell(value: 0),
+                          'id': TrinaCell(value: 0),
+                          'rop': TrinaCell(value: 0),
+                          'roq': TrinaCell(value: 0),
+                          'status': TrinaCell(value: ''),
+                          'override': TrinaCell(value: ''),
+                        },
+                      ),
+                    );
+                  }
+                  return TrinaDualGrid(
+                    isVertical: true,
+                    display: TrinaDualGridDisplayRatio(ratio: 0.75),
+                    gridPropsA: TrinaDualGridProps(
+                      columns: columns,
+                      rows: rows,
+                      onLoaded: (TrinaGridOnLoadedEvent event) {
+                        stateManager = event.stateManager;
+                        context.read<SpareCriticalityNotifier>().stateManager =
+                            stateManager;
+                        event.stateManager.addListener(gridAHandler);
+                        stateManager.setShowColumnFilter(true);
+                      },
+                      onSorted: (TrinaGridOnSortedEvent event) {
+                        context
+                                .read<SpareCriticalitySettingNotifier>()
+                                .sortColumn =
+                            event.column;
+                        context
+                                .read<SpareCriticalitySettingNotifier>()
+                                .sortType =
+                            event.column.sort;
+                      },
+                      onChanged: (TrinaGridOnChangedEvent event) async {
+                        // recalculate rpn number > nre priority if not overwritten
+                        if (![4, 5, 6].contains(event.columnIdx)) {
+                          // only need to update if changes made to these columns
+                          return;
+                        }
+                        debugPrint('running grid A on change event');
+                        final newRpn = rpnFunc(
+                          await database!.getSpareCriticality(
+                            id: event.row.cells['id']!.value,
+                          ),
+                        );
+                        debugPrint(newRpn.toString());
+                        if (newRpn > 0) {
+                          await database!.updateSpareCriticality(
+                            newRPN: newRpn,
+                            spareid: event.row.cells['id']!.value,
+                          );
+                          event.row.cells['rpn']!.value = newRpn;
+                          if (context.mounted) {
+                            final newPriority = context
+                                .read<SpareCriticalityNotifier>()
+                                .rpnFindDistribution(newRpn);
+                            if (event.row.cells['override']!.value !=
+                                AssetOverride.priority) {
+                              event.row.cells['newPriority']!.value =
+                                  newPriority;
+                              event.row.cells['override']!.value =
+                                  AssetOverride.breakdowns;
+                            }
+                          }
+                        }
+                      },
+                      configuration: TrinaGridConfiguration(
+                        style: themeManager.theme == ThemeMode.dark
+                            ? const TrinaGridStyleConfig.dark()
+                            : const TrinaGridStyleConfig(),
+                        shortcut: TrinaGridShortcut(
+                          actions: {
+                            ...TrinaGridShortcut.defaultActions,
+                            LogicalKeySet(LogicalKeyboardKey.add):
+                                CustomAddKeyAction(),
+                            LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                                CustomAddKeyAction(),
+                            LogicalKeySet(LogicalKeyboardKey.minus):
+                                CustomMinusKeyAction(),
+                            LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                                CustomMinusKeyAction(),
+                          },
+                        ),
+                        scrollbar: TrinaGridScrollbarConfig(
+                          isAlwaysShown: true,
+                          thickness: 10,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                gridPropsB: TrinaDualGridProps(
-                  configuration: TrinaGridConfiguration(
-                      style: themeManager.theme == ThemeMode.dark
-                          ? const TrinaGridStyleConfig.dark()
-                          : const TrinaGridStyleConfig()),
-                  columns: detailColumns,
-                  rows: detailRows,
-                  onLoaded: (TrinaGridOnLoadedEvent event) {
-                    detailStateManager = event.stateManager;
-                  },
-                  rowColorCallback: (rowColorContext) {
-                    if (rowColorContext.row.cells['included']!.value != 'Yes') {
-                      return Colors.grey;
-                    }
-                    return themeManager.theme == ThemeMode.dark
-                        ? Colors.black
-                        : Colors.white;
-                  },
-                ),
-                divider: themeManager.theme == ThemeMode.dark
-                    ? TrinaDualGridDivider.dark(
-                        indicatorColor: Theme.of(context).colorScheme.onSurface)
-                    : const TrinaDualGridDivider(),
-              );
-            },
+                    gridPropsB: TrinaDualGridProps(
+                      configuration: TrinaGridConfiguration(
+                        style: themeManager.theme == ThemeMode.dark
+                            ? const TrinaGridStyleConfig.dark()
+                            : const TrinaGridStyleConfig(),
+                      ),
+                      columns: detailColumns,
+                      rows: detailRows,
+                      onLoaded: (TrinaGridOnLoadedEvent event) {
+                        detailStateManager = event.stateManager;
+                      },
+                      rowColorCallback: (rowColorContext) {
+                        if (rowColorContext.row.cells['included']!.value !=
+                            'Yes') {
+                          return Colors.grey;
+                        }
+                        return themeManager.theme == ThemeMode.dark
+                            ? Colors.black
+                            : Colors.white;
+                      },
+                    ),
+                    divider: themeManager.theme == ThemeMode.dark
+                        ? TrinaDualGridDivider.dark(
+                            indicatorColor: Theme.of(
+                              context,
+                            ).colorScheme.onSurface,
+                          )
+                        : const TrinaDualGridDivider(),
+                  );
+                },
           );
         },
       ),
@@ -742,7 +831,9 @@ class CustomAddKeyAction extends TrinaGridShortcutAction {
         );
     }
     stateManager.changeCellValue(
-        stateManager.currentCell!, stateManager.currentCell!.value + 1);
+      stateManager.currentCell!,
+      stateManager.currentCell!.value + 1,
+    );
   }
 }
 
@@ -782,7 +873,9 @@ class CustomMinusKeyAction extends TrinaGridShortcutAction {
         );
     }
     stateManager.changeCellValue(
-        stateManager.currentCell!, stateManager.currentCell!.value - 1);
+      stateManager.currentCell!,
+      stateManager.currentCell!.value - 1,
+    );
   }
 }
 
@@ -814,8 +907,10 @@ class _SparePartsLoadingIndicatorState
     return Text(message);
   }
 
-  Future<void> sparePartLoading(
-      {required String siteid, required String env}) async {
+  Future<void> sparePartLoading({
+    required String siteid,
+    required String env,
+  }) async {
     if (loading) {
       // dont load multiple times
       return;
@@ -833,31 +928,19 @@ class _SparePartsLoadingIndicatorState
         setState(() {
           message = 'Loading item information from Maximo...';
         });
-        await database!.getItemDetailsMaximo(
-          siteid: siteid,
-          env: env,
-        );
+        await database!.getItemDetailsMaximo(siteid: siteid, env: env);
         setState(() {
           message = 'Loading spare parts information from Maximo...';
         });
-        await database!.getSparePartsMaximo(
-          siteid: siteid,
-          env: env,
-        );
+        await database!.getSparePartsMaximo(siteid: siteid, env: env);
         setState(() {
           message = 'Loading purchasing information from Maximo...';
         });
-        await database!.getPurchasesMaximo(
-          siteid: siteid,
-          env: env,
-        );
+        await database!.getPurchasesMaximo(siteid: siteid, env: env);
         setState(() {
           message = 'Loading parts usage information from Maximo...';
         });
-        await database!.getItemUsageMaximo(
-          siteid: siteid,
-          env: env,
-        );
+        await database!.getItemUsageMaximo(siteid: siteid, env: env);
       } catch (e) {
         setState(() {
           message = e.toString();
@@ -881,8 +964,9 @@ class _SparePartsLoadingIndicatorState
               .read<SpareCriticalitySettingNotifier>();
           // TODO this should be multi-threaded
           await database!.computeSparePartCriticality(
-              siteid: siteid,
-              useCriticality: spareCriticalitySetting.useCriticality);
+            siteid: siteid,
+            useCriticality: spareCriticalitySetting.useCriticality,
+          );
           Navigator.pop(navigatorKey.currentContext!);
           navigatorKey.currentContext!.router.replacePath("/criticality/spare");
           Navigator.pop(navigatorKey.currentContext!); // close the drawer
@@ -913,10 +997,7 @@ double rpnFunc(SpareCriticality sparePart) {
 }
 
 class SparePartStatusIcon extends StatefulWidget {
-  const SparePartStatusIcon({
-    super.key,
-    required this.rendererContext,
-  });
+  const SparePartStatusIcon({super.key, required this.rendererContext});
 
   final TrinaColumnRendererContext rendererContext;
 
@@ -944,15 +1025,9 @@ class _StatusIconState extends State<SparePartStatusIcon> {
       statusText = 'RPN generated';
       searchText = 'complete';
     }
-    stateManager.changeCellValue(
-      widget.rendererContext.cell,
-      searchText,
-    );
+    stateManager.changeCellValue(widget.rendererContext.cell, searchText);
     return IconButton(
-      icon: Icon(
-        icon,
-        color: color,
-      ),
+      icon: Icon(icon, color: color),
       onPressed: () {},
       tooltip: statusText,
     );
@@ -960,10 +1035,7 @@ class _StatusIconState extends State<SparePartStatusIcon> {
 }
 
 class OverrideSparePartStatusIcon extends StatefulWidget {
-  const OverrideSparePartStatusIcon({
-    super.key,
-    required this.rendererContext,
-  });
+  const OverrideSparePartStatusIcon({super.key, required this.rendererContext});
 
   final TrinaColumnRendererContext rendererContext;
 
@@ -994,17 +1066,15 @@ class _OverrideStatusIconState extends State<OverrideSparePartStatusIcon> {
         statusText = 'Purchasing information overridden';
     }
     return IconButton(
-      icon: Icon(
-        icon,
-        color: color,
-      ),
+      icon: Icon(icon, color: color),
       onPressed: () async {
         stateManager.changeCellValue(
           widget.rendererContext.cell,
           AssetOverride.none,
         );
         await database!.removeSparePartOverride(
-            spareid: widget.rendererContext.row.cells['id']!.value);
+          spareid: widget.rendererContext.row.cells['id']!.value,
+        );
         widget.rendererContext.stateManager.changeCellValue(
           widget.rendererContext.row.cells['cost']!,
           0,
@@ -1045,10 +1115,10 @@ class _SparePartCalculatingIndicatorState
 
   @override
   Widget build(BuildContext context) {
-    SpareCriticalitySettingNotifier spareCritifcalitySettingNotifier =
-        context.read<SpareCriticalitySettingNotifier>();
-    SpareCriticalityNotifier spareCritifcalityNotifier =
-        context.read<SpareCriticalityNotifier>();
+    SpareCriticalitySettingNotifier spareCritifcalitySettingNotifier = context
+        .read<SpareCriticalitySettingNotifier>();
+    SpareCriticalityNotifier spareCritifcalityNotifier = context
+        .read<SpareCriticalityNotifier>();
     final siteid = context.read<SelectedSiteNotifier>().selectedSite;
     calculateRPNDistributionSpares(
       siteid: siteid,
@@ -1094,8 +1164,10 @@ class _SparePartCalculatingIndicatorState
       setState(() {
         message = 'Saving Calculated ABC Values...';
       });
-      await database!
-          .updateSparePriority(newCutoffs: newCutoffs, siteid: siteid);
+      await database!.updateSparePriority(
+        newCutoffs: newCutoffs,
+        siteid: siteid,
+      );
       setState(() {
         message = 'Calculating Reorder Information (Inventory Optimization)...';
       });
@@ -1110,8 +1182,10 @@ class _SparePartCalculatingIndicatorState
       debugPrint('RPN cutoffs successfully calculated...');
       Navigator.pop(navigatorKey.currentContext!);
       Navigator.pop(navigatorKey.currentContext!);
-      toast(navigatorKey.currentContext!,
-          'ABC Type and Reorder Details Successfully Calculated');
+      toast(
+        navigatorKey.currentContext!,
+        'ABC Type and Reorder Details Successfully Calculated',
+      );
     } catch (e) {
       debugPrint(e.toString());
       setState(() {
@@ -1153,50 +1227,59 @@ class _SpareCriticalityConfigState extends State<SpareCriticalityConfig> {
             (notifier.percentA + notifier.percentB + notifier.percentC)
                 .toString();
         final selectedSite = context.read<SelectedSiteNotifier>().selectedSite;
-        return Column(children: [
-          TextField(
-            controller: percentAController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'A%'),
-            onChanged: (value) async {
-              await notifier.setPercentages(
-                  percentA: int.parse(value), selectedSite: selectedSite);
-              sumController.text =
-                  (notifier.percentA + notifier.percentB + notifier.percentC)
-                      .toString();
-            },
-          ),
-          TextField(
-            controller: percentBController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'B%'),
-            onChanged: (value) async {
-              await notifier.setPercentages(
-                  percentB: int.parse(value), selectedSite: selectedSite);
-              sumController.text =
-                  (notifier.percentA + notifier.percentB + notifier.percentC)
-                      .toString();
-            },
-          ),
-          TextField(
-            controller: percentCController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'C%'),
-            onChanged: (value) async {
-              await notifier.setPercentages(
-                  percentC: int.parse(value), selectedSite: selectedSite);
-              sumController.text =
-                  (notifier.percentA + notifier.percentB + notifier.percentC)
-                      .toString();
-            },
-          ),
-          TextField(
-            controller: sumController,
-            decoration: const InputDecoration(
-                labelText: 'Ensure Percentages add to 100%'),
-            readOnly: true,
-          ),
-        ]);
+        return Column(
+          children: [
+            TextField(
+              controller: percentAController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'A%'),
+              onChanged: (value) async {
+                await notifier.setPercentages(
+                  percentA: int.parse(value),
+                  selectedSite: selectedSite,
+                );
+                sumController.text =
+                    (notifier.percentA + notifier.percentB + notifier.percentC)
+                        .toString();
+              },
+            ),
+            TextField(
+              controller: percentBController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'B%'),
+              onChanged: (value) async {
+                await notifier.setPercentages(
+                  percentB: int.parse(value),
+                  selectedSite: selectedSite,
+                );
+                sumController.text =
+                    (notifier.percentA + notifier.percentB + notifier.percentC)
+                        .toString();
+              },
+            ),
+            TextField(
+              controller: percentCController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'C%'),
+              onChanged: (value) async {
+                await notifier.setPercentages(
+                  percentC: int.parse(value),
+                  selectedSite: selectedSite,
+                );
+                sumController.text =
+                    (notifier.percentA + notifier.percentB + notifier.percentC)
+                        .toString();
+              },
+            ),
+            TextField(
+              controller: sumController,
+              decoration: const InputDecoration(
+                labelText: 'Ensure Percentages add to 100%',
+              ),
+              readOnly: true,
+            ),
+          ],
+        );
       },
     );
   }
@@ -1225,8 +1308,8 @@ class _PurchaseHistorySettingDialogState
   @override
   void initState() {
     super.initState();
-    SpareCriticalitySettingNotifier spareCriticalitySettingsNotifier =
-        context.read<SpareCriticalitySettingNotifier>();
+    SpareCriticalitySettingNotifier spareCriticalitySettingsNotifier = context
+        .read<SpareCriticalitySettingNotifier>();
     startDate = spareCriticalitySettingsNotifier.purchaseCutoffStart;
     endDate = spareCriticalitySettingsNotifier.purchaseCutoffEnd;
     siteFilterBy = spareCriticalitySettingsNotifier.purchaseFilterBy;
@@ -1246,99 +1329,111 @@ class _PurchaseHistorySettingDialogState
   @override
   Widget build(BuildContext context) {
     return Consumer<SpareCriticalitySettingNotifier>(
-        builder: (context, notifier, child) {
-      return Column(
-        children: [
-          ListTile(
-            title: const Text('Ignore Purchases Before'),
-            leading: const Icon(Icons.calendar_month),
-            subtitle: TextField(
-              controller: startDateController,
-              readOnly: true,
-              onTap: () async {
-                DateTime? pickedDate = await showDatePicker(
+      builder: (context, notifier, child) {
+        return Column(
+          children: [
+            ListTile(
+              title: const Text('Ignore Purchases Before'),
+              leading: const Icon(Icons.calendar_month),
+              subtitle: TextField(
+                controller: startDateController,
+                readOnly: true,
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
                     context: context,
                     initialDate: startDate,
                     firstDate: DateTime(1951),
                     //DateTime.now() - not to allow to choose before today.
-                    lastDate: DateTime.now());
-                if (pickedDate != null) {
-                  setState(() {
-                    startDateController.text =
-                        DateFormat('yyyy-MM-dd').format(pickedDate);
-                    //set output date to TextField value.
-                    context
-                        .read<SpareCriticalitySettingNotifier>()
-                        .setPurchaseSettings(
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      startDateController.text = DateFormat(
+                        'yyyy-MM-dd',
+                      ).format(pickedDate);
+                      //set output date to TextField value.
+                      context
+                          .read<SpareCriticalitySettingNotifier>()
+                          .setPurchaseSettings(
                             selectedSite: context
                                 .read<SelectedSiteNotifier>()
                                 .selectedSite,
-                            purchaseCutoffStart: pickedDate);
-                  });
-                }
-              },
+                            purchaseCutoffStart: pickedDate,
+                          );
+                    });
+                  }
+                },
+              ),
             ),
-          ),
-          ListTile(
-            title: const Text('Ignore Purchases After'),
-            leading: const Icon(Icons.calendar_month),
-            subtitle: TextField(
-              controller: endDateController,
-              readOnly: true,
-              onTap: () async {
-                DateTime? pickedDate = await showDatePicker(
+            ListTile(
+              title: const Text('Ignore Purchases After'),
+              leading: const Icon(Icons.calendar_month),
+              subtitle: TextField(
+                controller: endDateController,
+                readOnly: true,
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
                     context: context,
                     initialDate: endDate,
                     firstDate: DateTime(1951),
                     //DateTime.now() - not to allow to choose before today.
-                    lastDate: DateTime.now());
-                if (pickedDate != null) {
-                  setState(() {
-                    endDateController.text =
-                        DateFormat('yyyy-MM-dd').format(pickedDate);
-                    //set output date to TextField value.
-                    context
-                        .read<SpareCriticalitySettingNotifier>()
-                        .setPurchaseSettings(
-                            selectedSite: context
-                                .read<SelectedSiteNotifier>()
-                                .selectedSite,
-                            purchaseCutoffEnd: pickedDate);
-                  });
-                }
-              },
-            ),
-          ),
-          ListTile(
-              title: const Text('Purchases Site Filter'),
-              leading: const Icon(Icons.map),
-              subtitle: DropdownButton(
-                  isExpanded: true,
-                  value: siteFilterBy,
-                  items: WorkOrderFilterBy.values.map((filter) {
-                    return DropdownMenuItem(
-                        value: filter, child: Text(filter.description));
-                  }).toList(),
-                  onChanged: (WorkOrderFilterBy? newValue) {
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
                     setState(() {
-                      siteFilterBy = newValue!;
+                      endDateController.text = DateFormat(
+                        'yyyy-MM-dd',
+                      ).format(pickedDate);
+                      //set output date to TextField value.
                       context
                           .read<SpareCriticalitySettingNotifier>()
                           .setPurchaseSettings(
-                              selectedSite: context
-                                  .read<SelectedSiteNotifier>()
-                                  .selectedSite,
-                              purchaseFilterBy: newValue);
+                            selectedSite: context
+                                .read<SelectedSiteNotifier>()
+                                .selectedSite,
+                            purchaseCutoffEnd: pickedDate,
+                          );
                     });
-                  })),
-          ListTile(
-            title: const Text('Use Asset RPN Or Criticality'),
-            leading: const Icon(Icons.compare_arrows),
-            subtitle: CalcOptionChoice(),
-          ),
-        ],
-      );
-    });
+                  }
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text('Purchases Site Filter'),
+              leading: const Icon(Icons.map),
+              subtitle: DropdownButton(
+                isExpanded: true,
+                value: siteFilterBy,
+                items: WorkOrderFilterBy.values.map((filter) {
+                  return DropdownMenuItem(
+                    value: filter,
+                    child: Text(filter.description),
+                  );
+                }).toList(),
+                onChanged: (WorkOrderFilterBy? newValue) {
+                  setState(() {
+                    siteFilterBy = newValue!;
+                    context
+                        .read<SpareCriticalitySettingNotifier>()
+                        .setPurchaseSettings(
+                          selectedSite: context
+                              .read<SelectedSiteNotifier>()
+                              .selectedSite,
+                          purchaseFilterBy: newValue,
+                        );
+                  });
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text('Use Asset RPN Or Criticality'),
+              leading: const Icon(Icons.compare_arrows),
+              subtitle: CalcOptionChoice(),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -1359,8 +1454,8 @@ class _CalcOptionChoiceState extends State<CalcOptionChoice> {
   @override
   void initState() {
     super.initState();
-    SpareCriticalitySettingNotifier spareCriticalitySettingsNotifier =
-        context.read<SpareCriticalitySettingNotifier>();
+    SpareCriticalitySettingNotifier spareCriticalitySettingsNotifier = context
+        .read<SpareCriticalitySettingNotifier>();
     useCriticality = spareCriticalitySettingsNotifier.useCriticality;
     selectedOption = useCriticality ? CalcOption.criticality : CalcOption.rpn;
   }
@@ -1384,11 +1479,13 @@ class _CalcOptionChoiceState extends State<CalcOptionChoice> {
       onSelectionChanged: (Set<CalcOption> newSelection) {
         setState(() {
           selectedOption = newSelection.first;
-          useCriticality =
-              selectedOption == CalcOption.criticality ? true : false;
+          useCriticality = selectedOption == CalcOption.criticality
+              ? true
+              : false;
           context.read<SpareCriticalitySettingNotifier>().setPurchaseSettings(
-              selectedSite: context.read<SelectedSiteNotifier>().selectedSite,
-              useCriticality: useCriticality);
+            selectedSite: context.read<SelectedSiteNotifier>().selectedSite,
+            useCriticality: useCriticality,
+          );
         });
       },
     );
@@ -1396,12 +1493,9 @@ class _CalcOptionChoiceState extends State<CalcOptionChoice> {
 }
 
 // TODO this should be changed to a year filter for performance reasons
-bool isPurchaseOrderInRange(
-  Purchase purchase,
-  String selectedSite,
-) {
-  final spareCriticalitySetting =
-      navigatorKey.currentContext!.read<SpareCriticalitySettingNotifier>();
+bool isPurchaseOrderInRange(Purchase purchase, String selectedSite) {
+  final spareCriticalitySetting = navigatorKey.currentContext!
+      .read<SpareCriticalitySettingNotifier>();
   if (purchase.endDate == null) {
     return false;
   }
@@ -1421,12 +1515,9 @@ bool isPurchaseOrderInRange(
   return true;
 }
 
-bool isInFilterDateRange(
-  int checkYear,
-  String selectedSite,
-) {
-  final spareCriticalitySetting =
-      navigatorKey.currentContext!.read<SpareCriticalitySettingNotifier>();
+bool isInFilterDateRange(int checkYear, String selectedSite) {
+  final spareCriticalitySetting = navigatorKey.currentContext!
+      .read<SpareCriticalitySettingNotifier>();
   return (spareCriticalitySetting.purchaseCutoffStart.year <= checkYear &&
           checkYear <= spareCriticalitySetting.purchaseCutoffEnd.year)
       ? true
@@ -1434,8 +1525,8 @@ bool isInFilterDateRange(
 }
 
 int yearsInFilterDateRange(String selectedSite) {
-  final spareCriticalitySetting =
-      navigatorKey.currentContext!.read<SpareCriticalitySettingNotifier>();
+  final spareCriticalitySetting = navigatorKey.currentContext!
+      .read<SpareCriticalitySettingNotifier>();
   return spareCriticalitySetting.purchaseCutoffEnd.year -
       spareCriticalitySetting.purchaseCutoffStart.year +
       1;

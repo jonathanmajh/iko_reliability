@@ -42,7 +42,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
 
     _updateFab();
 
-// define columns
+    // define columns
     columns.addAll([
       TrinaColumn(
         title: '',
@@ -71,11 +71,12 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             items: siteIDAndDescription.keys
                 .toList()
                 .map<DropdownMenuItem<String>>((String key) {
-              return DropdownMenuItem<String>(
-                value: key,
-                child: Text(siteIDAndDescription[key] ?? 'Unknown'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<String>(
+                    value: key,
+                    child: Text(siteIDAndDescription[key] ?? 'Unknown'),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -96,9 +97,9 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
                 stateManager.changeCellValue(rendererContext.cell, value);
               });
             },
-            items: productionLines.keys
-                .toList()
-                .map<DropdownMenuItem<String>>((String key) {
+            items: productionLines.keys.toList().map<DropdownMenuItem<String>>((
+              String key,
+            ) {
               return DropdownMenuItem<String>(
                 value: key,
                 child: Text(productionLines[key] ?? 'Unknown'),
@@ -132,11 +133,12 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text('$value: ${systemSafety[value]}'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text('$value: ${systemSafety[value]}'),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -159,11 +161,12 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text('$value: ${systemRegulatory[value]}'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text('$value: ${systemRegulatory[value]}'),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -186,11 +189,12 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text('$value: ${systemEconomic[value]}'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text('$value: ${systemEconomic[value]}'),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -213,11 +217,12 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
             },
             items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                 .map<DropdownMenuItem<int>>((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: Text('$value: ${systemThroughput[value]}'),
-              );
-            }).toList(),
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text('$value: ${systemThroughput[value]}'),
+                  );
+                })
+                .toList(),
           );
         },
       ),
@@ -251,22 +256,19 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
         width: 80,
         title: 'Score',
         field: 'score',
-        type: TrinaColumnType.number(
-          format: '#.##',
-        ),
+        type: TrinaColumnType.number(format: '#.##'),
       ),
       TrinaColumn(
-          width: 85,
-          title: 'Delete?',
-          field: 'delete',
-          type: TrinaColumnType.text(),
-          renderer: (rendererContext) {
-            return Row(
-              children: [
-                SystemDeleteIcon(rendererContext: rendererContext),
-              ],
-            );
-          }),
+        width: 85,
+        title: 'Delete?',
+        field: 'delete',
+        type: TrinaColumnType.text(),
+        renderer: (rendererContext) {
+          return Row(
+            children: [SystemDeleteIcon(rendererContext: rendererContext)],
+          );
+        },
+      ),
     ]);
   }
 
@@ -275,18 +277,20 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
     List<Widget> temp = [];
     temp = [
       Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-          child: FloatingActionButton(
-            heroTag: UniqueKey(),
-            onPressed: () async {
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return const NewSystemForm();
-                  });
-            },
-            child: const Icon(Icons.add),
-          )),
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+        child: FloatingActionButton(
+          heroTag: UniqueKey(),
+          onPressed: () async {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return const NewSystemForm();
+              },
+            );
+          },
+          child: const Icon(Icons.add),
+        ),
+      ),
     ];
 
     setState(() {
@@ -305,9 +309,9 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
       stateManager.removeCurrentRow();
       await database!.deleteSystemCriticalitys(id);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please select a system to remove'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a system to remove')),
+      );
     }
   }
 
@@ -329,7 +333,7 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
             ),
-          )
+          ),
         ],
       ),
       endDrawer: const EndDrawer(),
@@ -340,107 +344,133 @@ class _SystemCriticalityPageState extends State<SystemCriticalityPage> {
       ),
       body: FutureBuilder<List<SystemCriticality>>(
         future: database!.getSystemCriticalitiesFiltered(
-            context.watch<SelectedSiteNotifier>().selectedSite),
-        builder: (BuildContext context,
-            AsyncSnapshot<List<SystemCriticality>> snapshot) {
-          List<TrinaRow> rows = [];
-          if (snapshot.hasData) {
-            if (snapshot.data!.isNotEmpty) {
-              debugPrint('Reloading Grid');
-              for (var row in snapshot.data!) {
-                rows.add(TrinaRow(cells: {
-                  'id': TrinaCell(value: row.id),
-                  'line': TrinaCell(value: row.line),
-                  'site': TrinaCell(value: row.siteid ?? 'All'),
-                  'description': TrinaCell(value: row.description),
-                  'safety': TrinaCell(value: row.safety),
-                  'regulatory': TrinaCell(value: row.regulatory),
-                  'economic': TrinaCell(value: row.economic),
-                  'throughput': TrinaCell(value: row.throughput),
-                  'quality': TrinaCell(value: row.quality),
-                  'score': TrinaCell(value: row.score),
-                  'delete': TrinaCell(value: ''),
-                }));
-                stateManager.removeAllRows();
-                stateManager.appendRows(rows);
+          context.watch<SelectedSiteNotifier>().selectedSite,
+        ),
+        builder:
+            (
+              BuildContext context,
+              AsyncSnapshot<List<SystemCriticality>> snapshot,
+            ) {
+              List<TrinaRow> rows = [];
+              if (snapshot.hasData) {
+                if (snapshot.data!.isNotEmpty) {
+                  debugPrint('Reloading Grid');
+                  for (var row in snapshot.data!) {
+                    rows.add(
+                      TrinaRow(
+                        cells: {
+                          'id': TrinaCell(value: row.id),
+                          'line': TrinaCell(value: row.line),
+                          'site': TrinaCell(value: row.siteid ?? 'All'),
+                          'description': TrinaCell(value: row.description),
+                          'safety': TrinaCell(value: row.safety),
+                          'regulatory': TrinaCell(value: row.regulatory),
+                          'economic': TrinaCell(value: row.economic),
+                          'throughput': TrinaCell(value: row.throughput),
+                          'quality': TrinaCell(value: row.quality),
+                          'score': TrinaCell(value: row.score),
+                          'delete': TrinaCell(value: ''),
+                        },
+                      ),
+                    );
+                    stateManager.removeAllRows();
+                    stateManager.appendRows(rows);
+                  }
+                }
+              } else if (snapshot.hasError) {
+                rows.add(
+                  TrinaRow(
+                    cells: {
+                      'id': TrinaCell(value: 0),
+                      'line': TrinaCell(value: 'C'),
+                      'site': TrinaCell(value: 'All'),
+                      'description': TrinaCell(value: snapshot.error),
+                      'safety': TrinaCell(value: 0),
+                      'regulatory': TrinaCell(value: 0),
+                      'economic': TrinaCell(value: 0),
+                      'throughput': TrinaCell(value: 0),
+                      'quality': TrinaCell(value: 0),
+                      'score': TrinaCell(value: 0),
+                      'delete': TrinaCell(value: ''),
+                    },
+                  ),
+                );
+              } else {
+                rows.add(
+                  TrinaRow(
+                    cells: {
+                      'id': TrinaCell(value: 0),
+                      'line': TrinaCell(value: 'C'),
+                      'site': TrinaCell(value: 'All'),
+                      'description': TrinaCell(value: 'No Site Selected'),
+                      'safety': TrinaCell(value: 0),
+                      'regulatory': TrinaCell(value: 0),
+                      'economic': TrinaCell(value: 0),
+                      'throughput': TrinaCell(value: 0),
+                      'quality': TrinaCell(value: 0),
+                      'score': TrinaCell(value: 0),
+                      'delete': TrinaCell(value: ''),
+                    },
+                  ),
+                );
               }
-            }
-          } else if (snapshot.hasError) {
-            rows.add(TrinaRow(cells: {
-              'id': TrinaCell(value: 0),
-              'line': TrinaCell(value: 'C'),
-              'site': TrinaCell(value: 'All'),
-              'description': TrinaCell(value: snapshot.error),
-              'safety': TrinaCell(value: 0),
-              'regulatory': TrinaCell(value: 0),
-              'economic': TrinaCell(value: 0),
-              'throughput': TrinaCell(value: 0),
-              'quality': TrinaCell(value: 0),
-              'score': TrinaCell(value: 0),
-              'delete': TrinaCell(value: ''),
-            }));
-          } else {
-            rows.add(TrinaRow(cells: {
-              'id': TrinaCell(value: 0),
-              'line': TrinaCell(value: 'C'),
-              'site': TrinaCell(value: 'All'),
-              'description': TrinaCell(value: 'No Site Selected'),
-              'safety': TrinaCell(value: 0),
-              'regulatory': TrinaCell(value: 0),
-              'economic': TrinaCell(value: 0),
-              'throughput': TrinaCell(value: 0),
-              'quality': TrinaCell(value: 0),
-              'score': TrinaCell(value: 0),
-              'delete': TrinaCell(value: ''),
-            }));
-          }
-          return TrinaGrid(
-            columns: columns,
-            rows: rows,
-            configuration: TrinaGridConfiguration(
-              shortcut: TrinaGridShortcut(actions: {
-                ...TrinaGridShortcut.defaultActions,
-                // + / - keys should increase / decrease values
-                LogicalKeySet(LogicalKeyboardKey.add): CustomAddKeyAction(),
-                LogicalKeySet(LogicalKeyboardKey.numpadAdd):
-                    CustomAddKeyAction(),
-                LogicalKeySet(LogicalKeyboardKey.minus): CustomMinusKeyAction(),
-                LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
-                    CustomMinusKeyAction(),
-              }),
-              style: context.watch<ThemeManager>().theme == ThemeMode.dark
-                  ? const TrinaGridStyleConfig.dark()
-                  : const TrinaGridStyleConfig(),
-            ),
-            onChanged: (TrinaGridOnChangedEvent event) async {
-              // score should auto calcualte when values change
-              event.row.cells['score']!.value = sqrt(
-                  (event.row.cells['safety']?.value *
-                              event.row.cells['safety']?.value +
-                          event.row.cells['regulatory']?.value *
-                              event.row.cells['regulatory']?.value +
-                          event.row.cells['economic']?.value *
-                              event.row.cells['economic']?.value +
-                          event.row.cells['throughput']?.value *
-                              event.row.cells['throughput']?.value +
-                          event.row.cells['quality']?.value *
-                              event.row.cells['quality']?.value) /
-                      5);
-              updateSystem(event.row)
-                  .then((value) => event.row.cells['id']!.value = value);
-              context.read<SystemCriticalityNotifier>().systems =
-                  await database!.getSystemCriticalitiesFiltered(
-                      context.read<SelectedSiteNotifier>().selectedSite);
-              debugPrint('$event');
+              return TrinaGrid(
+                columns: columns,
+                rows: rows,
+                configuration: TrinaGridConfiguration(
+                  shortcut: TrinaGridShortcut(
+                    actions: {
+                      ...TrinaGridShortcut.defaultActions,
+                      // + / - keys should increase / decrease values
+                      LogicalKeySet(LogicalKeyboardKey.add):
+                          CustomAddKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.numpadAdd):
+                          CustomAddKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.minus):
+                          CustomMinusKeyAction(),
+                      LogicalKeySet(LogicalKeyboardKey.numpadSubtract):
+                          CustomMinusKeyAction(),
+                    },
+                  ),
+                  style: context.watch<ThemeManager>().theme == ThemeMode.dark
+                      ? const TrinaGridStyleConfig.dark()
+                      : const TrinaGridStyleConfig(),
+                ),
+                onChanged: (TrinaGridOnChangedEvent event) async {
+                  // score should auto calcualte when values change
+                  event.row.cells['score']!.value = sqrt(
+                    (event.row.cells['safety']?.value *
+                                event.row.cells['safety']?.value +
+                            event.row.cells['regulatory']?.value *
+                                event.row.cells['regulatory']?.value +
+                            event.row.cells['economic']?.value *
+                                event.row.cells['economic']?.value +
+                            event.row.cells['throughput']?.value *
+                                event.row.cells['throughput']?.value +
+                            event.row.cells['quality']?.value *
+                                event.row.cells['quality']?.value) /
+                        5,
+                  );
+                  updateSystem(
+                    event.row,
+                  ).then((value) => event.row.cells['id']!.value = value);
+                  context
+                      .read<SystemCriticalityNotifier>()
+                      .systems = await database!.getSystemCriticalitiesFiltered(
+                    context.read<SelectedSiteNotifier>().selectedSite,
+                  );
+                  debugPrint('$event');
+                },
+                onLoaded: (TrinaGridOnLoadedEvent event) {
+                  event.stateManager.setSelectingMode(
+                    TrinaGridSelectingMode.cell,
+                  );
+                  stateManager = event.stateManager;
+                  context.read<SystemCriticalityNotifier>().stateManager =
+                      stateManager;
+                },
+              );
             },
-            onLoaded: (TrinaGridOnLoadedEvent event) {
-              event.stateManager.setSelectingMode(TrinaGridSelectingMode.cell);
-              stateManager = event.stateManager;
-              context.read<SystemCriticalityNotifier>().stateManager =
-                  stateManager;
-            },
-          );
-        },
       ),
     );
   }
@@ -463,8 +493,10 @@ Future<int> updateSystem(TrinaRow row) async {
   );
 
   final rows = await database!.updateAssetsRelatedSystem(id);
-  toast(navigatorKey.currentContext!,
-      'Updated $rows assets assigned to ${row.cells['description']!.value}');
+  toast(
+    navigatorKey.currentContext!,
+    'Updated $rows assets assigned to ${row.cells['description']!.value}',
+  );
   return id;
 }
 
@@ -490,7 +522,9 @@ class CustomAddKeyAction extends TrinaGridShortcutAction {
       return;
     }
     stateManager.changeCellValue(
-        stateManager.currentCell!, stateManager.currentCell!.value + 1);
+      stateManager.currentCell!,
+      stateManager.currentCell!.value + 1,
+    );
   }
 }
 
@@ -512,7 +546,9 @@ class CustomMinusKeyAction extends TrinaGridShortcutAction {
       return;
     }
     stateManager.changeCellValue(
-        stateManager.currentCell!, stateManager.currentCell!.value - 1);
+      stateManager.currentCell!,
+      stateManager.currentCell!.value - 1,
+    );
   }
 }
 
@@ -530,101 +566,106 @@ class _NewSystemFormState extends State<NewSystemForm> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        title: const Text('Add New System'),
-        content: SizedBox(
-          height: 400,
-          width: 400,
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DropdownButtonFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'Production Line'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select a Production Line';
-                    }
-                    return null;
-                  },
-                  initialValue: selectedSystem,
-                  items: productionLines.keys
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(productionLines[value] ?? ''));
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedSystem = newValue!;
-                    });
-                  },
-                ),
-                TextFormField(
-                  controller: descriptionTextController,
-                  decoration: const InputDecoration(labelText: 'System Name'),
-                  // The validator receives the text that the user has entered.
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a system name';
-                    }
-                    return null;
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      // Validate returns true if the form is valid, or false otherwise.
-                      if (_formKey.currentState!.validate()) {
-                        // If the form is valid, display a snackbar. In the real world,
-                        // you'd often call a server or save the information in a database.
-                        final stateManager = context
-                            .read<SystemCriticalityNotifier>()
-                            .stateManager;
-                        for (var row in stateManager!.iterateAllRow) {
-                          if (row.cells['description']!.value ==
-                              descriptionTextController.text) {
-                            ScaffoldMessenger.of(navigatorKey.currentContext!)
-                                .showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    '"${descriptionTextController.text}" already exists'),
-                                duration: const Duration(seconds: 10),
+      title: const Text('Add New System'),
+      content: SizedBox(
+        height: 400,
+        width: 400,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DropdownButtonFormField(
+                decoration: const InputDecoration(labelText: 'Production Line'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a Production Line';
+                  }
+                  return null;
+                },
+                initialValue: selectedSystem,
+                items: productionLines.keys.map<DropdownMenuItem<String>>((
+                  String value,
+                ) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(productionLines[value] ?? ''),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedSystem = newValue!;
+                  });
+                },
+              ),
+              TextFormField(
+                controller: descriptionTextController,
+                decoration: const InputDecoration(labelText: 'System Name'),
+                // The validator receives the text that the user has entered.
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a system name';
+                  }
+                  return null;
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Validate returns true if the form is valid, or false otherwise.
+                    if (_formKey.currentState!.validate()) {
+                      // If the form is valid, display a snackbar. In the real world,
+                      // you'd often call a server or save the information in a database.
+                      final stateManager = context
+                          .read<SystemCriticalityNotifier>()
+                          .stateManager;
+                      for (var row in stateManager!.iterateAllRow) {
+                        if (row.cells['description']!.value ==
+                            descriptionTextController.text) {
+                          ScaffoldMessenger.of(
+                            navigatorKey.currentContext!,
+                          ).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '"${descriptionTextController.text}" already exists',
                               ),
-                            );
-                            Navigator.of(navigatorKey.currentContext!).pop();
-                            return;
-                          }
+                              duration: const Duration(seconds: 10),
+                            ),
+                          );
+                          Navigator.of(navigatorKey.currentContext!).pop();
+                          return;
                         }
-                        final row = await database!.addSystemCriticalitys(
-                            descriptionTextController.text,
-                            selectedSystem,
-                            context.read<SelectedSiteNotifier>().selectedSite);
-                        final newRow = stateManager.getNewRow();
-                        newRow.cells['id'] = TrinaCell(value: row.id);
-                        newRow.cells['line']!.value = row.line;
-                        newRow.cells['site']!.value = navigatorKey
-                            .currentContext!
-                            .read<SelectedSiteNotifier>()
-                            .selectedSite;
-                        newRow.cells['description']!.value = row.description;
-                        stateManager.appendRows([newRow]);
-                        ScaffoldMessenger.of(navigatorKey.currentContext!)
-                            .showSnackBar(
-                          const SnackBar(content: Text('Adding New System')),
-                        );
-                        Navigator.of(navigatorKey.currentContext!).pop();
                       }
-                    },
-                    child: const Text('Submit'),
-                  ),
+                      final row = await database!.addSystemCriticalitys(
+                        descriptionTextController.text,
+                        selectedSystem,
+                        context.read<SelectedSiteNotifier>().selectedSite,
+                      );
+                      final newRow = stateManager.getNewRow();
+                      newRow.cells['id'] = TrinaCell(value: row.id);
+                      newRow.cells['line']!.value = row.line;
+                      newRow.cells['site']!.value = navigatorKey.currentContext!
+                          .read<SelectedSiteNotifier>()
+                          .selectedSite;
+                      newRow.cells['description']!.value = row.description;
+                      stateManager.appendRows([newRow]);
+                      ScaffoldMessenger.of(
+                        navigatorKey.currentContext!,
+                      ).showSnackBar(
+                        const SnackBar(content: Text('Adding New System')),
+                      );
+                      Navigator.of(navigatorKey.currentContext!).pop();
+                    }
+                  },
+                  child: const Text('Submit'),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 
@@ -641,20 +682,18 @@ class _SystemDeleteIconState extends State<SystemDeleteIcon> {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(
-        Icons.delete,
-        color: Colors.red,
-      ),
+      icon: const Icon(Icons.delete, color: Colors.red),
       onPressed: () async {
         final id = widget.rendererContext.row.cells['id']!.value;
         try {
           await database!.deleteSystemCriticalitys(id);
-          widget.rendererContext.stateManager
-              .removeRows([widget.rendererContext.row]);
+          widget.rendererContext.stateManager.removeRows([
+            widget.rendererContext.row,
+          ]);
         } catch (e) {
-          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-            SnackBar(content: Text(e.toString())),
-          );
+          ScaffoldMessenger.of(
+            navigatorKey.currentContext!,
+          ).showSnackBar(SnackBar(content: Text(e.toString())));
         }
       },
     );
@@ -684,8 +723,10 @@ class _SystemLoadingIndicatorState extends State<SystemLoadingIndicator> {
     return Text(message);
   }
 
-  Future<void> systemLoading(
-      {required String siteid, required String env}) async {
+  Future<void> systemLoading({
+    required String siteid,
+    required String env,
+  }) async {
     if (loading) {
       // dont load multiple times
       return;
@@ -698,11 +739,13 @@ class _SystemLoadingIndicatorState extends State<SystemLoadingIndicator> {
       message = 'Checking system information...';
     });
     var systems = await database!.getSystemCriticalitiesFiltered(
-        context.read<SelectedSiteNotifier>().selectedSite);
+      context.read<SelectedSiteNotifier>().selectedSite,
+    );
     if (systems.isEmpty) {
       if (mounted) {
-        await database!
-            .loadSystems(context.read<SelectedSiteNotifier>().selectedSite);
+        await database!.loadSystems(
+          context.read<SelectedSiteNotifier>().selectedSite,
+        );
       }
     }
     if (!mounted) {
