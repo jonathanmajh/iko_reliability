@@ -105,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.7"
+  build_cli_annotations:
+    dependency: transitive
+    description:
+      name: build_cli_annotations
+      sha256: e563c2e01de8974566a1998410d3f6f03521788160a02503b0b1f1a46c7b3d95
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
   build_config:
     dependency: transitive
     description:
@@ -189,10 +197,10 @@ packages:
     dependency: transitive
     description:
       name: code_assets
-      sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
+      sha256: "83ccdaa064c980b5596c35dd64a8d3ecc68620174ab9b90b6343b753aa721687"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "1.0.0"
   code_builder:
     dependency: transitive
     description:
@@ -454,6 +462,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.35"
+  flutter_rust_bridge:
+    dependency: transitive
+    description:
+      name: flutter_rust_bridge
+      sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.11.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -500,10 +516,10 @@ packages:
     dependency: transitive
     description:
       name: hooks
-      sha256: "9a62a50b50b769a737bc0a8ff381f333529df3ab746b2f6b02e83760231455ba"
+      sha256: "025f060e86d2d4c3c47b56e33caf7f93bf9283340f26d23424ebcfccf34f621e"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "1.0.3"
   hotreloader:
     dependency: transitive
     description:
@@ -512,14 +528,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.4.0"
-  html_unescape:
-    dependency: transitive
-    description:
-      name: html_unescape
-      sha256: "15362d7a18f19d7b742ef8dcb811f5fd2a2df98db9f80ea393c075189e0b61e3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   http:
     dependency: "direct main"
     description:
@@ -584,14 +592,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0"
-  jinja:
-    dependency: transitive
-    description:
-      name: jinja
-      sha256: "065f662e534335f5262d73dd377e6e57d799261ac9abd9de15f7efe59aff2f8c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.6"
   jni:
     dependency: transitive
     description:
@@ -724,10 +724,18 @@ packages:
     dependency: transitive
     description:
       name: native_toolchain_c
-      sha256: f9c168717100ae6d9fee9ffb0be379bf1f8b26b0f6bcbd4fdddcd931993a6a72
+      sha256: "6ba77bb18063eebe9de401f5e6437e95e1438af0a87a3a39084fbd37c90df572"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.2"
+    version: "0.17.6"
+  native_toolchain_rust:
+    dependency: transitive
+    description:
+      name: native_toolchain_rust
+      sha256: "26d4dcae954328af4ebfa8fc56cca0bf74b9ae8b4a6132de5da2071ac3d237b3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
   nested:
     dependency: transitive
     description:
@@ -740,10 +748,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: b7fb95a6d9a4f009edd63dc5ac69f07420b23a16161c6dd8660290b59c602e8e
+      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
       url: "https://pub.dev"
     source: hosted
-    version: "9.5.0"
+    version: "9.3.0"
   package_config:
     dependency: transitive
     description:
@@ -1093,15 +1101,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.45.0"
-  squirrel:
-    dependency: "direct dev"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: bf6cfced6fb3fdc1aa3c6a4e49efbd9a1e7e770f
-      url: "https://github.com/jonathanmajh/squirrel-flutter"
-    source: git
-    version: "0.2.1"
   stack_trace:
     dependency: transitive
     description:
@@ -1182,14 +1181,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.11"
-  textwrap:
+  toml:
     dependency: transitive
     description:
-      name: textwrap
-      sha256: "7e79503c220a9c772d370075e0d4117204546ed4c6479ab1c9ee4d4c27add606"
+      name: toml
+      sha256: "35a35f782228656a2af31e8c73d1353cc4ef3d683fd68af1111b44631879c05e"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "0.18.0"
   trina_grid:
     dependency: "direct main"
     description:
@@ -1286,6 +1285,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  velopack_flutter:
+    dependency: "direct main"
+    description:
+      name: velopack_flutter
+      sha256: b23179aa33352f263b5d77b026caf2c3506b29a6c02a56f405ffd6c0c0e5c152
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3"
   vm_service:
     dependency: transitive
     description:

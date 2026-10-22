@@ -7,6 +7,12 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   publish_on_win:
     runs-on: windows-latest
@@ -15,6 +21,10 @@ jobs:
     - uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
+    - name: install Rust (required to build velopack_flutter native assets)
+      uses: dtolnay/rust-toolchain@stable
+    - name: install vpk (Velopack CLI)
+      run: dotnet tool install -g vpk
     - name: building for windows
       run: flutter build windows
     - name: verify sqlite3 is bundled (prevents broken installers)
@@ -31,15 +41,30 @@ jobs:
           throw "sqlite3.dll is missing from the release bundle; the app would crash on startup with 'Couldn't resolve native function sqlite3_initialize' (see https://github.com/simolus3/sqlite3.dart/issues/353)"
         }
         Write-Host "sqlite3.dll present in bundle: $dll"
-    - name: packaging in squirrel
-      run: flutter pub run squirrel:installer_windows
-    - name: get version name
+    - name: download previous velopack release (source for delta packages)
+      run: vpk download github --repoUrl https://github.com/jonathanmajh/iko_reliability --token $env:GITHUB_TOKEN
+      # on the FIRST velopack release there is nothing to chain deltas from
+      # and the command aborts, so a failure here must not block the release
+      continue-on-error: true
+    - name: build Velopack release
       run: |
-        $env:VERSION=$env:GITHUB_REF_NAME.substring(1)
-        echo Version: $env:VERSION
-
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with: 
-        files: |
-          releases/*
+        $version = $env:GITHUB_REF_NAME.substring(1)
+        Write-Host Version: $version
+        vpk pack `
+          --packId iko_reliability_flutter `
+          --packVersion $version `
+          --packDir build/windows/x64/runner/Release `
+          --mainExe iko_reliability_flutter.exe `
+          --packTitle "IKO Reliability PM Tool" `
+          --packAuthors Jonathan `
+          --icon iko_logo.ico `
+          --splashImage iko_logo.gif `
+          --runtime win-x64
+    - name: publish release to GitHub Releases
+      run: |
+        vpk upload github `
+          --repoUrl https://github.com/jonathanmajh/iko_reliability `
+          --publish `
+          --releaseName "IKO Reliability PM Tool $env:GITHUB_REF_NAME" `
+          --tag $env:GITHUB_REF_NAME `
+          --token $env:GITHUB_TOKEN

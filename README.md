@@ -24,7 +24,35 @@ flutter pub get
 flutter upgrade
 
 flutter build windows
-dart run squirrel:installer_windows
 
-git tag -a v1.4.10 -m "."
-git push --follow-tags
+## Releases / updates (Velopack)
+
+Releases are built with [Velopack](https://velopack.io/) and published to this
+repo's GitHub Releases (no app store involved). The app auto-updates in-place
+from the newest GitHub release (incl. delta updates); users of the previous
+squirrel-based installers migrate by running the newest `*-Setup.exe` once.
+
+Local release build:
+
+    flutter build windows
+
+    # one-time tool setup
+    dotnet tool install -g vpk
+    # rust is required to build the velopack_flutter native assets:
+    # https://rustup.rs/
+
+    # regenerate the release artifacts from the newest published release
+    # (skip the download step for the very first velopack release)
+    vpk download github --repoUrl https://github.com/jonathanmajh/iko_reliability
+
+    vpk pack --packId iko_reliability_flutter --packVersion <version> `
+        --packDir build/windows/x64/runner/Release `
+        --mainExe iko_reliability_flutter.exe `
+        --packTitle "IKO Reliability PM Tool" --packAuthors Jonathan `
+        --icon iko_logo.ico --splashImage iko_logo.gif
+
+Artifacts land in ./Releases (Setup.exe, portable zip, nupkg packages and
+releases.win.json).
+
+CI (`.github/workflows/release.yml`) does all of this automatically on tag
+pushes: `git tag -a v1.4.10 -m "."` then `git push --follow-tags`.
