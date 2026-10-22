@@ -40,6 +40,12 @@ dependencies:
     shared_preferences: ^2.5.3
     pdf_document: ^3.2.0
     pdf: ^3.11.0
+    # TODO(printing-plugin): watch upstream DavBfr/dart_pdf PR #1985
+    # (https://github.com/DavBfr/dart_pdf/pull/1985, "print on a worker
+    # thread", fixes issue #1982). Once merged + released, bump this
+    # dependency — upgrading removes the post-confirm print freeze on
+    # Windows — and then delete the warning in wo_print_page.dart
+    # (_printSelected TODO).
     printing: ^5.15.1
     excel_plus: ^2.12.4
     velopack_flutter: ^0.3.3

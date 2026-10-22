@@ -96,6 +96,12 @@ class _WoPrintPageState extends State<WoPrintPage> {
 
   bool _loadingList = false;
   bool _generating = false;
+
+  /// True while a print pack PDF is being rendered/sent (infinite spinner
+  /// in the action bar). The system print dialog's send step still blocks
+  /// the window inside the printing plugin's Windows code, so the status
+  /// warns about that up front (see _printSelected).
+  bool _rendering = false;
   String _status = 'Ready';
 
   /// Bundled Roboto TTFs for the PDF (loaded once, cached). Null = the
@@ -425,10 +431,30 @@ class _WoPrintPageState extends State<WoPrintPage> {
   Future<void> _printSelected() async {
     final packets = await _generatePackets();
     if (packets == null || !mounted) return;
-    setState(() => _status = 'Rendering print pack PDF...');
+    setState(() {
+      _rendering = true;
+      _status = 'Rendering print pack PDF '
+          '(${packets.length} work order packet(s))...';
+    });
     try {
       final fonts = await _loadFonts();
-      final bytes = await buildWoBatchPdf(packets, fonts: fonts);
+      // render off the UI isolate: on the main thread the heavy layout
+      // pass would freeze the window (and any progress spinner with it)
+      final bytes = await buildWoBatchPdfIsolated(packets, fonts: fonts);
+      if (!mounted) return;
+      // TODO(printing-plugin): once the user confirms the print dialog, the
+      // printing plugin's Windows code spools the whole document
+      // synchronously on the platform (UI) thread (StartDoc, per-page
+      // FPDF_RenderPage, EndDoc), so the window cannot repaint and the
+      // status below does not visibly update until the job is sent (~20 s
+      // with big packs / slow drivers). Keep an eye on the upstream fix -
+      // https://github.com/DavBfr/dart_pdf/pull/1985 ("print on a worker
+      // thread", fixes DavBfr/dart_pdf#1982) - bump the `printing` version
+      // once it ships, then delete this warning status.
+      setState(() => _status =
+          'Print pack rendered - choose a printer and confirm. After '
+          'confirming, the job is sent to the printer and the window may '
+          'not respond while the job is submitted.');
       await Printing.layoutPdf(onLayout: (format) async => bytes);
       if (mounted) {
         setState(() => _status = 'Print dialog closed - '
@@ -436,6 +462,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
       }
     } catch (e) {
       if (mounted) setState(() => _status = 'Print failed: $e');
+    } finally {
+      if (mounted) setState(() => _rendering = false);
     }
   }
 
@@ -444,10 +472,16 @@ class _WoPrintPageState extends State<WoPrintPage> {
   Future<void> _savePdfs() async {
     final packets = await _generatePackets();
     if (packets == null || !mounted) return;
-    setState(() => _status = 'Rendering print pack PDF...');
+    setState(() {
+      _rendering = true;
+      _status = 'Rendering print pack PDF '
+          '(${packets.length} work order packet(s))...';
+    });
     try {
       final fonts = await _loadFonts();
-      final merged = await buildWoBatchPdf(packets, fonts: fonts);
+      // build all PDFs (merged + one per packet) in one background-isolate
+      // run, so the heavy layouts never block the window
+      final kit = await buildWoPdfKitIsolated(packets, fonts: fonts);
       final dir = await FilePicker.getDirectoryPath(
           dialogTitle: 'Choose a folder for the PDF files');
       if (dir == null || !mounted) {
@@ -456,12 +490,11 @@ class _WoPrintPageState extends State<WoPrintPage> {
       }
       setState(() => _status = 'Writing PDF files...');
       final ts = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      await File('$dir\\WO_Print_Pack_$ts.pdf').writeAsBytes(merged);
+      await File('$dir\\WO_Print_Pack_$ts.pdf').writeAsBytes(kit.merged);
       var written = 1;
-      for (final packet in packets) {
-        final wonum = '${packet.header['wonum']}';
-        final bytes = await buildWoPacketPdf(packet, fonts: fonts);
-        await File('$dir\\$wonum.pdf').writeAsBytes(bytes);
+      for (var i = 0; i < packets.length; i++) {
+        final wonum = '${packets[i].header['wonum']}';
+        await File('$dir\\$wonum.pdf').writeAsBytes(kit.singles[i]);
         written++;
       }
       final opened = await _openWithDefaultHandler(dir);
@@ -471,6 +504,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
       }
     } catch (e) {
       setState(() => _status = 'Save failed: $e');
+    } finally {
+      if (mounted) setState(() => _rendering = false);
     }
   }
 
@@ -493,10 +528,14 @@ class _WoPrintPageState extends State<WoPrintPage> {
   Future<void> _saveSinglePdf() async {
     final packets = await _generatePackets();
     if (packets == null || !mounted) return;
-    setState(() => _status = 'Rendering print pack PDF...');
+    setState(() {
+      _rendering = true;
+      _status = 'Rendering print pack PDF '
+          '(${packets.length} work order packet(s))...';
+    });
     try {
       final fonts = await _loadFonts();
-      final bytes = await buildWoBatchPdf(packets, fonts: fonts);
+      final bytes = await buildWoBatchPdfIsolated(packets, fonts: fonts);
       final ts = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       final path = await FilePicker.saveFile(
         dialogTitle: 'Save all selected work orders as one PDF',
@@ -519,6 +558,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
       }
     } catch (e) {
       setState(() => _status = 'Save failed: $e');
+    } finally {
+      if (mounted) setState(() => _rendering = false);
     }
   }
 
@@ -877,30 +918,31 @@ class _WoPrintPageState extends State<WoPrintPage> {
   }
 
   Widget _buildActionBar() {
+    final busy = _generating || _rendering;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           FilledButton.icon(
-            onPressed: _generating ? null : _printSelected,
+            onPressed: busy ? null : _printSelected,
             icon: const Icon(Icons.print),
             label: const Text('Print selected'),
           ),
           const SizedBox(width: 12),
           OutlinedButton.icon(
-            onPressed: _generating ? null : _savePdfs,
+            onPressed: busy ? null : _savePdfs,
             icon: const Icon(Icons.save),
             label: const Text('Save As PDF (Individual Files)'),
           ),
           const SizedBox(width: 12),
           OutlinedButton.icon(
-            onPressed: _generating ? null : _saveSinglePdf,
+            onPressed: busy ? null : _saveSinglePdf,
             icon: const Icon(Icons.picture_as_pdf),
             label: const Text('Save As PDF (One Package)'),
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: _generating
+            child: busy
                 ? Row(
                     children: [
                       const SizedBox(
