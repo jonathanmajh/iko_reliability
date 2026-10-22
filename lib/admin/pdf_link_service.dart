@@ -26,9 +26,16 @@ class PdfLinkToolService {
       case PdfLinkReplacementMode.replaceAll:
         return input.replaceAll(pattern, replacement);
       case PdfLinkReplacementMode.prefix:
-        return input.replaceFirstMapped(pattern, (m) => '$replacement${m[0]}');
+        // 'Add prefix': replace the FIRST match with the replacement, e.g.
+        // find 'example.com' -> replacement 'base.example.com' turns
+        // 'https://example.com/path' into 'https://base.example.com/path'.
+        return input.replaceFirst(pattern, replacement);
       case PdfLinkReplacementMode.suffix:
-        return input.replaceFirstMapped(pattern, (m) => '${m[0]}$replacement');
+        // 'Add suffix': replace the LAST match with the replacement.
+        final matches = pattern.allMatches(input).toList();
+        if (matches.isEmpty) return input;
+        final last = matches.last;
+        return input.replaceRange(last.start, last.end, replacement);
     }
   }
 
