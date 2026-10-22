@@ -184,8 +184,8 @@ class _WoPrintPageState extends State<WoPrintPage> {
 
   Future<void> _loadReleased() async {
     if (!_siteValid) {
-      setState(
-          () => _status = 'Select a site on the home page first (not "All").');
+      setState(() => _status =
+          'Select your site from the end drawer. (Top right gear icon)');
       return;
     }
     setState(() {
@@ -326,18 +326,17 @@ class _WoPrintPageState extends State<WoPrintPage> {
     try {
       final found = await WoPrintFetcher(env: _env, site: _site)
           .fetchAssignmentLaborcodes(
-            missing,
-            onStatus: (s) {
-              if (mounted) setState(() => _status = s);
-            },
-          );
+        missing,
+        onStatus: (s) {
+          if (mounted) setState(() => _status = s);
+        },
+      );
       if (!mounted) return;
       setState(() {
         for (final w in missing) {
           _laborByWonum[w] = found[w] ?? <String>{};
         }
-        _status =
-            'Assigned labor codes loaded for '
+        _status = 'Assigned labor codes loaded for '
             '${missing.length} work order(s).';
       });
     } on WoPrintFetchException catch (e) {
@@ -451,10 +450,10 @@ class _WoPrintPageState extends State<WoPrintPage> {
       // https://github.com/DavBfr/dart_pdf/pull/1985 ("print on a worker
       // thread", fixes DavBfr/dart_pdf#1982) - bump the `printing` version
       // once it ships, then delete this warning status.
-      setState(() => _status =
-          'Print pack rendered - choose a printer and confirm. After '
-          'confirming, the job is sent to the printer and the window may '
-          'not respond while the job is submitted.');
+      setState(() =>
+          _status = 'Print package ready - choose a printer and confirm. After '
+              'confirming, the job is sent to the printer and the window may '
+              'not respond while the job is submitted.');
       await Printing.layoutPdf(onLayout: (format) async => bytes);
       if (mounted) {
         setState(() => _status = 'Print dialog closed - '
@@ -760,14 +759,13 @@ class _WoPrintPageState extends State<WoPrintPage> {
         codes.isEmpty
             ? 'Assigned labor: any'
             : codes.length == 1
-            ? 'Assigned labor: ${codes.first}'
-            : 'Assigned labor: ${codes.first} +${codes.length - 1}',
+                ? 'Assigned labor: ${codes.first}'
+                : 'Assigned labor: ${codes.first} +${codes.length - 1}',
       ),
       selected: codes.isNotEmpty,
       onSelected: _laborLoading ? null : (_) => _openLaborFilter(),
-      onDeleted: codes.isEmpty
-          ? null
-          : () => setState(() => _assignedLabors.clear()),
+      onDeleted:
+          codes.isEmpty ? null : () => setState(() => _assignedLabors.clear()),
       deleteIcon: const Icon(Icons.close, size: 16),
     );
   }
@@ -923,10 +921,20 @@ class _WoPrintPageState extends State<WoPrintPage> {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          FilledButton.icon(
-            onPressed: busy ? null : _printSelected,
-            icon: const Icon(Icons.print),
-            label: const Text('Print selected'),
+          // Printing to a PDF destination (Microsoft Print to PDF / XPS /
+          // "Print to file") submits a page-by-page GDI job in the printing
+          // plugin and is slow for big packs — steer users to the in-app
+          // Save As PDF buttons, which write files directly.
+          Tooltip(
+            waitDuration: const Duration(milliseconds: 500),
+            preferBelow: false,
+            message: 'Use Save as PDF, if a PDF file is desired.'
+                'Print to PDF is slow and freezes the window',
+            child: FilledButton.icon(
+              onPressed: busy ? null : _printSelected,
+              icon: const Icon(Icons.print),
+              label: const Text('Print selected'),
+            ),
           ),
           const SizedBox(width: 12),
           OutlinedButton.icon(
