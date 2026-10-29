@@ -105,7 +105,26 @@ const workType = {
 
 /// Stopped/Running process condition (IKO_CONDITIONS) codes valid for PM
 /// job plans.
-const processConditions = ['CR01', 'CS01'];
+const processConditions = [
+  'CR01',
+  'CR02',
+  'CR03',
+  'CR04',
+  'CR05',
+  'CR06',
+  'CR07',
+  'CR10',
+  'CR11',
+  'CS01',
+  'CS02',
+  'CS03',
+  'CS10',
+  'CS11',
+  'CS12',
+  'CS97',
+  'CS98',
+  'CS99',
+];
 
 /// Contains asset work type information for different job plans.
 const assetWorkType = {

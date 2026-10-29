@@ -66,7 +66,26 @@ TemplateOptions templateOptions() {
   options.workTypes.addAll(workTypes);
   const crafts = {'E': 'ELECT: E', 'M': 'MECH-MW: M', 'O': 'PROD: O'};
   options.crafts.addAll(crafts);
-  const conditions = {'CR01': 'CR01 (Running)', 'CS01': 'CS01 (Stopped)'};
+  const conditions = {
+    'CR01': 'Running',
+    'CR02': 'Running - Thread-Up',
+    'CR03': 'Running - Full Speed / Full Load',
+    'CR04': 'Running - Full Tank',
+    'CR05': 'Running - No Air Consumption',
+    'CR06': 'Running - 1/2 Tank',
+    'CR07': 'Running - 1/4 Tank',
+    'CR10': 'Running - 3 Tab',
+    'CR11': 'Running - Laminate',
+    'CS01': 'Stopped',
+    'CS02': 'Stopped - Cooled Down',
+    'CS03': 'Stopped - Air Out / Drained',
+    'CS10': 'Stopped - 3 Tab',
+    'CS11': 'Stopped - Laminate',
+    'CS12': 'Stopped - All lines',
+    'CS97': 'Stopped - Weekly Shutdown',
+    'CS98': 'Stopped - Quarterly Shutdown',
+    'CS99': 'Stopped - Annual Shutdown',
+  };
   options.conditions.addAll(conditions);
   return options;
 }
