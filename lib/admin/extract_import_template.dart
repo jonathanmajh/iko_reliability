@@ -66,25 +66,27 @@ TemplateOptions templateOptions() {
   options.workTypes.addAll(workTypes);
   const crafts = {'E': 'ELECT: E', 'M': 'MECH-MW: M', 'O': 'PROD: O'};
   options.crafts.addAll(crafts);
+  // values must start with the 4-char condition code: parse_template takes
+  // the first 4 characters of the cell to recover the code for validation
   const conditions = {
-    'CR01': 'Running',
-    'CR02': 'Running - Thread-Up',
-    'CR03': 'Running - Full Speed / Full Load',
-    'CR04': 'Running - Full Tank',
-    'CR05': 'Running - No Air Consumption',
-    'CR06': 'Running - 1/2 Tank',
-    'CR07': 'Running - 1/4 Tank',
-    'CR10': 'Running - 3 Tab',
-    'CR11': 'Running - Laminate',
-    'CS01': 'Stopped',
-    'CS02': 'Stopped - Cooled Down',
-    'CS03': 'Stopped - Air Out / Drained',
-    'CS10': 'Stopped - 3 Tab',
-    'CS11': 'Stopped - Laminate',
-    'CS12': 'Stopped - All lines',
-    'CS97': 'Stopped - Weekly Shutdown',
-    'CS98': 'Stopped - Quarterly Shutdown',
-    'CS99': 'Stopped - Annual Shutdown',
+    'CR01': 'CR01 (Running)',
+    'CR02': 'CR02 (Running - Thread-Up)',
+    'CR03': 'CR03 (Running - Full Speed / Full Load)',
+    'CR04': 'CR04 (Running - Full Tank)',
+    'CR05': 'CR05 (Running - No Air Consumption)',
+    'CR06': 'CR06 (Running - 1/2 Tank)',
+    'CR07': 'CR07 (Running - 1/4 Tank)',
+    'CR10': 'CR10 (Running - 3 Tab)',
+    'CR11': 'CR11 (Running - Laminate)',
+    'CS01': 'CS01 (Stopped)',
+    'CS02': 'CS02 (Stopped - Cooled Down)',
+    'CS03': 'CS03 (Stopped - Air Out / Drained)',
+    'CS10': 'CS10 (Stopped - 3 Tab)',
+    'CS11': 'CS11 (Stopped - Laminate)',
+    'CS12': 'CS12 (Stopped - All lines)',
+    'CS97': 'CS97 (Stopped - Weekly Shutdown)',
+    'CS98': 'CS98 (Stopped - Quarterly Shutdown)',
+    'CS99': 'CS99 (Stopped - Annual Shutdown)',
   };
   options.conditions.addAll(conditions);
   return options;

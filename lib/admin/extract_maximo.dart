@@ -500,21 +500,45 @@ String? _freqUnitFromMaximo(String? frequnit) {
 ///
 /// The PM import template stores the meter 'inspect' value which is used to
 /// look up the meter in the local database when generating meter numbers.
-/// Maximo stores the generated number 'code counter' so the trailing digits
-/// are stripped and the local meter DB is queried for the inspect value.
+/// Maximo stores the meter name as `` `CODE` `` followed by the counter digits
+/// so the trailing counter digits are stripped and the local meter DB
+/// (MeterDBs) is queried for the inspect value.
+///
+/// Lookups are tried in order, returning the first hit's inspect value:
+/// 1. exact meter name,
+/// 2. all trailing digits stripped (covers 'ROLC01' -> 'ROLC'),
+/// 3. only the last two digits stripped (covers meter codes that themselves
+///    end in a digit, e.g. 'ROIC101' -> 'ROIC1'),
+/// 4. the meter inspect value (mirrors generateMeterNumber on upload).
+/// When nothing matches the raw Maximo meter name is returned unchanged.
 Future<String?> _meterInspectFromMaximo(String? metername) async {
   if (metername == null || metername.isEmpty) {
     return null;
   }
-  final code = metername.replaceFirst(RegExp(r'\d+$'), '');
+  final candidates = <String>[
+    metername,
+    metername.replaceFirst(RegExp(r'\d+$'), ''),
+  ];
+  // generateMeterNumber always appends a 2-digit counter ('01'...'xx')
+  if (metername.length > 2) {
+    candidates.add(metername.substring(0, metername.length - 2));
+  }
+  for (final code in candidates) {
+    try {
+      final meter = await database!.getMeter(code);
+      return meter.inspect;
+    } catch (e) {
+      debugPrint('meter lookup failed for $metername (as $code): $e');
+    }
+  }
   try {
-    final meter = await database!.getMeter(code);
+    final meter = await database!.getMeterByDescription(metername);
     return meter.inspect;
   } catch (e) {
-    debugPrint('meter lookup failed for $metername: $e');
-    // best effort: fall back to the meter code without counter digits
-    return code;
+    debugPrint('meter inspect lookup failed for $metername: $e');
   }
+  // best effort: keep the raw Maximo meter name for manual review
+  return metername;
 }
 
 /// Exports all extracted PMs as a brand-new PM request workbook generated

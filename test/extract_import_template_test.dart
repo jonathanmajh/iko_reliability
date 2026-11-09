@@ -11,12 +11,33 @@ import 'package:iko_reliability_flutter/admin/parse_template.dart';
 import 'package:iko_reliability_flutter/bin/consts.dart' show FileDetails;
 
 void main() async {
-  final inspects = {'LNWK': 'Line Walk', 'LUBP': 'Lubrication Points'};
+  // mirrors the MeterDBs lookup chain in extract_maximo:
+  // exact name -> all trailing digits stripped -> last two digits stripped
+  // -> keep the raw Maximo meter name when nothing is found
+  final inspects = {
+    'LNWK': 'Line Walk',
+    'LUBP': 'Lubrication Points',
+    // meter codes that themselves end in a digit ('ROIC1' + counter '01')
+    'ROIC1': 'Roller(Idler, Conveyor)',
+  };
   Future<String?> resolveMeter(String? metername) async {
     if (metername == null || metername.isEmpty) {
       return null;
     }
-    return inspects[metername.replaceAll(RegExp(r'\d+$'), '')];
+    final candidates = <String>[
+      metername,
+      metername.replaceAll(RegExp(r'\d+$'), ''),
+    ];
+    if (metername.length > 2) {
+      candidates.add(metername.substring(0, metername.length - 2));
+    }
+    for (final code in candidates) {
+      final inspect = inspects[code];
+      if (inspect != null) {
+        return inspect;
+      }
+    }
+    return metername;
   }
 
   // PM 1 mirrors the real TEST2 extraction for A0001D1INRE (AA): route with
@@ -60,6 +81,7 @@ void main() async {
       {
         'jptask': 30,
         'description': 'Completion',
+        'metername': 'ZZZZ9',
         'description_longdescription': '<div>Wrap up</div>',
       },
     ]
@@ -92,7 +114,7 @@ void main() async {
           {
             'jptask': 10,
             'description': 'Inspect Line Walk',
-            'metername': 'LNWK01',
+            'metername': 'ROIC101',
             'description_longdescription':
                 '<div>Inspect line walk carefully</div>',
           },
@@ -153,7 +175,36 @@ void main() async {
         ),
     };
 
-  final bytes = await buildImportTemplateWorkbook([pm1, pm2], resolveMeter);
+  // PM 3: a Stopped condition plus a full work type must round-trip as their
+  // codes (the condition cell option string carries the code as its prefix).
+  final pm3 = ExtractStore(siteid: 'AA', pmnum: 'B0001')
+    ..pm = {
+      'pmnum': 'B0001',
+      'siteid': 'AA',
+      'assetnum': 'B0001',
+      'nextdate': '2026-08-01T00:00:00-04:00',
+      'frequnit': 'WEEKS',
+      'frequency': '2',
+      'description': 'Shutdown Inspection',
+    }
+    ..jobplan = {
+      'jpnum': 'AAB0001',
+      'iko_worktype': 'PPM',
+      'iko_conditions': 'CS01',
+    }
+    ..joblabors = [
+      {'craft': 'ELECT', 'quantity': 1, 'laborhrs': '0:30', 'laborcode': ''},
+    ]
+    ..jobtasks = <dynamic>[]
+    ..jobmaterials = <dynamic>[]
+    ..jobservices = <dynamic>[]
+    ..routeStops = <dynamic>[];
+
+  final bytes = await buildImportTemplateWorkbook([
+    pm1,
+    pm2,
+    pm3,
+  ], resolveMeter);
   final excel = Excel.decodeBytes(bytes);
 
   _expect(
@@ -290,6 +341,14 @@ void main() async {
   _expect(cell(18, 4) == 'C7145', 'PM1 stop task asset C7145');
   _expect(cell(18, 5) == 'Line Walk', 'PM1 stop meter mapped to inspect value');
   _expect(cell(19, 4) == 'H2125', 'PM1 stop task asset H2125');
+  _expect(
+    cell(19, 5) == 'Roller(Idler, Conveyor)',
+    'PM1 digit-suffix meter (ROIC1 + 01) maps to inspect value',
+  );
+  _expect(
+    cell(15, 5) == 'ZZZZ9',
+    'PM1 unknown meter keeps its raw Maximo name',
+  );
   _expect(cell(20, 0) == 'Materials (Mapics Number)', 'PM1 materials header');
   _expect(
     fill(20, 0) == hex(gray) && style(20, 0)?.isBold == false,
@@ -361,15 +420,15 @@ void main() async {
   }
 
   _expect(
-    occurrences('Materials (Mapics Number)', 0) == 2,
+    occurrences('Materials (Mapics Number)', 0) == 3,
     'exactly one materials header per PM',
   );
   _expect(
     occurrences('Task Route Assets (one per cell):', 3) == 2,
-    'exactly one route asset marker per PM',
+    'exactly one route asset marker per PM with route stops',
   );
   _expect(
-    occurrences('PM Options', 9) == 2,
+    occurrences('PM Options', 9) == 3,
     'exactly one PM Options note per PM',
   );
   _expect(
@@ -385,6 +444,7 @@ void main() async {
           as Map;
   final parsed1 = perPm[1] as ParsedTemplate;
   final parsed2 = perPm[2] as ParsedTemplate;
+  final parsed3 = perPm[3] as ParsedTemplate;
 
   _expect(parsed1.pmNumber == 'A0001D1INRE', 'parsed PM1 number');
   _expect(parsed1.siteId == 'AA', 'parsed PM1 site');
@@ -418,9 +478,15 @@ void main() async {
   );
   _expect(
     parsed1.tasks
-        .where((t) => t.assetNumber != null)
+        .where((t) => t.assetNumber == 'C7145')
         .every((t) => t.metername == 'Line Walk'),
-    'parsed PM1 stop task meters',
+    'parsed PM1 C7145 stop task meter',
+  );
+  _expect(
+    parsed1.tasks
+        .where((t) => t.assetNumber == 'H2125')
+        .every((t) => t.metername == 'Roller(Idler, Conveyor)'),
+    'parsed PM1 H2125 digit-suffix stop task meter',
   );
   _expect(
     parsed1.assets.toString() == '[C6105, C6115, C7145, H2125]',
@@ -482,6 +548,39 @@ void main() async {
         pm2Assets.where((a) => a == 'SC03').length == 2,
     'parsed PM2 assets from all stop task rows',
   );
+
+  // --- PM 3 block: condition/code round trip (label row 41, data row 42) ---
+  _expect(
+    cell(41, 0) == 'PM Asset/ Parent (Route)*:',
+    'PM3 label row at row 41',
+  );
+  _expect(cell(42, 0) == 'B0001', 'PM3 asset');
+  _expect(
+    cell(42, 7) == 'CS01 (Stopped)',
+    'PM3 condition option string starts with the code (CS01)',
+  );
+  _expect(
+    cell(42, 6) == 'PPM (Preventative Maintenance)',
+    'PM3 work type option string',
+  );
+  _expect(
+    cell(48, 0) == 'Materials (Mapics Number)',
+    'PM3 content: labour row then the section headers',
+  );
+
+  _expect(parsed3.pmNumber == 'B0001', 'parsed PM3 number');
+  _expect(parsed3.siteId == 'AA', 'parsed PM3 site');
+  _expect(parsed3.pmAsset == 'B0001', 'parsed PM3 asset');
+  _expect(
+    parsed3.workOrderType == 'PPM',
+    'parsed PM3 work type (code read from option string prefix)',
+  );
+  _expect(
+    parsed3.processCondition == 'CS01',
+    'parsed PM3 Stopped condition round-trips as CS01',
+  );
+  _expect(parsed3.frequency == 2, 'parsed PM3 frequency');
+  _expect(parsed3.frequencyUnit == 'W', 'parsed PM3 frequency unit');
 
   // ignore: avoid_print
   print('ALL CHECKS PASSED');
