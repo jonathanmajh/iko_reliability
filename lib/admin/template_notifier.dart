@@ -250,6 +250,7 @@ class TemplateNotifier extends ChangeNotifier {
     int template,
     String maximoServerSelected,
     bool includeFrequency,
+    bool useSuggestedName,
   ) async {
     final parsedTemplate = allTemplates[file]![template]!.parsedTemplate;
     parsedTemplate.routeCode = code;
@@ -260,6 +261,7 @@ class TemplateNotifier extends ChangeNotifier {
         parsedTemplate,
         maximoServerSelected,
         includeFrequency,
+        useSuggestedName,
       );
       setNameTemplate(file, template, value);
       final value2 = await generatePM(

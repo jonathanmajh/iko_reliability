@@ -566,6 +566,7 @@ Future<void> populateTemplateFromExtract(
   TemplateNotifier templateNotifier,
   String maximoServerSelected,
   bool includeFrequency,
+  bool useSuggestedName,
 ) async {
   final file = store.key;
   final nextDate = fieldOf(store.pm, 'nextdate') ?? '';
@@ -677,6 +678,7 @@ Future<void> populateTemplateFromExtract(
       templateNotifier.getParsedTemplate(file, 1),
       maximoServerSelected,
       includeFrequency,
+      useSuggestedName,
     );
     templateNotifier.setNameTemplate(file, 1, name);
     final pm = await generatePM(

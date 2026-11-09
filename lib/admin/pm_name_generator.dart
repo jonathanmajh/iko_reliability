@@ -33,10 +33,15 @@ class PMName {
 }
 
 ///Auto-generate name for PM
+///
+///When [useSuggestedName] is set and the template has a non-empty suggested
+///PM name, the suggested name is used for the PM (and route) name instead of
+///the auto-generated one.
 Future<PMName> generateName(
   ParsedTemplate pmdetails,
   String maximoServerSelected,
   bool includeFrequency,
+  bool useSuggestedName,
 ) async {
   // validate the template's dropdown fields against the value lists: a
   // blank field (unfilled dropdown, e.g. where the extracted PM had no Work
@@ -141,9 +146,18 @@ Future<PMName> generateName(
 
   //consider suggested PM name of null to be ''
   String pmNameSuggested = pmdetails.suggestedPmName ?? '';
+  // default the PM name to the suggested name when enabled and one exists,
+  // mirroring the "Use suggested name" action in pm_details which also
+  // applies the suggested name to the route description
+  if (useSuggestedName && pmNameSuggested.isNotEmpty) {
+    name = pmNameSuggested;
+    if (routeName != null) {
+      routeName = pmNameSuggested;
+    }
+  }
   return PMName(
     pmNumber: number,
-    pmName: name, //use auto-generated PM name by default
+    pmName: name, //auto-generated PM name unless the suggested name is used
     pmNameAuto: name,
     pmNameSuggested: pmNameSuggested,
     jpNumber: '${pmdetails.siteId!}$number',

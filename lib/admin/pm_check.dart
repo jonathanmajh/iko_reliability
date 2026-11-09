@@ -501,6 +501,11 @@ class _PmCheckPageState extends State<PmCheckPage> {
               ApplicationSetting.includeFrequencyInDescriptions,
             )
             as bool?;
+    final useSuggestedName =
+        context.read<SettingsNotifier>().getSetting(
+              ApplicationSetting.useSuggestedPmName,
+            )
+            as bool?;
     setState(() {
       templates = files;
     });
@@ -517,6 +522,7 @@ class _PmCheckPageState extends State<PmCheckPage> {
         files,
         maximo.maximoServerSelected,
         includeFrequency ?? true,
+        useSuggestedName ?? false,
       );
     }
   }
@@ -546,6 +552,7 @@ void processAllTemplates(
   List<FileDetails> files,
   String maximoServerSelected,
   bool includeFrequency,
+  bool useSuggestedName,
 ) async {
   templateNotifier.setLoading(true);
   var parsedTmpts = await parseSpreadsheets(files);
@@ -570,6 +577,7 @@ void processAllTemplates(
             templateNotifier.getParsedTemplate(ws, templateNumber),
             maximoServerSelected,
             includeFrequency,
+            useSuggestedName,
           );
           templateNotifier.setNameTemplate(ws, templateNumber, value);
           final value2 = await generatePM(

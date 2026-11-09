@@ -100,6 +100,36 @@ class _EndDrawerState extends State<EndDrawer> {
               );
             },
           ),
+          Consumer<SettingsNotifier>(
+            builder: (context, settingsNotifier, child) {
+              final useSuggestedName =
+                  settingsNotifier.getSetting(
+                        ApplicationSetting.useSuggestedPmName,
+                      )
+                      as bool?;
+              return SwitchListTile(
+                title: const Text('Use Suggested PM Name by default'),
+                subtitle: const Text(
+                  'Defaults PM names to the template\'s suggested name (templates without one keep the generated name). Clears templates when changed, requires reloading files',
+                ),
+                value: useSuggestedName ?? false,
+                onChanged: (bool value) {
+                  settingsNotifier.changeSettings({
+                    ApplicationSetting.useSuggestedPmName: value,
+                  });
+                  context.read<TemplateNotifier>().clearTemplates();
+                  context.read<UploadNotifier>().clearTemplates();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Templates cleared. Re-select a file to process templates again.',
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
           ListTile(
             //load observation from spreadsheet/excel
             title: const Text('Load Observation'),

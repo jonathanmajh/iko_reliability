@@ -765,6 +765,14 @@ enum ApplicationSetting {
     defaultValue: true,
   ),
 
+  ///TRUE FALSE for defaulting PM names to the template's suggested name
+  ///(falls back to the auto-generated name when the template has none)
+  useSuggestedPmName(
+    keyString: 'use suggested pm name',
+    dataType: 'bool',
+    defaultValue: false,
+  ),
+
   ///int for asset criticality RPN risk distribution percentage (very low)
   rpnPercentVL(
     keyString: 'RPN percent very low',

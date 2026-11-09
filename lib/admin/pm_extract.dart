@@ -304,11 +304,17 @@ class _PmExtractPageState extends State<PmExtractPage> {
               ApplicationSetting.includeFrequencyInDescriptions,
             )
             as bool?;
+    final useSuggestedName =
+        context.read<SettingsNotifier>().getSetting(
+              ApplicationSetting.useSuggestedPmName,
+            )
+            as bool?;
     await populateTemplateFromExtract(
       store,
       templateNotifier,
       maximo.maximoServerSelected,
       includeFrequency ?? true,
+      useSuggestedName ?? false,
     );
     _show('Loaded ${store.key} into the PM Check page template editor');
   }

@@ -491,6 +491,14 @@ class _PMDetailsState extends State<PMDetails> {
                                       )
                                       as bool? ??
                                   true,
+                              Provider.of<SettingsNotifier>(
+                                        context,
+                                        listen: false,
+                                      ).getSetting(
+                                        ApplicationSetting.useSuggestedPmName,
+                                      )
+                                      as bool? ??
+                                  false,
                             );
                           }
                         },
