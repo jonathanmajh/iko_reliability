@@ -372,11 +372,9 @@ const tableHeaders = {
 
 /// Maps Maximo server environments to their API endpoints.
 Map<String, String> maximoServerDomains = {
-  'MASPROD': 'https://prod.manage.prod.iko.max-it-eam.com/maximo/api/os/',
-  'DEV 8.11': 'https://dev.manage.dev.iko.max-it-eam.com/maximo/api/os/',
-  'TEST2 8.11': 'https://test2.manage.test2.iko.max-it-eam.com/maximo/api/os/',
-  'Dev 9.1': 'https://mas.manage.dev.ikona-np.naviam.app/maximo/api/os/',
-  'Test 9.1': 'https://mas.manage.uat.ikona-np.naviam.app/maximo/api/os/',
+  'PROD': 'https://mas.manage.ikona.naviam.app/maximo/api/os/',
+  'Dev': 'https://mas.manage.dev.ikona-np.naviam.app/maximo/api/os/',
+  'Test': 'https://mas.manage.uat.ikona-np.naviam.app/maximo/api/os/',
 };
 
 /// Contains API keys for different Maximo environments.

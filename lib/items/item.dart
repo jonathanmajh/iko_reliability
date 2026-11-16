@@ -208,7 +208,7 @@ class _ItemResultDisplayState extends State<ItemResultDisplay> {
                   onPressed: () {
                     launchUrl(
                       Uri.parse(
-                        'https://prod.manage.prod.iko.max-it-eam.com/maximo/oslc/graphite/manage-shell/index.html?event=loadapp&value=item&additionalevent=useqbe&additionaleventvalue=itemnum%3D${items[index]}',
+                        'https://mas.manage.ikona.naviam.app/maximo/oslc/graphite/manage-shell/index.html?event=loadapp&value=item&additionalevent=useqbe&additionaleventvalue=itemnum%3D${items[index]}',
                       ),
                     );
                   },
