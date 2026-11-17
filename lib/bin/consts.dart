@@ -378,13 +378,7 @@ Map<String, String> maximoServerDomains = {
 };
 
 /// Contains API keys for different Maximo environments.
-Map<String, String> apiKeys = {
-  'MASPROD': '',
-  'DEV 8.11': '',
-  'TEST2 8.11': '',
-  'Dev 9.1': '',
-  'Test 9.1': '',
-};
+Map<String, String> apiKeys = {'PROD': '', 'Dev': '', 'Test': ''};
 
 /// Contains frequency rating information for different levels of maintenance.
 Map<int, Map<String, dynamic>> frequencyRating = {
