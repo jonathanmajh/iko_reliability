@@ -28,7 +28,7 @@ Future<void> displayLoginAttempt(String password, String env) async {
     showDataAlert(navigatorKey.currentContext!, [
       'Logged into: $env',
       'As: ${result['displayName']}',
-      'Server URL: ${result['maslogouturl'].toString().substring(0, 42)}',
+      'Server URL: ${result['maslogouturl'].toString().replaceAll('/logout', '')}',
     ], 'Logged in!');
   }
 }

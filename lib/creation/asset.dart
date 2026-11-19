@@ -150,6 +150,12 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
   List<TrinaColumn> columns = [];
   List<TrinaRow> rows = [];
 
+  bool _stateManagerReady = false;
+  String? _loadedSite; // Site whose assets AssetCreationNotifier holds.
+  String? _rowsSite; // Site the rows currently in the grid belong to.
+  bool _refreshScheduled = false;
+  int _refreshId = 0;
+
   @override
   void dispose() {
     //stateManager.dispose();
@@ -247,56 +253,121 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
     ]);
   }
 
-  Future<void> _loadGrid(String site) async {
-    final assetCreationNotifier = Provider.of<AssetCreationNotifier>(
-      context,
-      listen: false,
-    );
-    await context.read<AssetCreationNotifier>().setSite(
-      context.read<SelectedSiteNotifier>().selectedSite,
-    );
-    debugPrint('load grid');
+  /// Schedules at most one grid refresh per frame. The refresh re-reads the
+  /// notifiers when it runs, so the latest site and data always win.
+  void _scheduleRefresh() {
+    if (_refreshScheduled) return;
+    _refreshScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshScheduled = false;
+      _refresh();
+    });
+  }
 
-    var fetchedRows = _getChildRows('Top', assetCreationNotifier.parentAssets);
-    var value = await TrinaGridStateManager.initializeRowsAsync(
-      columns,
-      fetchedRows,
+  /// Keys of all expanded groups in the grid's row tree (including groups
+  /// nested inside collapsed parents, whose expanded state is still kept).
+  Set<String> _expandedGroupKeys() {
+    final expanded = <String>{};
+    void walk(Iterable<TrinaRow> groupRows) {
+      for (final row in groupRows) {
+        if (!row.type.isGroup) continue;
+        if (row.type.group.expanded) {
+          final value = row.cells['hierarchy']!.value;
+          if (value != null) expanded.add(value.toString());
+        }
+        walk(row.type.group.children.originalList);
+      }
+    }
+
+    walk(stateManager.refRows.originalList.where((row) => row.isMain));
+    return expanded;
+  }
+
+  /// Flattens the row tree into the rows TrinaGrid displays (children of
+  /// expanded groups only). Parent links are set by [_getChildRows].
+  List<TrinaRow> _flattenVisibleRows(Iterable<TrinaRow> treeRows) {
+    final visible = <TrinaRow>[];
+    void add(Iterable<TrinaRow> current) {
+      for (final row in current) {
+        visible.add(row);
+        if (row.type.isGroup && row.type.group.expanded) {
+          add(row.type.group.children.originalList);
+        }
+      }
+    }
+
+    add(treeRows);
+    return visible;
+  }
+
+  /// Rebuilds the grid from [AssetCreationNotifier.parentAssets], keeping the
+  /// groups the user has expanded. Only a site change re-reads the database.
+  Future<void> _refresh() async {
+    if (!mounted || !_stateManagerReady) return;
+    final site = context.read<SelectedSiteNotifier>().selectedSite;
+    if (site.isEmpty) return;
+
+    final notifier = context.read<AssetCreationNotifier>();
+    final refreshId = ++_refreshId;
+    if (site != _loadedSite) {
+      _loadedSite = site;
+      await notifier.setSite(site);
+      if (!mounted || refreshId != _refreshId) return;
+    }
+
+    // Restore expansion only if the rows on screen already belong to this
+    // site; a newly selected site starts with all groups expanded.
+    final treeRows = _getChildRows(
+      'Top',
+      notifier.parentAssets,
+      expandedKeys: site == _rowsSite ? _expandedGroupKeys() : null,
     );
-    stateManager.refRows.clear();
-    stateManager.refRows.addAll(value);
+    final initialized = await TrinaGridStateManager.initializeRowsAsync(
+      columns,
+      treeRows,
+    );
+    if (!mounted || refreshId != _refreshId) return;
+
+    stateManager.refRows
+      ..clearFromOriginal()
+      ..addAll(_flattenVisibleRows(initialized));
+    _rowsSite = site;
     stateManager.setShowLoading(false);
     stateManager.notifyListeners();
-    //workaround since setting the group as expanded does not expand first row
-    stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
-    stateManager.toggleExpandedRowGroup(rowGroup: stateManager.rows.first);
-    return;
   }
 
   /// Returns a list of Trina rows that are children of the parent given
   /// the parent's asset number.
   List<TrinaRow> _getChildRows(
     String parent,
-    Map<String, List<Asset>> parentAssets,
-  ) {
+    Map<String, List<Asset>> parentAssets, {
+    Set<String>? expandedKeys,
+  }) {
     List<TrinaRow> rows = [];
     if (parentAssets.containsKey(parent)) {
       for (var child in parentAssets[parent]!) {
-        rows.add(
-          TrinaRow(
-            cells: {
-              'description': TrinaCell(value: child.description),
-              'hierarchy': TrinaCell(value: child.assetnum),
-              'site': TrinaCell(value: child.siteid),
-              'actions': TrinaCell(value: ''),
-            },
-            type: TrinaRowType.group(
-              expanded: true,
-              children: FilteredList<TrinaRow>(
-                initialList: _getChildRows(child.assetnum, parentAssets),
-              ),
-            ),
+        final childRows = _getChildRows(
+          child.assetnum,
+          parentAssets,
+          expandedKeys: expandedKeys,
+        );
+        final childRow = TrinaRow(
+          cells: {
+            'description': TrinaCell(value: child.description),
+            'hierarchy': TrinaCell(value: child.assetnum),
+            'site': TrinaCell(value: child.siteid),
+            'actions': TrinaCell(value: ''),
+          },
+          type: TrinaRowType.group(
+            expanded:
+                expandedKeys == null || expandedKeys.contains(child.assetnum),
+            children: FilteredList<TrinaRow>(initialList: childRows),
           ),
         );
+        for (final childRowChild in childRows) {
+          childRowChild.setParent(childRow);
+        }
+        rows.add(childRow);
       }
     }
     return rows;
@@ -309,9 +380,9 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
       listen: true,
     );
 
-    return Consumer<SelectedSiteNotifier>(
-      builder: (context, selectedSiteNotifier, child) {
-        _loadGrid(selectedSiteNotifier.selectedSite);
+    return Consumer2<SelectedSiteNotifier, AssetCreationNotifier>(
+      builder: (context, _, _, child) {
+        _scheduleRefresh();
         return TrinaGrid(
           rowColorCallback: (rowColorContext) {
             var assetStatus = context
@@ -335,6 +406,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
           rows: rows,
           onLoaded: (TrinaGridOnLoadedEvent event) {
             stateManager = event.stateManager;
+            _stateManagerReady = true;
             stateManager.setShowColumnFilter(true);
             stateManager.setRowGroup(
               TrinaRowGroupTreeDelegate(
@@ -345,6 +417,7 @@ class _AssetCreationGridState extends State<AssetCreationGrid> {
                 showFirstExpandableIcon: true,
               ),
             );
+            _scheduleRefresh();
           },
           configuration: TrinaGridConfiguration(
             style: themeManager.theme == ThemeMode.dark
@@ -617,15 +690,8 @@ class _AssetCreationDialogState extends State<AssetCreationDialog> {
                 modelNum: modelNumTextController.text,
                 assetCriticality: assetCriticalityValue,
               );
-              // force reload table, should switch out loading later
-              if (!context.mounted) {
-                throw Exception(
-                  'Context no longer mounted, user navigated away?',
-                );
-              }
-              context.read<SelectedSiteNotifier>().setSite(
-                context.read<SelectedSiteNotifier>().selectedSite,
-              );
+              // addAsset notifies AssetCreationNotifier; the grid listens to
+              // it and refreshes itself, so no manual reload is needed here.
               toast(
                 navigatorKey.currentContext!,
                 'Added $assetNum to table, id: $id',
