@@ -198,9 +198,13 @@ class WoPrintFetcher {
         totalPages = int.tryParse('${info['totalPages'] ?? ''}') ?? totalPages;
         // follow Maximo's next-page link while one exists (Test2/MAS returns
         // it as an object `{href: ...}`, other versions as a plain string)
-        final nextHref = _pagingHref(info['nextPage']);
+        var nextHref = _pagingHref(info['nextPage']);
         if (member.isEmpty || nextHref.isEmpty) {
           break;
+        }
+        // next page url is returning mas-ui instead of mas for version 9.1 > replace it
+        if (nextHref.contains('mas-ui')) {
+          nextHref = nextHref.replaceFirst('mas-ui', 'mas');
         }
         final nextUrl = _relativePagingUrl(nextHref);
         if (nextUrl == null || !followedHrefs.add(nextHref)) {

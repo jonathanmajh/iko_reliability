@@ -57,3 +57,5 @@ app.*.map.json
 lib/print/*.pdf
 samples/W26J17417_print_pack.pdf
 tool/prod_data/
+# Widget Preview related
+.widget_preview/
